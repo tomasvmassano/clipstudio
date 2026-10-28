@@ -16,7 +16,10 @@ export type Desempenho = {
     reels: number; views: number; mediana: number | null; media: number | null;
     likes: number; comentarios: number; ultimo: string | null;
     views_30d: number; reels_30d: number; outliers: number;
+    views_prev_30d: number; reels_prev_30d: number;
   };
+  diario: { date: string; views: number; reels: number }[];
+  bandas: { abaixo: number; normal: number; acima: number; viral: number };
   contas: ContaRow[];
   semanas: Semana[];
   top: ReelRow[];

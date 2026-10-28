@@ -25,8 +25,11 @@ export function ChannelBreakdownChart({
 	className,
 	data,
 	total,
+	title = "Formatos de hoje",
+	description,
+	emptyText = "Ainda não há guiões hoje.",
 	...props
-}: ComponentProps<typeof Card> & { data: MixDatum[]; total: number }) {
+}: ComponentProps<typeof Card> & { data: MixDatum[]; total: number; title?: string; description?: string; emptyText?: string }) {
 	const chartConfig: ChartConfig = { share: { label: "Peso" } };
 	data.forEach((d, i) => { chartConfig[d.key] = { label: d.label, color: COLORS[i % COLORS.length] }; });
 	const chartData = data.map((d) => ({ channel: d.key, share: d.share, fill: `var(--color-${d.key})` }));
@@ -37,14 +40,14 @@ export function ChannelBreakdownChart({
 		>
 			<CardHeader className="items-center space-y-1 pb-0 sm:items-start">
 				<div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
-					<CardTitle >Formatos de hoje</CardTitle>
+					<CardTitle >{title}</CardTitle>
 				</div>
 				<CardDescription>
-					Peso de cada formato nos {total} guiões do dia
+					{description ?? `Peso de cada formato nos ${total} guiões do dia`}
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="my-auto">
-				{total === 0 ? (<p className="py-10 text-center text-muted-foreground text-sm">Ainda não há guiões hoje.</p>) : (
+				{total === 0 ? (<p className="py-10 text-center text-muted-foreground text-sm">{emptyText}</p>) : (
 				<ChartContainer
 					className="mx-auto aspect-square max-h-72 w-full"
 					config={chartConfig}
