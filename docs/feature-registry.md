@@ -24,8 +24,8 @@ Estado: **ativo** (existe e é verificado no servidor por `authorize()`; também
 | `scripts.reject` | Guiões | M | ws, proj | ativo | Rejeitar |
 | `scripts.delete` | Guiões | A | ws | ativo | Arquivar / recuperar do arquivo (sem eliminação definitiva) |
 | `scripts.export` | Guiões | M | ws | ativo | Exportar .txt |
-| `recording.use` | Teleprompter (M03) | B | ws, own | ativo | `/teleprompter` |
-| `recording.confirm` | Teleprompter | M | ws, own | ativo | Marcar gravado / "Gravaste?" |
+| `recording.use` | Teleprompter (M03) | B | ws, own | ativo | `/teleprompter`: abrir/entrar na sessão do dia, fila, reordenar, saltar conteúdos e blocos, retoma (`recording_session_open`, `recording_queue_set`, `recording_progress`, `recording_session_close`) |
+| `recording.confirm` | Teleprompter | M | ws, own | ativo | Marcar gravado / "Gravaste?"; marcar, escolher, descartar e anotar takes (`take_create`, `take_update`) |
 | `sources.read` | Fontes (M04) | B | ws | ativo | `/fontes` (`sources_list`), brief e fontes do guião (`content_context`) |
 | `sources.create` | Fontes | M | ws | ativo | Adicionar fonte por URL/manual com dedup (`source_create`) |
 | `sources.triage` | Fontes | M | ws | ativo | Selecionar, em triagem, descartar com motivo (`source_update`) |
