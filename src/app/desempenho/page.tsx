@@ -3,24 +3,36 @@
 import { useEffect, useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Formatos, KpiCard, Producao, Recentes, Referencias, TopReels, ViewsPorSemana } from "@/components/desempenho-cards";
 import { fetchDesempenho, fmtCompact, fmtDay, fmtInt, type Desempenho } from "@/lib/desempenho";
 
 export default function DesempenhoPage() {
   const [d, setD] = useState<Desempenho | null>(null);
   const [error, setError] = useState("");
+  const [account, setAccount] = useState<string>("todas");
 
   useEffect(() => {
-    fetchDesempenho().then(setD).catch((e: Error) => setError(e.message));
-  }, []);
+    fetchDesempenho(undefined, account === "todas" ? null : account).then(setD).catch((e: Error) => setError(e.message));
+  }, [account]);
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Desempenho</h1>
-        <p className="text-sm text-muted-foreground">
-          @itsnumeiro no Instagram, a partir dos reels guardados pelo scraper. Dados de hoje chegam quando a recolha diária correr.
-        </p>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Desempenho</h1>
+          <p className="text-sm text-muted-foreground">
+            Por conta, a partir dos reels guardados pelo scraper. Dados de hoje chegam quando a recolha diária correr.
+          </p>
+        </div>
+        {d && d.contas.length > 0 && (
+          <ToggleGroup value={[account]} onValueChange={(v) => setAccount(((v as string[])[0] as string) ?? "todas")} variant="outline" size="sm">
+            <ToggleGroupItem value="todas">Todas as contas</ToggleGroupItem>
+            {d.contas.map((c) => (
+              <ToggleGroupItem key={c.id} value={c.id}>@{c.handle} · {c.platform}</ToggleGroupItem>
+            ))}
+          </ToggleGroup>
+        )}
       </div>
 
       {error && (
