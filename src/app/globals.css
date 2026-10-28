@@ -128,3 +128,6 @@
     @apply font-sans;
   }
 }
+@keyframes dash {
+  to { stroke-dashoffset: -12; }
+}
