@@ -70,6 +70,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         const c = await loadContext();
         setCtx(c);
         setLegacy(null);
+        saveSession(null); // quem entra com conta deixa de ter o código guardado neste browser
         setCodeCookie(false);
         const saved = store.get(WS_KEY);
         const list = c?.workspaces ?? [];

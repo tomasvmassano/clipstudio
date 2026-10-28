@@ -13,8 +13,4 @@ export async function serverSupabase() {
   });
 }
 
-/** Só aceita caminhos internos como destino (evita open redirect). */
-export function safeNext(next: string | null | undefined): string {
-  if (!next || !next.startsWith("/") || next.startsWith("//") || next.startsWith("/\\")) return "/";
-  return next;
-}
+export { safeNext } from "@/lib/safe-next";

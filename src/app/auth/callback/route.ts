@@ -8,7 +8,7 @@ import { safeNext, serverSupabase } from "@/lib/server/supabase";
 export async function GET(req: NextRequest) {
   const url = req.nextUrl;
   const code = url.searchParams.get("code");
-  const next = safeNext(url.searchParams.get("next"));
+  const next = safeNext(url.searchParams.get("next"), url.origin);
   const errDesc = url.searchParams.get("error_description");
   if (errDesc) return NextResponse.redirect(new URL(`/login?erro=${encodeURIComponent(errDesc)}`, url.origin));
   if (!code) return NextResponse.redirect(new URL("/login?erro=link_invalido", url.origin));

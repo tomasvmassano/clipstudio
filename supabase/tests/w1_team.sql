@@ -1,4 +1,5 @@
 -- supabase/tests/w1_team.sql : RPCs da Equipa (workspace_team, invite_member, revoke_invitation).
+-- Negativos só passam com o SQLSTATE esperado (42501/22023/28000); outro erro aborta a suite.
 -- Corre tudo e termina com RAISE para fazer ROLLBACK (nada fica na base).
 do $$
 declare
@@ -24,15 +25,15 @@ begin
   begin perform workspace_team('ws_test_b'); insert into t values ('admin B lê equipa B', true, true);
   exception when others then insert into t values ('admin B lê equipa B', true, false); end;
   begin perform workspace_team('numeiro'); insert into t values ('admin B NÃO lê equipa A', false, true);
-  exception when others then insert into t values ('admin B NÃO lê equipa A', false, false); end;
+  exception when sqlstate '42501' or sqlstate '22023' or sqlstate '28000' then insert into t values ('admin B NÃO lê equipa A', false, false); end;
   begin perform invite_member('numeiro','x1@test.invalid','viewer','client_staff'); insert into t values ('admin B NÃO convida em A', false, true);
-  exception when others then insert into t values ('admin B NÃO convida em A', false, false); end;
+  exception when sqlstate '42501' or sqlstate '22023' or sqlstate '28000' then insert into t values ('admin B NÃO convida em A', false, false); end;
   begin perform invite_member('ws_test_b','x2@test.invalid','viewer','agency_staff'); insert into t values ('cliente NÃO convida staff da agência', false, true);
-  exception when others then insert into t values ('cliente NÃO convida staff da agência', false, false); end;
+  exception when sqlstate '42501' or sqlstate '22023' or sqlstate '28000' then insert into t values ('cliente NÃO convida staff da agência', false, false); end;
   begin perform invite_member('ws_test_b','x3@test.invalid','workspace_owner','client_staff'); insert into t values ('admin NÃO convida acima do teto', false, true);
-  exception when others then insert into t values ('admin NÃO convida acima do teto', false, false); end;
+  exception when sqlstate '42501' or sqlstate '22023' or sqlstate '28000' then insert into t values ('admin NÃO convida acima do teto', false, false); end;
   begin perform invite_member('ws_test_b','x4@test.invalid','superuser','client_staff'); insert into t values ('papel inventado recusado', false, true);
-  exception when others then insert into t values ('papel inventado recusado', false, false); end;
+  exception when sqlstate '42501' or sqlstate '22023' or sqlstate '28000' then insert into t values ('papel inventado recusado', false, false); end;
   begin inv_b := invite_member('ws_test_b','X5@Test.invalid','viewer','client_staff'); insert into t values ('admin B convida viewer em B', true, inv_b is not null);
   exception when others then insert into t values ('admin B convida viewer em B', true, false); end;
   execute 'reset role';  -- verificações internas (authenticated não lê invitations/audit_events diretamente)
@@ -46,16 +47,16 @@ begin
   begin perform workspace_team('numeiro'); insert into t values ('contributor A lê equipa A', true, true);
   exception when others then insert into t values ('contributor A lê equipa A', true, false); end;
   begin perform invite_member('numeiro','x6@test.invalid','viewer','client_staff'); insert into t values ('contributor NÃO convida', false, true);
-  exception when others then insert into t values ('contributor NÃO convida', false, false); end;
+  exception when sqlstate '42501' or sqlstate '22023' or sqlstate '28000' then insert into t values ('contributor NÃO convida', false, false); end;
   begin perform revoke_invitation(inv_b); insert into t values ('A NÃO cancela convite de B', false, true);
-  exception when others then insert into t values ('A NÃO cancela convite de B', false, false); end;
+  exception when sqlstate '42501' or sqlstate '22023' or sqlstate '28000' then insert into t values ('A NÃO cancela convite de B', false, false); end;
   begin perform workspace_team('ws_test_b'); insert into t values ('contributor A NÃO descobre B', false, true);
-  exception when others then insert into t values ('contributor A NÃO descobre B', false, false); end;
+  exception when sqlstate '42501' or sqlstate '22023' or sqlstate '28000' then insert into t values ('contributor A NÃO descobre B', false, false); end;
 
   -- manager da agência em A (sem team.invite)
   perform set_config('request.jwt.claims', json_build_object('sub', u_mgrA, 'role','authenticated')::text, true);
   begin perform invite_member('numeiro','x7@test.invalid','viewer','client_staff'); insert into t values ('manager agência NÃO convida', false, true);
-  exception when others then insert into t values ('manager agência NÃO convida', false, false); end;
+  exception when sqlstate '42501' or sqlstate '22023' or sqlstate '28000' then insert into t values ('manager agência NÃO convida', false, false); end;
   insert into t values ('manager vê can_invite=false', false, (workspace_team('numeiro')->>'can_invite')::boolean);
 
   -- dono da agência
@@ -73,7 +74,7 @@ begin
   -- anónimo
   perform set_config('request.jwt.claims', json_build_object('role','anon')::text, true);
   begin perform workspace_team('numeiro'); insert into t values ('anónimo NÃO lê equipa', false, true);
-  exception when others then insert into t values ('anónimo NÃO lê equipa', false, false); end;
+  exception when sqlstate '42501' or sqlstate '22023' or sqlstate '28000' then insert into t values ('anónimo NÃO lê equipa', false, false); end;
 
   for r in select * from t loop
     if r.expected = r.got then ok := ok + 1; else bad := bad + 1; res := res || ' FAIL[' || r.name || ']'; end if;

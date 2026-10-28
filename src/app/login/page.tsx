@@ -14,9 +14,8 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSession } from "@/components/session-provider";
 import { SUPABASE_KEY, SUPABASE_URL, supabase } from "@/lib/supabase";
 import { friendlyError } from "@/lib/access";
+import { safeNext } from "@/lib/safe-next";
 
-/** Só caminhos internos como destino depois de entrar. */
-const safeNext = (n: string | null) => (n && n.startsWith("/") && !n.startsWith("//") && !n.startsWith("/\\") ? n : "/");
 
 function authError(msg: string): string {
   const m = msg.toLowerCase();
@@ -33,7 +32,7 @@ function authError(msg: string): string {
 export default function LoginPage() {
   const params = useSearchParams();
   const router = useRouter();
-  const next = safeNext(params.get("next"));
+  const next = safeNext(params.get("next"), typeof location === "undefined" ? undefined : location.origin);
   const { mode, signInCode } = useSession();
   const [tab, setTab] = useState<"entrar" | "criar" | "codigo">("entrar");
   const [email, setEmail] = useState("");
