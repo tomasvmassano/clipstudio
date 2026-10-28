@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-29 (CHG-000 processo)
+
+- **CHG-000 PRD com fonte única e trabalho por PR** (PRD §28, §33; AGENTS §10, §11, §15; ADR-0004). O PRD só é escrito neste repo e só muda em PRs só de documentação com `docs/changes/CHG-NNN.md`; o workflow `PRD guard` chumba o resto. `CLAUDE.md` ganha a secção "Change workflow": nada de push direto para `main`, merge por PR com checks verdes e preview verificado, migrações em expandir/contrair. Sem alteração funcional.
+- Por fazer: ligar a proteção do `main` no GitHub (PR obrigatório, 0 aprovações, checks `prd-guard` e Vercel obrigatórios). Até lá o guard avisa mas não bloqueia.
+
 ## 2026-10-29 (W2 Conteúdo)
 
 - **W2-01 modelo canónico de conteúdo** (PRD §4, §7, §23, FR-02-01..06, FR-17-04; ADR-0002). Migrações `20261028195656_w2_content_core`, `20261028195905_w2_legacy_sync`, `20261028200818_w2_conflict_code_pt409`.
