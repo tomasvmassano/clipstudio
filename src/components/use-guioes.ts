@@ -5,13 +5,14 @@ import {
   createContent, duplicateContent, fetchGuioes, fetchHistory, restoreVersion, saveContent, setProduction, subscribeGuioes, transitionContent,
 } from "@/lib/data";
 import type { Access } from "@/lib/access";
-import type { BriefFields, ContentContext, ContentHistory, ContentPatch, EditorialTarget, Guiao, Source } from "@/lib/types";
+import type { BriefFields, ContentContext, ContentHistory, ContentPatch, EditorialTarget, Guiao, Reference, Source } from "@/lib/types";
 import { fetchContext, fetchSources, linkSource, saveBrief } from "@/lib/sources";
+import { fetchReferences, linkReference } from "@/lib/references";
 import { useSession } from "@/components/session-provider";
 
 /** O que o utilizador pode fazer aos guiões neste workspace (o servidor volta a verificar cada ação). */
 export type ScriptCaps = {
-  create: boolean; edit: boolean; submit: boolean; approve: boolean; reject: boolean; archive: boolean; record: boolean; export: boolean;
+  create: boolean; edit: boolean; submit: boolean; approve: boolean; reject: boolean; archive: boolean; record: boolean; export: boolean; refs: boolean;
 };
 
 /** Ações sobre um guião; cada uma devolve a linha atualizada e já a põe na lista. */
@@ -26,6 +27,8 @@ export type ScriptActions = {
   saveBrief: (id: string, f: BriefFields) => Promise<ContentContext>;
   link: (id: string, sourceId: number, link: boolean) => Promise<ContentContext>;
   sources: () => Promise<Source[]>;
+  references: () => Promise<Reference[]>;
+  linkRef: (id: string, refId: number, link: boolean) => Promise<ContentContext>;
   reload: () => Promise<void>;
 };
 
@@ -79,6 +82,8 @@ export function useGuioes(access: Access, date: string) {
     saveBrief: (id: string, f: BriefFields) => saveBrief(access, id, f),
     link: (id: string, sourceId: number, l: boolean) => linkSource(access, id, sourceId, l),
     sources: () => fetchSources(access, {}, 300),
+    references: () => fetchReferences(access),
+    linkRef: async (id: string, refId: number, l: boolean) => { await linkReference(access, refId, { content: id }, l); return fetchContext(access, id); },
     reload,
   }), [access, put, reload]);
 
@@ -93,6 +98,7 @@ export function useGuioes(access: Access, date: string) {
     archive: can("scripts.delete"),
     record: can("recording.confirm"),
     export: can("scripts.export"),
+    refs: can("references.read"),
   };
   const canWrite = caps.approve || caps.reject || caps.edit || caps.record;
 

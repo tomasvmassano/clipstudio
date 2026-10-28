@@ -14,6 +14,13 @@
   - RPCs `content_save`, `content_transition`, `content_production`, `content_create`, `content_duplicate`, `content_history`, `content_restore_version`; `guiao_update` passa a usar o modelo novo.
   - Os 30 guiões existentes migrados com versão 1 e estado "em revisão".
 - **W2-02 app de guiões**: editor por blocos (Hook 1..N, Corpo, CTA, Notas) que guarda sozinho e deteta conflitos de edição; Aprovar, Pedir alterações, Rejeitar (motivo obrigatório), Retirar aprovação, Recuperar; Histórico com versões, autoria e "Usar este texto"; Novo guião, Duplicar, Arquivar conforme a capacidade; filtros por estado. Teleprompter mostra o CTA e deixa de engolir erros ao marcar gravado.
+- **W2-04 referências** (PRD M07; ADR-0005; migrações `20261028205017_w2_references`, `20261028205134_w2_references_zero_duration`).
+  - `/referencias` (sai de "em breve"): Biblioteca com pesquisa, coleções e favoritos; Descobrir com os reels dos criadores seguidos ainda por guardar, ordenados por quanto ficaram acima da mediana, já com a análise; Arquivo.
+  - Guardar um reel na biblioteca herda hook, formato, narrativa, duração e idioma; adicionar por link; classificar (formato, estilo, narrativa, duração, idioma, tags, coleções, notas).
+  - Métricas só com origem e data ("scraper · 29/10"); referências por link não mostram números.
+  - Referências no painel do guião (ligar e desligar) e "Usada em" na biblioteca. Também ligáveis a fontes.
+  - Corrigido antes de chegar à app: reels com duração 0 faziam falhar o guardar.
+  - Testes: `w2_references` 36/36; E2E em workspace de teste isolado 13/13.
 - **W2-03 fontes, briefs e pedidos do talento** (PRD M04, FR-17-02/03, §20; ADR-0003; migração `20261028202656_w2_sources_briefs_requests`).
   - `/fontes` substitui `/ideias` (redirecionamento): separadores Por triar, Selecionadas, Pedidos, Usadas, Descartadas, Todas; pesquisa; Adicionar fonte por link com deteção de repetidos; Selecionar, Em triagem, Descartar com motivo; Criar guião a partir da fonte.
   - Corrigido: o "take" e a expiração das fontes nunca apareciam (a página lia campos que não existem).
@@ -27,7 +34,7 @@
 
 - Sem eliminação definitiva (só arquivo); sem diff visual entre versões; sem bulk actions (FR-02-05) nem vistas guardadas (FR-02-07).
 - Outbox sem consumidores (W4). Estados de produção além de gravado chegam no W3.
-- Fontes: sem RSS/integrações nem resumo por IA; o motor ainda não prioriza fontes selecionadas nem lê pedidos (W4). Referências (M07) são o próximo incremento.
+- Fontes: sem RSS/integrações nem resumo por IA; o motor ainda não prioriza fontes selecionadas nem lê pedidos (W4). Referências (M07) entregues no W2-04.
 
 ## 2026-10-28 (W1 Fundação)
 

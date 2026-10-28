@@ -228,7 +228,7 @@ export function GuiaoCard({ g, carried, caps, actions, onError, startInEdit }: P
           )}
         </div>
       </CardContent>
-      <BriefSheet g={g} open={briefOpen} onOpenChange={setBriefOpen} actions={actions} canEdit={caps.edit && st !== "archived"} />
+      <BriefSheet g={g} open={briefOpen} onOpenChange={setBriefOpen} actions={actions} canEdit={caps.edit && st !== "archived"} canRefs={caps.refs} />
       <HistorySheet g={g} open={historyOpen} onOpenChange={setHistoryOpen} actions={actions} canRestore={caps.edit && st !== "archived"} onError={onError} />
     </Card>
   );

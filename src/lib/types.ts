@@ -134,4 +134,20 @@ export type ContentContext = {
   brief_versions: number;
   approved_brief_id: string | null;
   sources: { id: number; titulo: string | null; kind: string; fonte_tipo: string | null; fonte: string | null; fonte_url: string | null; status: SourceStatus }[];
+  references: { id: number; titulo: string; creator: string | null; url: string | null; formato: string | null }[];
 };
+
+// W2-04: referências (M07). Métricas só quando vêm do scraper, com data de recolha (FR-07-06).
+export type RefMetrics = { views: number | null; likes: number | null; comments: number | null; outlier: number | null; duration: number | null; collected_at: string | null; source: "scraper" };
+export type RefAnalysis = { tese: string | null; gatilho?: string | null; estrutura?: string | null; porque_viraliza: string | null; formato: string | null; analyzed_at?: string | null };
+export type Reference = {
+  id: number; workspace_id: string; url: string | null; reel_id: string | null; platform: string | null; creator: string | null; titulo: string;
+  hook: string | null; formato: string | null; estilo: string | null; narrativa: string | null; duracao_s: number | null; idioma: string | null;
+  tags: string[]; colecoes: string[]; notas: string | null; favorito: boolean; archived_at: string | null; created_label: string | null; created_at: string;
+  metrics: RefMetrics | null; analysis: RefAnalysis | null; links: { content_id: string | null; source_id: number | null; label: string }[];
+};
+export type DiscoverReel = {
+  id: string; url: string | null; platform: string | null; creator: string; hook: string | null; caption: string | null; views: number | null;
+  likes: number | null; comments: number | null; outlier: number | null; duration: number | null; collected_at: string | null; analysis: RefAnalysis | null;
+};
+export type Discover = { creators: { id: string; handle: string; platform: string; reels: number }[]; reels: DiscoverReel[] };
