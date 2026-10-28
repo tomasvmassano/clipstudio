@@ -2,6 +2,8 @@
 
 ## 2026-10-28 (W1 Fundação)
 
+- **Produção**: app no Vercel em `https://clipstudio-c8h1.vercel.app` (deploy automático a cada push no `main`). Projeto Supabase `numeiro-engine` transferido para a organização **Informal Labs** (mesmo ref, mesmas chaves). Auth: Site URL = Vercel; Redirect URLs = `https://clipstudio-c8h1.vercel.app/**` e `http://localhost:3000/**`. E2E em produção 21/21; anónimo continua sem acesso (401/42501).
+
 - **W1-01 identidade e tenancy** (PRD §2, §3, §16, CAP-01..04, TEAM-01..03): organização ClipStudio, `workspace_access`, `agency_memberships`, `permission_grants` (allow/deny com expiração), `invitations`, `audit_events` append-only, registo de capacidades e `authorize(cap, ws)` deny-by-default. ADR-0001.
 - **W1-02 corte do acesso aos dados**: fim das leituras anónimas; RLS por `authorize()`; RPCs verificam o workspace (login) ou o token legado (`legacy_can`); escritas auditadas; canal de agentes privado (`agents:<ws>`); guiões no realtime.
 - **W1-03 app com login individual**: `/login` (email+palavra-passe; Google aparece só quando o fornecedor estiver ativo no Supabase; código de equipa como opção de transição), `/auth/callback` (PKCE, destino só interno), `src/proxy.ts` (verificação otimista, renova cookies), contexto de workspace com troca entre clientes autorizados, todas as páginas atrás de `WorkspaceGate` com a capacidade certa, menu lateral derivado das capacidades.
