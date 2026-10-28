@@ -17,12 +17,12 @@ Estado: **ativo** (existe e é verificado no servidor por `authorize()`; também
 | `permissions.manage` | CAP | A | org, ws | W1 | — |
 | `audit.read` | CAP | M | org, ws | W1 | — |
 | `scripts.read` | Guiões (M02) | B | ws, proj, own | ativo | `/guioes`, `/`, teleprompter |
-| `scripts.create` | Guiões | M | ws, proj | W2 | motor (fora da app) |
-| `scripts.edit` | Guiões | M | ws, proj, own | ativo | Editar no cartão |
-| `scripts.submit` | Guiões | M | ws, proj, own | W2 | — |
+| `scripts.create` | Guiões | M | ws, proj | ativo | Novo guião, Duplicar (`content_create`, `content_duplicate`); o motor insere direto |
+| `scripts.edit` | Guiões | M | ws, proj, own | ativo | Editor por blocos com autosave, restaurar versão (`content_save`, `content_restore_version`) |
+| `scripts.submit` | Guiões | M | ws, proj, own | ativo | Enviar para revisão (`content_transition` → `in_review`) |
 | `scripts.approve` | Guiões | A | ws, proj | ativo | Validar |
 | `scripts.reject` | Guiões | M | ws, proj | ativo | Rejeitar |
-| `scripts.delete` | Guiões | A | ws | W2 | — |
+| `scripts.delete` | Guiões | A | ws | ativo | Arquivar / recuperar do arquivo (sem eliminação definitiva) |
 | `scripts.export` | Guiões | M | ws | ativo | Exportar .txt |
 | `recording.use` | Teleprompter (M03) | B | ws, own | ativo | `/teleprompter` |
 | `recording.confirm` | Teleprompter | M | ws, own | ativo | Marcar gravado / "Gravaste?" |

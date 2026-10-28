@@ -48,4 +48,4 @@ Teto de autoridade: ninguém concede mais do que tem (R-12); um admin do cliente
 
 ## Mapeamento de hoje
 
-O código de equipa `studio_tokens(role='creator')` do Numeiro corresponde a um `contributor` com `scripts.approve`, `scripts.reject` e `recording.confirm` por grant. Na migração W1 cada pessoa que usa o código recebe uma conta individual com esse papel. O código só é desligado depois de a migração estar validada (AGENTS §5).
+O código de equipa `studio_tokens(role='creator')` do Numeiro corresponde a um `contributor` com `scripts.approve`, `scripts.reject` e `recording.confirm` por grant (W2: também `scripts.submit`, para poder reaprovar depois de editar; não tem `scripts.create` nem `scripts.delete`). Na migração W1 cada pessoa que usa o código recebe uma conta individual com esse papel. O código só é desligado depois de a migração estar validada (AGENTS §5).

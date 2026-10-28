@@ -22,7 +22,7 @@ export type AppContext = {
 
 /** Capacidades do código de equipa (espelha legacy_can no SQL; o servidor é quem decide). */
 export const LEGACY_CAPS = [
-  "scripts.read", "scripts.edit", "scripts.approve", "scripts.reject", "scripts.export",
+  "scripts.read", "scripts.edit", "scripts.submit", "scripts.approve", "scripts.reject", "scripts.export",
   "recording.use", "recording.confirm", "sources.read", "analytics.read", "agents.read", "agents.rehearse",
 ];
 
@@ -43,6 +43,13 @@ export function friendlyError(msg: string): string {
   if (msg.includes("email_invalido")) return "Email inválido.";
   if (msg.includes("papel_invalido")) return "Papel inválido.";
   if (msg.includes("nada_a_alterar")) return "Nada para guardar.";
+  if (msg.includes("conflito_edicao")) return "Alguém mudou este guião entretanto. Recarreguei a versão mais recente: revê e volta a guardar.";
+  if (msg.includes("motivo_obrigatorio")) return "Escreve o motivo.";
+  if (msg.includes("transicao_invalida")) return "Esta ação já não se aplica ao estado atual do guião. Recarrega.";
+  if (msg.includes("nao_elegivel")) return "Guiões rejeitados ou arquivados não se gravam.";
+  if (msg.includes("aprovacao_necessaria")) return "Neste cliente só se gravam guiões aprovados.";
+  if (msg.includes("arquivado")) return "Este guião está arquivado. Recupera-o primeiro.";
+  if (msg.includes("corpo_vazio")) return "O corpo não pode ficar vazio.";
   if (msg.toLowerCase().includes("failed to fetch") || msg.toLowerCase().includes("network")) return "Sem ligação ao servidor. Verifica a internet e tenta de novo.";
   return msg;
 }

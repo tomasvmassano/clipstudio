@@ -84,7 +84,7 @@ begin
   execute 'reset role';
 
   -- negações vão para RAISE LOG 'audit_denied' (ver migração w1_denials_to_db_log), não para audit_events
-  insert into t values ('gravado do contributor no audit', true, exists(select 1 from audit_events where action='recording.confirm' and actor_user_id=u_cliA));
+  insert into t values ('gravado do contributor no audit', true, exists(select 1 from audit_events where action='recording.confirmed' and actor_user_id=u_cliA));
 
   select count(*) filter (where expected is not distinct from got), count(*) filter (where expected is distinct from got) into ok, bad from t;
   select string_agg(case when expected is not distinct from got then 'PASS ' else 'FAIL ' end || name, E'\n' order by name) into res from t;

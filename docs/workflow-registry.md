@@ -1,5 +1,7 @@
 # Registo de workflows e eventos
 
+> **Estado (W2-01, 2026-10-29):** editorial e produção (gravado/por gravar) implementados em `content_transition` e `content_production`; versões imutáveis em `content_versions`; transições em `content_transitions`; eventos na outbox `domain_events` (ainda sem consumidores, W4). Conflitos de edição devolvem `PT409` (HTTP 409). Ver ADR-0002.
+
 Fonte: PRD v2.1 §4 (estados), §20 (teleprompter), §23 (eventos), AGENTS §6. Cada transição guarda ator, timestamp, versão, estado anterior e novo, motivo e correlation id. Estados editorial, produção, revisão de media e publicação são **independentes**.
 
 ## Editorial (por `content_version`)
@@ -16,7 +18,11 @@ approved | rejected → archived   (regras)
 | in_review → changes_requested | `scripts.reject` | motivo | `review.changes_requested` |
 | in_review → approved | `scripts.approve` | versão exata | `script.approved` |
 | in_review → rejected | `scripts.reject` | motivo | `script.rejected` |
-| approved → (editar) | `scripts.edit` | cria **nova versão** em draft; a aprovação anterior fica ligada à versão antiga (R-06) | `script.version_created` |
+| approved → (editar) | `scripts.edit` | volta a `draft`; a aprovação anterior fica ligada à versão antiga (R-06); a versão nova nasce na próxima submissão/aprovação | `script.reopened` |
+| draft / changes_requested → approved | `scripts.approve` + `scripts.submit` | regista `in_review` e `approved` na mesma operação, com a versão exata | `script.submitted`, `script.approved` |
+| rejected → in_review | `scripts.approve` | recuperar | `script.reopened` |
+| approved → in_review | `scripts.approve` | retirar aprovação | `script.unapproved` |
+| * → archived, archived → (estado anterior) | `scripts.delete` | sem eliminação definitiva | `script.archived`, `script.restored` |
 
 ## Produção (por conteúdo)
 

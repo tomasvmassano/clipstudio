@@ -24,6 +24,36 @@ export type Guiao = {
   gravado_em: string | null;
   history: { hooks: Hook[]; corpo: string; at: string | null }[];
   updated_at: string;
+  // W2: modelo canónico (PRD §4). As colunas acima ficam por compatibilidade com o motor e os dashboards.
+  editorial_status: EditorialStatus;
+  production_status: ProductionStatus;
+  current_version_id: string | null;
+  approved_version_id: string | null;
+  cta: string | null;
+  notas: string | null;
+  lock_version: number;
+  created_at: string;
+};
+
+export type EditorialStatus = "draft" | "in_review" | "changes_requested" | "approved" | "rejected" | "archived";
+export type ProductionStatus = "not_started" | "scheduled" | "recording" | "recorded" | "editing" | "ready" | "published" | "cancelled";
+
+export const EDITORIAL_LABEL: Record<EditorialStatus, string> = {
+  draft: "rascunho",
+  in_review: "em revisão",
+  changes_requested: "alterações pedidas",
+  approved: "aprovado",
+  rejected: "rejeitado",
+  archived: "arquivado",
+};
+
+/** O que se pode editar na cópia de trabalho (content_save). */
+export type ContentPatch = Partial<{ hooks: Hook[]; corpo: string; cta: string; notas: string; tema: string; formato: string }>;
+export type EditorialTarget = "in_review" | "approved" | "changes_requested" | "rejected" | "archived" | "restore";
+
+export type ContentHistory = {
+  versions: { id: string; version_no: number; hooks: Hook[]; corpo: string; cta: string | null; created_at: string; created_kind: string; author: string | null; is_current: boolean; is_approved: boolean }[];
+  transitions: { kind: "editorial" | "production"; from: string | null; to: string; reason: string | null; at: string; actor: string | null; version_no: number | null }[];
 };
 
 export type GuiaoPatch = Partial<

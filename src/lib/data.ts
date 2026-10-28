@@ -1,6 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import { friendlyError, type Access } from "@/lib/access";
-import type { Guiao, GuiaoPatch, Idea, Session } from "@/lib/types";
+import type { ContentHistory, ContentPatch, EditorialTarget, Guiao, Idea, Session } from "@/lib/types";
 
 // ---------- datas (sempre em Asia/Dubai) ----------
 export function todayDubai(): string {
@@ -35,22 +35,49 @@ export async function fetchGuioes(access: Access, date: string, carryDays = 3): 
   return (data ?? []) as Guiao[];
 }
 
+/** Rejeitados e arquivados não entram na fila de gravação (PRD §4). */
+export const recordable = (g: Guiao) => g.editorial_status !== "rejected" && g.editorial_status !== "archived";
+
 export function splitDay(all: Guiao[], date: string) {
   const day = all.filter((g) => g.date === date);
-  const carry = all.filter((g) => g.date < date && g.status !== "rejeitado" && !g.gravado);
+  const carry = all.filter((g) => g.date < date && recordable(g) && g.production_status !== "recorded");
   return { day, carry };
 }
 
 export function tpQueue(all: Guiao[], date: string): Guiao[] {
   const { day, carry } = splitDay(all, date);
-  return [...carry, ...day.filter((g) => g.status !== "rejeitado")];
+  return [...carry, ...day.filter(recordable)];
 }
 
-export async function updateGuiao(access: Access, id: string, patch: GuiaoPatch): Promise<Guiao> {
-  const { data, error } = await supabase().rpc("guiao_update", { p_id: id, p_patch: patch, p_token: access.token });
-  if (error) throw new Error("Não foi possível guardar: " + friendlyError(error.message));
-  return data as Guiao;
+async function rpc<T>(fn: string, args: Record<string, unknown>, prefix = ""): Promise<T> {
+  const { data, error } = await supabase().rpc(fn, args);
+  if (error) {
+    const e = new Error(prefix + friendlyError(error.message)) as Error & { code?: string };
+    e.code = error.code;
+    throw e;
+  }
+  return data as T;
 }
+
+/** Guarda a cópia de trabalho. `lock` = lock_version que o ecrã viu; se mudou entretanto o servidor recusa (PT409, HTTP 409). */
+export const saveContent = (access: Access, id: string, patch: ContentPatch, lock?: number) =>
+  rpc<Guiao>("content_save", { p_id: id, p_patch: patch, p_lock: lock ?? null, p_token: access.token }, "Não foi possível guardar: ");
+
+export const transitionContent = (access: Access, id: string, to: EditorialTarget, reason?: string, lock?: number) =>
+  rpc<Guiao>("content_transition", { p_id: id, p_to: to, p_reason: reason ?? null, p_lock: lock ?? null, p_token: access.token });
+
+export const setProduction = (access: Access, id: string, to: "recorded" | "not_started") =>
+  rpc<Guiao>("content_production", { p_id: id, p_to: to, p_token: access.token });
+
+export const createContent = (access: Access, fields: ContentPatch & { date: string }) =>
+  rpc<Guiao>("content_create", { p_ws: access.ws, p_fields: fields, p_token: access.token });
+
+export const duplicateContent = (access: Access, id: string) => rpc<Guiao>("content_duplicate", { p_id: id, p_token: access.token });
+
+export const fetchHistory = (access: Access, id: string) => rpc<ContentHistory>("content_history", { p_id: id, p_token: access.token });
+
+export const restoreVersion = (access: Access, id: string, versionId: string, lock?: number) =>
+  rpc<Guiao>("content_restore_version", { p_id: id, p_version: versionId, p_lock: lock ?? null, p_token: access.token });
 
 /** Ao vivo só com login (postgres_changes respeita o RLS). No modo código a página recarrega de 20 em 20 s. */
 export function subscribeGuioes(access: Access, onChange: () => void): () => void {
@@ -103,5 +130,5 @@ export async function checkToken(token: string): Promise<Session | null> {
 // ---------- texto ----------
 export const words = (s: string | null | undefined) => (s ?? "").trim().split(/\s+/).filter(Boolean).length;
 export function teleprompterText(queue: Guiao[]): string {
-  return queue.map((g, i) => `${i + 1}\n\n${g.hooks.map((h) => h.text).join("\n\n")}\n\n—\n\n${g.corpo}`).join("\n\n\n\n") + "\n";
+  return queue.map((g, i) => `${i + 1}\n\n${g.hooks.map((h) => h.text).join("\n\n")}\n\n—\n\n${g.corpo}${g.cta ? `\n\n${g.cta}` : ""}`).join("\n\n\n\n") + "\n";
 }

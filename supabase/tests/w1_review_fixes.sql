@@ -17,6 +17,8 @@ begin
 
   create temp table t(name text, expected boolean, got boolean) on commit drop;
   grant all on t to authenticated;
+  insert into t values ('sync: validado direto => approved', true, (select editorial_status from guioes where id='numeiro-2026-10-28-30') = 'approved');
+  insert into t values ('sync: rejeitado direto => rejected', true, (select editorial_status from guioes where id='numeiro-2026-10-28-29') = 'rejected');
   execute 'set local role authenticated';
 
   perform set_config('request.jwt.claims', json_build_object('sub', u_ed, 'role','authenticated')::text, true);
@@ -46,7 +48,7 @@ begin
   insert into t values ('admin da agência convida staff do cliente', true, st = 'ok');
 
   execute 'reset role';
-  insert into t values ('anulação registada no audit', true, exists(select 1 from audit_events where actor_user_id=u_ed and (after->>'validacao_anulada')::boolean));
+  insert into t values ('anulação registada (script.reopened, W2)', true, exists(select 1 from content_transitions where actor_user_id=u_ed and from_status='approved' and to_status='draft'));
 
   for r in select * from t loop
     if r.expected = r.got then ok := ok + 1; else bad := bad + 1; res := res || ' FAIL[' || r.name || ']'; end if;

@@ -2,7 +2,7 @@
 
 import { Suspense, useMemo, useState } from "react";
 import Link from "next/link";
-import { DownloadIcon, MonitorPlayIcon } from "lucide-react";
+import { DownloadIcon, Loader2Icon, MonitorPlayIcon, PlusIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -13,10 +13,10 @@ import { TeamCode } from "@/components/team-code";
 import { useGuioes } from "@/components/use-guioes";
 import { WorkspaceGate } from "@/components/workspace-gate";
 import type { Access } from "@/lib/access";
-import { splitDay, teleprompterText, todayDubai, tpQueue, words } from "@/lib/data";
+import { recordable, splitDay, teleprompterText, todayDubai, tpQueue, words } from "@/lib/data";
 import { WPS } from "@/lib/types";
 
-type Filter = "todos" | "por_validar" | "validados" | "rejeitados" | "gravados";
+type Filter = "todos" | "rever" | "aprovados" | "gravados" | "rejeitados" | "arquivados";
 
 function Stat({ v, l }: { v: string | number; l: string }) {
   return (
@@ -31,26 +31,38 @@ function GuioesInner({ access }: { access: Access }) {
   const [date, setDate] = useState(todayDubai());
   const [filter, setFilter] = useState<Filter>("todos");
   const [msg, setMsg] = useState("");
-  const { all, loading, error, patch, caps, canWrite } = useGuioes(access, date);
+  const [creating, setCreating] = useState(false);
+  const [fresh, setFresh] = useState<string | null>(null);
+  const { all, loading, error, actions, create, caps, canWrite } = useGuioes(access, date);
   const { day, carry } = useMemo(() => splitDay(all, date), [all, date]);
   const isToday = date === todayDubai();
 
-  const ok = day.filter((g) => g.status !== "rejeitado");
+  const ok = day.filter(recordable);
+  const toReview = (s: string) => s === "in_review" || s === "draft" || s === "changes_requested";
   const stats = {
     para: ok.length,
-    val: ok.filter((g) => g.validado).length,
-    grav: ok.filter((g) => g.gravado).length,
-    rej: day.length - ok.length,
+    val: ok.filter((g) => g.editorial_status === "approved").length,
+    rever: ok.filter((g) => toReview(g.editorial_status)).length,
+    grav: ok.filter((g) => g.production_status === "recorded").length,
+    rej: day.filter((g) => g.editorial_status === "rejected").length,
     min: Math.round(ok.reduce((t, g) => t + (words(g.corpo) + words(g.hooks[0]?.text)) / WPS, 0) / 60),
   };
 
   const shown = day.filter((g) => {
-    if (filter === "por_validar") return g.status !== "rejeitado" && !g.validado;
-    if (filter === "validados") return g.validado && g.status !== "rejeitado";
-    if (filter === "rejeitados") return g.status === "rejeitado";
-    if (filter === "gravados") return g.gravado;
-    return true;
+    if (filter === "rever") return toReview(g.editorial_status);
+    if (filter === "aprovados") return g.editorial_status === "approved";
+    if (filter === "rejeitados") return g.editorial_status === "rejected";
+    if (filter === "arquivados") return g.editorial_status === "archived";
+    if (filter === "gravados") return g.production_status === "recorded";
+    return g.editorial_status !== "archived";
   });
+
+  const newScript = async () => {
+    setCreating(true); setMsg("");
+    try { const g = await create(date); setFresh(g.id); setFilter("todos"); }
+    catch (e) { setMsg((e as Error).message); }
+    finally { setCreating(false); }
+  };
 
   const exportTxt = () => {
     const txt = teleprompterText(tpQueue(all, date));
@@ -69,6 +81,11 @@ function GuioesInner({ access }: { access: Access }) {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <TeamCode />
+          {caps.create && (
+            <Button size="sm" variant="outline" disabled={creating} onClick={newScript}>
+              {creating ? <Loader2Icon className="animate-spin" /> : <PlusIcon />} Novo guião
+            </Button>
+          )}
           {caps.export && <Button size="sm" variant="outline" onClick={exportTxt}><DownloadIcon /> Exportar .txt</Button>}
           <Button size="sm" render={<Link href={`/teleprompter?date=${date}`} />} nativeButton={false}><MonitorPlayIcon /> Teleprompter</Button>
         </div>
@@ -76,7 +93,8 @@ function GuioesInner({ access }: { access: Access }) {
 
       <div className="flex flex-wrap gap-2">
         <Stat v={stats.para} l="para gravar" />
-        <Stat v={`${stats.val}/${stats.para}`} l="validados" />
+        <Stat v={`${stats.val}/${stats.para}`} l="aprovados" />
+        <Stat v={stats.rever} l="por rever" />
         <Stat v={stats.grav} l="gravados" />
         <Stat v={stats.rej} l="rejeitados" />
         <Stat v={`${stats.min} min`} l="de texto" />
@@ -86,14 +104,14 @@ function GuioesInner({ access }: { access: Access }) {
       {!canWrite && (
         <Alert>
           <AlertDescription>
-            Tens acesso de leitura neste workspace: podes ler e abrir o teleprompter, mas não validar, editar nem rejeitar.
+            Tens acesso de leitura neste workspace: podes ler e abrir o teleprompter, mas não aprovar, editar nem rejeitar.
           </AlertDescription>
         </Alert>
       )}
       {canWrite && (
         <Alert>
           <AlertDescription>
-            <b>Como validar:</b> lê cada guião e carrega em <i>Validar</i> nos que gravas tal como estão{caps.edit ? <>, <i>Editar</i> para mudar uma frase</> : null}{caps.reject ? <>, <i>Rejeitar</i> (com o motivo) nos que não dirias</> : null}. O teleprompter leva todos os que não rejeitaste.
+            <b>Como rever:</b> lê cada guião e carrega em <i>Aprovar</i> nos que gravas tal como estão{caps.edit ? <>, <i>Editar</i> para mudar uma frase (guarda sozinho)</> : null}{caps.reject ? <>, <i>Pedir alterações</i> ou <i>Rejeitar</i> com o motivo</> : null}. Cada aprovação fica presa à versão exata que aprovaste; o <i>Histórico</i> mostra todas. O teleprompter leva tudo o que não foi rejeitado nem arquivado.
           </AlertDescription>
         </Alert>
       )}
@@ -105,10 +123,11 @@ function GuioesInner({ access }: { access: Access }) {
 
       <ToggleGroup value={[filter]} onValueChange={(v) => setFilter(((v as string[])[0] as Filter) ?? "todos")} variant="outline" size="sm">
         <ToggleGroupItem value="todos">Todos</ToggleGroupItem>
-        <ToggleGroupItem value="por_validar">Por validar</ToggleGroupItem>
-        <ToggleGroupItem value="validados">Validados</ToggleGroupItem>
+        <ToggleGroupItem value="rever">Por rever</ToggleGroupItem>
+        <ToggleGroupItem value="aprovados">Aprovados</ToggleGroupItem>
         <ToggleGroupItem value="gravados">Gravados</ToggleGroupItem>
         <ToggleGroupItem value="rejeitados">Rejeitados</ToggleGroupItem>
+        {caps.archive && <ToggleGroupItem value="arquivados">Arquivados</ToggleGroupItem>}
       </ToggleGroup>
 
       {loading ? (
@@ -121,8 +140,8 @@ function GuioesInner({ access }: { access: Access }) {
         </Alert>
       ) : (
         <div className="flex flex-col gap-3">
-          {isToday && filter === "todos" && carry.map((g) => <GuiaoCard key={g.id} g={g} carried caps={caps} onPatch={patch} onError={setMsg} />)}
-          {shown.map((g) => <GuiaoCard key={g.id} g={g} caps={caps} onPatch={patch} onError={setMsg} />)}
+          {isToday && filter === "todos" && carry.map((g) => <GuiaoCard key={g.id} g={g} carried caps={caps} actions={actions} onError={setMsg} />)}
+          {shown.map((g) => <GuiaoCard key={g.id} g={g} caps={caps} actions={actions} onError={setMsg} startInEdit={g.id === fresh} />)}
         </div>
       )}
     </div>

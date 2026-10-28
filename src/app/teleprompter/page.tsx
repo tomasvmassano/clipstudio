@@ -37,7 +37,7 @@ function TeleprompterInner({ access }: { access: Access }) {
   const params = useSearchParams();
   const router = useRouter();
   const date = params.get("date") ?? todayDubai();
-  const { all, loading, patch, caps } = useGuioes(access, date);
+  const { all, loading, actions, caps } = useGuioes(access, date);
   const canWrite = caps.record;
   const queue = useMemo(() => tpQueue(all, date), [all, date]);
 
@@ -50,6 +50,7 @@ function TeleprompterInner({ access }: { access: Access }) {
   const [barVisible, setBarVisible] = useState(true);
   const [progress, setProgress] = useState(0);
   const [confirm, setConfirm] = useState<Confirm | null>(null);
+  const [tpError, setTpError] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const acc = useRef(0);
   const last = useRef(0);
@@ -57,7 +58,7 @@ function TeleprompterInner({ access }: { access: Access }) {
   const hideT = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lock = useRef<WakeLockSentinel | null>(null);
 
-  const firstOpen = useMemo(() => Math.max(0, queue.findIndex((g) => !g.gravado)), [queue]);
+  const firstOpen = useMemo(() => Math.max(0, queue.findIndex((g) => g.production_status !== "recorded")), [queue]);
   const idx = picked ?? firstOpen;
 
 
@@ -99,7 +100,7 @@ function TeleprompterInner({ access }: { access: Access }) {
   /** Se o guião foi lido até 80% e ainda não está gravado, pergunta antes de seguir. */
   const shouldAsk = useCallback(() => {
     const g = queue[idx];
-    if (!g || g.gravado || !canWrite) return null;
+    if (!g || g.production_status === "recorded" || !canWrite) return null;
     const el = scrollRef.current;
     const read = pct() >= 0.8 || (!!el && el.scrollHeight <= el.clientHeight && performance.now() - shownAt.current > 5000);
     return read ? g : null;
@@ -139,10 +140,10 @@ function TeleprompterInner({ access }: { access: Access }) {
     const c = confirm;
     if (!c) return;
     setConfirm(null);
-    if (yes) { try { await patch(c.id, { gravado: true }); } catch {} }
+    if (yes) { try { await actions.record(c.id, true); } catch (e) { setTpError((e as Error).message); } }
     if (c.then === "exit") router.push("/guioes");
     else step(1);
-  }, [confirm, patch, router, step]);
+  }, [confirm, actions, router, step]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -182,11 +183,18 @@ function TeleprompterInner({ access }: { access: Access }) {
               {cur.hooks.map((h, i) => <p key={i} className="mb-[1.5em]">{h.text}</p>)}
               <hr className="mb-[1.3em] mt-[.4em] border-t-[3px] border-neutral-700" />
               {cur.corpo.split("\n").filter(Boolean).map((l, i) => <p key={i} className="mb-[.75em]">{l}</p>)}
+              {cur.cta && <p className="mt-[1.2em] text-amber-300">{cur.cta}</p>}
             </>
           )}
         </div>
       </div>
       <div className="pointer-events-none fixed left-0 right-0 top-[34vh]"><div className="absolute left-[1.5vw] -top-[9px] border-[9px] border-transparent border-l-[14px] border-l-amber-400" /></div>
+      {tpError && (
+        <div role="alert" className="fixed inset-x-0 top-10 z-10 mx-auto flex w-[min(92vw,34rem)] items-center gap-3 rounded-xl border border-red-500/50 bg-red-950/90 px-4 py-3 text-sm">
+          <span className="flex-1">Não ficou marcado: {tpError}</span>
+          <button className="rounded-md border border-red-400/50 px-3 py-1" onClick={() => setTpError("")}>Fechar</button>
+        </div>
+      )}
       {confirm && (
         <div role="dialog" aria-label="Confirmar gravação" className="fixed inset-x-0 bottom-28 z-10 mx-auto flex w-[min(92vw,34rem)] flex-wrap items-center justify-center gap-3 rounded-2xl border border-neutral-700 bg-neutral-950/95 p-4 text-center">
           <p className="w-full text-lg font-semibold">Gravaste o guião {confirm.n}?</p>
@@ -206,7 +214,7 @@ function TeleprompterInner({ access }: { access: Access }) {
         <span className="min-w-[4rem] text-center text-sm tabular-nums text-neutral-400">{font} px</span>
         <Btn label="A+" aria="Letra maior" onClick={() => setFont((f) => Math.min(96, f + 4))} />
         <Btn label="Espelho" on={mirror} onClick={() => setMirror((m) => !m)} />
-        {canWrite && cur && <Btn label="Gravado" on={cur.gravado} onClick={() => patch(cur.id, { gravado: !cur.gravado }).catch(() => {})} />}
+        {canWrite && cur && <Btn label="Gravado" on={cur.production_status === "recorded"} onClick={() => actions.record(cur.id, cur.production_status !== "recorded").catch((e: Error) => setTpError(e.message))} />}
         <Btn label="Sair" onClick={exit} />
       </div>
     </div>

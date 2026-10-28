@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-10-29 (W2 Conteúdo)
+
+- **W2-01 modelo canónico de conteúdo** (PRD §4, §7, §23, FR-02-01..06, FR-17-04; ADR-0002). Migrações `20261028195656_w2_content_core`, `20261028195905_w2_legacy_sync`, `20261028200818_w2_conflict_code_pt409`.
+  - `guioes` ganha estado editorial (`draft → in_review → changes_requested/approved/rejected`, `archived`) e de produção independentes, `cta`, `notas`, `lock_version`.
+  - `content_versions` imutáveis; a aprovação fica presa à versão exata (`approved_version_id`); editar um aprovado volta a rascunho sem perder a aprovação antiga.
+  - `content_transitions` append-only; outbox `domain_events`; auditoria em cada ação.
+  - RPCs `content_save`, `content_transition`, `content_production`, `content_create`, `content_duplicate`, `content_history`, `content_restore_version`; `guiao_update` passa a usar o modelo novo.
+  - Os 30 guiões existentes migrados com versão 1 e estado "em revisão".
+- **W2-02 app de guiões**: editor por blocos (Hook 1..N, Corpo, CTA, Notas) que guarda sozinho e deteta conflitos de edição; Aprovar, Pedir alterações, Rejeitar (motivo obrigatório), Retirar aprovação, Recuperar; Histórico com versões, autoria e "Usar este texto"; Novo guião, Duplicar, Arquivar conforme a capacidade; filtros por estado. Teleprompter mostra o CTA e deixa de engolir erros ao marcar gravado.
+- Testes: `w2_content` 47/47, `w1_review_fixes` 11/11, `w1_data_access` 25/25 (com o modelo novo). E2E de escrita num workspace de teste isolado (criado e apagado no fim) 23/23.
+
+### Limitações conhecidas W2 (PARTIAL)
+
+- Sem eliminação definitiva (só arquivo); sem diff visual entre versões; sem bulk actions (FR-02-05) nem vistas guardadas (FR-02-07).
+- Outbox sem consumidores (W4). Estados de produção além de gravado chegam no W3.
+- Briefs (FR-17-03), fontes ligadas e pedidos do talento são os próximos incrementos do W2.
+
 ## 2026-10-28 (W1 Fundação)
 
 - **Produção**: app no Vercel em `https://clipstudio-c8h1.vercel.app` (deploy automático a cada push no `main`). Projeto Supabase `numeiro-engine` transferido para a organização **Informal Labs** (mesmo ref, mesmas chaves). Auth: Site URL = Vercel; Redirect URLs = `https://clipstudio-c8h1.vercel.app/**` e `http://localhost:3000/**`. E2E em produção 21/21; anónimo continua sem acesso (401/42501).
