@@ -1,17 +1,17 @@
-# Estúdio Numeiro
+# Estúdio Numeiro (clipstudio)
 
-Página estática com os guiões do dia e o teleprompter. `index.html` é a app inteira.
+App Next.js 16 + Tailwind 4 + shadcn/ui, com os blocos `@efferd/app-shell-5` (shell com sidebar, header, pesquisa, tema) e `@efferd/dashboard-5` (cartões e gráficos). É o design system de todas as páginas: componentes em `src/components/ui`, tokens em `src/app/globals.css`, navegação em `src/components/app-shared.tsx`.
 
-- `data/guioes-AAAA-MM-DD.json`: os guiões do dia, no formato do motor (`numeiro-engine`).
-- `seed_from_engine.py`: converte esse JSON em documentos (um por guião).
-- `make_snapshot.py`: mete os documentos dentro de `index.html`, para a página funcionar sem base de dados.
+Rotas: `/` Hoje · `/desempenho` dashboard (dados de exemplo até à ligação ao Supabase) · `/legacy/index.html` a página de guiões e teleprompter de hoje (estática, com os 30 guiões dentro).
 
-Publicar um dia novo:
+Adicionar componentes: `npx shadcn@latest add <nome>` ou `npx shadcn@latest add @efferd/<bloco>`.
+
+Publicar um dia novo na página estática:
 
 ```
-python seed_from_engine.py data/guioes-2026-10-29.json 2026-10-29 /tmp/docs/scripts
-python make_snapshot.py /tmp/docs/scripts
-git commit -am "guiões 2026-10-29" && git push      # o Vercel publica sozinho
+python scripts/seed_from_engine.py data/guioes-AAAA-MM-DD.json AAAA-MM-DD /tmp/docs/scripts
+python scripts/make_snapshot.py /tmp/docs/scripts
+git commit -am "guiões AAAA-MM-DD" && git push      # o Vercel publica sozinho
 ```
 
-No Vercel: Framework preset "Other", sem build. A versão no claude.ai (com validação pelo Numeiro) usa a base de dados do artifact; esta versão no Vercel é só de leitura, com o teleprompter.
+Desenvolvimento: `npm run dev`. Deploy: Vercel, preset Next.js, sem variáveis por agora.
