@@ -3,9 +3,11 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppShell } from "@/components/app-shell";
+import { SessionProvider } from "@/components/session-provider";
+import { Suspense } from "react";
 import "./globals.css";
 
-const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
+const geistSans = Geist({ variable: "--font-sans-app", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -19,7 +21,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-full flex flex-col">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <TooltipProvider>
-            <AppShell>{children}</AppShell>
+            <Suspense fallback={null}>
+              <SessionProvider>
+                <AppShell>{children}</AppShell>
+              </SessionProvider>
+            </Suspense>
           </TooltipProvider>
         </ThemeProvider>
       </body>

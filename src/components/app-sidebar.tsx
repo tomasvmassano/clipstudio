@@ -18,7 +18,6 @@ import {
 import { AppSearch } from "@/components/app-search";
 import { navGroups } from "@/components/app-shared";
 import { CustomTrigger } from "@/components/custom-trigger";
-import { LatestChange } from "@/components/latest-change";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { SettingsIcon } from "lucide-react";
 import { usePathname } from "next/navigation";
@@ -58,7 +57,6 @@ export function AppSidebar() {
 				))}
 			</SidebarContent>
 			<SidebarFooter className="px-4">
-				<LatestChange />
 				<div className="flex items-center pt-4 pb-2">
 					<ThemeSwitcher />
 					<Button className="text-muted-foreground" size="icon-sm" variant="ghost" render={<a aria-label="Settings" href="#" />} nativeButton={false}><SettingsIcon
