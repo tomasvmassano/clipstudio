@@ -1,10 +1,15 @@
 # ClipStudio — PRD master v2.1 (consolidado + governance + operations)
 
 **Documento canónico · 28 outubro 2026 · Estado: especificação para validação**
+
 **Nota:** A Parte I preserva a especificação detalhada da v1.1; a Parte II complementa e, em caso de conflito, prevalece nas decisões explicitamente assinaladas. O PDF Viral Engine é a origem do preset Numeiro, não uma limitação multi-cliente.
+
 **Data:** 28 outubro 2026
+
 **Estado:** especificação proposta para validação e implementação
+
 **Modelo:** agência com equipa transversal + workspaces de clientes com equipas próprias e dados isolados
+
 **Base de evidência:** inspeção estática de `clipstudio-main.zip` e auditoria anterior; **não** constitui teste E2E do deploy ou confirmação das políticas SQL de produção.
 
 ## 0. Resumo executivo
@@ -42,6 +47,7 @@ Billing SaaS self-service e marketplace público de agentes; não há exclusão 
 ### Hierarquia e propriedade
 
 `Agency Organization → Client Workspaces → Projects/Campaigns → Content/Tasks/Assets`. A organização da agência é a entidade operadora; cada cliente é um workspace com equipa, dados, definições, agentes, integrações e métricas isolados. Uma pessoa interna da agência pode pertencer a múltiplos workspaces mediante atribuição explícita, além dos privilégios administrativos limitados ao âmbito da agência. A equipa de cada cliente não obtém acesso aos restantes workspaces nem ao painel interno da agência.
+
 **Definições distintas:**
 
 - `affiliation_type` = `agency_staff` ou `client_staff` (origem/afiliação organizacional).
@@ -54,17 +60,27 @@ Billing SaaS self-service e marketplace público de agentes; não há exclusão 
 ### Regras globais
 
 R-01. Toda a leitura/escrita de dados de negócio deve ser autorizada no servidor com base na identidade, pertença organizacional, atribuição ao workspace, função e escopo do recurso; `workspace_id` do browser nunca é prova de autorização.
+
 R-02. Todas as tabelas de negócio multi-tenant têm `workspace_id`, FK e RLS; storage, pesquisa e realtime aplicam a mesma fronteira.
+
 R-03. Uma conta de agência pode participar em N workspaces com funções diferentes; a conta do cliente pertence a um único workspace de cliente no produto 1.1. Não permitir convites cruzados por administradores do cliente.
+
 R-04. Dashboard global da agência agrega apenas workspaces autorizados; o cliente vê apenas o seu.
+
 R-05. Todas as ações críticas são auditáveis com ator, afiliação, âmbito, recurso, data e resultado; nunca registar tokens.
+
 R-06. Aprovação editorial e progresso de produção são estados separados; versões aprovadas são imutáveis.
 
 R-07. Falhas de rede não podem aparentar sucesso; ações assíncronas apresentam estado e retry seguro.
+
 R-08. Operações externas e publicações têm chave de idempotência.
+
 R-09. Timestamps UTC e timezone por workspace; soft-delete com recuperação controlada.
+
 R-10. Conteúdo externo e de IA é dado não confiável; PT-PT inicial com internacionalização preparada.
+
 R-11. Desativar uma conta, retirar atribuição ou reduzir permissões revoga imediatamente acesso de API, pesquisa, realtime e media protegida; URLs assinados existentes são de curta duração e a revogação imediata de URLs já emitidos exige proxy de acesso ou rotação de objetos.
+
 R-12. Uma pessoa não pode elevar os próprios privilégios; convites, mudanças de função e delegações obedecem a um teto de autoridade e segregação de funções.
 
 ## 3. Papéis, equipas e permissões
@@ -116,75 +132,127 @@ Cada requisito abaixo tem ID único, prioridade de entrega (P0 crítico, P1 esse
 ### M01 — Início / Dashboard
 
 **Rota proposta:** `/`. **Objetivo:** Visão executiva e operacional por workspace.
+
 **FR-01-01 [P0]** KPIs com período configurável: fontes recebidas, guiões criados, pendentes de aprovação, aprovados, gravados, publicados, views, engagement, custos e produtividade.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-01-02 [P0]** Widgets configuráveis por função e por workspace; comparação temporal e explicação das métricas.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
 
 **FR-01-03 [P1]** Minha fila: tarefas, aprovações, gravações, prazos e alertas; clique abre objeto correspondente.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-01-04 [P1]** Calendário editorial compacto e atividade recente com ator e timestamp.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-01-05 [P1]** Ações rápidas criar fonte, guião, projeto e tarefa; cada ação respeita permissões.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-01-06 [P2]** Estados vazios explicativos, loading, erro/retry, filtros persistentes por utilizador.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
 
 ### M02 — Guiões
 
 **Rota proposta:** `/guioes`. **Objetivo:** Editor editorial e origem do conteúdo.
+
 **FR-02-01 [P0]** CRUD de guiões, duplicação, arquivo, recuperação e eliminação com confirmação.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-02-02 [P0]** Editor por blocos ordenados: Hook 1..N, Body, CTA, notas e comentários; autosave com indicador.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-02-03 [P1]** Campos: título, cliente/workspace, campanha, tema, formato, plataforma, responsável, datas, tags e fontes relacionadas.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-02-04 [P1]** Estados editoriais rascunho, em revisão, alterações pedidas, aprovado, rejeitado; estados de produção independentes.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-02-05 [P1]** Enviar para revisão, aprovar/rejeitar/pedir alterações com comentário obrigatório na rejeição; bulk actions autorizadas.
 
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-02-06 [P2]** Histórico de versões com diff e restauro, conflitos de edição e autoria.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-02-07 [P2]** Filtros, pesquisa, ordenação, vistas guardadas, exportação e impressão.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-02-08 [P2]** IA: sugestões de hooks, CTA e reformulação; nunca sobrescrever versão sem confirmação.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
 
 ### M03 — Teleprompter
 
 **Rota proposta:** `/teleprompter`. **Objetivo:** Execução de sessões de gravação.
+
 **FR-03-01 [P0]** Fila de gravação por data, campanha e responsável, apenas conteúdos elegíveis; reordenar e saltar blocos.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-03-02 [P0]** Blocos identificados Hook 1, Hook 2, Body, CTA e personalizados; seleção e repetição de takes.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-03-03 [P1]** Espelhamento horizontal e vertical independentes; velocidade, fonte, line-height, margens e contraste.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-03-04 [P1]** Play/pause, scroll manual, fullscreen por gesto, atalhos configuráveis, controlo remoto compatível.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-03-05 [P1]** Guardado de preferências por utilizador e dispositivo; bloqueio de suspensão quando suportado.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
 
 **FR-03-06 [P2]** Marcar take gravado, adicionar notas e anexar ficheiro, sem alterar estado editorial automaticamente.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-03-07 [P2]** Fallback de fullscreen/wake lock, falhas de gravação visíveis, estado offline e retoma segura.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
 
 ### M04 — Fontes / Notícias
 
 **Rota proposta:** `/fontes`. **Objetivo:** Ingestão, curadoria e triagem.
+
 **FR-04-01 [P0]** CRUD de fontes com URL, título, origem, data, idioma, autor, tags, categoria, resumo e anexo.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-04-02 [P0]** Adicionar manualmente, por URL, RSS e integrações autorizadas; rastreio de data de ingestão e proveniência.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-04-03 [P1]** Filtros por categoria, tema, fonte, idioma, data, estado e pesquisa full-text.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-04-04 [P1]** Estados nova, triagem, selecionada, utilizada, descartada; favoritos, duplicados e expiração.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-04-05 [P1]** Resumo por IA com referências à fonte, classificação de relevância e ângulos sugeridos.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-04-06 [P2]** Converter fonte em guião ou ligar múltiplas fontes a um guião; evitar cópias não autorizadas.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-04-07 [P2]** Feed personalizado por workspace e utilizador; configurações de tópicos e exclusões.
 
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
@@ -192,119 +260,203 @@ Cada requisito abaixo tem ID único, prioridade de entrega (P0 crítico, P1 esse
 ### M05 — Revisão
 
 **Rota proposta:** `/revisao`. **Objetivo:** Aprovação editorial e de media.
+
 **FR-05-01 [P0]** Inbox de revisão com filtros por tipo, responsável, estado, prioridade e deadline.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-05-02 [P0]** Revisão de guião com comentários contextuais e decisões versionadas.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-05-03 [P1]** Revisão de vídeo com player, comentários por timestamp, anotações e histórico.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-05-04 [P1]** Aprovar, rejeitar ou pedir alterações com motivo e notificações.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-05-05 [P1]** Fluxos configuráveis de aprovação por workspace/projeto; responsáveis e prazos.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-05-06 [P2]** Comparação entre versões e bloqueio de publicação sem aprovação exigida.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-05-07 [P2]** Registo de decisões e auditoria de alterações após aprovação.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
 
 ### M06 — Agentes IA
 
 **Rota proposta:** `/agentes`. **Objetivo:** Orquestração e configuração de IA.
+
 **FR-06-01 [P0]** Catálogo de agentes com função, versão, modelo, prompt, ferramentas, permissões e limites.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
 
 **FR-06-02 [P0]** Configuração por workspace: temas, tom, idioma, formatos, referências, restrições e metas.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-06-03 [P1]** Execução manual/agendada, progresso, logs, erros, retry e cancelamento.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-06-04 [P1]** Versionamento de prompts/configurações, testes antes de ativar, rollback e auditoria.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-06-05 [P1]** Custos, tokens, latência e qualidade por execução/agente.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-06-06 [P2]** Aprovação humana configurável antes de criar guião ou publicar resultado; bloqueio de dados sensíveis.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-06-07 [P2]** Biblioteca de templates de agentes, duplicação entre workspaces sem copiar dados privados.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
 
 ### M07 — Referências
 
 **Rota proposta:** `/referencias`. **Objetivo:** Biblioteca de inspiração e benchmarking.
+
 **FR-07-01 [P0]** Guardar referências por URL, upload ou captura autorizada; metadados e autoria.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-07-02 [P0]** Classificação por formato, estilo, narrativa, hook, duração, idioma e tags.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-07-03 [P1]** Filtros, favoritos, coleções e pesquisa.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
 
 **FR-07-04 [P1]** Transcrição e análise de estrutura quando tecnicamente e legalmente permitido.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-07-05 [P1]** Ligar referências a fontes e guiões; manter atribuição e URL original.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-07-06 [P2]** Indicadores de desempenho apenas quando obtidos por API ou fonte autorizada, com timestamp.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
 
 ### M08 — Biblioteca
 
 **Rota proposta:** `/biblioteca`. **Objetivo:** Gestão de ativos produzidos.
+
 **FR-08-01 [P0]** Upload de vídeo, áudio, imagens, thumbnails, legendas e documentos com progresso e retry.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-08-02 [P0]** Pastas/coleções lógicas por campanha, projeto, formato e estado; pesquisa e tags.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-08-03 [P1]** Pré-visualização, download, links temporários e permissões de partilha.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-08-04 [P1]** Versionamento, substituição, histórico e associação a guião/take/publicação.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-08-05 [P1]** Controlo de tipos, tamanho, antivírus quando aplicável, quotas e retenção.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-08-06 [P2]** Eliminação reversível, gestão de órfãos e custos de armazenamento.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
 
 ### M09 — Desempenho
 
 **Rota proposta:** `/desempenho`. **Objetivo:** Medição de resultados e aprendizagem.
+
 **FR-09-01 [P0]** Conectar contas de plataformas com OAuth quando suportado e gerir sincronização.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-09-02 [P0]** Métricas por conteúdo e período: views, alcance, interações, retenção, seguidores e conversões disponíveis.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-09-03 [P1]** Definições consistentes por plataforma; mostrar indisponibilidade e data da última atualização.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-09-04 [P1]** Comparação de conteúdos, hooks, temas, formatos, campanhas e responsáveis.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-09-05 [P1]** Rankings, gráficos, exportação e relatórios programados.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-09-06 [P2]** Atribuir métricas ao conteúdo publicado e ao guião original; evitar dupla contagem.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-09-07 [P2]** Erros de integração, token expirado e sincronização parcial com retry.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
 
 ### M10 — Custos
 
 **Rota proposta:** `/custos`. **Objetivo:** Visibilidade financeira da produção.
+
 **FR-10-01 [P0]** Consumo de IA por agente, modelo, execução e workspace.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-10-02 [P0]** Armazenamento, processamento e integrações com custos rastreáveis.
 
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-10-03 [P1]** Custos manuais opcionais por produção, freelancer e projeto; moeda base configurável.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-10-04 [P1]** Orçamentos, limites rígidos/soft, alertas e autorização para ultrapassar quota.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-10-05 [P1]** Custo por guião, vídeo e publicação; tendência mensal e exportação.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-10-06 [P2]** Diferenciar custo estimado de custo confirmado e guardar taxa de câmbio utilizada.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
 
 ### M11 — Calendário / Produção
 
 **Rota proposta:** `/calendario`. **Objetivo:** Planeamento transversal.
+
 **FR-11-01 [P0]** Calendário editorial por dia, semana e mês; drag and drop com validação.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-11-02 [P0]** Tarefas, gravações, revisões, publicações, responsáveis, deadlines e dependências.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-11-03 [P1]** Vistas por equipa, plataforma, campanha e estado; conflitos e atrasos destacados.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-11-04 [P1]** Templates de produção, checklist por conteúdo e notificações.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-11-05 [P1]** Links para guiões, ficheiros, revisões e publicações.
 
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
@@ -312,106 +464,179 @@ Cada requisito abaixo tem ID único, prioridade de entrega (P0 crítico, P1 esse
 ### M12 — Publicação
 
 **Rota proposta:** `/publicacoes`. **Objetivo:** Distribuição e rastreio.
+
 **FR-12-01 [P0]** Preparar legendas, hashtags, thumbnail, plataformas e datas por variante.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-12-02 [P0]** Publicação manual com registo de URL e timestamp; agendamento por API quando autorizado.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-12-03 [P1]** Fila com estados agendado, a publicar, publicado, falhou, cancelado.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-12-04 [P1]** Retry idempotente para evitar posts duplicados; falhas e limites de API visíveis.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-12-05 [P1]** Validação de aprovação e requisitos de formato antes de agendar.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-12-06 [P2]** Permissões de publicação separadas de edição e aprovação.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
 
 ### M13 — Equipa
 
 **Rota proposta:** `/equipa`. **Objetivo:** Utilizadores, papéis e acesso.
+
 **FR-13-01 [P0]** Convidar por email com expiração, aceitar/recusar, reenviar e revogar convite.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-13-02 [P0]** Funções Owner, Admin, Editor, Reviewer, Viewer com permissões por recurso e ação.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
 
 **FR-13-03 [P1]** Múltiplos workspaces por utilizador, papéis independentes e mudança de contexto segura.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-13-04 [P1]** Desativar membro, transferir propriedade, impedir remoção do último Owner.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-13-05 [P1]** Auditoria de convites, alterações de papéis e ações críticas.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-13-06 [P2]** Gestão de grupos/equipas e atribuição de tarefas, sem permissões implícitas.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
 
 ### M14 — Perfil
 
 **Rota proposta:** `/perfil`. **Objetivo:** Identidade e preferências individuais.
+
 **FR-14-01 [P0]** Nome, avatar, email verificado, password reset e MFA quando disponível.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-14-02 [P0]** Idioma, timezone, tema, notificações e preferências do teleprompter.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-14-03 [P1]** Sessões/dispositivos ativos, terminar sessões e histórico de segurança.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-14-04 [P1]** Lista de workspaces e seleção de workspace preferido.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-14-05 [P1]** Exportação dos próprios dados e pedido de eliminação conforme política.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
 
 ### M15 — Settings
 
 **Rota proposta:** `/settings`. **Objetivo:** Configuração do workspace.
+
 **FR-15-01 [P0]** Geral: nome, logótipo, idioma, timezone, moeda e branding.
 
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-15-02 [P0]** Conteúdo: categorias, formatos, estados, templates, regras de aprovação e checklists.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-15-03 [P1]** Integrações: conectar, testar, renovar, revogar e ver saúde de cada integração.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-15-04 [P1]** IA: prompts, modelos, limites, permissões e política de aprovação.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-15-05 [P1]** Notificações: canais, eventos e preferências organizacionais.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-15-06 [P2]** Segurança: MFA obrigatória opcional, políticas de sessão, logs, exportação e retenção.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-15-07 [P2]** Dados: importação/exportação, soft-delete, recuperação e política de eliminação.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-15-08 [P2]** Administração de workspace: transferir propriedade, arquivar e eliminar com confirmação reforçada.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
 
 ### M16 — Pesquisa e notificações
 
 **Rota proposta:** `/pesquisa; /notificacoes`. **Objetivo:** Serviços globais.
+
 **FR-16-01 [P0]** Pesquisa global com controlo de acesso em todas as entidades, sugestões e resultados agrupados.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-16-02 [P0]** Atalho de teclado, pesquisa por título/tag/ID e estado vazio.
 
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-16-03 [P1]** Inbox de notificações, marcar como lida, deep links e preferências.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-16-04 [P1]** Menções, atribuições, aprovações, falhas de automação e integrações.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
+
 **FR-16-05 [P1]** Evitar notificação de dados de outros workspaces e impedir vazamento em resultados.
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
 
 ## 5A. Requisitos adicionais — equipas duplas e operação multidisciplinar
 
 Os requisitos seguintes complementam e, em caso de conflito, prevalecem sobre os requisitos genéricos de Equipa, Perfil, Settings, Dashboard, Calendário e Biblioteca descritos acima. **TEAM-01 [P0] — Identidade única.** Um utilizador entra uma vez e tem um `auth_user_id` estável.
+
 **Aceitação:** login da agência com acesso aos clientes A e B alterna entre ambos sem novo login; logout invalida a sessão; conta do cliente A não vê B. **TEAM-02 [P0] — Dois diretórios de equipa.** `/agency/team` lista staff interno; `/w/[workspace]/settings/team` lista membros do cliente e colaboradores da agência atribuídos, identificados com etiquetas distintas.
+
 **Aceitação:** Client Admin só pode convidar e gerir `client_staff` do seu cliente, não consegue editar `agency_staff` nem elevar autoridade. **TEAM-03 [P0] — Atribuições da agência.** Agency Owner/Admin delegado atribui membros internos a um ou vários clientes com papel e grants específicos por cliente.
+
 **Aceitação:** remover atribuição a B retira B do seletor, dashboard, API, pesquisa, notificações e ficheiros, mantendo A intacto. **TEAM-04 [P0] — Restrição de membros do cliente.** Convites client-side ficam vinculados ao workspace emissor e não podem aceitar outro workspace por alteração de payload.
+
 **Aceitação:** testes negativos com URL, API, websocket, search e storage devolvem acesso negado em B. **TEAM-05 [P0] — Matriz de permissões configurável.** Suportar permissões `module.action` e escopos `workspace/project/assigned_only`; modelos por profissão são apenas sugestões.
+
 **Aceitação:** um editor só altera itens atribuídos quando `assigned_only`; pode consultar módulo sem editar quando grant read-only. **TEAM-06 [P0] — Tarefas e responsáveis.** Cada tarefa tem workspace, projeto, responsável, criador, prioridade, estado, deadline, dependências, comentários e histórico.
+
 **Aceitação:** não é possível atribuir tarefa a utilizador sem acesso ao projeto; mudança de responsável notifica ambos; tarefa concluída permanece auditável.
 
 **TEAM-07 [P1] — Dashboard por âmbito.** Agency Staff tem vista `Os meus clientes` e `As minhas tarefas`; Client Staff entra diretamente no cliente.
+
 **Aceitação:** agregados globais nunca incluem clientes não autorizados; filtros persistem por utilizador e não vazam caches entre clientes. **TEAM-08 [P1] — Equipas funcionais e capacidade.** Criar equipas de Produção, Pós-produção, Clipping, Estratégia, Social e Copy; gerir carga por responsável, estado e prazo.
+
 **Aceitação:** capacidade apresenta tarefas pendentes por pessoa/cliente e respeita acesso a projetos privados. **TEAM-09 [P1] — Workflow adaptável por cliente.** Definir etapas, aprovadores, SLA e ações automáticas por tipo de conteúdo, incluindo clipping e vídeo longo.
+
 **Aceitação:** fluxo de Cliente A não altera Cliente B; transições não autorizadas são rejeitadas; histórico imutável. **TEAM-10 [P1] — Aprovações sem conflito.** Aprovação pode exigir diretor criativo, cliente ou ambos; política opcional impede autoaprovação.
+
 **Aceitação:** decisão guarda versão, ator, função e timestamp; nova versão exige nova aprovação quando configurado. **TEAM-11 [P1] — Freelancer/guest.** Acesso temporário limitado a projetos ou tarefas, com expiração e revogação.
+
 **Aceitação:** após expirar, não acede a conteúdo, uploads nem downloads; histórico mantém autoria. **TEAM-12 [P1] — Notificações direcionadas.** Atribuições, menções, aprovações, alterações e prazos notificam apenas utilizadores autorizados.
+
 **Aceitação:** remover membership impede novas notificações e invalida deep links anteriores. **TEAM-13 [P1] — Separação de settings.** `/agency/settings` controla políticas globais e clientes; `/w/[workspace]/settings` controla opções delegadas do cliente; `/profile` controla preferências pessoais.
+
 **Aceitação:** Client Admin não altera política global ou permissões superiores. **TEAM-14 [P1] — Produção e edição.** Sessões, shot lists, ficheiros brutos, versões de edição, clips e entregas são associados a tarefas e conteúdos.
+
 **Aceitação:** videógrafo entrega material → editor recebe tarefa → envia versão → reviewer aprova → social manager agenda; todas as transições auditáveis. **TEAM-15 [P1] — Transferência e offboarding.** Remover um membro solicita reatribuição de tarefas pendentes e mantém versões e comentários.
+
 **Aceitação:** sem tarefas órfãs invisíveis; propriedade de conteúdo permanece no workspace. **TEAM-16 [P0] — Segurança e testes de autorização.** Testar matriz de agência vs cliente em leitura, escrita, exportação, RPC, realtime, storage, search e jobs.
+
 **Aceitação:** nenhuma combinação de identidade/token/ID externo permite acesso cruzado ou elevação de privilégios.
 
 ### Casos-limite obrigatórios
@@ -428,13 +653,21 @@ Os requisitos seguintes complementam e, em caso de conflito, prevalecem sobre os
 ## 6. Fluxos end-to-end obrigatórios
 
 **FL-01 Onboarding:** criar conta → verificar email → criar workspace → escolher timezone/moeda → convidar equipa → aceitar convite → entrar com função correta.
+
 **Aceitação:** convites expirados/revogados falham; um utilizador de B não vê A. **FL-02 Curadoria editorial:** adicionar fonte → classificar → associar referência → criar guião → editar hooks/body/CTA → submeter → comentar → pedir alterações → nova versão → aprovar.
+
 **Aceitação:** comentários e histórico preservados; aprovação refere a versão correta. **FL-03 Produção:** guião aprovado → calendarizar → abrir fila → teleprompter → gravar múltiplos takes → associar media → revisão de vídeo → aprovado.
+
 **Aceitação:** trocar data não perde seleção nem associa take ao guião errado. **FL-04 Publicação:** vídeo aprovado → preparar variantes → validar conta e permissões → agendar/publicar → registar URL/ID externo → sincronizar métricas.
+
 **Aceitação:** retry não publica duplicado e falha de API não marca como publicado. **FL-05 IA:** fonte → agente gera proposta → revisão humana → criar versão de guião → registar custo e proveniência.
+
 **Aceitação:** IA não publica nem aprova automaticamente sem política explícita; falha/cancelamento não gera conteúdo parcial aprovado. **FL-06 Multi-workspace:** membro de A e B alterna contexto → pesquisa, dashboard, notificações, ficheiros, analytics e custos refletem apenas workspace selecionado.
+
 **Aceitação:** testes negativos com ID manipulado, chamadas diretas e canais realtime. **FL-07 Offboarding:** remover membro → revogar sessões/permissões → preservar autoria e audit log → bloquear uploads e downloads protegidos.
+
 **Aceitação:** URLs temporárias respeitam expiração; acesso API recusado após revogação. **FL-08 Recuperação:** falha de rede durante edição → estado de erro → recuperação do rascunho e retry → ausência de duplicados.
+
 **Aceitação:** versão aprovada não é silenciosamente sobrescrita.
 
 ## 7. Modelo de dados lógico proposto
@@ -486,14 +719,23 @@ Os requisitos seguintes complementam e, em caso de conflito, prevalecem sobre os
 ## 9. Migração do código existente
 
 **MIG-01** Inventariar SQL, tabelas, views, RLS, RPCs `studio_whoami` e `guiao_update` no Supabase real antes de qualquer migração; backup e staging obrigatórios.
+
 **MIG-02** Criar workspaces/memberships e associar registos atuais `client_id='numeiro'` ao workspace legado sem perder IDs.
+
 **MIG-03** Substituir `DEFAULT_CLIENT` em `src/lib/supabase.ts`, `src/lib/data.ts` e `src/components/use-guioes.ts` por contexto autenticado; bloquear acesso sem membership.
+
 **MIG-04** Migrar códigos de equipa/localStorage para Supabase Auth e sessões geridas; período de transição controlado, revogação e logout.
+
 **MIG-05** Migrar `Guiao` para content_item + content_versions, mantendo compatibilidade de leitura temporária e mapeamento `aprovado/rejeitado`, `validado`, `gravado`.
+
 **MIG-06** Migrar `Idea` para sources, removendo `take_numeiro` em favor de `editorial_angle` genérico; adicionar workspace_id e RLS.
+
 **MIG-07** Criar rotas reais para módulos existentes no menu e novas páginas `/fontes`, `/equipa`, `/perfil`, `/settings`, `/calendario`, `/publicacoes`. Redirecionar `/ideias` → `/fontes` de forma permanente quando pronto.
+
 **MIG-08** Implementar pesquisa real em `app-search.tsx`, corrigir links `#`, perfil demo, loading infinito e erros silenciosos do teleprompter.
+
 **MIG-09** Introduzir feature flags por workspace para migração progressiva, dual-read limitado e plano de rollback testado.
+
 **MIG-10** Remover RPCs e credenciais legadas só depois de validação e reconciliação de dados.
 
 ## 10. Requisitos não funcionais e segurança
@@ -599,52 +841,77 @@ A aplicação gere a cadeia **Descoberta → Estratégia → Guião → Aprovaç
 ### 19.1 Inbox universal e triagem
 
 **FR-17-01 [P0]** Inbox unificada por utilizador com tarefas, aprovações, menções, erros de automação e decisões pendentes, deduplicada por evento.
+
 **Aceitação:** abrir um item navega para recurso e contexto certos; marcar lido não aprova conteúdo; filtros por workspace, urgência e tipo persistem.
+
 **FR-17-02 [P1]** Caixa de entrada por workspace com triagem de novas fontes, pedidos do talento, feedback do cliente e material entregue.
+
 **Aceitação:** item tem responsável, SLA e estado; não fica sem dono.
 
 ### 19.2 Brief único e conteúdo canónico
 
 **FR-17-03 [P0]** Todo o conteúdo pode ter briefing estruturado: objetivo, audiência, tese, formato, duração, plataformas, CTA, referências, restrições, dono e deadline.
+
 **Aceitação:** versões e aprovações referenciam o briefing em vigor.
+
 **FR-17-04 [P0]** Relação um-para-muitos: conteúdo → hooks → takes → variantes → assets → publicações por conta → métricas.
+
 **Aceitação:** uma publicação em três contas não triplica o número de guiões; cada resultado mantém atribuição inequívoca.
 
 ### 19.3 Handoffs e bloqueios
 
 **FR-17-05 [P0]** Transições configuráveis de workflow geram tarefas e notificações idempotentes, com owner, prazo e pré-requisitos.
+
 **Aceitação:** uma transição repetida não cria tarefas duplicadas; cada bloqueio mostra causa e próximo responsável.
 
 **FR-17-06 [P1]** Regras de escalonamento por SLA e fila de exceções (sem responsável, atraso, erro de upload, publicação falhada).
+
 **Aceitação:** escalonamento não concede permissões nem publica automaticamente.
 
 ### 19.4 Operação de alto volume
 
 **FR-17-07 [P1]** Operações em lote: atribuir, categorizar, aprovar quando permitido, exportar e reagendar; pré-visualização de impacto e confirmação para ações destrutivas.
+
 **Aceitação:** resultado individual por item, falhas parciais recuperáveis.
+
 **FR-17-08 [P1]** Gestão de capacidade por pessoa e equipa: disponibilidade, estimativas, WIP limits e redistribuição com histórico.
+
 **Aceitação:** alerta de sobrecarga não bloqueia trabalho sem política explícita.
+
 **FR-17-09 [P1]** Templates de projetos, campanhas, séries e checklists; clonagem segura sem copiar tokens, memberships ou dados privados.
+
 **Aceitação:** clone pertence exclusivamente ao workspace de destino.
 
 ### 19.5 Aprendizagem e qualidade
 
 **FR-17-10 [P1]** Taxonomia de motivos de rejeição por guião e vídeo; dashboards de retrabalho por etapa.
+
 **Aceitação:** alterações alimentam relatórios, sem mudar automaticamente prompts sem aprovação.
+
 **FR-17-11 [P1]** Experimentos de hooks/formatos com hipótese, variantes, contas, janela de medição e critérios de decisão; alertar sobre amostras insuficientes.
+
 **Aceitação:** nunca declarar causalidade a partir de comparações observacionais simples.
+
 **FR-17-12 [P1]** Motor “repetir vencedor” cria proposta de continuação/variação ligada à publicação original, com aprovação editorial.
+
 **Aceitação:** não publica sozinho.
 
 ### 19.6 Continuidade e fiabilidade
 
 **FR-17-13 [P0]** Auto-save com indicador persistido, proteção contra alterações concorrentes e recuperação de rascunhos.
+
 **Aceitação:** conflito apresenta diff/versão; nunca sobrescreve silenciosamente.
+
 **FR-17-14 [P0]** Jobs duráveis com idempotency key, retries exponenciais, timeout, dead-letter, cancelamento e reprocessamento autorizado.
+
 **Aceitação:** refresh não perde job; duplicar pedido não duplica resultados/custos sem aviso.
+
 **FR-17-15 [P0]** Observabilidade com logs estruturados, correlação por workspace/run/content, alertas e dashboard de saúde.
+
 **Aceitação:** segredos e dados pessoais sensíveis são removidos dos logs.
+
 **FR-17-16 [P1]** Centro de integrações com estado da ligação, última sincronização, limites e permissões OAuth; reconexão e revogação.
+
 **Aceitação:** uma conta expirada não causa publicação silenciosamente perdida.
 
 ## 20. Preset operacional Viral Engine / Numeiro
@@ -656,9 +923,13 @@ propostas sujeitas a aprovação. O talento pode rejeitar guião com motivo; a s
 ## 21. Social accounts e publicação multi-canal
 
 Um workspace pode gerir N criadores e cada criador N contas em Instagram, TikTok, YouTube, X ou outras. Entidades: `creators`, `social_accounts`, `content_items`, `content_variants`, `publication_targets`, `publications`, `metric_snapshots`. Uma peça pode ser publicada várias vezes em contas diferentes com legendas, capas, horários, estados e URLs próprios.
+
 **FR-21-01 [P0]** permissões e credenciais são por conta.
+
 **FR-21-02 [P0]** não publicar sem aprovação humana do asset/versão e do destino.
+
 **FR-21-03 [P1]** importação manual e sync via API autorizada.
+
 **FR-21-04 [P1]** atribuição de métricas por `publication_id`, janela e origem.
 
 **Aceitação comum:** contas de clientes diferentes nunca se misturam; falhas por destino são isoladas e repetíveis sem posts duplicados.
@@ -736,15 +1007,23 @@ Qualquer pedido, incluindo um botão ou novo separador, recebe `change_id`, owne
 ## 30. Centro de Acessos e Permissões (CAP)
 
 **CAP-01 [P0] Registo central de capacidades.** Cada feature/ação/API/job tem `feature_key` estável, módulo, descrição, risco, ações possíveis, escopos suportados, flag de disponibilidade, dono e versão. Uma feature não entra em produção sem registo; ocultar no menu não é autorização.
+
 **Aceitação:** nova funcionalidade registada aparece automaticamente no inventário de administração e nos testes de autorização. **CAP-02 [P0] Duas matrizes administrativas.** Vistas `pessoas × capacidades` e `funções × capacidades`, com pesquisa, filtros por agência/cliente/equipa/projeto, ações em lote, exportação, resumo de diferenças e preview antes de guardar.
+
 **Aceitação:** Owner autorizado encontra todas as capacidades, sabe quem tem acesso e altera permissões sem editar código. **CAP-03 [P0] Papéis e exceções.** Templates por profissão (clipper, editor, SMM, videógrafo, estratega, copywriter) são pontos de partida; papéis customizados versionados e grants explícitos por pessoa, equipa, projeto ou recurso. A decisão é `deny-by-default`; `explicit deny` prevalece sobre allow; restrições de tenant, expiração, estado da conta e segregação de funções nunca podem ser ultrapassadas por grant local. `owner` é papel protegido e exige fluxo de transferência.
+
 **Aceitação:** dois editores com o mesmo cargo podem ter permissões distintas; cliente não pode conceder a si mesmo escopo de agência. **CAP-04 [P0] Permissões granulares.** Exemplos: `scripts.read/create/edit/submit/approve/delete`, `clipping.create/export`, `media.upload/download/share`, `review.comment/approve`, `publishing.schedule/publish`, `analytics.read`, `costs.read`, `team.invite/manage`, `permissions.manage`, `agents.configure/run`, `integrations.manage`. Separar leitura, edição, aprovação, publicação, download, exportação e gestão.
+
 **Aceitação:** utilizador autorizado a editar não recebe automaticamente poder de publicar ou aprovar. **CAP-05 [P0] Avaliação centralizada e explicável.** Função `authorize(actor, action, resource, context)` partilhada por APIs, jobs e camada de acesso a dados; RLS e storage como segunda linha. UI usa apenas `can()` para visibilidade/disabled, nunca como barreira única. Ecrã `Porque tem acesso?` apresenta papel/grant/escopo/expiração; simulador `Ver como utilizador` é somente leitura e não impersonation real.
 
 **Aceitação:** acesso negado por URL, API, Realtime, pesquisa, download e job mesmo que UI esteja desatualizada. **CAP-06 [P0] Gestão de ciclo de vida.** Convites com validade, aceitação, suspensão, remoção, acessos temporários com expiração, revisões periódicas de acessos, reatribuição de tarefas e revogação de tokens/sessões quando viável. URLs assinados previamente emitidos têm limites explícitos; para revogação imediata de ficheiros sensíveis usar proxy/rotação.
+
 **Aceitação:** membro removido perde novos acessos imediatamente, mantendo autoria e logs. **CAP-07 [P1] Controlo de mudanças sensíveis.** Preview do impacto (número de utilizadores/recursos), confirmação reforçada para publicação, finanças, integrações e permissões, aprovação por segunda pessoa quando configurada, trilho antes/depois, reversão segura e alertas de grants excessivos.
+
 **Aceitação:** alterações são atribuíveis, recuperáveis e não escalam privilégios. **CAP-08 [P1] Interface multi-cliente.** Administração da agência vê clientes autorizados e grants por cliente; administradores do cliente só veem o seu workspace e apenas podem delegar subconjunto permitido pela agência. Convidados podem receber acesso a uma peça/revisão com prazo e sem listar projetos.
+
 **Aceitação:** nenhuma listagem ou contagem revela nomes de outros clientes. **CAP-09 [P1] Disponibilidade ≠ autorização.** Feature flags controlam rollout/planos/experiências; permissões controlam acesso a ações e dados. Uma flag ligada não concede acesso.
+
 **Aceitação:** feature off bloqueia operações relevantes com erro explícito, mesmo se a permissão existir.
 
 ### 30.1 Modelo lógico proposto (validar contra SQL real)
@@ -754,15 +1033,23 @@ Qualquer pedido, incluindo um botão ou novo separador, recebe `change_id`, owne
 ## 31. Equipa, presença e centro operacional
 
 **OPS-01 [P0] Diretório e contadores.** Lista de colaboradores por agência, workspace, equipa e projeto; totais de membros, convidados, ativos, online, disponíveis, em tarefa, ausentes e bloqueados. Contagens deduplicadas por utilizador; visibilidade autorizada.
+
 **Aceitação:** utilizador com dois separadores abertos conta uma vez. **OPS-02 [P0] Estados distintos.** `online` = ligação Presence; `active` = atividade recente com timeout e consentimento; `working` = tarefa explicitamente iniciada; `available/busy/away/do-not-disturb` = estado manual ou calendário autorizado. Não equiparar online a produtividade nem usar presença como controlo laboral.
+
 **Aceitação:** desconexão e idle atualizam presença sem encerrar tarefa nem fabricar horas trabalhadas.
 
 **OPS-03 [P0] Minha área de trabalho.** Inbox universal de tarefas, menções, aprovações, bloqueios e pedidos; filtros por cliente, prioridade e prazo; `acknowledge`, snooze, delegar e concluir, sempre com autorização.
+
 **Aceitação:** o utilizador vê apenas itens autorizados, mesmo em agregação multi-cliente. **OPS-04 [P1] Quem trabalha em quê.** Cartões por membro com tarefa atual voluntariamente iniciada, projeto, cliente, estado, bloqueio, deadline e última atualização; ocultar detalhes privados de workspaces não autorizados.
+
 **Aceitação:** agência consegue identificar responsáveis e bloqueios; cliente A não vê tarefas de B. **OPS-05 [P1] Capacidade e workload.** Disponibilidade declarada, férias, capacidade semanal, estimativa vs. esforço real opcional, WIP limits, backlog, distribuição de tarefas, previsão de entregas e gargalos. Não inferir produtividade a partir de presença.
+
 **Aceitação:** sobrecarga é sinalizada com base em esforço/capacidade configurados e sem atribuições duplicadas. **OPS-06 [P1] Planeamento e handoffs.** Workflow templates por formato/cliente, checklists de passagem, dependências, SLAs, escalonamentos, responsáveis substitutos e autoatribuição com aprovação onde necessário.
+
 **Aceitação:** conclusão de edição gera revisão uma vez (idempotência); falha/retry não duplica tarefas. **OPS-07 [P1] Colaboração e revisão.** Comentários com menções, timestamps, comparação de versões, aprovações, decisões e evidências, incluindo acesso externo restrito por recurso.
+
 **Aceitação:** comentário não concede acesso ao asset; aprovação aplica-se à versão exata. **OPS-08 [P1] Auditoria de operações.** Histórico de alterações e decisões, relatórios de throughput, lead time, cycle time, tempo em espera, retrabalho, taxa de aprovação, clips por origem e atrasos por etapa. Métricas de equipa só são apresentadas com contexto e regras de privacidade definidas. **OPS-09 [P2] Automação inteligente.** Sugestões de atribuição por especialidade/capacidade, previsão de bloqueios, briefings automáticos de turno, recomendações de repetição de vencedores e alertas de qualidade. IA nunca altera permissões nem publica autonomamente. **OPS-10 [P1] Presença segura.** Supabase Realtime Presence com canais por workspace e RLS; atualização limitada para estado pouco frequente; Broadcast para cursores/colaboração intensiva. Indicador de atividade opcional e minimização de dados.
+
 **Aceitação:** utilizador sem acesso ao workspace não consegue subscrever o seu canal de presença.
 
 ## 32. Mecanismos adicionais para escalar clipping e conteúdo
