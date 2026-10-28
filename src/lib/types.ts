@@ -89,3 +89,49 @@ export const FORMATO_LABEL: Record<string, string> = {
   citacao: "citação",
   noticia: "notícia",
 };
+
+// W2-03: fontes (tabela ideas), pedidos do talento e brief.
+export type SourceStatus = "nova" | "triagem" | "selecionada" | "usada" | "descartada" | "rejeitada";
+export type Source = {
+  id: number;
+  client_id: string;
+  kind: "source" | "talent_request";
+  fonte_tipo: string | null;
+  titulo: string | null;
+  fonte: string | null;
+  fonte_url: string | null;
+  url_normalized: string | null;
+  categoria: string | null;
+  formato_sugerido: string | null;
+  urgencia: string | null;
+  autor: string | null;
+  tags: string[];
+  resumo: string | null;
+  notas: string | null;
+  status: SourceStatus;
+  status_reason: string | null;
+  expira_em: string | null;
+  agent: string | null;
+  created_kind: "engine" | "user" | "legacy_code";
+  created_label: string | null;
+  ingested_via: string;
+  created_at: string;
+  data: Record<string, unknown> | null;
+  take: string | null;
+  linked: { id: string; date: string; n: number; tema: string | null; editorial_status: EditorialStatus }[];
+};
+export const SOURCE_STATUS_LABEL: Record<SourceStatus, string> = {
+  nova: "nova", triagem: "em triagem", selecionada: "selecionada", usada: "usada", descartada: "descartada", rejeitada: "descartada",
+};
+export type Brief = {
+  id: string; version_no: number; objetivo: string | null; audiencia: string | null; tese: string | null; formato: string | null;
+  duracao_s: number | null; plataformas: string[]; cta: string | null; referencias: string | null; restricoes: string | null;
+  dono: string | null; deadline: string | null; created_at: string; created_label: string | null;
+};
+export type BriefFields = Partial<Omit<Brief, "id" | "version_no" | "created_at" | "created_label">>;
+export type ContentContext = {
+  brief: Brief | null;
+  brief_versions: number;
+  approved_brief_id: string | null;
+  sources: { id: number; titulo: string | null; kind: string; fonte_tipo: string | null; fonte: string | null; fonte_url: string | null; status: SourceStatus }[];
+};

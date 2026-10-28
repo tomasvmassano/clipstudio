@@ -23,7 +23,7 @@ export type AppContext = {
 /** Capacidades do código de equipa (espelha legacy_can no SQL; o servidor é quem decide). */
 export const LEGACY_CAPS = [
   "scripts.read", "scripts.edit", "scripts.submit", "scripts.approve", "scripts.reject", "scripts.export",
-  "recording.use", "recording.confirm", "sources.read", "analytics.read", "agents.read", "agents.rehearse",
+  "recording.use", "recording.confirm", "sources.read", "requests.create", "analytics.read", "agents.read", "agents.rehearse",
 ];
 
 /** Aceita convites pendentes para o email confirmado e devolve o contexto do utilizador. */
@@ -49,6 +49,12 @@ export function friendlyError(msg: string): string {
   if (msg.includes("nao_elegivel")) return "Guiões rejeitados ou arquivados não se gravam.";
   if (msg.includes("aprovacao_necessaria")) return "Neste cliente só se gravam guiões aprovados.";
   if (msg.includes("arquivado")) return "Este guião está arquivado. Recupera-o primeiro.";
+  if (msg.startsWith("duplicado:")) return "Esta fonte já existe neste cliente.";
+  if (msg.includes("url_invalido")) return "O link tem de começar por http:// ou https://.";
+  if (msg.includes("titulo_obrigatorio")) return "Falta o título.";
+  if (msg.includes("texto_curto")) return "Escreve um pouco mais sobre o que queres.";
+  if (msg.includes("texto_longo")) return "O pedido é demasiado longo (máximo 2000 caracteres).";
+  if (msg.includes("duracao_s")) return "A duração tem de estar entre 1 e 3600 segundos.";
   if (msg.includes("corpo_vazio")) return "O corpo não pode ficar vazio.";
   if (msg.toLowerCase().includes("failed to fetch") || msg.toLowerCase().includes("network")) return "Sem ligação ao servidor. Verifica a internet e tenta de novo.";
   return msg;

@@ -5,7 +5,8 @@ import {
   createContent, duplicateContent, fetchGuioes, fetchHistory, restoreVersion, saveContent, setProduction, subscribeGuioes, transitionContent,
 } from "@/lib/data";
 import type { Access } from "@/lib/access";
-import type { ContentHistory, ContentPatch, EditorialTarget, Guiao } from "@/lib/types";
+import type { BriefFields, ContentContext, ContentHistory, ContentPatch, EditorialTarget, Guiao, Source } from "@/lib/types";
+import { fetchContext, fetchSources, linkSource, saveBrief } from "@/lib/sources";
 import { useSession } from "@/components/session-provider";
 
 /** O que o utilizador pode fazer aos guiões neste workspace (o servidor volta a verificar cada ação). */
@@ -21,6 +22,10 @@ export type ScriptActions = {
   duplicate: (id: string) => Promise<Guiao>;
   restore: (id: string, versionId: string, lock?: number) => Promise<Guiao>;
   history: (id: string) => Promise<ContentHistory>;
+  context: (id: string) => Promise<ContentContext>;
+  saveBrief: (id: string, f: BriefFields) => Promise<ContentContext>;
+  link: (id: string, sourceId: number, link: boolean) => Promise<ContentContext>;
+  sources: () => Promise<Source[]>;
   reload: () => Promise<void>;
 };
 
@@ -70,6 +75,10 @@ export function useGuioes(access: Access, date: string) {
     duplicate: async (id) => put(await duplicateContent(access, id)),
     restore: async (id, versionId, lock) => put(await restoreVersion(access, id, versionId, lock)),
     history: (id: string) => fetchHistory(access, id),
+    context: (id: string) => fetchContext(access, id),
+    saveBrief: (id: string, f: BriefFields) => saveBrief(access, id, f),
+    link: (id: string, sourceId: number, l: boolean) => linkSource(access, id, sourceId, l),
+    sources: () => fetchSources(access, {}, 300),
     reload,
   }), [access, put, reload]);
 

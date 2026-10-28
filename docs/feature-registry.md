@@ -26,9 +26,10 @@ Estado: **ativo** (existe e é verificado no servidor por `authorize()`; também
 | `scripts.export` | Guiões | M | ws | ativo | Exportar .txt |
 | `recording.use` | Teleprompter (M03) | B | ws, own | ativo | `/teleprompter` |
 | `recording.confirm` | Teleprompter | M | ws, own | ativo | Marcar gravado / "Gravaste?" |
-| `sources.read` | Fontes (M04) | B | ws | ativo | `/ideias` |
-| `sources.create` | Fontes | M | ws | W2 | — |
-| `sources.triage` | Fontes | M | ws | W2 | — |
+| `sources.read` | Fontes (M04) | B | ws | ativo | `/fontes` (`sources_list`), brief e fontes do guião (`content_context`) |
+| `sources.create` | Fontes | M | ws | ativo | Adicionar fonte por URL/manual com dedup (`source_create`) |
+| `sources.triage` | Fontes | M | ws | ativo | Selecionar, em triagem, descartar com motivo (`source_update`) |
+| `requests.create` | Fontes | B | ws | ativo | Pedir um tema (`talent_request_create`); também no código de equipa |
 | `references.read` | Referências (M07) | B | org, ws | W2 | — |
 | `references.manage` | Referências | M | org, ws | W2 | — |
 | `review.comment` | Revisão (M05) | M | ws, proj | W5 | — |

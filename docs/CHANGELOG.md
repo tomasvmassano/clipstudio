@@ -9,13 +9,20 @@
   - RPCs `content_save`, `content_transition`, `content_production`, `content_create`, `content_duplicate`, `content_history`, `content_restore_version`; `guiao_update` passa a usar o modelo novo.
   - Os 30 guiões existentes migrados com versão 1 e estado "em revisão".
 - **W2-02 app de guiões**: editor por blocos (Hook 1..N, Corpo, CTA, Notas) que guarda sozinho e deteta conflitos de edição; Aprovar, Pedir alterações, Rejeitar (motivo obrigatório), Retirar aprovação, Recuperar; Histórico com versões, autoria e "Usar este texto"; Novo guião, Duplicar, Arquivar conforme a capacidade; filtros por estado. Teleprompter mostra o CTA e deixa de engolir erros ao marcar gravado.
-- Testes: `w2_content` 47/47, `w1_review_fixes` 11/11, `w1_data_access` 25/25 (com o modelo novo). E2E de escrita num workspace de teste isolado (criado e apagado no fim) 23/23.
+- **W2-03 fontes, briefs e pedidos do talento** (PRD M04, FR-17-02/03, §20; ADR-0003; migração `20261028202656_w2_sources_briefs_requests`).
+  - `/fontes` substitui `/ideias` (redirecionamento): separadores Por triar, Selecionadas, Pedidos, Usadas, Descartadas, Todas; pesquisa; Adicionar fonte por link com deteção de repetidos; Selecionar, Em triagem, Descartar com motivo; Criar guião a partir da fonte.
+  - Corrigido: o "take" e a expiração das fontes nunca apareciam (a página lia campos que não existem).
+  - Pedido do talento por texto ("Pedir um tema"), também disponível no código de equipa. Nada é gerado sem aprovação.
+  - Painel "Brief e fontes" em cada guião: brief estruturado com versões, fontes ligadas, ligar e desligar. A aprovação guarda o brief em vigor; se mudar depois, a app avisa.
+  - Capacidade nova `requests.create`. URL repetido vindo do motor não derruba a corrida: entra descartado com a referência ao original.
+  - Testes: `w2_sources` 41/41, `w2_content` 47/47 (regressão). E2E em workspace de teste isolado 16/16.
+- Testes (W2-01/02): `w2_content` 47/47, `w1_review_fixes` 11/11, `w1_data_access` 25/25 (com o modelo novo). E2E de escrita num workspace de teste isolado (criado e apagado no fim) 23/23.
 
 ### Limitações conhecidas W2 (PARTIAL)
 
 - Sem eliminação definitiva (só arquivo); sem diff visual entre versões; sem bulk actions (FR-02-05) nem vistas guardadas (FR-02-07).
 - Outbox sem consumidores (W4). Estados de produção além de gravado chegam no W3.
-- Briefs (FR-17-03), fontes ligadas e pedidos do talento são os próximos incrementos do W2.
+- Fontes: sem RSS/integrações nem resumo por IA; o motor ainda não prioriza fontes selecionadas nem lê pedidos (W4). Referências (M07) são o próximo incremento.
 
 ## 2026-10-28 (W1 Fundação)
 

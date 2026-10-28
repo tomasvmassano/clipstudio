@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ArchiveIcon, CheckIcon, ChevronDownIcon, ChevronUpIcon, CopyIcon, ExternalLinkIcon, HistoryIcon, Loader2Icon, MessageSquareWarningIcon,
-  MoreHorizontalIcon, PencilIcon, PlusIcon, SendIcon, Trash2Icon, UndoIcon, VideoIcon, XIcon,
+  MoreHorizontalIcon, NotebookTextIcon, PencilIcon, PlusIcon, SendIcon, Trash2Icon, UndoIcon, VideoIcon, XIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +18,7 @@ import { recordable, words } from "@/lib/data";
 import { EDITORIAL_LABEL, FORMATO_LABEL, WPS, type EditorialStatus, type Guiao, type Hook } from "@/lib/types";
 import type { ScriptActions, ScriptCaps } from "@/components/use-guioes";
 import { HistorySheet } from "@/components/guiao-history";
+import { BriefSheet } from "@/components/guiao-brief";
 
 const MECH = ["pergunta", "contra", "numero", "ego", "confissao", "segredo"];
 
@@ -54,6 +55,7 @@ export function GuiaoCard({ g, carried, caps, actions, onError, startInEdit }: P
   const [busy, setBusy] = useState(false);
   const [reason, setReason] = useState("");
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [briefOpen, setBriefOpen] = useState(false);
 
   const st = g.editorial_status;
   const dead = st === "rejected" || st === "archived";
@@ -199,6 +201,9 @@ export function GuiaoCard({ g, carried, caps, actions, onError, startInEdit }: P
                   <VideoIcon /> {recorded ? "Desmarcar gravado" : "Marcar gravado"}
                 </Button>
               )}
+              <Button size="sm" variant="ghost" onClick={() => setBriefOpen(true)}>
+                <NotebookTextIcon /> Brief e fontes
+              </Button>
               <Button size="sm" variant="ghost" onClick={() => setHistoryOpen(true)}>
                 <HistoryIcon /> Histórico
               </Button>
@@ -223,6 +228,7 @@ export function GuiaoCard({ g, carried, caps, actions, onError, startInEdit }: P
           )}
         </div>
       </CardContent>
+      <BriefSheet g={g} open={briefOpen} onOpenChange={setBriefOpen} actions={actions} canEdit={caps.edit && st !== "archived"} />
       <HistorySheet g={g} open={historyOpen} onOpenChange={setHistoryOpen} actions={actions} canRestore={caps.edit && st !== "archived"} onError={onError} />
     </Card>
   );

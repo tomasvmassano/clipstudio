@@ -2,6 +2,7 @@
 
 import { Suspense, useMemo, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { DownloadIcon, Loader2Icon, MonitorPlayIcon, PlusIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -28,7 +29,8 @@ function Stat({ v, l }: { v: string | number; l: string }) {
 }
 
 function GuioesInner({ access }: { access: Access }) {
-  const [date, setDate] = useState(todayDubai());
+  const params = useSearchParams();
+  const [date, setDate] = useState(() => (/^\d{4}-\d{2}-\d{2}$/.test(params.get("date") ?? "") ? params.get("date")! : todayDubai()));
   const [filter, setFilter] = useState<Filter>("todos");
   const [msg, setMsg] = useState("");
   const [creating, setCreating] = useState(false);

@@ -36,6 +36,25 @@ approved | rejected → archived   (regras)
 
 Por defeito conteúdos `rejected` não entram na fila do teleprompter; o workspace pode exigir `approved` para gravar.
 
+## Fontes e pedidos do talento (`ideas`, W2-03)
+
+`nova → triagem → selecionada → usada`, ou `descartada` (motivo obrigatório). `kind = source | talent_request`.
+
+| De → para | Capacidade | Regra | Evento |
+| --- | --- | --- | --- |
+| (criar) | `sources.create` | dedup por URL normalizado por workspace; repetido = PT409 `duplicado:<id>`; motor nunca falha, o repetido entra `descartada` com "duplicado de #id" | `source.created` |
+| (pedido) | `requests.create` | texto 3–2000 caracteres; entra `nova`, nada é gerado sem aprovação | `request.created` |
+| nova → triagem / selecionada | `sources.triage` | — | `source.status_changed` / `source.approved` |
+| * → descartada | `sources.triage` | motivo | `source.discarded` |
+| ligar a um guião | `scripts.edit` | mesmo workspace; fonte passa a `usada` | auditoria `content.source_linked` |
+| fonte → guião | `scripts.create` | rascunho com tema, hooks e take da fonte; ligação automática | `script.created` |
+
+O motor continua a consumir só `status='nova'`; `selecionada` ainda não tem prioridade no motor (contrato a fechar no W4).
+
+## Brief (`content_briefs`, W2-03)
+
+Cada gravação cria uma versão nova (append-only). `guioes.brief_id` aponta para a versão em vigor e `content_versions.brief_id` guarda o brief de cada versão, por isso a aprovação fica com o brief que estava em vigor (FR-17-03). Mudar o brief depois de aprovar não anula a aprovação; a app mostra "mudou depois da aprovação". Evento `brief.updated`.
+
 ## Revisão de media e publicação
 
 Media: `not_submitted → pending → changes_requested | approved | rejected`.
