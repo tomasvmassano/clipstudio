@@ -1,4 +1,4 @@
--- 20261028190000 drift_hoje_resumo_desempenho
+-- 20261028184500 drift_hoje_resumo_desempenho
 -- Regista definições aplicadas fora de migração (patches de 28/10 via SQL direto): ensaios fora do Hoje; diario/bandas/prev_30d no desempenho.
 CREATE OR REPLACE FUNCTION public.hoje_resumo(p_client text DEFAULT 'numeiro'::text)
  RETURNS jsonb
