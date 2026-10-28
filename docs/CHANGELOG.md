@@ -14,6 +14,15 @@
   - RPCs `content_save`, `content_transition`, `content_production`, `content_create`, `content_duplicate`, `content_history`, `content_restore_version`; `guiao_update` passa a usar o modelo novo.
   - Os 30 guiões existentes migrados com versão 1 e estado "em revisão".
 - **W2-02 app de guiões**: editor por blocos (Hook 1..N, Corpo, CTA, Notas) que guarda sozinho e deteta conflitos de edição; Aprovar, Pedir alterações, Rejeitar (motivo obrigatório), Retirar aprovação, Recuperar; Histórico com versões, autoria e "Usar este texto"; Novo guião, Duplicar, Arquivar conforme a capacidade; filtros por estado. Teleprompter mostra o CTA e deixa de engolir erros ao marcar gravado.
+- **W2-05 teleprompter** (PRD M03 FR-03-01..07, §20, FL-03; ADR-0006; migrações `20261028211702_w2_teleprompter`, `20261028211915_w2_teleprompter_same_ws_fix`, `20261028212101_w2_teleprompter_prefs_revoke_anon`, `20261028213636_w2_teleprompter_search_path`).
+  - Fila de gravação do dia guardada no servidor e partilhada entre dispositivos (iPad e computador veem a mesma): transitados primeiro, reordenar, saltar guiões e saltar blocos; sem rejeitados nem arquivados.
+  - Leitura por blocos (Hook 1..N, Body, CTA) com saltar para o bloco anterior/seguinte.
+  - Takes por bloco ("Take" ou tecla T): numerados, ligados à versão lida, escolher o melhor, descartar, notas. Não mudam o estado do guião; "gravado" continua a pedir confirmação.
+  - Sem rede, os takes ficam no dispositivo e são enviados quando a ligação volta, sem duplicar.
+  - Retomar onde se ficou, também noutro dispositivo.
+  - Espelho horizontal e vertical independentes, velocidade, letra, entrelinha, margens, contraste (branco, alto, âmbar), atalhos configuráveis para comandos Bluetooth, ecrã inteiro por botão, tecla ou duplo toque, ecrã sempre ligado quando o browser deixa (e aviso quando não deixa).
+  - Preferências guardadas por utilizador e dispositivo (com conta) ou só no dispositivo (código de equipa).
+  - Testes: `w2_teleprompter` 52/52; E2E em workspace de teste isolado 28/28 (inclui offline, dois dispositivos, iPad e telemóvel).
 - **W2-04 referências** (PRD M07; ADR-0005; migrações `20261028205017_w2_references`, `20261028205134_w2_references_zero_duration`).
   - `/referencias` (sai de "em breve"): Biblioteca com pesquisa, coleções e favoritos; Descobrir com os reels dos criadores seguidos ainda por guardar, ordenados por quanto ficaram acima da mediana, já com a análise; Arquivo.
   - Guardar um reel na biblioteca herda hook, formato, narrativa, duração e idioma; adicionar por link; classificar (formato, estilo, narrativa, duração, idioma, tags, coleções, notas).
@@ -32,6 +41,7 @@
 
 ### Limitações conhecidas W2 (PARTIAL)
 
+- Teleprompter: sem anexar ficheiro ao take (W5), sem filtros por campanha/responsável (W3), sem blocos personalizados, não abre já sem rede.
 - Sem eliminação definitiva (só arquivo); sem diff visual entre versões; sem bulk actions (FR-02-05) nem vistas guardadas (FR-02-07).
 - Outbox sem consumidores (W4). Estados de produção além de gravado chegam no W3.
 - Fontes: sem RSS/integrações nem resumo por IA; o motor ainda não prioriza fontes selecionadas nem lê pedidos (W4). Referências (M07) entregues no W2-04.

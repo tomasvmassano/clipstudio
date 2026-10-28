@@ -1,222 +1,333 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useGuioes } from "@/components/use-guioes";
 import { WorkspaceGate } from "@/components/workspace-gate";
+import { useSession } from "@/components/session-provider";
+import { Prompter } from "@/components/teleprompter/prompter";
+import { TpSettings } from "@/components/teleprompter/settings";
+import { useTpPrefs } from "@/components/teleprompter/use-prefs";
 import type { Access } from "@/lib/access";
-import { todayDubai, tpQueue } from "@/lib/data";
+import { addDays, dayLabel, setProduction, subscribeGuioes, todayDubai } from "@/lib/data";
+import {
+  blockLabel, blocksOf, closeSession, createTake, openSession, permanentError, readOutbox, saveProgress, setQueue, updateTake, writeOutbox,
+  type BlockKey, type PendingTake, type RecordingSession, type SessionItem, type TakeRow,
+} from "@/lib/recording";
 import { cn } from "@/lib/utils";
 
 /*
- * Teleprompter: sempre preto e branco, de propósito. Só número, 3 hooks, separador e corpo.
- * Teclas: Espaço rola/para · ↑↓ velocidade · ←→ ou PageUp/PageDown guião · M espelho · +/- letra · Esc sai.
- * Ler até 80% NÃO marca gravado (AGENTS.md §6, PRD §20): ao avançar pergunta "Gravaste?" e só marca com confirmação.
+ * Teleprompter (PRD M03): fila de gravação do dia partilhada entre dispositivos, blocos Hook/Body/CTA, takes,
+ * preferências por utilizador e dispositivo, retoma segura e takes offline com reenvio idempotente.
  */
-const store = {
-  get<T>(k: string, d: T): T { try { const v = localStorage.getItem(k); return v == null ? d : (JSON.parse(v) as T); } catch { return d; } },
-  set(k: string, v: unknown) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+
+const subscribeOnline = (cb: () => void) => {
+  window.addEventListener("online", cb); window.addEventListener("offline", cb);
+  return () => { window.removeEventListener("online", cb); window.removeEventListener("offline", cb); };
 };
 
-function Btn({ on, label, onClick, aria }: { on?: boolean; label: string; onClick: () => void; aria?: string }) {
+function Btn({ label, onClick, on, disabled, aria, className }: { label: string; onClick: () => void; on?: boolean; disabled?: boolean; aria?: string; className?: string }) {
   return (
-    <button
-      type="button"
-      aria-label={aria ?? label}
-      onClick={onClick}
-      className={cn("min-h-11 min-w-11 rounded-xl border border-neutral-700 bg-neutral-900 px-3 font-semibold text-white", on && "border-amber-400 bg-amber-400 text-black")}
-    >
+    <button type="button" aria-label={aria ?? label} onClick={onClick} disabled={disabled}
+      className={cn("min-h-11 rounded-xl border border-neutral-700 bg-neutral-900 px-3 text-sm font-semibold text-white disabled:opacity-40", on && "border-amber-400 bg-amber-400 text-black", className)}>
       {label}
     </button>
   );
 }
 
-type Confirm = { id: string; n: number; then: "next" | "exit" };
-
 function TeleprompterInner({ access }: { access: Access }) {
   const params = useSearchParams();
   const router = useRouter();
   const date = params.get("date") ?? todayDubai();
-  const { all, loading, actions, caps } = useGuioes(access, date);
-  const canWrite = caps.record;
-  const queue = useMemo(() => tpQueue(all, date), [all, date]);
+  const { mode, can } = useSession();
+  const canTake = can("recording.confirm");
+  const { prefs, update, keysFor, syncError } = useTpPrefs(mode === "user");
+  const online = useSyncExternalStore(subscribeOnline, () => navigator.onLine, () => true);
 
-  // null = ainda não escolhido: começa no primeiro por gravar
-  const [picked, setPicked] = useState<number | null>(null);
-  const [playing, setPlaying] = useState(false);
-  const [speed, setSpeed] = useState(() => store.get("tp.speed", 4));
-  const [font, setFont] = useState(() => store.get("tp.font", 56));
-  const [mirror, setMirror] = useState(() => store.get("tp.mirror", false));
-  const [barVisible, setBarVisible] = useState(true);
-  const [progress, setProgress] = useState(0);
-  const [confirm, setConfirm] = useState<Confirm | null>(null);
-  const [tpError, setTpError] = useState("");
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const acc = useRef(0);
-  const last = useRef(0);
-  const shownAt = useRef(0);
-  const hideT = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const lock = useRef<WakeLockSentinel | null>(null);
+  const [session, setSession] = useState<RecordingSession | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [view, setView] = useState<{ kind: "queue" } | { kind: "prompter"; index: number; pct?: number; block?: BlockKey | null }>({ kind: "queue" });
+  const [settings, setSettings] = useState(false);
+  const [outbox, setOutbox] = useState<PendingTake[]>(() => readOutbox(access.ws));
+  const [expanded, setExpanded] = useState<string | null>(null);
 
-  const firstOpen = useMemo(() => Math.max(0, queue.findIndex((g) => g.production_status !== "recorded")), [queue]);
-  const idx = picked ?? firstOpen;
+  const load = useCallback(async () => {
+    try { setSession(await openSession(access, date)); setError(""); }
+    catch (e) { setError((e as Error).message); }
+    finally { setLoading(false); }
+  }, [access, date]);
 
-
-  const cur = queue[idx];
-  useEffect(() => { store.set("tp.speed", speed); }, [speed]);
-  useEffect(() => { store.set("tp.font", font); }, [font]);
-  useEffect(() => { store.set("tp.mirror", mirror); }, [mirror]);
   useEffect(() => {
-    if (scrollRef.current) scrollRef.current.scrollTop = 0;
-    acc.current = 0;
-    shownAt.current = performance.now();
-  }, [idx]);
+    let alive = true;
+    openSession(access, date)
+      .then((s) => { if (alive) { setSession(s); setError(""); } })
+      .catch((e: Error) => { if (alive) setError(e.message); })
+      .finally(() => { if (alive) setLoading(false); });
+    const unsub = subscribeGuioes(access, load);
+    const onFocus = () => { if (document.visibilityState === "visible") load(); };
+    document.addEventListener("visibilitychange", onFocus);
+    return () => { alive = false; unsub(); document.removeEventListener("visibilitychange", onFocus); };
+  }, [access, date, load]);
 
-  // wake lock + ecrã inteiro
-  useEffect(() => {
-    (async () => { try { lock.current = await navigator.wakeLock?.request("screen"); } catch {} })();
-    document.documentElement.requestFullscreen?.().catch(() => {});
-    return () => { lock.current?.release().catch(() => {}); if (document.fullscreenElement) document.exitFullscreen().catch(() => {}); };
-  }, []);
-
-  // auto-scroll
-  useEffect(() => {
-    let raf = 0;
-    const loop = (t: number) => {
-      const el = scrollRef.current;
-      if (playing && el) {
-        const dt = last.current ? Math.min((t - last.current) / 1000, 0.1) : 0;
-        acc.current += dt * speed * font * 0.09;
-        if (acc.current >= 1) { const px = Math.floor(acc.current); el.scrollTop += px; acc.current -= px; }
+  // ---------- takes por enviar ----------
+  const setBox = useCallback((f: (l: PendingTake[]) => PendingTake[]) => {
+    setOutbox((prev) => { const next = f(prev); writeOutbox(access.ws, next); return next; });
+  }, [access.ws]);
+  const flushing = useRef(false);
+  const flush = useCallback(async () => {
+    if (flushing.current) return;
+    flushing.current = true;
+    try {
+      for (const t of readOutbox(access.ws)) {
+        if (t.error) continue;
+        try {
+          await createTake(access, t);
+          setBox((l) => l.filter((x) => x.client_ref !== t.client_ref));
+        } catch (e) {
+          const code = (e as { code?: string }).code;
+          if (permanentError(code)) setBox((l) => l.map((x) => (x.client_ref === t.client_ref ? { ...x, error: (e as Error).message } : x)));
+          else break; // sem rede: tenta mais tarde
+        }
       }
-      last.current = t;
-      raf = requestAnimationFrame(loop);
-    };
-    raf = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(raf);
-  }, [playing, speed, font]);
+    } finally { flushing.current = false; }
+    load();
+  }, [access, setBox, load]);
+  useEffect(() => {
+    if (!online || !outbox.some((t) => !t.error)) return;
+    const t = setTimeout(flush, 500);
+    const iv = setInterval(flush, 15000);
+    return () => { clearTimeout(t); clearInterval(iv); };
+  }, [online, outbox, flush]);
 
-  const pct = () => { const el = scrollRef.current; if (!el) return 1; const max = el.scrollHeight - el.clientHeight; return max > 0 ? el.scrollTop / max : 1; };
-  /** Se o guião foi lido até 80% e ainda não está gravado, pergunta antes de seguir. */
-  const shouldAsk = useCallback(() => {
-    const g = queue[idx];
-    if (!g || g.production_status === "recorded" || !canWrite) return null;
-    const el = scrollRef.current;
-    const read = pct() >= 0.8 || (!!el && el.scrollHeight <= el.clientHeight && performance.now() - shownAt.current > 5000);
-    return read ? g : null;
-  }, [queue, idx, canWrite]);
-
-  const step = useCallback((k: number) => {
-    const j = idx + k;
-    if (j < 0 || j >= queue.length) return;
-    setPicked(j);
-  }, [idx, queue.length]);
-
-  const go = useCallback((k: number) => {
-    if (k > 0) {
-      const g = shouldAsk();
-      if (g) { setPlaying(false); setConfirm({ id: g.id, n: g.n, then: "next" }); return; }
+  const onTake = useCallback(async (contentId: string, block: BlockKey): Promise<TakeRow> => {
+    if (!session) throw new Error("Sem sessão.");
+    const t: PendingTake = { session: session.id, content: contentId, block, client_ref: crypto.randomUUID(), at: new Date().toISOString() };
+    try {
+      const row = await createTake(access, t);
+      setSession((s) => s && { ...s, items: s.items.map((i) => (i.content_id === contentId ? { ...i, takes: [...i.takes, row] } : i)) });
+      return row;
+    } catch (e) {
+      if (permanentError((e as { code?: string }).code)) throw e;
+      setBox((l) => [...l, t]); // sem rede: fica no dispositivo e é reenviado com o mesmo client_ref
+      return { id: t.client_ref, block_key: block, take_number: 0, status: "ok", selected: false, notes: null, version_id: null, session_id: t.session, created_label: null, created_at: t.at, pending: true };
     }
-    step(k);
-  }, [shouldAsk, step]);
+  }, [access, session, setBox]);
 
-  const showBar = useCallback(() => {
-    setBarVisible(true);
-    if (hideT.current) clearTimeout(hideT.current);
-    hideT.current = setTimeout(() => setBarVisible(false), 3000);
-  }, []);
+  const takesFor = useCallback((contentId: string): TakeRow[] => {
+    const real = session?.items.find((i) => i.content_id === contentId)?.takes ?? [];
+    const pend = outbox.filter((t) => t.content === contentId && t.session === session?.id).map<TakeRow>((t) => ({
+      id: t.client_ref, block_key: t.block, take_number: 0, status: "ok", selected: false, notes: t.error ? `Não enviado: ${t.error}` : null,
+      version_id: null, session_id: t.session, created_label: null, created_at: t.at, pending: true,
+    }));
+    return [...real, ...pend];
+  }, [session, outbox]);
+
+  const onTakeUpdate = useCallback(async (t: TakeRow, patch: { selected?: boolean; status?: "ok" | "discarded"; notes?: string }) => {
+    await updateTake(access, t.id, patch);
+    await load();
+  }, [access, load]);
+
+  const onRecorded = useCallback(async (contentId: string, recorded: boolean) => {
+    await setProduction(access, contentId, recorded ? "recorded" : "not_started");
+    await load();
+  }, [access, load]);
+
+  // ---------- progresso (retoma segura) ----------
+  const prog = useRef<{ content: string; block: BlockKey | null; pct: number; sent: number; dirty: boolean } | null>(null);
+  const onProgress = useCallback((content: string, block: BlockKey | null, pct: number) => {
+    const prev = prog.current;
+    prog.current = { content, block, pct, sent: prev?.sent ?? 0, dirty: true };
+    try { localStorage.setItem(`tp.resume.${access.ws}.${date}`, JSON.stringify({ content, block, pct, at: Date.now() })); } catch {}
+  }, [access.ws, date]);
   useEffect(() => {
-    hideT.current = setTimeout(() => setBarVisible(false), 3000);
-    return () => { if (hideT.current) clearTimeout(hideT.current); };
-  }, []);
+    if (!session || session.closed_at) return;
+    const iv = setInterval(() => {
+      const p = prog.current;
+      if (!p || !p.dirty || !navigator.onLine) return;
+      p.dirty = false;
+      saveProgress(access, session.id, p.content, p.block, p.pct).catch(() => { if (prog.current) prog.current.dirty = true; });
+    }, 4000);
+    return () => clearInterval(iv);
+  }, [access, session]);
 
-  const exit = useCallback(() => {
-    const g = shouldAsk();
-    if (g) { setPlaying(false); setConfirm({ id: g.id, n: g.n, then: "exit" }); return; }
-    router.push("/guioes");
-  }, [shouldAsk, router]);
+  // ---------- fila ----------
+  const items = useMemo(() => session?.items ?? [], [session]);
+  const playable = useMemo(() => items.filter((i) => !i.skipped && blocksOf(i.content).some((b) => !i.skipped_blocks.includes(b.key))), [items]);
 
-  const answer = useCallback(async (yes: boolean) => {
-    const c = confirm;
-    if (!c) return;
-    setConfirm(null);
-    if (yes) { try { await actions.record(c.id, true); } catch (e) { setTpError((e as Error).message); } }
-    if (c.then === "exit") router.push("/guioes");
-    else step(1);
-  }, [confirm, actions, router, step]);
+  const saveQueue = useCallback(async (next: SessionItem[]) => {
+    if (!session) return;
+    setBusy(true);
+    try {
+      setSession(await setQueue(access, session.id, next.map((i) => ({ content_id: i.content_id, skipped: i.skipped, skipped_blocks: i.skipped_blocks }))));
+      setError("");
+    } catch (e) { setError((e as Error).message); }
+    finally { setBusy(false); }
+  }, [access, session]);
+  const move = (i: number, k: number) => {
+    const j = i + k;
+    if (j < 0 || j >= items.length) return;
+    const next = [...items];
+    [next[i], next[j]] = [next[j], next[i]];
+    saveQueue(next);
+  };
+  const toggleSkip = (it: SessionItem) => saveQueue(items.map((x) => (x.content_id === it.content_id ? { ...x, skipped: !x.skipped } : x)));
+  const toggleBlock = (it: SessionItem, b: BlockKey) =>
+    saveQueue(items.map((x) => (x.content_id === it.content_id
+      ? { ...x, skipped_blocks: x.skipped_blocks.includes(b) ? x.skipped_blocks.filter((y) => y !== b) : [...x.skipped_blocks, b] } : x)));
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      const k = e.key;
-      if (confirm) {
-        if (k === "Enter" || k === "s" || k === "S") { e.preventDefault(); answer(true); }
-        else if (k === "Escape" || k === "n" || k === "N") { e.preventDefault(); answer(false); }
-        return;
-      }
-      if (k === " ") { e.preventDefault(); setPlaying((p) => !p); showBar(); }
-      else if (k === "ArrowUp") { e.preventDefault(); setSpeed((s) => Math.min(10, s + 1)); showBar(); }
-      else if (k === "ArrowDown") { e.preventDefault(); setSpeed((s) => Math.max(1, s - 1)); showBar(); }
-      else if (k === "ArrowRight" || k === "PageDown") { e.preventDefault(); go(1); }
-      else if (k === "ArrowLeft" || k === "PageUp") { e.preventDefault(); go(-1); }
-      else if (k === "Escape") { e.preventDefault(); exit(); }
-      else if (k === "m" || k === "M") setMirror((m) => !m);
-      else if (k === "+" || k === "=") setFont((f) => Math.min(96, f + 4));
-      else if (k === "-") setFont((f) => Math.max(32, f - 4));
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [go, exit, showBar, confirm, answer]);
+  const resume = useMemo(() => {
+    if (!session) return null;
+    let local: { content: string; block: BlockKey | null; pct: number; at: number } | null = null;
+    try { local = JSON.parse(localStorage.getItem(`tp.resume.${access.ws}.${date}`) ?? "null"); } catch {}
+    const server = session.last_content_id ? { content: session.last_content_id, block: session.last_block, pct: session.last_pct ?? 0, at: Date.parse(session.last_at ?? "") || 0 } : null;
+    const r = local && (!server || local.at > server.at) ? local : server;
+    if (!r) return null;
+    const index = playable.findIndex((i) => i.content_id === r.content);
+    if (index < 0 || playable[index].content.production_status === "recorded") return null;
+    return { ...r, index, n: playable[index].content.n };
+  }, [session, playable, access.ws, date]);
 
+  const start = (index: number, extra?: { pct?: number; block?: BlockKey | null }) => { setView({ kind: "prompter", index, ...extra }); };
+  const firstOpen = Math.max(0, playable.findIndex((i) => i.content.production_status !== "recorded"));
+
+  const endSession = async () => {
+    if (!session) return;
+    if (!window.confirm("Terminar a sessão de gravação deste dia? Os takes ficam guardados.")) return;
+    setBusy(true);
+    try { await closeSession(access, session.id); router.push(`/guioes?date=${date}`); }
+    catch (e) { setError((e as Error).message); setBusy(false); }
+  };
+
+  const settingsPanel = settings && (
+    <TpSettings prefs={prefs} update={update} keysFor={keysFor} serverSync={mode === "user"} syncError={syncError} onClose={() => setSettings(false)} />
+  );
+
+  if (view.kind === "prompter") {
+    return (
+      <>
+        <Prompter
+          items={playable} start={view} prefs={prefs} update={update} keysFor={keysFor} canTake={canTake} takesFor={takesFor}
+          online={online} pendingCount={outbox.filter((t) => !t.error).length}
+          onTake={onTake} onTakeUpdate={onTakeUpdate} onRecorded={onRecorded} onProgress={onProgress}
+          onSettings={() => setSettings(true)} onExit={() => { setView({ kind: "queue" }); load(); }}
+        />
+        {settingsPanel}
+      </>
+    );
+  }
+
+  const failed = outbox.filter((t) => t.error);
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-black text-white" onPointerMove={showBar} onPointerDown={showBar}>
-      <div className="fixed left-0 top-0 h-[3px] bg-amber-400 transition-[width]" style={{ width: queue.length ? `${((idx + Math.min(progress, 1)) / queue.length) * 100}%` : 0 }} />
-      <div className="fixed right-4 top-3 text-sm tabular-nums text-neutral-500">{queue.length ? `guião ${idx + 1} de ${queue.length}` : ""}</div>
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-[6vw] [scrollbar-width:none]" onScroll={() => setProgress(pct())}>
-        <div className={cn("mx-auto max-w-[1100px] py-[38vh] pb-[70vh] font-bold leading-[1.38]", mirror && "[transform:scaleX(-1)]")} style={{ fontSize: font }}>
-          {loading ? (
-            <p className="text-neutral-500">A carregar…</p>
-          ) : !cur ? (
-            <p>Não há guiões para gravar neste dia.</p>
-          ) : (
-            <>
-              <div className="mb-[.8em] text-[.45em] font-normal text-neutral-500">{idx + 1}</div>
-              {cur.hooks.map((h, i) => <p key={i} className="mb-[1.5em]">{h.text}</p>)}
-              <hr className="mb-[1.3em] mt-[.4em] border-t-[3px] border-neutral-700" />
-              {cur.corpo.split("\n").filter(Boolean).map((l, i) => <p key={i} className="mb-[.75em]">{l}</p>)}
-              {cur.cta && <p className="mt-[1.2em] text-amber-300">{cur.cta}</p>}
-            </>
-          )}
-        </div>
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black text-white">
+      <div className="mx-auto flex max-w-3xl flex-col gap-4 px-4 pb-16 pt-6">
+        <header className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h1 className="text-xl font-semibold">Teleprompter · {dayLabel(date)}</h1>
+            <p className="text-sm text-neutral-400">
+              {session ? `Sessão aberta por ${session.opened_label ?? "—"} · partilhada com os outros dispositivos deste cliente` : loading ? "A abrir a sessão…" : ""}
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Btn label="‹ Dia" aria="Dia anterior" onClick={() => router.replace(`/teleprompter?date=${addDays(date, -1)}`)} />
+            <Btn label="Dia ›" aria="Dia seguinte" onClick={() => router.replace(`/teleprompter?date=${addDays(date, 1)}`)} />
+            <Btn label="Definições" onClick={() => setSettings(true)} />
+            <Btn label="Sair" onClick={() => router.push(`/guioes?date=${date}`)} />
+          </div>
+        </header>
+
+        {!online && <p role="status" className="rounded-xl border border-red-500/50 bg-red-950/80 px-4 py-3 text-sm">Sem ligação. Podes ler e marcar takes; ficam neste dispositivo e são enviados quando a ligação voltar.</p>}
+        {outbox.some((t) => !t.error) && online && <p role="status" className="rounded-xl border border-amber-500/40 bg-amber-950/60 px-4 py-3 text-sm">A enviar {outbox.filter((t) => !t.error).length} takes guardados no dispositivo…</p>}
+        {failed.length > 0 && (
+          <div role="alert" className="rounded-xl border border-red-500/50 bg-red-950/80 px-4 py-3 text-sm">
+            <p>{failed.length} take{failed.length > 1 ? "s" : ""} não {failed.length > 1 ? "foram aceites" : "foi aceite"} pelo servidor: {failed[0].error}</p>
+            <button type="button" className="mt-2 rounded-md border border-red-400/50 px-3 py-1" onClick={() => setBox((l) => l.filter((t) => !t.error))}>Descartar estes takes</button>
+          </div>
+        )}
+        {error && (
+          <div role="alert" className="flex items-center gap-3 rounded-xl border border-red-500/50 bg-red-950/80 px-4 py-3 text-sm">
+            <span className="flex-1">{error}</span>
+            <button type="button" className="rounded-md border border-red-400/50 px-3 py-1" onClick={() => { setLoading(true); load(); }}>Tentar de novo</button>
+          </div>
+        )}
+        {session?.require_approval && <p className="text-sm text-neutral-400">Neste cliente só entram na fila guiões aprovados.</p>}
+
+        {loading && !session ? (
+          <p className="text-neutral-400" aria-busy="true">A carregar a fila…</p>
+        ) : session && items.length === 0 ? (
+          <p className="text-neutral-300">Não há guiões para gravar neste dia. Os guiões rejeitados e arquivados não entram na fila.</p>
+        ) : session ? (
+          <>
+            <div className="flex flex-wrap items-center gap-2">
+              {resume && <Btn on label={`Retomar no guião ${resume.n}${resume.block ? ` · ${blockLabel(resume.block)}` : ""} (${Math.round(resume.pct * 100)}%)`} onClick={() => start(resume.index, { pct: resume.pct, block: resume.block })} />}
+              <Btn on={!resume} label={playable.length ? `Começar no guião ${playable[firstOpen]?.content.n ?? ""}` : "Nada para ler"} disabled={!playable.length} onClick={() => start(firstOpen)} />
+              <span className="text-sm text-neutral-400">{playable.length} na fila · {items.filter((i) => i.content.production_status === "recorded").length} gravados{busy ? " · a guardar…" : ""}</span>
+            </div>
+            <ol className="flex flex-col gap-2" aria-label="Fila de gravação">
+              {items.map((it, i) => {
+                const bl = blocksOf(it.content);
+                const ok = it.takes.filter((t) => t.status === "ok").length;
+                const rec = it.content.production_status === "recorded";
+                const open = expanded === it.content_id;
+                return (
+                  <li key={it.content_id} data-item={it.content_id} className={cn("rounded-xl border border-neutral-800 bg-neutral-950 p-3", it.skipped && "opacity-50")}>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="w-8 text-right tabular-nums text-neutral-500">{it.content.n}</span>
+                      <button type="button" className="min-w-0 flex-1 truncate text-left font-medium" onClick={() => setExpanded(open ? null : it.content_id)} aria-expanded={open}>
+                        {it.content.hooks?.[0]?.text || it.content.tema || "Sem hook"}
+                      </button>
+                      {it.carried && <span className="rounded bg-neutral-800 px-2 py-0.5 text-xs">de {dayLabel(it.content.date).toLowerCase()}</span>}
+                      {rec && <span className="rounded bg-emerald-900 px-2 py-0.5 text-xs text-emerald-100">gravado</span>}
+                      {ok > 0 && <span className="rounded bg-neutral-800 px-2 py-0.5 text-xs">{ok} take{ok > 1 ? "s" : ""}</span>}
+                      {it.skipped && <span className="rounded bg-neutral-800 px-2 py-0.5 text-xs">saltado</span>}
+                      <span className="flex gap-1">
+                        <Btn label="↑" aria={`Subir guião ${it.content.n}`} onClick={() => move(i, -1)} disabled={busy || i === 0} className="min-w-11" />
+                        <Btn label="↓" aria={`Descer guião ${it.content.n}`} onClick={() => move(i, 1)} disabled={busy || i === items.length - 1} className="min-w-11" />
+                        <Btn label={it.skipped ? "Incluir" : "Saltar"} onClick={() => toggleSkip(it)} disabled={busy} />
+                        {!it.skipped && <Btn label="Ler" onClick={() => start(Math.max(0, playable.findIndex((x) => x.content_id === it.content_id)))} />}
+                      </span>
+                    </div>
+                    {open && (
+                      <div className="mt-3 flex flex-col gap-3 border-t border-neutral-800 pt-3 text-sm">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="text-neutral-400">Blocos:</span>
+                          {bl.map((b) => {
+                            const off = it.skipped_blocks.includes(b.key);
+                            return (
+                              <button key={b.key} type="button" aria-pressed={!off} disabled={busy} onClick={() => toggleBlock(it, b.key)}
+                                className={cn("min-h-9 rounded-full border px-3 text-xs", off ? "border-neutral-700 text-neutral-500 line-through" : "border-amber-400/60 text-amber-200")}>
+                                {b.label}
+                              </button>
+                            );
+                          })}
+                          <span className="text-xs text-neutral-500">(toca para saltar ou incluir)</span>
+                        </div>
+                        {it.takes.length > 0 && (
+                          <p className="text-neutral-400">
+                            Takes: {Array.from(new Set(it.takes.map((t) => t.block_key))).map((k) => {
+                              const l = it.takes.filter((t) => t.block_key === k && t.status === "ok");
+                              const sel = it.takes.find((t) => t.block_key === k && t.selected);
+                              return `${blockLabel(k)} ${l.length}${sel ? ` (escolhido #${sel.take_number})` : ""}`;
+                            }).join(" · ")}
+                          </p>
+                        )}
+                        {canTake && rec && (
+                          <div><Btn label="Desfazer gravado" onClick={() => onRecorded(it.content_id, false).catch((e: Error) => setError(e.message))} /></div>
+                        )}
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
+            </ol>
+            <div className="flex flex-wrap gap-2 border-t border-neutral-800 pt-4">
+              <Btn label="Terminar sessão" onClick={endSession} disabled={busy} />
+              <span className="self-center text-xs text-neutral-500">O que não for gravado passa para o dia seguinte com os takes que já tem.</span>
+            </div>
+          </>
+        ) : null}
       </div>
-      <div className="pointer-events-none fixed left-0 right-0 top-[34vh]"><div className="absolute left-[1.5vw] -top-[9px] border-[9px] border-transparent border-l-[14px] border-l-amber-400" /></div>
-      {tpError && (
-        <div role="alert" className="fixed inset-x-0 top-10 z-10 mx-auto flex w-[min(92vw,34rem)] items-center gap-3 rounded-xl border border-red-500/50 bg-red-950/90 px-4 py-3 text-sm">
-          <span className="flex-1">Não ficou marcado: {tpError}</span>
-          <button className="rounded-md border border-red-400/50 px-3 py-1" onClick={() => setTpError("")}>Fechar</button>
-        </div>
-      )}
-      {confirm && (
-        <div role="dialog" aria-label="Confirmar gravação" className="fixed inset-x-0 bottom-28 z-10 mx-auto flex w-[min(92vw,34rem)] flex-wrap items-center justify-center gap-3 rounded-2xl border border-neutral-700 bg-neutral-950/95 p-4 text-center">
-          <p className="w-full text-lg font-semibold">Gravaste o guião {confirm.n}?</p>
-          <Btn label="Sim, marcar gravado" on onClick={() => answer(true)} />
-          <Btn label="Ainda não" onClick={() => answer(false)} />
-          <p className="w-full text-xs text-neutral-500">Enter = sim · Esc = não</p>
-        </div>
-      )}
-      <div data-bar className={cn("fixed inset-x-0 bottom-0 flex flex-wrap items-center justify-center gap-2 bg-gradient-to-t from-black/95 via-black/80 to-transparent px-4 pb-[calc(12px+env(safe-area-inset-bottom,0px))] pt-6 transition-opacity", !barVisible && "pointer-events-none opacity-0")}>
-        <Btn label="‹" aria="Guião anterior" onClick={() => go(-1)} />
-        <Btn label={playing ? "Parar" : "Rolar"} on={playing} onClick={() => setPlaying((p) => !p)} />
-        <Btn label="›" aria="Guião seguinte" onClick={() => go(1)} />
-        <Btn label="−" aria="Mais devagar" onClick={() => setSpeed((s) => Math.max(1, s - 1))} />
-        <span className="min-w-[4rem] text-center text-sm tabular-nums text-neutral-400">vel. {speed}</span>
-        <Btn label="+" aria="Mais depressa" onClick={() => setSpeed((s) => Math.min(10, s + 1))} />
-        <Btn label="A−" aria="Letra mais pequena" onClick={() => setFont((f) => Math.max(32, f - 4))} />
-        <span className="min-w-[4rem] text-center text-sm tabular-nums text-neutral-400">{font} px</span>
-        <Btn label="A+" aria="Letra maior" onClick={() => setFont((f) => Math.min(96, f + 4))} />
-        <Btn label="Espelho" on={mirror} onClick={() => setMirror((m) => !m)} />
-        {canWrite && cur && <Btn label="Gravado" on={cur.production_status === "recorded"} onClick={() => actions.record(cur.id, cur.production_status !== "recorded").catch((e: Error) => setTpError(e.message))} />}
-        <Btn label="Sair" onClick={exit} />
-      </div>
+      {settingsPanel}
     </div>
   );
 }

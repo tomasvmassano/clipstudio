@@ -57,6 +57,12 @@ export function friendlyError(msg: string): string {
   if (msg.includes("texto_longo")) return "O pedido é demasiado longo (máximo 2000 caracteres).";
   if (msg.includes("duracao_s")) return "A duração tem de estar entre 1 e 3600 segundos.";
   if (msg.includes("corpo_vazio")) return "O corpo não pode ficar vazio.";
+  if (msg.includes("sessao_fechada")) return "Esta sessão de gravação já foi fechada. Abre o teleprompter outra vez.";
+  if (msg.includes("sessao_nao_encontrada")) return "A sessão de gravação já não existe. Abre o teleprompter outra vez.";
+  if (msg.includes("item_desconhecido")) return "Este guião já não está na fila desta sessão. Recarrega a fila.";
+  if (msg.includes("bloco_invalido")) return "Esse bloco não existe neste guião.";
+  if (msg.includes("take_descartado")) return "Recupera o take antes de o escolher.";
+  if (msg.includes("client_ref_reutilizado")) return "Take repetido com dados diferentes. Recarrega a sessão.";
   if (msg.toLowerCase().includes("failed to fetch") || msg.toLowerCase().includes("network")) return "Sem ligação ao servidor. Verifica a internet e tenta de novo.";
   return msg;
 }

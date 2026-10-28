@@ -36,6 +36,19 @@ approved | rejected → archived   (regras)
 
 Por defeito conteúdos `rejected` não entram na fila do teleprompter; o workspace pode exigir `approved` para gravar.
 
+## Sessão de gravação e takes (W2-05)
+
+Sessão (`recording_sessions`): `aberta → fechada`, uma aberta por cliente e dia, partilhada entre dispositivos. Fila (`recording_session_items`): elegíveis do dia + transitados por gravar; ordem, saltar conteúdo e saltar bloco persistem.
+
+| Ação | Capacidade | Regra | Evento |
+| --- | --- | --- | --- |
+| abrir / entrar | `recording.use` | idempotente por cliente e dia; acrescenta novos elegíveis no fim | `recording.session_opened` |
+| reordenar / saltar | `recording.use` | só itens da sessão; blocos `hook_N`, `body`, `cta` | auditoria `recording.queue_set` |
+| progresso | `recording.use` | retoma; ≥80% uma vez por conteúdo e sessão | `recording.viewed_80` (telemetria, não marca gravado) |
+| marcar take | `recording.confirm` | numerado por bloco, ligado à versão lida; idempotente por `client_ref`; não muda estados | `take.recorded` |
+| escolher / descartar take | `recording.confirm` | um escolhido por bloco; descartado fica guardado | `take.selected` |
+| fechar sessão | `recording.use` | não aceita mais takes; reabrir o dia cria sessão nova | `recording.session_closed` |
+
 ## Fontes e pedidos do talento (`ideas`, W2-03)
 
 `nova → triagem → selecionada → usada`, ou `descartada` (motivo obrigatório). `kind = source | talent_request`.
@@ -62,7 +75,7 @@ Publicação (por destino/conta): `draft → scheduled → processing → publis
 
 ## Eventos de domínio (PRD §23)
 
-`source.approved`, `script.submitted`, `script.approved`, `script.rejected`, `script.version_created`, `recording.confirmed`, `asset.uploaded`, `variant.ready`, `review.changes_requested`, `review.approved`, `publication.scheduled`, `publication.published`, `publication.failed`, `metrics.synced`, `run.started`, `run.step`, `run.failed`, `run.completed`. Publicados por outbox transacional; consumidores idempotentes.
+`source.approved`, `script.submitted`, `script.approved`, `script.rejected`, `script.version_created`, `recording.confirmed`, `recording.session_opened`, `recording.viewed_80`, `take.recorded`, `take.selected`, `asset.uploaded`, `variant.ready`, `review.changes_requested`, `review.approved`, `publication.scheduled`, `publication.published`, `publication.failed`, `metrics.synced`, `run.started`, `run.step`, `run.failed`, `run.completed`. Publicados por outbox transacional; consumidores idempotentes.
 
 ## Mapeamento de hoje (`guioes`)
 
