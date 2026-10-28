@@ -9,7 +9,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import type { ScriptActions } from "@/components/use-guioes";
-import { SOURCE_STATUS_LABEL, type BriefFields, type ContentContext, type Guiao, type Source } from "@/lib/types";
+import { SOURCE_STATUS_LABEL, type BriefFields, type ContentContext, type Guiao, type Reference, type Source } from "@/lib/types";
 
 const PLATAFORMAS = ["instagram", "tiktok", "youtube", "facebook", "linkedin"];
 type Form = { objetivo: string; audiencia: string; tese: string; formato: string; duracao_s: string; plataformas: string[]; cta: string; referencias: string; restricoes: string; dono: string; deadline: string };
@@ -22,8 +22,8 @@ const toForm = (c: ContentContext | null): Form => {
 };
 
 /** Brief estruturado (FR-17-03) e fontes ligadas (FR-04-06) de um guião. Cada gravação do brief é uma versão nova. */
-export function BriefSheet({ g, open, onOpenChange, actions, canEdit }: {
-  g: Guiao; open: boolean; onOpenChange: (v: boolean) => void; actions: ScriptActions; canEdit: boolean;
+export function BriefSheet({ g, open, onOpenChange, actions, canEdit, canRefs }: {
+  g: Guiao; open: boolean; onOpenChange: (v: boolean) => void; actions: ScriptActions; canEdit: boolean; canRefs: boolean;
 }) {
   const [ctx, setCtx] = useState<ContentContext | null>(null);
   const [form, setForm] = useState<Form>(toForm(null));
@@ -32,6 +32,8 @@ export function BriefSheet({ g, open, onOpenChange, actions, canEdit }: {
   const [busy, setBusy] = useState(false);
   const [pool, setPool] = useState<Source[] | null>(null);
   const [pick, setPick] = useState("");
+  const [refPool, setRefPool] = useState<Reference[] | null>(null);
+  const [refPick, setRefPick] = useState("");
   const [rev, setRev] = useState(0);
 
   useEffect(() => {
@@ -39,8 +41,19 @@ export function BriefSheet({ g, open, onOpenChange, actions, canEdit }: {
     let alive = true;
     actions.context(g.id).then((c) => { if (alive) { setCtx(c); setForm(toForm(c)); setErr(""); } }).catch((e: Error) => { if (alive) setErr(e.message); });
     if (canEdit) actions.sources().then((s) => { if (alive) setPool(s); }).catch(() => { if (alive) setPool([]); });
+    if (canEdit && canRefs) actions.references().then((r) => { if (alive) setRefPool(r); }).catch(() => { if (alive) setRefPool([]); });
     return () => { alive = false; };
-  }, [open, g.id, actions, canEdit, rev]);
+  }, [open, g.id, actions, canEdit, canRefs, rev]);
+  const refLinkable = useMemo(() => {
+    const linked = new Set((ctx?.references ?? []).map((r) => r.id));
+    return (refPool ?? []).filter((r) => !linked.has(r.id));
+  }, [refPool, ctx]);
+  const linkRef = async (id: number, on: boolean) => {
+    setBusy(true); setErr("");
+    try { setCtx(await actions.linkRef(g.id, id, on)); setRefPick(""); }
+    catch (e) { setErr((e as Error).message); }
+    finally { setBusy(false); }
+  };
 
   const linkable = useMemo(() => {
     const linked = new Set((ctx?.sources ?? []).map((s) => s.id));
@@ -73,7 +86,7 @@ export function BriefSheet({ g, open, onOpenChange, actions, canEdit }: {
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full overflow-y-auto sm:max-w-lg">
         <SheetHeader>
-          <SheetTitle>Brief e fontes do guião {g.n}</SheetTitle>
+          <SheetTitle>Brief, fontes e referências do guião {g.n}</SheetTitle>
           <SheetDescription>O brief diz para que serve este conteúdo. Cada aprovação guarda o brief que estava em vigor.</SheetDescription>
         </SheetHeader>
         <div className="flex flex-col gap-6 px-4 pb-6">
@@ -149,6 +162,34 @@ export function BriefSheet({ g, open, onOpenChange, actions, canEdit }: {
                   </div>
                 )}
               </section>
+
+              {canRefs && (
+                <section className="flex flex-col gap-2" aria-label="Referências ligadas">
+                  <h3 className="text-sm font-medium">Referências ({ctx.references.length})</h3>
+                  {ctx.references.length === 0 && <p className="text-xs text-muted-foreground">Nenhuma referência ligada. Liga o vídeo que inspirou este guião para quem grava e edita.</p>}
+                  {ctx.references.map((r) => (
+                    <div key={r.id} className="flex items-start gap-2 rounded-md border p-2 text-sm">
+                      <div className="min-w-0 flex-1">
+                        <div className="font-medium">{r.titulo}</div>
+                        <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+                          {r.creator && <>@{r.creator}</>}{r.formato && <> · {r.formato}</>}
+                          {r.url && <a href={r.url} target="_blank" rel="noopener" className="inline-flex items-center gap-0.5 underline">ver original <ExternalLinkIcon className="size-3" /></a>}
+                        </div>
+                      </div>
+                      {canEdit && <Button size="sm" variant="ghost" aria-label={`Desligar referência ${r.titulo}`} disabled={busy} onClick={() => linkRef(r.id, false)}><Unlink2Icon /></Button>}
+                    </div>
+                  ))}
+                  {canEdit && (
+                    <div className="flex gap-2">
+                      <select aria-label="Escolher referência para ligar" className="h-9 min-w-0 flex-1 rounded-md border bg-background px-2 text-sm" value={refPick} onChange={(e) => setRefPick(e.target.value)}>
+                        <option value="">{refPool === null ? "A carregar referências…" : refLinkable.length ? "Escolhe uma referência…" : "Não há referências por ligar"}</option>
+                        {refLinkable.map((r) => <option key={r.id} value={r.id}>{r.creator ? `@${r.creator} · ` : ""}{r.titulo.slice(0, 70)}</option>)}
+                      </select>
+                      <Button size="sm" variant="outline" disabled={!refPick || busy} onClick={() => linkRef(Number(refPick), true)}><Link2Icon /> Ligar</Button>
+                    </div>
+                  )}
+                </section>
+              )}
             </>
           )}
         </div>

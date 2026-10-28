@@ -30,8 +30,8 @@ Estado: **ativo** (existe e é verificado no servidor por `authorize()`; também
 | `sources.create` | Fontes | M | ws | ativo | Adicionar fonte por URL/manual com dedup (`source_create`) |
 | `sources.triage` | Fontes | M | ws | ativo | Selecionar, em triagem, descartar com motivo (`source_update`) |
 | `requests.create` | Fontes | B | ws | ativo | Pedir um tema (`talent_request_create`); também no código de equipa |
-| `references.read` | Referências (M07) | B | org, ws | W2 | — |
-| `references.manage` | Referências | M | org, ws | W2 | — |
+| `references.read` | Referências (M07) | B | ws | ativo | `/referencias` Biblioteca e Descobrir (`references_list`, `references_discover`); referências no painel do guião; também no código de equipa |
+| `references.manage` | Referências | M | ws | ativo | Guardar reel, adicionar por link, classificar, favorito, coleções, arquivar, ligar a fontes (`reference_create`, `reference_update`, `reference_link`) |
 | `review.comment` | Revisão (M05) | M | ws, proj | W5 | — |
 | `review.approve` | Revisão | A | ws, proj | W5 | — |
 | `media.upload` | Biblioteca (M08) | M | ws, proj | W5 | — |

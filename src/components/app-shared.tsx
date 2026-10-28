@@ -32,6 +32,7 @@ export const navGroups: SidebarNavGroup[] = [
 			{ title: "Guiões", path: "/guioes", icon: <ScrollTextIcon />, cap: "scripts.read" },
 			{ title: "Teleprompter", path: "/teleprompter", icon: <MonitorPlayIcon />, cap: "recording.use" },
 			{ title: "Fontes", path: "/fontes", icon: <LightbulbIcon />, cap: "sources.read" },
+			{ title: "Referências", path: "/referencias", icon: <UsersIcon />, cap: "references.read" },
 		],
 	},
 	{
@@ -49,7 +50,6 @@ export const navGroups: SidebarNavGroup[] = [
 		label: "Em breve",
 		items: [
 			{ title: "Revisão", icon: <ClapperboardIcon />, soon: true },
-			{ title: "Referências", icon: <UsersIcon />, soon: true },
 			{ title: "Biblioteca", icon: <LibraryIcon />, soon: true },
 			{ title: "Custos", icon: <WalletIcon />, soon: true },
 		],

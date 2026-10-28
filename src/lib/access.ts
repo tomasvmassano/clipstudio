@@ -23,7 +23,7 @@ export type AppContext = {
 /** Capacidades do código de equipa (espelha legacy_can no SQL; o servidor é quem decide). */
 export const LEGACY_CAPS = [
   "scripts.read", "scripts.edit", "scripts.submit", "scripts.approve", "scripts.reject", "scripts.export",
-  "recording.use", "recording.confirm", "sources.read", "requests.create", "analytics.read", "agents.read", "agents.rehearse",
+  "recording.use", "recording.confirm", "sources.read", "requests.create", "references.read", "analytics.read", "agents.read", "agents.rehearse",
 ];
 
 /** Aceita convites pendentes para o email confirmado e devolve o contexto do utilizador. */
@@ -50,6 +50,7 @@ export function friendlyError(msg: string): string {
   if (msg.includes("aprovacao_necessaria")) return "Neste cliente só se gravam guiões aprovados.";
   if (msg.includes("arquivado")) return "Este guião está arquivado. Recupera-o primeiro.";
   if (msg.startsWith("duplicado:")) return "Esta fonte já existe neste cliente.";
+  if (msg.includes("url_obrigatorio")) return "Falta o link da referência.";
   if (msg.includes("url_invalido")) return "O link tem de começar por http:// ou https://.";
   if (msg.includes("titulo_obrigatorio")) return "Falta o título.";
   if (msg.includes("texto_curto")) return "Escreve um pouco mais sobre o que queres.";
