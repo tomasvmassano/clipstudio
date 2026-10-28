@@ -118,7 +118,6 @@ export default function AgentesPage() {
                 const on = live.speaking === a.id;
                 const target = live.to === a.id;
                 const b = live.bubble[a.id];
-                const fresh = b && Date.now() - b.at < STEP_MS * 3;
                 return (
                   <div key={a.id} className="absolute flex w-[9.5rem] -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1 text-center" style={{ left: `${a.x}%`, top: `${a.y}%` }}>
                     {on && b?.text && (
@@ -140,7 +139,7 @@ export default function AgentesPage() {
                       {live.done.has(a.id) && !on && <span className="absolute -bottom-1 -right-1 grid size-4 place-items-center rounded-full bg-emerald-600 text-[9px] text-white">✓</span>}
                     </div>
                     <div className="text-xs font-semibold">{a.nome}</div>
-                    <div className={cn("text-[10px] leading-tight text-muted-foreground", fresh && !on && "opacity-60")}>{a.papel}</div>
+                    <div className="text-[10px] leading-tight text-muted-foreground">{a.papel}</div>
                   </div>
                 );
               })}
