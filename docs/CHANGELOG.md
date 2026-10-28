@@ -2,6 +2,8 @@
 
 ## 2026-10-28
 
+- **W0 (inventário e contratos)**: `docs/inventory/supabase.md`, `docs/inventory/engine-and-app.md`, `docs/feature-registry.md`, `docs/access-matrix.md`, `docs/workflow-registry.md`. As 15 migrações aplicadas estão agora em `supabase/migrations/` (segredos tapados; o repo é público).
+- **SEC-HOTFIX-001**: `anon`/`authenticated` tinham INSERT/UPDATE/DELETE por defeito; a vista `agent_feed` (security definer) permitia apagar `agent_log` com a chave pública. Revogada toda a escrita direta, fechadas as vistas `v_*` à API, privilégios por defeito corrigidos. Reteste: escrita 401, app 200.
 - Design system: shell e dashboard passam para o efferd `app-shell-3` + `dashboard-3`. Navegação com estado ativo por rota; módulos do PRD ainda sem página aparecem como "em breve", sem link (AGENTS.md §4).
 - Hoje (`/`): layout do dashboard-3 com dados reais: guiões do dia, validados, gravados, views 30 dias vs 30 anteriores, views por dia (7/30/60), mix de formatos, produção diária, views médias por semana, agentes da última corrida real, guiões de hoje e atividade. Nova RPC só de leitura `hoje_resumo(p_client)`.
 - Desempenho (`/desempenho`): passa ao layout do dashboard-3, por conta: views 30 dias e reels publicados vs 30 dias anteriores, mediana, virais, views por dia (7/30/60), reels por nível de outlier, views médias por semana, produção diária, mediana vs referências, top reels e últimos publicados. A RPC `desempenho` ganha `diario`, `bandas` e os totais dos 30 dias anteriores. Removidos os componentes de demonstração do dashboard-5 que já não eram usados.
