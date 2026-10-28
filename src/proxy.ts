@@ -23,6 +23,21 @@ export async function proxy(req: NextRequest) {
   });
   const { data } = await sb.auth.getClaims();
   const path = req.nextUrl.pathname;
+  const sp = req.nextUrl.searchParams;
+
+  // Se o Supabase não aceitar o redirect pedido, volta para a Site URL (ex.: "/?code=…").
+  // Encaminhamos o código para o callback em vez de o perder no redirect para /login.
+  if (!path.startsWith("/auth/") && sp.has("code")) {
+    const to = new URL("/auth/callback", req.url);
+    to.searchParams.set("code", sp.get("code")!);
+    if (sp.has("next")) to.searchParams.set("next", sp.get("next")!);
+    return NextResponse.redirect(to);
+  }
+  if (!path.startsWith("/login") && sp.has("error_description")) {
+    const to = new URL("/login", req.url);
+    to.searchParams.set("erro", sp.get("error_description")!);
+    return NextResponse.redirect(to);
+  }
   if (PUBLIC.some((r) => r.test(path))) return res;
 
   const hasUser = !!data?.claims?.sub;

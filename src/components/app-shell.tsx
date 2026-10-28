@@ -10,7 +10,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 	const path = usePathname();
 	// Entrar e voltar do email: sem menu lateral (ainda não há workspace).
 	if (path.startsWith("/login") || path.startsWith("/auth")) {
-		return <main className="flex min-h-svh items-center justify-center p-4">{children}</main>;
+		return <>{children}</>;
 	}
 	return (
 		<div className="overflow-hidden">
