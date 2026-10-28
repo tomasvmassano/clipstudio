@@ -1,0 +1,493 @@
+<!doctype html><html lang="pt"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="color-scheme" content="dark light"><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style></head><body>
+<title>Estúdio Numeiro</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+/* Layout: régua de estúdio. Barra fixa com data e contadores, coluna única de guiões; o teleprompter é um ecrã preto à parte. */
+:root{
+  --bg:#f3f4f6; --panel:#ffffff; --line:#d9dde3; --fg:#14171b; --muted:#5b6470;
+  --accent:#b86e00; --accent-soft:rgba(184,110,0,.12); --accent-ink:#ffffff;
+  --bad:#c4373b; --bad-soft:rgba(196,55,59,.1); --ok:#1e8a46; --ok-soft:rgba(30,138,70,.12);
+  --display:"Archivo","Arial Narrow",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e1013; --panel:#16191e; --line:#2a3038; --fg:#e8ebee; --muted:#98a1ab;
+  --accent:#f2a93b; --accent-soft:rgba(242,169,59,.14); --accent-ink:#1b1204;
+  --bad:#ef5d61; --bad-soft:rgba(239,93,97,.12); --ok:#4cc46f; --ok-soft:rgba(76,196,111,.12);
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1013; --panel:#16191e; --line:#2a3038; --fg:#e8ebee; --muted:#98a1ab;
+  --accent:#f2a93b; --accent-soft:rgba(242,169,59,.14); --accent-ink:#1b1204;
+  --bad:#ef5d61; --bad-soft:rgba(239,93,97,.12); --ok:#4cc46f; --ok-soft:rgba(76,196,111,.12);
+  color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--panel)}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+header.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--panel);border-bottom:1px solid var(--line);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px}
+.bar-in{max-width:920px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px}
+.brand{font-family:var(--display);font-weight:800;font-stretch:75%;font-size:22px;letter-spacing:.01em;text-transform:uppercase;display:flex;align-items:center;gap:10px}
+.tally{width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+.datenav{display:flex;align-items:center;gap:6px}
+.datenav button{border:1px solid var(--line);background:transparent;border-radius:8px;width:34px;height:34px}
+.datenav .d{font-family:var(--display);font-weight:600;font-size:16px;min-width:150px;text-align:center}
+.datenav .d small{display:block;font-family:var(--body);font-weight:400;font-size:12px;color:var(--muted)}
+.spacer{flex:1}
+.btn{border:1px solid var(--line);background:transparent;border-radius:8px;padding:8px 14px;min-height:40px;font-weight:700;white-space:nowrap}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.sm{padding:4px 10px;min-height:32px;font-size:13px}
+.btn[disabled]{opacity:.45;cursor:default}
+
+main{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 80px}
+.wrap{max-width:920px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+.stats{display:flex;flex-wrap:wrap;gap:8px}
+.stat{display:flex;align-items:baseline;gap:6px;border:1px solid var(--line);border-radius:999px;padding:4px 12px;background:var(--panel);font-variant-numeric:tabular-nums}
+.stat b{font-family:var(--display);font-size:17px}
+.stat span{color:var(--muted);font-size:13px}
+.notice{border:1px dashed var(--line);border-radius:var(--r);padding:16px;color:var(--muted);background:var(--panel)}
+.notice strong{color:var(--fg)}
+
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:10px}
+.panel h2{margin:0;font-family:var(--display);font-size:17px}
+.panel p{margin:0;color:var(--muted);font-size:13px}
+textarea{width:100%;border:1px solid var(--line);border-radius:8px;background:var(--bg);padding:10px;resize:vertical}
+input[type=text],select{border:1px solid var(--line);border-radius:8px;background:var(--bg);padding:8px 10px;min-height:38px}
+
+.list{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);display:grid;grid-template-columns:56px minmax(0,1fr);overflow:hidden}
+.card.rej{opacity:.62}
+.card .num{font-family:var(--display);font-weight:800;font-stretch:70%;font-size:30px;line-height:1;padding:16px 0 0;text-align:center;color:var(--muted);border-right:1px solid var(--line);font-variant-numeric:tabular-nums}
+.card.done .num{color:var(--ok)}
+.card .in{padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:12px}
+.chip{border:1px solid var(--line);border-radius:999px;padding:1px 9px;color:var(--muted);white-space:nowrap}
+.chip.fmt{color:var(--fg);font-weight:700}
+.chip.ok{color:var(--ok);border-color:var(--ok);background:var(--ok-soft)}
+.chip.val{color:var(--accent);border-color:var(--accent);background:var(--accent-soft);font-weight:700}
+.btn.val{background:var(--ok);border-color:var(--ok);color:#fff}
+.chip.bad{color:var(--bad);border-color:var(--bad);background:var(--bad-soft)}
+.chip.carry{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
+.score{margin-left:auto;font-family:var(--display);font-weight:700;font-variant-numeric:tabular-nums;color:var(--muted)}
+.hooks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.hooks li{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:8px;align-items:baseline;font-weight:700;font-size:16px;line-height:1.35}
+.hooks .k{font-family:var(--display);color:var(--accent);font-size:13px}
+.hooks .m{font-weight:400;font-size:11px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.corpo{white-space:pre-line;color:var(--fg);border-left:2px solid var(--line);padding-left:12px;font-size:15px}
+.corpo.clip{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.reason{font-size:13px;color:var(--bad)}
+.actions{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.actions .r{margin-left:auto;display:flex;gap:6px}
+.src{font-size:12px;color:var(--muted);word-break:break-word}
+.src a{color:var(--muted)}
+.edit-grid{display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:8px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lbl{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+
+/* Teleprompter: sempre preto e branco, de propósito */
+#tp{position:fixed;inset:0;z-index:50;background:#000;color:#fff;display:flex;flex-direction:column}
+#tp[hidden]{display:none!important}
+#tpScroll{flex:1;overflow-y:auto;scrollbar-width:none;
+  padding-left:max(6vw,env(safe-area-inset-left,0px));padding-right:max(6vw,env(safe-area-inset-right,0px))}
+#tpScroll::-webkit-scrollbar{display:none}
+#tpText{max-width:1100px;margin:0 auto;padding-block:38vh 70vh;font-family:var(--body);font-weight:700;line-height:1.38}
+#tpText.mirror{transform:scaleX(-1)}
+#tpText .n{font-size:.45em;color:#8a8a8a;font-weight:400;margin-bottom:.8em}
+#tpText p{margin:0 0 .75em}
+#tpText .h{margin-bottom:1.5em}
+#tpText hr{border:0;border-top:3px solid #3a3a3a;margin:.4em 0 1.3em}
+.eyeline{position:fixed;left:0;right:0;top:34vh;height:0;pointer-events:none}
+.eyeline::before{content:"";position:absolute;left:max(1.5vw,env(safe-area-inset-left,0px));top:-9px;border:9px solid transparent;border-left:14px solid #f2a93b}
+.tpbar{position:fixed;left:0;right:0;bottom:0;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;
+  padding:12px max(16px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
+  background:linear-gradient(transparent,rgba(0,0,0,.92) 35%);transition:opacity .25s}
+.tpbar.hide{opacity:0;pointer-events:none}
+.tpbar button{background:#1c1c1c;border:1px solid #3a3a3a;color:#fff;border-radius:10px;min-width:44px;min-height:44px;padding:0 12px;font-weight:700;font-family:var(--body)}
+.tpbar button.on{background:#f2a93b;color:#1b1204;border-color:#f2a93b}
+.tpbar .v{color:#bdbdbd;font-size:13px;font-variant-numeric:tabular-nums;min-width:62px;text-align:center}
+.tpprog{position:fixed;left:0;top:0;height:3px;background:#f2a93b;transition:width .2s}
+.tpcount{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));color:#7a7a7a;font-size:13px;font-family:var(--body);font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion: reduce){.tpbar,.tpprog{transition:none}}
+@media (max-width:560px){
+  .datenav .d{min-width:120px}
+  .edit-grid{grid-template-columns:1fr}
+  .card{grid-template-columns:40px minmax(0,1fr)}
+  .card .num{font-size:22px}
+}
+</style>
+
+<header class="bar">
+  <div class="bar-in">
+    <div class="brand"><span class="tally" aria-hidden="true"></span>Estúdio Numeiro</div>
+    <div class="datenav" aria-label="Data">
+      <button id="prevDay" aria-label="Dia anterior">‹</button>
+      <div class="d" id="dateLabel">Hoje<small>—</small></div>
+      <button id="nextDay" aria-label="Dia seguinte">›</button>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn" id="newBtn">Novo guião</button>
+    <button class="btn" id="importBtn">Importar</button>
+    <button class="btn" id="exportBtn">Exportar .txt</button>
+    <button class="btn primary" id="tpBtn">Abrir teleprompter</button>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <div class="stats" id="stats"></div>
+    <div id="msg"></div>
+    <div class="notice" id="howto"><strong>Como validar:</strong> lê cada guião, carrega em <em>Validar</em> nos que gravas tal como estão, em <em>Editar</em> para mudar uma frase, e em <em>Rejeitar</em> (com o motivo) nos que não dirias. O teleprompter leva todos os que não rejeitaste.</div>
+    <section class="panel" id="importPanel" hidden>
+      <h2>Importar guiões para este dia</h2>
+      <p>Cola o JSON do motor ou o texto do teleprompter (número, 3 hooks, uma linha com —, corpo; guiões separados por 3 linhas em branco).</p>
+      <textarea id="importText" rows="10" aria-label="Texto a importar"></textarea>
+      <div class="row"><button class="btn primary" id="importGo">Importar</button><button class="btn" id="importCancel">Cancelar</button><span class="src" id="importMsg"></span></div>
+    </section>
+    <div class="list" id="list"></div>
+  </div>
+</main>
+
+<div id="tp" hidden>
+  <div class="tpprog" id="tpProg" style="width:0"></div>
+  <div class="tpcount" id="tpCount"></div>
+  <div id="tpScroll"><div id="tpText"></div></div>
+  <div class="eyeline" aria-hidden="true"></div>
+  <div class="tpbar" id="tpBar">
+    <button id="tpPrev" aria-label="Guião anterior">‹</button>
+    <button id="tpPlay" aria-label="Rolar ou parar">Rolar</button>
+    <button id="tpNext" aria-label="Guião seguinte">›</button>
+    <button id="tpSlower" aria-label="Mais devagar">−</button><span class="v" id="tpSpeed"></span><button id="tpFaster" aria-label="Mais depressa">+</button>
+    <button id="tpSmaller" aria-label="Letra mais pequena">A−</button><span class="v" id="tpFont"></span><button id="tpBigger" aria-label="Letra maior">A+</button>
+    <button id="tpMirror" aria-label="Espelho">Espelho</button>
+    <button id="tpDone" aria-label="Marcar como gravado">Gravado</button>
+    <button id="tpClose" aria-label="Sair do teleprompter">Sair</button>
+  </div>
+</div>
+
+<script id="snapshot" type="application/json">[{"date": "2026-10-28", "n": 1, "formato": "mecanismo", "tema": "atenção no Instagram e quem quer algo sério", "hooks": [{"text": "Quanto mais homens lhe mandam mensagem, menos hipóteses tens de ela querer algo sério contigo.", "mecanismo": "contra"}, {"text": "Uma rapariga com 300 pedidos de mensagem por semana não está à procura de namorado.", "mecanismo": "numero"}, {"text": "Tu achas que és especial. Para ela és a notificação número 47 de hoje.", "mecanismo": "ego"}], "corpo": "Deixa-me explicar como isto funciona, porque depois de perceberes não consegues deixar de ver.\nEla publica a foto na praia. Em dez minutos tem duzentos likes e quinze mensagens. O cérebro dela recebe a mesma dose de dopamina que tu recebes quando ganhas uma aposta, e a ciência é clara: o que dá dopamina de borla repete-se.\nEntão publica mais. E mais homens aparecem. E a tua mensagem a convidá-la para jantar fica no meio de catorze iguais.\nAgora vem a parte que ninguém te diz. Quem tem quinze opções por dia não escolhe nenhuma. Não precisa. A escolha custa, a atenção é grátis.\nTu vais dizer que ela é diferente, que contigo foi outra coisa. Pá, foi outra coisa até ao próximo story.\nResumindo: não estás a competir com outro homem. Estás a competir com um telemóvel que lhe dá cem homens por dia sem ela se levantar do sofá.\nE contra isso não ganhas com flores. Ganhas sendo o único que não está na fila.", "status": "aprovado", "gravado": false, "critic_score": null, "fonte": "", "legenda": "", "comentario_fixado": "", "history": [], "origem": "Claude v4", "validado": false, "id": "2026-10-28-01"}, {"date": "2026-10-28", "n": 2, "formato": "paradoxo", "tema": "a mulher que diz que não liga a dinheiro", "hooks": [{"text": "A mulher que diz que não liga a dinheiro nunca namorou um pobre.", "mecanismo": "contra"}, {"text": "Se ela não liga a dinheiro, porque é que o ex dela tinha carro?", "mecanismo": "pergunta"}, {"text": "Ela disse-te que o dinheiro não interessa. Repara em quem ela seguiu a semana passada.", "mecanismo": "ego"}], "corpo": "Olha, ela não é má pessoa. A frase é que é falsa, e a prova está no histórico dela.\nTu vais dizer que a tua é diferente, que ela até paga jantares. Ótimo. Pergunta-lhe quantos dos ex ganhavam menos do que ela. A resposta é sempre a mesma: nenhum.\nE isto não é maldade, é biologia com Wi-Fi. Ninguém se apaixona por uma folha de Excel, mas também ninguém se apaixona por um gajo que lhe pede dinheiro para o Uber.\nO dinheiro não compra a atração. Mas a falta dele apaga-a muito depressa.\nO que ela quer dizer com \"não ligo a dinheiro\" é outra coisa: não ligo a dinheiro desde que tu tenhas o suficiente para eu não ter de ligar.\nÉ uma frase bonita. Só que vem com um mínimo escondido.", "status": "aprovado", "gravado": false, "critic_score": null, "fonte": "", "legenda": "", "comentario_fixado": "", "history": [], "origem": "Claude v4", "validado": false, "id": "2026-10-28-02"}, {"date": "2026-10-28", "n": 3, "formato": "mecanismo", "tema": "traição e dinheiro", "hooks": [{"text": "Ela não te traiu por outro homem. Traiu-te por outra vida.", "mecanismo": "contra"}, {"text": "Vou dizer-te a razão que ela nunca vai admitir.", "mecanismo": "segredo"}, {"text": "Nove em cada dez traições começam com uma comparação. Nunca com um beijo.", "mecanismo": "numero"}], "corpo": "Ela não acordou um dia e decidiu. Começou muito antes, numa comparação pequena.\nO colega dela foi de férias para as Maldivas. A amiga mudou-se para um T2 com varanda. O gajo da ginásio tem um carro que não precisa de inspeção.\nE tu continuas igual. A dizer que para o ano é que vai ser.\nA traição não é um ato. É uma conta que ela fez durante meses: o que tenho, o que podia ter, quanto perco se trocar. No dia em que a conta dá positivo, aparece o outro. O outro é só o resultado.\nTu vais dizer que há mulheres que traem gajos ricos. Há. Mas repara que trocam sempre por uma vida que acham melhor, nunca por uma pior.\nPor isso, se queres proteger a tua relação, não lhe vejas o telemóvel. Vê o que estás a construir.\nNinguém abandona um projeto que está a crescer.", "status": "aprovado", "gravado": false, "critic_score": null, "fonte": "", "legenda": "", "comentario_fixado": "", "history": [], "origem": "Claude v4", "validado": false, "id": "2026-10-28-03"}, {"date": "2026-10-28", "n": 4, "formato": "paradoxo", "tema": "nunca dizer quanto ganhas", "hooks": [{"text": "Nunca digas à tua namorada quanto ganhas. Nem por cima nem por baixo.", "mecanismo": "contra"}, {"text": "No dia em que ela souber que ganhas 3.000 euros, o jantar passa a custar 80.", "mecanismo": "numero"}, {"text": "Sabes o que acontece no dia em que ela vê o teu recibo de vencimento?", "mecanismo": "pergunta"}], "corpo": "Deixa-me explicar o que acontece no dia em que ela vê o recibo.\nSe ganhas pouco, ela começa a fazer contas por ti. O jantar fica mais barato, as férias ficam na Nazaré e o sogro começa a falar de concursos públicos.\nSe ganhas muito, ela começa a fazer contas por ela. O jantar passa a ter sobremesa, as férias passam a ter voo, e qualquer \"este mês não dá\" vira uma discussão sobre prioridades.\nEm nenhum dos casos ganhaste alguma coisa por responder.\nOs reis nunca mostraram o tesouro à corte. Mostravam o castelo e deixavam toda a gente adivinhar.\nFaz o mesmo. Paga o que queres pagar, vive como queres viver, e quando ela perguntar quanto ganhas, responde com a verdade: o suficiente.\nE é isso que vais dizer ao teu contabilista, à tua mãe e ao gajo do banco.", "status": "aprovado", "gravado": false, "critic_score": null, "fonte": "", "legenda": "", "comentario_fixado": "", "history": [], "origem": "Claude v4", "validado": false, "id": "2026-10-28-04"}, {"date": "2026-10-28", "n": 5, "formato": "tabu", "tema": "amigas solteiras da namorada", "hooks": [{"text": "As amigas solteiras da tua namorada são o maior risco da tua relação.", "mecanismo": "contra"}, {"text": "Há uma pessoa que decide se a tua relação dura. E não és tu nem ela.", "mecanismo": "segredo"}, {"text": "Uma amiga solteira ao jantar de sexta vale mais do que dez discussões.", "mecanismo": "numero"}], "corpo": "Vou explicar o mecanismo e tu vais ficar a odiar-me, mas vais perceber.\nToda a gente precisa de pertencer a um grupo. A tua namorada tem um grupo de amigas, e nesse grupo há uma regra que ninguém diz em voz alta: o que uma tem, as outras querem, e o que uma perde, as outras ajudam a justificar.\nEnquanto estão todas solteiras, o grupo defende a solteirice. \"Não precisas de ninguém, tu mereces mais, olha o que ele te fez.\"\nQuando a tua namorada começa a faltar ao jantar de sexta por tua causa, deixa de ser igual a elas. E o grupo não gosta de quem deixa de ser igual.\nTu vais dizer que as amigas dela gostam de ti. Gostam, até ao dia em que és a razão de ela chegar mais tarde.\nA ciência chama-lhe pressão de pares. Eu chamo-lhe o grupo do WhatsApp às duas da manhã.\nNão lhe digas para cortar com ninguém. Dá-lhe uma vida tão boa contigo que o grupo tenha inveja em vez de opinião.", "status": "aprovado", "gravado": false, "critic_score": null, "fonte": "", "legenda": "", "comentario_fixado": "", "history": [], "origem": "Claude v4", "validado": false, "id": "2026-10-28-05"}, {"date": "2026-10-28", "n": 6, "formato": "hipocrisia", "tema": "querem um homem sensível, casam com o que tem casa", "hooks": [{"text": "Dizem que querem um homem sensível. Casam com o que tem casa.", "mecanismo": "contra"}, {"text": "Choraste à frente dela a pensar que ganhavas pontos. Perdeste-a nesse dia.", "mecanismo": "ego"}, {"text": "Se elas querem homens sensíveis, porque é que os sensíveis estão todos solteiros?", "mecanismo": "pergunta"}], "corpo": "Pergunta a qualquer mulher o que procura num homem e a resposta vem sempre com as mesmas palavras: sensível, que ouça, que fale dos sentimentos.\nAgora olha para quem elas escolhem. O gajo que fala pouco, trabalha muito, resolve problemas e tem uma casa com chave.\nAs duas coisas são verdade ao mesmo tempo, e é isso que confunde os rapazes de hoje.\nEla quer um homem que consiga ser sensível. Não quer um homem que precise de ser consolado.\nÉ a diferença entre um bombeiro que também chora e um gajo que chora enquanto a casa arde.\nTu vais dizer que isto é tóxico. Chama-lhe o que quiseres, mas olha para o casamento das tuas amigas. Com quem é que casaram?\nSê sensível. Mas sê primeiro o gajo que paga a renda. Pela ordem certa, as duas coisas funcionam.", "status": "aprovado", "gravado": false, "critic_score": null, "fonte": "", "legenda": "", "comentario_fixado": "", "history": [], "origem": "Claude v4", "validado": false, "id": "2026-10-28-06"}, {"date": "2026-10-28", "n": 7, "formato": "mecanismo", "tema": "ninguém publica fotos de biquíni para si própria", "hooks": [{"text": "Ninguém publica fotos de biquíni para si própria.", "mecanismo": "contra"}, {"text": "Uma foto na praia, 180 likes, 12 mensagens de homens. Era para ela, claro.", "mecanismo": "numero"}, {"text": "A tua namorada diz que publica para si. Então porque é que apaga a foto que teve poucos likes?", "mecanismo": "ego"}], "corpo": "Olha a frase: é para mim, gosto de me sentir bem. Está bem, pá. Então explica-me porque é que a foto com 40 likes desaparece ao fim de uma hora e a de 400 fica fixada no perfil.\nO que ela publica não é a foto. É um pedido de voto. E os votos vêm de onde vêm.\nDeixa-me explicar o mecanismo, porque isto vale para homens e mulheres. O like é a moeda mais barata da internet, e quando alguém recebe duzentas moedas por uma foto, o cérebro aprende qual é a foto que paga. A seguinte tem menos roupa. Não por maldade. Por treino.\nTu vais dizer que ela tem o direito. Tem. E tu tens o direito de perceber o que estás a ver.\nUma mulher que precisa de duzentos estranhos a dizer que é bonita não está à procura de um namorado. Está à procura de uma audiência.\nE a diferença entre uma audiência e uma relação é que a audiência nunca te pede para apagares a foto.", "status": "aprovado", "gravado": false, "critic_score": null, "fonte": "", "legenda": "", "comentario_fixado": "", "history": [], "origem": "Claude v4", "validado": false, "id": "2026-10-28-07"}, {"date": "2026-10-28", "n": 8, "formato": "conselho_absurdo", "tema": "dividir a conta no primeiro encontro", "hooks": [{"text": "Se ela quer dividir a conta no primeiro jantar, já decidiu que não há segundo.", "mecanismo": "contra"}, {"text": "Sabes o que significa quando ela pega na carteira no primeiro encontro?", "mecanismo": "pergunta"}, {"text": "Vinte e dois euros a meias. Foi o preço de ela nunca mais te responder.", "mecanismo": "numero"}], "corpo": "Pá, isto parece contraditório, por isso ouve até ao fim.\nQuando ela pega na carteira no primeiro jantar, não está a ser moderna. Está a fechar a conta. Com a conta fechada, não te deve nada: nem a segunda mensagem, nem o segundo encontro, nem a explicação.\nÉ a mesma lógica de quem devolve a prenda. Enquanto a prenda está na casa dela, há uma ligação. Devolvida, acabou.\nTu vais dizer que há mulheres que gostam de dividir por princípio. Há. E vais reparar que essas, quando gostam mesmo de um gajo, esquecem-se do princípio.\nO que ela faz com a conta diz-te o que ela decidiu durante a sobremesa.\nPor isso, da próxima vez que ela insistir em pagar metade, não discutas. Deixa, sorri, e poupa os 22 euros para alguém que te deixe pagar.", "status": "aprovado", "gravado": false, "critic_score": null, "fonte": "", "legenda": "", "comentario_fixado": "", "history": [], "origem": "Claude v4", "validado": false, "id": "2026-10-28-08"}, {"date": "2026-10-28", "n": 9, "formato": "tabu", "tema": "casar depois dos 35", "hooks": [{"text": "Quem casa depois dos 35 não escolheu. Sobrou.", "mecanismo": "contra"}, {"text": "Tens 36 anos e dizes que ainda estás à procura. Estás à espera que alguém sobre.", "mecanismo": "ego"}, {"text": "Aos 25 tinhas cinquenta opções. Aos 35 tens cinco, e três já foram casadas.", "mecanismo": "numero"}], "corpo": "Vamos lá ver se nos entendemos, porque isto vale para homens e para mulheres.\nAos vinte e cinco anos conheces gente todos os dias. Na faculdade, no primeiro emprego, nas férias com amigos. O mercado está cheio e tu és novo nele.\nAos trinta e cinco, os melhores já estão comprometidos, os teus amigos já não saem e o Tinder passou a ser uma loja de segunda mão com fotos de há cinco anos.\nTu vais dizer que conheces casais felizes que se casaram aos 40. Eu também. E todos te contam a mesma história: foi uma sorte. Sorte é o que resta quando se deixa de escolher.\nNão estou a dizer para casares com a primeira. Estou a dizer para parares de fingir que o tempo está do teu lado.\nO tempo é o único que nunca está do lado de ninguém.\nSe tens vinte e tal anos e andas a adiar porque \"ainda é cedo\", lembra-te disto aos trinta e seis.", "status": "aprovado", "gravado": false, "critic_score": null, "fonte": "", "legenda": "", "comentario_fixado": "", "history": [], "origem": "Claude v4", "validado": false, "id": "2026-10-28-09"}, {"date": "2026-10-28", "n": 10, "formato": "rant_habito", "tema": "chorar à frente dela", "hooks": [{"text": "Podes chorar. Mas não à frente dela.", "mecanismo": "contra"}, {"text": "Choraste no colo da tua namorada e agora não percebes porque é que ela te trata como um irmão.", "mecanismo": "ego"}, {"text": "Há uma coisa que fazes a pensar que aproxima e que na verdade afasta.", "mecanismo": "segredo"}], "corpo": "Não há nada de errado em chorar. Eu choro. Toda a gente chora. A questão é onde.\nRepara no que acontece quando um gajo chora no colo da namorada. Ela abraça-o, diz que está tudo bem, faz o papel de mãe. E a partir desse dia o cérebro dela ficou com uma imagem nova: o homem que precisa de ser protegido.\nTu vais dizer que ela te disse que foi lindo. Disse. E seis meses depois disse que \"já não sentia a mesma coisa\" e não soube explicar porquê.\nOs generais romanos choravam. Em privado, antes da batalha. À frente das tropas nunca, porque as tropas precisam de acreditar que alguém sabe o que está a fazer.\nA tua namorada não é tua inimiga. Mas também não é a tua mãe nem o teu psicólogo.\nChora com os teus amigos, chora sozinho no carro, chora com o teu pai. E volta para casa como o gajo que ela escolheu.", "status": "aprovado", "gravado": false, "critic_score": null, "fonte": "", "legenda": "", "comentario_fixado": "", "history": [], "origem": "Claude v4", "validado": false, "id": "2026-10-28-10"}, {"date": "2026-10-28", "n": 11, "formato": "tabu", "tema": "controlar onde ela está", "hooks": [{"text": "Se a tua namorada precisa de ver o teu telemóvel, a relação já acabou. Só falta marcar a data.", "mecanismo": "contra"}, {"text": "Dás a password do telemóvel por confiança ou por medo?", "mecanismo": "pergunta"}, {"text": "Quem vasculha o telemóvel do outro já sabe a resposta. Só quer a prova.", "mecanismo": "ego"}], "corpo": "Ninguém vai ao telemóvel de alguém em quem confia. Vai-se ao telemóvel quando a confiança já foi e só falta confirmar.\nE quando não encontra nada, fica descansado? Claro que não. Fica desconfiado de outra maneira: então apagaste.\nPara quem já decidiu que és culpado, não há prova de inocência que chegue.\nIsto vale para os dois lados, pá. O gajo que controla com quem ela fala e a rapariga que lê as mensagens às três da manhã estão no mesmo sítio: com medo de perder alguém que, na cabeça deles, já está a ir-se embora.\nTu vais dizer que quem não deve não teme. Então deixa o telemóvel em cima da mesa e nunca lhe toques tu ao dela. Vais ver que o problema não era o telemóvel.\nUma relação aguenta-se porque os dois escolhem ficar todos os dias, sem vigilância.\nSe precisas de ver para acreditar, aquilo já é uma investigação. E numa investigação há sempre um culpado, mesmo quando não há crime.", "status": "aprovado", "gravado": false, "critic_score": null, "fonte": "", "legenda": "", "comentario_fixado": "", "history": [], "origem": "Claude v4", "validado": false, "id": "2026-10-28-11"}, {"date": "2026-10-28", "n": 12, "formato": "tabu", "tema": "pagar o jantar", "hooks": [{"text": "Pagar o jantar não te torna interessante. Torna-te conveniente.", "mecanismo": "contra"}, {"text": "Se a única coisa que levas a um encontro é a carteira, vais pagar muitos jantares sozinho.", "mecanismo": "ego"}, {"text": "Pagas o jantar porque queres ou porque tens medo de não ser suficiente sem pagar?", "mecanismo": "pergunta"}], "corpo": "Eu pago sempre o jantar. Com gosto.\nO problema é o gajo que acha que pagar é o plano. Leva-a ao restaurante mais caro que consegue, pede o vinho que não sabe pronunciar e passa a noite a falar do trabalho, à espera que a conta faça o resto.\nE depois não percebe porque é que ela não respondeu à mensagem.\nTu vais dizer que ela devia dar valor. Dá valor ao que é raro. E um gajo a pagar um jantar não é raro, pá. Há cinquenta a fazer o mesmo esta semana.\nO dinheiro num encontro é como o perfume. Na dose certa ninguém repara. Quando é a mais, é porque estás a tapar alguma coisa.\nO que a faz voltar é a conversa, a maneira como a ouviste e o facto de teres uma vida que ela tem vontade de conhecer.\nUm homem interessante leva-a a comer uma bifana e ela diz às amigas que foi a melhor noite da semana.\nSe tens de comprar a atenção, é porque nunca a tiveste.", "status": "aprovado", "gravado": false, "critic_score": null, "fonte": "", "legenda": "", "comentario_fixado": "", "history": [], "origem": "Claude v4", "validado": false, "id": "2026-10-28-12"}, {"date": "2026-10-28", "n": 13, "formato": "hipocrisia", "tema": "casa vs salário mínimo 2027", "hooks": [{"text": "Para comprar um T1 em Portugal precisas de 107 salários mínimos. Sem comer.", "mecanismo": "numero"}, {"text": "O aumento do salário mínimo é a melhor notícia que o Governo te podia dar. Para te calar.", "mecanismo": "contra"}, {"text": "O teu salário sobe 5% e a casa sobe 17%. Ficaste mais rico ou mais pobre?", "mecanismo": "pergunta"}], "corpo": "Vamos fazer as contas que ninguém faz na televisão.\nEm 2027 o salário mínimo passa de 920 para 970 euros. Mais cinquenta euros, e toda a gente bate palmas.\nNo mesmo país, o preço mediano das casas subiu 16,8% num só ano, segundo o INE. 2.076 euros por metro quadrado.\nUm T1 de cinquenta metros passa dos cem mil euros.\nDivide isso pelo salário mínimo de 2027 e dá 107 salários. Brutos. Mesmo contando com os subsídios, são mais de sete anos e meio a trabalhar sem gastar um cêntimo em comida, luz ou gasolina.\nTu vais dizer que ninguém compra casa com o salário mínimo. Pois não. E é exatamente esse o ponto: nem com o dobro.\nE ainda te chamam preguiçoso por viveres em casa dos pais aos trinta.\nCinquenta euros por mês compram um bocadinho de paciência, e é exatamente isso que estão a comprar.\nEm Portugal não te pagam para viveres, pá. Pagam-te para não te ires embora.", "status": "aprovado", "gravado": false, "critic_score": null, "fonte": "https://rr.pt/noticia/economia/2026/04/24/preco-das-casas-em-portugal-dispara-168-em-2025-e-agrava-crise-da-habitacao/468280/ https://www.dnoticias.pt/2026/10/8/508265-governo-assume-salario-minimo-nos-970-euros-no-proximo-ano/", "legenda": "", "comentario_fixado": "", "history": [], "origem": "Claude v4", "validado": false, "id": "2026-10-28-13"}, {"date": "2026-10-28", "n": 14, "formato": "hipocrisia", "tema": "Pinto Luz e os 100 mil jovens com casa", "hooks": [{"text": "O ministro diz que 100 mil jovens já têm casa. Esqueceu-se de dizer a que preço.", "mecanismo": "contra"}, {"text": "Cem mil jovens compraram casa sem pagar IMT. No mesmo ano, as casas subiram 16,8%.", "mecanismo": "numero"}, {"text": "Se o Governo te tira o imposto e o vendedor sobe o preço, quem ficou com o desconto?", "mecanismo": "pergunta"}], "corpo": "Em maio, o ministro das Infraestruturas e Habitação, Miguel Pinto Luz, disse isto numa conferência em Braga: não é despiciendo dizer-se que cem mil jovens que não tinham casa têm hoje casa.\nEstava a falar da isenção de IMT e de imposto de selo para os jovens.\nParece uma boa notícia. Agora vê a outra metade. No mesmo período, o preço mediano das casas em Portugal subiu 16,8%, segundo o INE.\nEu não sou economista, mas sei como funciona uma feira, pá. Se toda a gente aparece com mais dinheiro no bolso para gastar na mesma banca, o vendedor sobe o preço.\nO desconto que o Estado te dá no imposto, o mercado tira-to no preço. E tu ficas com um crédito de quarenta anos e uma fotografia com o ministro.\nSenhor ministro, da próxima vez que fizer as contas aos cem mil, faça também a outra: quanto é que cada um pagou a mais pela casa.\nSe o número for pequeno, eu faço um vídeo a dar-lhe os parabéns. Com o nome dele e tudo.", "status": "aprovado", "gravado": false, "critic_score": null, "fonte": "https://www.dnoticias.pt/2026/5/14/491981-100-mil-jovens-nao-ricos-compraram-casa-no-ultimo-ano-e-meio-em-portugal/ https://rr.pt/noticia/economia/2026/04/24/preco-das-casas-em-portugal-dispara-168-em-2025-e-agrava-crise-da-habitacao/468280/", "legenda": "", "comentario_fixado": "", "history": [], "origem": "Claude v4", "validado": false, "id": "2026-10-28-14"}, {"date": "2026-10-28", "n": 15, "formato": "noticia", "tema": "Ronaldo, Jorge Jesus e a seleção", "hooks": [{"text": "Ninguém é maior do que a seleção. Nem o Ronaldo.", "mecanismo": "contra"}, {"text": "Se fosse outro jogador a sair do estágio, ainda estava na pré-convocatória?", "mecanismo": "pergunta"}, {"text": "Se tu saísses do trabalho a meio de uma reunião, no dia seguinte não tinhas emprego.", "mecanismo": "ego"}], "corpo": "Vamos lá ver se nos entendemos. Em setembro o Ronaldo aqueceu e não jogou contra a Noruega. Antes do jogo com a Dinamarca, saiu do estágio. Acusou o Jorge Jesus de quebrar promessas e de quebrar a confiança.\nA Federação deu-lhe trinta dias de suspensão, a pena mais leve que havia. Acaba a 30 de outubro. E esta semana o nome dele já aparece na pré-convocatória.\nAgora diz-me uma coisa. Se fosse um miúdo de vinte anos a fazer isto, alguém estava a discutir se volta? Estava em casa, e com razão.\nTu vais dizer que é o Ronaldo, que ganhou o Euro, que tem 140 golos pela seleção. Tudo verdade. E é por isso mesmo que o exemplo dele pesa mais do que o de qualquer outro.\nUma seleção é um balneário. Um balneário onde há um jogador que pode sair quando não joga deixa de ter treinador.\nSe o Jesus o convocar sem uma conversa à frente de toda a gente, perdeu o balneário. Se o deixar de fora, vai ter o país inteiro à porta.\nEu deixava-o de fora. Respeito é para todos, ou não é respeito.", "status": "aprovado", "gravado": false, "critic_score": null, "fonte": "https://pt.euronews.com/2026/10/26/cheira-a-regresso-ronaldo-entra-na-pre-lista-mas-convocatoria-ainda-nao-esta-ganha", "legenda": "", "comentario_fixado": "", "history": [], "origem": "Claude v4", "validado": false, "id": "2026-10-28-15"}, {"date": "2026-10-28", "n": 16, "formato": "noticia", "tema": "derrapagens nas obras públicas", "hooks": [{"text": "Duzentos e quatro milhões de euros. É quanto as obras públicas derraparam só no ano passado.", "mecanismo": "numero"}, {"text": "Se te atrasas na renda, pagas juros. Se o Estado derrapa duzentos milhões, sai um relatório.", "mecanismo": "contra"}, {"text": "Tu entregas três recibos para um crédito de cinco mil euros. Eles derrapam duzentos milhões.", "mecanismo": "ego"}], "corpo": "Saiu agora do Tribunal de Contas. As alterações aos contratos de obras públicas custaram mais 204,4 milhões em 2025. É o valor mais alto desde 2006. Nos últimos três anos são 561 milhões.\nTu, para pedires um crédito de cinco mil euros, entregas recibos, extratos e a alma ao banco. Falhas uma prestação e ligam-te no dia seguinte.\nDo outro lado, assina-se uma obra por um valor, faz-se por outro, e a diferença aparece num relatório que ninguém lê, anos depois.\nTu vais dizer que as obras são complicadas e que os preços sobem. Sobem. Mas a tua renda também subiu e o senhorio não te perdoou nada.\nMuda o governo e começa tudo outra vez.\nE este mês, no Orçamento, dizem-te que não há margem para aumentar mais os salários.\nHá dinheiro, pá. Só não é para ti.\nAposto contigo que ninguém vai ser despedido por isto. Se alguém for, escreve aqui nos comentários que eu pago o café.", "status": "aprovado", "gravado": false, "critic_score": null, "fonte": "https://eco.sapo.pt/2026/10/28/obras-publicas-registam-maior-desvio-financeiro-desde-2006/", "legenda": "", "comentario_fixado": "", "history": [], "origem": "Claude v4", "validado": false, "id": "2026-10-28-16"}, {"date": "2026-10-28", "n": 17, "formato": "historia_pessoal", "tema": "a verdade sobre promover casinos", "hooks": [{"text": "Já ganhei dinheiro a promover casinos. É o dinheiro de que menos me orgulho.", "mecanismo": "confissao"}, {"text": "Não existe promover casinos de forma responsável. Eu sei, porque já o fiz.", "mecanismo": "contra"}, {"text": "Vou contar-te o que um influencer sabe quando te mostra um casino online.", "mecanismo": "segredo"}], "corpo": "Quando promoves um casino, não estás a vender um jogo. Estás a vender a ideia de que o próximo clique muda a tua vida.\nE quem promove sabe exatamente para quem está a falar. Sabe a idade de quem o segue, sabe a que horas vê, e sabe que a maioria não tem dinheiro para perder.\nFala-se muito de jogo responsável. É como falar de tabaco responsável. Quando promoves uma coisa que vicia, qualquer promoção faz estragos, por mais avisos que ponhas no fim do vídeo.\nTu vais dizer que cada um é responsável pelo que faz com o dinheiro dele. É. E eu também sou responsável pelo que faço com a atenção de quem me vê.\nEu deixei de fazer. Não fiquei santo. Só percebi que o dinheiro fácil tem sempre alguém a pagar a conta do outro lado.\nPor isso, da próxima vez que vires um gajo a dizer que ganhou mil euros numa noite, lembra-te disto: se aquilo desse dinheiro, ele estava a jogar.\nNão estava a pedir-te para jogares tu.", "status": "aprovado", "gravado": false, "critic_score": null, "fonte": "", "legenda": "", "comentario_fixado": "", "history": [], "origem": "Claude v4", "validado": false, "id": "2026-10-28-17"}, {"date": "2026-10-28", "n": 18, "formato": "noticia", "tema": "emigração jovem e IRS Jovem", "hooks": [{"text": "Um em cada três jovens nascidos em Portugal já vive lá fora.", "mecanismo": "numero"}, {"text": "Portugal não exporta vinho nem futebolistas. Exporta filhos.", "mecanismo": "contra"}, {"text": "O teu país passou vinte anos a educar-te para te ver pagar impostos na Suíça.", "mecanismo": "ego"}], "corpo": "São cerca de 850 mil pessoas entre os 15 e os 39 anos, segundo o Observatório da Emigração. Quase um terço de uma geração.\nE esta semana, no debate do Orçamento, o ministro das Finanças disse que muitos jovens voltaram sobretudo por causa das medidas do Governo. Leia-se: o IRS Jovem.\nVamos lá ver se nos entendemos. Ninguém larga a vida, a namorada e o contrato em Munique por causa de um desconto no IRS. Volta-se porque lá fora correu mal, ou porque cá dentro há futuro.\nTu vais dizer que conheces quem voltou. Também eu. Pergunta-lhe se voltou pelo IRS ou pela mãe. Já sabes a resposta.\nFuturo é poderes pagar uma renda com o teu salário sem dividir casa com três pessoas aos trinta e dois anos.\nEnquanto o país tratar quem fica como sortudo e quem sai como traidor, vai continuar a ser o melhor sítio do mundo para passar férias.\nE o pior para começar a vida.", "status": "aprovado", "gravado": false, "critic_score": null, "fonte": "https://mundo.rtp.pt/portugal/um-em-cada-tres-jovens-nascidos-em-portugal-vivem-fora-do-pais https://www.dn.pt/pol%C3%ADtica/oramento-do-estado-para-2027-em-direto-no-site-do-dn", "legenda": "", "comentario_fixado": "", "history": [], "origem": "Claude v4", "validado": false, "id": "2026-10-28-18"}, {"date": "2026-10-28", "n": 19, "formato": "rant_habito", "tema": "padel como personalidade", "hooks": [{"text": "O padel não é um desporto. É um LinkedIn com raquete.", "mecanismo": "contra"}, {"text": "Trinta euros à hora para quatro gajos que não correm desde o 12.º ano.", "mecanismo": "numero"}, {"text": "Compraste uma raquete de duzentos euros e ainda não sabes onde fica o ginásio.", "mecanismo": "ego"}], "corpo": "Há cinco anos ninguém sabia o que era. Hoje o teu chefe joga, o teu cunhado joga, e o gajo que nunca fez desporto na vida tem uma raquete de duzentos euros e uma garrafa de água com o nome dele.\nE ninguém fala do jogo. Fala-se do clube, de quem lá estava, do court às sete da manhã antes do escritório.\nO padel resolveu um problema que os homens portugueses tinham há anos: como fazer amigos depois dos trinta sem parecer que andam a fazer amigos.\nO golfe era caro e o futebol de cinco dava cabo dos joelhos. O padel é o meio-termo perfeito. Suas um bocadinho, tiras uma fotografia e fechas um negócio no bar.\nTu vais dizer que o padel é um desporto a sério, que há um circuito mundial. Há. E tu estás nele?\nOlha, eu não tenho nada contra. Só não me venhas dizer que é pelo desporto.\nNinguém acorda às seis por desporto. Acorda às seis para pôr story às seis e um quarto.", "status": "aprovado", "gravado": false, "critic_score": null, "fonte": "", "legenda": "", "comentario_fixado": "", "history": [], "origem": "Claude v4", "validado": false, "id": "2026-10-28-19"}, {"date": "2026-10-28", "n": 20, "formato": "rant_habito", "tema": "o 'temos de combinar'", "hooks": [{"text": "\"Temos de combinar\" é a forma portuguesa de dizer adeus para sempre.", "mecanismo": "contra"}, {"text": "Há quatro anos que tens um jantar combinado com o teu amigo do secundário. Ainda não houve jantar.", "mecanismo": "numero"}, {"text": "Há uma frase que os portugueses dizem quando não te querem voltar a ver. E dizem-na a sorrir.", "mecanismo": "segredo"}], "corpo": "Encontras o teu amigo no Continente. Abraço, como é que estás, então e a família. Dois minutos de conversa e depois a frase sagrada: epá, temos de combinar.\nE os dois sabem perfeitamente que não vão combinar nada.\nNinguém marca a data. Ninguém manda mensagem. Aquilo é um contrato de silêncio assinado com um sorriso.\nO português prefere uma promessa falsa a uma verdade desconfortável. Não diz \"já não temos nada em comum\". Diz \"temos de combinar\" e deixa a amizade morrer de causas naturais.\nTu vais dizer que às vezes combinas mesmo. Uma em dez. As outras nove sabes tão bem como eu.\nO curioso é que fazemos o mesmo connosco. Temos de ir ao ginásio. Temos de poupar. Temos de ir ao médico ver aquilo.\nO \"temos de\" é a forma mais educada de não fazer nada.\nPor isso faz-me um favor. Pega no telemóvel agora, manda mensagem àquele amigo e marca o dia e a hora.\nSe ele não responder, ficas a saber. E se responder, deves-me um jantar.", "status": "aprovado", "gravado": false, "critic_score": null, "fonte": "", "legenda": "", "comentario_fixado": "", "history": [], "origem": "Claude v4", "validado": false, "id": "2026-10-28-20"}, {"date": "2026-10-28", "n": 21, "formato": "hipocrisia", "tema": "odiar ricos e jogar no Euromilhões", "hooks": [{"text": "Odeias os ricos de segunda a quinta. À sexta jogas no Euromilhões.", "mecanismo": "ego"}, {"text": "Ninguém odeia os ricos. Odeia é não ser um deles.", "mecanismo": "contra"}, {"text": "Gastas dez euros por semana a sonhar com o dinheiro que dizes que estraga as pessoas.", "mecanismo": "numero"}], "corpo": "Conheces este filme.\nO vizinho comprou casa e de repente foi a herança da avó. O colega abriu uma empresa e o pai deve ter ajudado. O teu primo ganhou dinheiro na internet e aquilo, pá, aquilo não é trabalho.\nMas à sexta-feira lá estás tu na fila do quiosque, de boletim na mão, a escolher a casa que vais comprar com o dinheiro que passaste a semana a desprezar.\nA probabilidade de acertares no primeiro prémio do Euromilhões é de uma em cento e trinta e nove milhões.\nTu vais dizer que são só dois euros e meio, que é por brincadeira. Então porque é que verificas a chave antes de ver as notícias?\nPreferes apostar nisso a admitir que o outro trabalhou mais do que tu.\nTratas o dinheiro como tratas os teus ex: dizes mal dele a toda a gente e ficas à espera que ele volte.\nNão volta.", "status": "aprovado", "gravado": false, "critic_score": null, "fonte": "", "legenda": "", "comentario_fixado": "", "history": [], "origem": "Claude v4", "validado": false, "id": "2026-10-28-21"}, {"date": "2026-10-28", "n": 22, "formato": "paradoxo", "tema": "o adepto que sabe tudo menos da vida dele", "hooks": [{"text": "Sabes de cor o orçamento do teu clube e não sabes quanto gastas por mês em Uber Eats.", "mecanismo": "ego"}, {"text": "O futebol é o único sítio onde o português planeia a longo prazo. E nem é a vida dele.", "mecanismo": "contra"}, {"text": "Três jogos por semana, mais o pré-jogo e o pós-jogo. Dá um part-time sem salário.", "mecanismo": "numero"}], "corpo": "Sabes quanto o teu clube pagou pelo avançado, quanto vale a cláusula e quem devia ser vendido em janeiro.\nSabes o onze ideal de cor. Sabes os erros do árbitro desde 2004.\nAgora pergunta-te quanto gastaste no mês passado. Quanto tens de poupanças. Qual é a taxa do teu crédito.\nNão sabes.\nFalas do teu clube como um diretor financeiro e da tua vida como um adepto: com emoção, sem plano, e sempre à espera que para o ano seja melhor.\nTu vais dizer que o futebol é uma paixão e a vida é uma chatice. Pois é. E é por isso que a vida está como está.\nEu também gosto de futebol, mano. Mas há uma diferença entre ver um jogo e viver para um clube que não sabe o teu nome.\nO presidente do teu clube tem plano para cinco anos. Tu não tens plano para sábado.\nNesta jornada, gasta os noventa minutos a pôr a tua vida numa folha de Excel. O teu clube sobrevive sem ti a ver. A tua conta bancária não sobrevive sem ti a olhar.", "status": "aprovado", "gravado": false, "critic_score": null, "fonte": "", "legenda": "", "comentario_fixado": "", "history": [], "origem": "Claude v4", "validado": false, "id": "2026-10-28-22"}, {"date": "2026-10-28", "n": 23, "formato": "historia_pessoal", "tema": "processo arquivado e o tribunal da internet", "hooks": [{"text": "O Ministério Público arquivou o meu processo. A internet já me tinha condenado.", "mecanismo": "confissao"}, {"text": "Num tribunal és inocente até prova em contrário. Na internet és culpado até ficares sem seguidores.", "mecanismo": "contra"}, {"text": "Ninguém te conta o que acontece depois de um processo ser arquivado. Eu conto.", "mecanismo": "segredo"}], "corpo": "Quando a notícia saiu, toda a gente tinha uma opinião. Jornais, páginas de memes, gente que nunca tinha visto um vídeo meu. As contas foram-se, as marcas desapareceram e o telemóvel deixou de tocar.\nMeses depois, o procurador arquivou o caso. A frase estava protegida pela liberdade de expressão. Não havia crime.\nSabes quantas das pessoas que partilharam a acusação partilharam o arquivamento? Quase nenhuma.\nA acusação dá cliques. O arquivamento não dá nada, por isso fica escondido numa página que ninguém abre.\nTu vais dizer que eu procurei a polémica. Procurei. E mesmo assim a lei disse que não havia crime. É isso que te devia preocupar: não o que eu disse, mas quem decidiu que eu não podia dizê-lo.\nA maior parte das pessoas que te atacam não quer justiça. Quer assistir.\nQuem me queria calado teve a resposta do Estado. A minha resposta é esta conta, este vídeo e o próximo.\nPodem tirar-me a plataforma as vezes que quiserem, pá. A voz vem comigo.", "status": "aprovado", "gravado": false, "critic_score": null, "fonte": "", "legenda": "", "comentario_fixado": "", "history": [], "origem": "Claude v4", "validado": false, "id": "2026-10-28-23"}, {"date": "2026-10-28", "n": 24, "formato": "noticia", "tema": "Sporting: assobios antes de o jogo começar", "hooks": [{"text": "Os adeptos que assobiam antes de o jogo começar já não querem ganhar. Querem ter razão.", "mecanismo": "contra"}, {"text": "Duas derrotas seguidas e já há lenços brancos e faixas em Alvalade.", "mecanismo": "numero"}, {"text": "Assobias o treinador lá da bancada e depois não aguentas uma crítica do teu chefe.", "mecanismo": "ego"}], "corpo": "O Sporting perdeu com o LASK, depois perdeu em casa com o Académico de Viseu, dois a um, e apareceram os lenços brancos para o Rui Borges. Não perdia dois jogos seguidos há quase dois anos.\nDois dias depois, na Taça da Liga com o Marítimo, houve assobios logo no anúncio do onze. Antes de a bola rolar. E uma faixa perto do estádio a pedir a saída do treinador.\nO Sporting ganhou dois a um.\nTu vais dizer que o adepto paga bilhete e tem direito a assobiar. Tem. E o treinador tem direito a perceber que já não está a ser avaliado pelo que faz.\nQuando decides que o treinador tem de sair, cada vitória passa a ser uma ofensa pessoal. Ele não pode ganhar, porque se ganhar quem fica mal és tu.\nPerguntaram ao Rui Borges o que prometia aos adeptos e ele disse: prometo trabalho. É o que responde quem sabe que não manda na bancada, só no balneário.\nE isto não é só futebol, mano. Há gente na tua vida à espera que falhes só para poder dizer que avisou.\nGanha na mesma. E deixa-os assobiar.", "status": "aprovado", "gravado": false, "critic_score": null, "fonte": "https://www.ojogo.pt/futebol/artigo/lencos-brancos-para-rui-borges-apos-derrota-do-sporting-contra-o-ac-viseu/18141084 https://www.record.pt/futebol/futebol-nacional/liga-betclic/sporting/detalhe/rui-borges-promessa-de-trabalho-aos-adeptos-rui-silva-grande-guarda-redes-e-a-resposta-muito-boa-de-pedro-lima", "legenda": "", "comentario_fixado": "", "history": [], "origem": "Claude v4", "validado": false, "id": "2026-10-28-24"}, {"date": "2026-10-28", "n": 25, "formato": "tabu", "tema": "a tia e o 'então, e namoradas?'", "hooks": [{"text": "O \"então, e namoradas?\" da tia já fez mais casamentos infelizes do que o álcool.", "mecanismo": "contra"}, {"text": "Tens casa, carro e trabalho, e no almoço de domingo tratam-te como um falhado.", "mecanismo": "ego"}, {"text": "Há uma pergunta que vais ouvir no Natal, e vou dizer-te como lhe responder.", "mecanismo": "segredo"}], "corpo": "Faltam dois meses para o Natal e já estás a ensaiar a resposta.\nSentas-te à mesa, passa o bacalhau, e lá vem ela: então, e namoradas? Tens trinta anos, tens casa, tens trabalho, tens uma vida que escolheste. Não interessa. Para a família portuguesa, um homem sozinho aos trinta é um problema para resolver.\nE há gajos que resolvem. Casam com a primeira que aparece só para a mesa de Natal ficar em silêncio. Dez anos depois, continua sem paz, mas agora com uma hipoteca a dois.\nTu vais dizer que a tia só quer o teu bem. Quer. O problema é que o bem dela é de 1987.\nA pressão da família é a forma mais carinhosa de te estragarem a vida.\nTu não estás atrasado. Estás a escolher. E escolher bem demora mais do que escolher à pressa.\nPor isso, este ano, quando a tia perguntar, responde com calma: estou à espera de uma tão boa como a tia.\nEla fica contente, a mesa ri-se e tu comes o bacalhau em paz.", "status": "aprovado", "gravado": false, "critic_score": null, "fonte": "", "legenda": "", "comentario_fixado": "", "history": [], "origem": "Claude v4", "validado": false, "id": "2026-10-28-25"}, {"date": "2026-10-28", "n": 26, "formato": "hipocrisia", "tema": "a empresa que diz que é uma família", "hooks": [{"text": "O jantar de Natal da empresa é o único dia do ano em que te pagam em bacalhau.", "mecanismo": "contra"}, {"text": "Se a empresa é uma família, porque é que te despedem por email?", "mecanismo": "pergunta"}, {"text": "O teu chefe diz que vocês são uma família. Experimenta ficar doente na semana de um prazo.", "mecanismo": "ego"}], "corpo": "Chega dezembro e começa o teatro. Restaurante com menu fechado, o diretor a dizer que foi um ano desafiante mas que aqui somos uma família, brinde, fotografia para o Instagram da empresa.\nEm janeiro chega o email. Este ano não há aumentos, o mercado está difícil.\nUma família não te avalia por objetivos trimestrais nem te substitui em duas semanas se ficares doente.\nTu vais dizer que o teu chefe é boa pessoa. Pode ser. Mas a boa pessoa recebe ordens de uma folha de Excel, e a folha de Excel não vai ao jantar de Natal.\nUma empresa é uma equipa. Joga contigo enquanto marcas golos e vende-te quando deixas de marcar. Até aí, tudo bem.\nO problema é a palavra família. Serve para te pedir a lealdade de um filho e pagar-te como a um estranho.\nVai ao jantar. Come o bacalhau. Bebe o vinho que eles pagam.\nMas no dia a seguir atualiza o currículo, pá.", "status": "aprovado", "gravado": false, "critic_score": null, "fonte": "", "legenda": "", "comentario_fixado": "", "history": [], "origem": "Claude v4", "validado": false, "id": "2026-10-28-26"}, {"date": "2026-10-28", "n": 27, "formato": "paradoxo", "tema": "nunca pedir aumento", "hooks": [{"text": "Nunca peças um aumento. Quem pede já perdeu.", "mecanismo": "contra"}, {"text": "Se precisas de pedir um aumento, o teu patrão já sabe que não te vais embora.", "mecanismo": "ego"}, {"text": "O teu patrão tem uma lista de quem nunca se vai embora. E tu estás nela.", "mecanismo": "segredo"}], "corpo": "Pensa no que acontece naquela reunião.\nEntras com um discurso ensaiado, falas dos anos de casa, do esforço, de como está tudo caro.\nEle ouve, acena com a cabeça e faz uma única conta: este gajo tem para onde ir?\nSe não tens, levas um \"para o ano vemos isso\" e uma palmadinha nas costas.\nAgora imagina outra reunião. Entras com uma proposta de outra empresa no telemóvel e dizes: gosto de estar aqui, mas ofereceram-me mais trezentos euros. O que é que fazemos?\nÉ a mesma pessoa, o mesmo trabalho, a mesma cadeira. Só mudou uma coisa: deixaste de ser um custo fixo e passaste a ser um risco.\nTu vais dizer que não há propostas na tua área. Há sempre. Só não há para quem nunca procurou.\nO teu salário não é o que tu vales. É o que ele acha que lhe custa substituir-te.\nAmanhã, em vez de ensaiares o discurso, atualiza o currículo.", "status": "aprovado", "gravado": false, "critic_score": null, "fonte": "", "legenda": "", "comentario_fixado": "", "history": [], "origem": "Claude v4", "validado": false, "id": "2026-10-28-27"}, {"date": "2026-10-28", "n": 28, "formato": "mecanismo", "tema": "os amigos que te puxam para baixo", "hooks": [{"text": "Os teus amigos querem que tenhas sucesso. Desde que seja menos do que eles.", "mecanismo": "contra"}, {"text": "Há uma razão para os teus amigos gozarem quando dizes que vais mudar de vida.", "mecanismo": "segredo"}, {"text": "O primeiro a gozar com o teu plano é sempre o amigo que nunca teve um.", "mecanismo": "ego"}], "corpo": "Deixa-me explicar o mecanismo, porque depois de o perceberes nunca mais deixas de o ver.\nOs pescadores dizem que um balde de caranguejos não precisa de tampa. Quando um tenta sair, os outros puxam-no para baixo.\nContigo é igual. No dia em que dizes que vais deixar de beber, começar a treinar ou abrir um negócio, não estás só a mudar a tua vida. Estás a mostrar ao grupo que eles também podiam mudar a deles. E não mudaram.\nPor isso vem o \"estás muito armado\", o \"isso não é para nós\", o \"lembra-te de onde vieste\".\nTu vais dizer que os teus amigos são diferentes, que te apoiam. Conta quantos apareceram no dia em que precisaste de ajuda para as mudanças. Esses são os amigos. Os outros são público.\nAquilo não é preocupação, pá. É autodefesa.\nCada degrau que tu sobes deixa a desculpa deles mais pequena.\nNão precisas de cortar com ninguém. Só tens de deixar de pedir opinião a quem perde alguma coisa com a tua vitória.", "status": "aprovado", "gravado": false, "critic_score": null, "fonte": "", "legenda": "", "comentario_fixado": "", "history": [], "origem": "Claude v4", "validado": false, "id": "2026-10-28-28"}, {"date": "2026-10-28", "n": 29, "formato": "lista", "tema": "cinco coisas que nunca deves explicar", "hooks": [{"text": "Há cinco coisas que nunca deves explicar a ninguém. A quinta é a que mais custa.", "mecanismo": "numero"}, {"text": "Há cinco explicações que, no momento em que as dás, perdes o respeito de quem as pediu.", "mecanismo": "contra"}, {"text": "Há cinco perguntas a que as pessoas com poder nunca respondem. Vou dizer-te quais.", "mecanismo": "segredo"}], "corpo": "A primeira é quanto ganhas. Se ganhas pouco, tratam-te com pena. Se ganhas muito, tratam-te com inveja. Em nenhum dos casos ganhas alguma coisa por responder.\nA segunda é porque é que te vais embora. De um emprego, de uma relação, de uma cidade. Quem explica abre uma negociação, e tu não queres negociar. Queres sair.\nA terceira é porque é que deixaste de beber. Querem que te justifiques para poderem discutir a justificação e puxar-te de volta para a mesa.\nA quarta é o que estás a construir. Um negócio, uma mudança, um plano. O que se conta antes de existir morre nos comentários dos outros.\nE a quinta, a que mais custa: porque é que acabaste com ela. Tu vais querer contar a tua versão. Não contes. Quem precisa de explicar uma separação ainda está dentro dela.\nO padrão é sempre o mesmo. Assim que explicas, a decisão deixa de ser tua e passa a ser um debate.\nOs adultos decidem, pá. As crianças pedem autorização.\nDa próxima vez que te perguntarem, sorri, diz \"porque quis\" e muda de assunto.", "status": "aprovado", "gravado": false, "critic_score": null, "fonte": "", "legenda": "", "comentario_fixado": "", "history": [], "origem": "Claude v4", "validado": false, "id": "2026-10-28-29"}, {"date": "2026-10-28", "n": 30, "formato": "mecanismo", "tema": "o guru que te vende o curso", "hooks": [{"text": "Quem te vende um curso para ficares rico ficou rico a vender-te o curso.", "mecanismo": "contra"}, {"text": "O segredo do guru que te promete liberdade financeira está no teu cartão de crédito.", "mecanismo": "segredo"}, {"text": "Se ele descobriu como ganhar milhões, porque é que precisa dos teus 497 euros?", "mecanismo": "pergunta"}], "corpo": "O funil é sempre igual. Primeiro um vídeo grátis com um carro alugado atrás. Depois uma aula ao vivo a dizer-te que o sistema está contra ti. No fim, uma oferta que acaba à meia-noite, com bónus para os primeiros cinquenta.\nNão há nada de ilegal nisto. Mas vê de onde vem o dinheiro dele. Vem das pessoas que compraram o método, não do método.\nSe o negócio dele fosse a bolsa, mostrava-te a conta da corretora. Se fosse o imobiliário, mostrava-te as escrituras. Mostra-te testemunhos e capturas de ecrã porque o produto é a tua esperança.\nTu vais dizer que eu também vendo coisas. Vendo. E mostro-te as contas, os erros e o que perdi. Se um gajo só te mostra os ganhos, está a esconder metade do negócio.\nAprender com quem já fez é a coisa mais inteligente que podes fazer. Pagar a quem só sabe vender a aprendizagem é a mais cara.\nAntes de comprares, faz uma pergunta: ele ganha mais quando eu tenho sucesso ou quando eu compro?\nSe ganha quando tu compras, o curso já resultou. Para ele.", "status": "aprovado", "gravado": false, "critic_score": null, "fonte": "", "legenda": "", "comentario_fixado": "", "history": [], "origem": "Claude v4", "validado": false, "id": "2026-10-28-30"}]</script>
+<script>
+(() => {
+  const MECH = ["pergunta","contra","numero","ego","confissao","segredo"];
+  const WPS = 2.6, CARRY_DAYS = 3;
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const dubai = d => new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Dubai",year:"numeric",month:"2-digit",day:"2-digit"}).format(d);
+  const addDays = (iso, k) => { const d = new Date(iso + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + k); return d.toISOString().slice(0,10); };
+  const nice = iso => new Intl.DateTimeFormat("pt-PT",{weekday:"long",day:"numeric",month:"short",timeZone:"UTC"}).format(new Date(iso+"T12:00:00Z"));
+  const words = s => (s || "").trim().split(/\s+/).filter(Boolean).length;
+  const store = { get(k,d){ try{ const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v);}catch{return d} }, set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch{} } };
+
+  const S = { today: dubai(new Date()), date: dubai(new Date()), docs: new Map(), db:null, user:null, uid:null, canWrite:true,
+    editing:null, rejecting:null, expanded:new Set(), pendingRender:false, unsub:null, loaded:false, status:"a ligar" };
+
+  // ---------- dados ----------
+  const norm = (id, d) => ({ id, ...d, hooks: (d.hooks || []).map(h => typeof h === "string" ? {text:h, mecanismo:""} : {text:h.text ?? h.hook ?? "", mecanismo:h.mecanismo ?? ""}) });
+  const dayList = () => [...S.docs.values()].filter(s => s.date === S.date).sort((a,b) => (a.n ?? 999) - (b.n ?? 999));
+  const carryList = () => [...S.docs.values()].filter(s => s.date < S.date && s.date >= addDays(S.date, -CARRY_DAYS) && s.status !== "rejeitado" && !s.gravado)
+    .sort((a,b) => a.date === b.date ? (a.n ?? 0) - (b.n ?? 0) : a.date < b.date ? -1 : 1);
+  const tpQueue = () => [...(S.date === S.today ? carryList() : []), ...dayList().filter(s => s.status !== "rejeitado")];
+
+  function subscribe(){
+    if (!S.db) return;
+    if (S.unsub) S.unsub();
+    S.docs.clear(); S.loaded = false; render();
+    const q = S.db.collection("scripts").where("date", ">=", addDays(S.date, -CARRY_DAYS)).where("date", "<=", S.date);
+    S.unsub = q.onSnapshot(snap => {
+      S.docs.clear();
+      snap.docs.forEach(d => { if (d.exists) S.docs.set(d.id, norm(d.id, d.data())); });
+      if (S.draft && !S.docs.has(S.draft.id)) S.docs.set(S.draft.id, S.draft);
+      S.loaded = true; S.status = "ok";
+      if (S.editing || S.rejecting) S.pendingRender = true; else render();
+      if (!$("tp").hidden) tpRefresh();
+    }, e => { S.status = "erro: " + e.code; render(); });
+  }
+
+  async function write(id, patch, whole){
+    if (!S.db) return;
+    const ref = S.db.doc("scripts/" + id);
+    const body = { ...patch, updated_at: new Date().toISOString(), updated_by: S.uid || null };
+    try { whole ? await ref.set(body) : await ref.update(body); }
+    catch(e){ flash(e.code === "invalid_argument" ? "Não tens permissão para alterar os guiões desta página." : e.code === "quota_exceeded" ? "A base de dados está cheia: apaga dias antigos." : "Não foi possível guardar (" + e.code + "). Tenta outra vez."); throw e; }
+  }
+  function flash(t){ $("msg").innerHTML = t ? `<div class="notice">${esc(t)}</div>` : ""; if (t) setTimeout(() => { if ($("msg").textContent === t) $("msg").innerHTML = ""; }, 6000); }
+
+  // ---------- render ----------
+  function renderStats(){
+    const L = dayList(), ok = L.filter(s => s.status !== "rejeitado");
+    const done = ok.filter(s => s.gravado).length, rej = L.length - ok.length, val = ok.filter(s => s.validado).length;
+    const secs = ok.reduce((t,s) => t + (words(s.corpo) + words(s.hooks[0]?.text)) / WPS, 0);
+    const carry = S.date === S.today ? carryList().length : 0;
+    $("stats").innerHTML = [
+      [ok.length, "para gravar"], [val + "/" + ok.length, "validados pelo Numeiro"], [done, "gravados"], [rej, "rejeitados"],
+      [Math.round(secs/60) + " min", "de texto"], ...(carry ? [[carry, "por gravar de dias anteriores"]] : [])
+    ].map(([b,t]) => `<div class="stat"><b>${b}</b><span>${t}</span></div>`).join("");
+  }
+
+  function cardHTML(s, carried){
+    const rej = s.status === "rejeitado";
+    const editing = S.editing === s.id, rejecting = S.rejecting === s.id;
+    const meta = `<div class="meta">
+        ${s.formato ? `<span class="chip fmt">${esc(s.formato.replace(/_/g," "))}</span>` : ""}
+        ${s.tema ? `<span class="chip">${esc(s.tema)}</span>` : ""}
+        ${carried ? `<span class="chip carry">de ${esc(nice(s.date))}</span>` : ""}
+        ${rej ? `<span class="chip bad">rejeitado</span>` : s.gravado ? `<span class="chip ok">gravado</span>` : s.validado ? `<span class="chip val">validado</span>` : ""}
+        <span class="chip">~${Math.round((words(s.corpo) + words(s.hooks[0]?.text)) / WPS)}s</span>
+        ${s.critic_score ? `<span class="score" title="Nota do Crítico">${Number(s.critic_score).toFixed(1)}</span>` : ""}
+      </div>`;
+    if (editing) {
+      const h = [0,1,2].map(i => s.hooks[i] || {text:"",mecanismo:""});
+      return `<article class="card" data-id="${esc(s.id)}"><div class="num">${esc(s.n ?? "")}</div><div class="in">${meta}
+        <div class="edit-grid">
+          ${h.map((x,i) => `<input type="text" id="eh${i}" value="${esc(x.text)}" placeholder="Hook ${i+1}" aria-label="Hook ${i+1}">
+            <select id="em${i}" aria-label="Mecanismo do hook ${i+1}"><option value="">mecanismo</option>${MECH.map(m => `<option ${m===x.mecanismo?"selected":""}>${m}</option>`).join("")}</select>`).join("")}
+        </div>
+        <div class="row"><input type="text" id="efmt" value="${esc(s.formato||"")}" placeholder="Formato" aria-label="Formato"><input type="text" id="etema" value="${esc(s.tema||"")}" placeholder="Tema" aria-label="Tema" style="flex:1;min-width:160px"></div>
+        <textarea id="ecorpo" rows="9" aria-label="Corpo">${esc(s.corpo||"")}</textarea>
+        <div class="row"><button class="btn primary sm" data-act="save">Guardar</button><button class="btn sm" data-act="cancel">Cancelar</button>
+        <span class="src">Uma frase por linha. Só o que o Numeiro diz.</span></div>
+      </div></article>`;
+    }
+    const open = S.expanded.has(s.id);
+    return `<article class="card ${rej?"rej":""} ${s.gravado?"done":""}" data-id="${esc(s.id)}"><div class="num">${esc(s.n ?? "·")}</div><div class="in">${meta}
+      <ol class="hooks">${s.hooks.map((h,i) => `<li><span class="k">${i+1}</span><span>${esc(h.text)}</span><span class="m">${esc(h.mecanismo||"")}</span></li>`).join("")}</ol>
+      <div class="corpo ${open?"":"clip"}">${esc(s.corpo)}</div>
+      ${rej && s.motivo_rejeicao ? `<div class="reason">Motivo: ${esc(s.motivo_rejeicao)}</div>` : ""}
+      ${s.fonte ? `<div class="src">Fonte: ${/^https?:\/\//.test(s.fonte) ? s.fonte.split(/\s+/).filter(Boolean).map(u => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(u.replace(/^https?:\/\/(www\.)?/,"").slice(0,60))}</a>`).join(" · ") : esc(s.fonte)}</div>` : ""}
+      ${rejecting ? `<div class="row"><input type="text" id="rejReason" placeholder="Porque não dirias isto?" aria-label="Motivo da rejeição" style="flex:1;min-width:200px">
+          <button class="btn danger sm" data-act="rejectGo">Rejeitar</button><button class="btn sm" data-act="cancel">Cancelar</button></div>` : `
+      <div class="actions">
+        <button class="btn sm" data-act="toggle">${open?"Recolher":"Ver tudo"}</button>
+        ${S.canWrite ? `<button class="btn sm" data-act="edit">Editar</button>
+        ${rej ? `<button class="btn sm" data-act="restore">Repor</button>` : `${s.validado ? `<button class="btn sm" data-act="val">Retirar validação</button>` : `<button class="btn val sm" data-act="val">Validar</button>`}
+        <button class="btn sm" data-act="reject">Rejeitar</button>
+        <button class="btn sm" data-act="rec">${s.gravado ? "Desmarcar gravado" : "Marcar gravado"}</button>`}` : ""}
+        ${S.canWrite && !carried ? `<span class="r"><button class="btn sm" data-act="up" aria-label="Subir">↑</button><button class="btn sm" data-act="down" aria-label="Descer">↓</button></span>` : ""}
+      </div>`}
+    </div></article>`;
+  }
+
+  function render(){
+    const isToday = S.date === S.today;
+    $("dateLabel").innerHTML = `${isToday ? "Hoje" : S.date === addDays(S.today,1) ? "Amanhã" : S.date === addDays(S.today,-1) ? "Ontem" : esc(S.date)}<small>${esc(nice(S.date))} · Dubai</small>`;
+    ["newBtn","importBtn"].forEach(b => $(b).disabled = !S.canWrite || !S.db);
+    renderStats();
+    if (!S.db && !S.readOnly) { $("list").innerHTML = `<div class="notice">A ligar…</div>`; return; }
+    if (S.readOnly) $("howto").innerHTML = `<strong>Estás a ver sem sessão:</strong> podes ler os guiões e abrir o teleprompter. Para validar, editar ou rejeitar, usa a versão no claude.ai (o Tomás manda-te o link).`;
+    if (!S.loaded) { $("list").innerHTML = `<div class="notice">A carregar os guiões de ${esc(nice(S.date))}…</div>`; return; }
+    const carry = isToday ? carryList() : [], L = dayList();
+    if (!L.length && !carry.length) {
+      $("list").innerHTML = `<div class="notice"><strong>Ainda não há guiões para ${esc(nice(S.date))}.</strong> Os guiões do motor aparecem aqui quando a corrida do dia acaba. Também podes criar um com <em>Novo guião</em> ou colar vários com <em>Importar</em>.</div>`;
+      return;
+    }
+    $("list").innerHTML = carry.map(s => cardHTML(s, true)).join("") + L.map(s => cardHTML(s, false)).join("");
+    S.pendingRender = false;
+  }
+
+  // ---------- ações nos cartões ----------
+  $("list").addEventListener("click", async e => {
+    const b = e.target.closest("[data-act]"); if (!b) return;
+    const id = b.closest(".card").dataset.id, s = S.docs.get(id) || S.draft, act = b.dataset.act;
+    if (act === "toggle") { S.expanded.has(id) ? S.expanded.delete(id) : S.expanded.add(id); return render(); }
+    if (act === "edit") { S.editing = id; S.rejecting = null; render(); $("eh0")?.focus(); return; }
+    if (act === "cancel") { if (S.draft) S.docs.delete(S.draft.id); S.editing = S.rejecting = null; S.draft = null; return render(); }
+    if (act === "reject") { S.rejecting = id; S.editing = null; render(); $("rejReason")?.focus(); return; }
+    try {
+      if (act === "save") {
+        const hooks = [0,1,2].map(i => ({ text: $("eh"+i).value.trim(), mecanismo: $("em"+i).value })).filter(h => h.text);
+        const corpo = $("ecorpo").value.split("\n").map(l => l.trim()).filter(Boolean).join("\n");
+        if (!hooks.length || !corpo) return flash("Um guião precisa de pelo menos um hook e do corpo.");
+        const isNew = S.draft && S.draft.id === id;
+        const prev = isNew ? [] : [...(s.history || []), { hooks: s.hooks, corpo: s.corpo, at: s.updated_at || null }].slice(-5);
+        const data = { hooks, corpo, formato: $("efmt").value.trim(), tema: $("etema").value.trim() };
+        if (isNew) { const { id: _drop, ...base } = S.draft; await write(id, { ...base, ...data, history: [] }, true); }
+        else await write(id, { ...data, history: prev });
+        S.editing = null; S.draft = null; render();
+      }
+      if (act === "rejectGo") { await write(id, { status: "rejeitado", motivo_rejeicao: $("rejReason").value.trim() || "sem motivo" }); S.rejecting = null; render(); }
+      if (act === "restore") await write(id, { status: "aprovado", motivo_rejeicao: "" });
+      if (act === "val") await write(id, { validado: !s.validado, validado_em: !s.validado ? new Date().toISOString() : null });
+      if (act === "rec") await write(id, { gravado: !s.gravado, gravado_em: !s.gravado ? new Date().toISOString() : null });
+      if (act === "up" || act === "down") {
+        const L = dayList(), i = L.findIndex(x => x.id === id), j = act === "up" ? i - 1 : i + 1;
+        if (j < 0 || j >= L.length) return;
+        const a = L[i], c = L[j];
+        await write(a.id, { n: c.n }); await write(c.id, { n: a.n });
+      }
+    } catch {}
+    if (S.pendingRender && !S.editing && !S.rejecting) render();
+  });
+
+  $("newBtn").onclick = () => {
+    const L = dayList(), n = (L.reduce((m,s) => Math.max(m, s.n || 0), 0)) + 1;
+    const id = `${S.date}-m${Date.now().toString(36)}`;
+    S.draft = { id, date: S.date, n, formato: "", tema: "", hooks: [], corpo: "", status: "aprovado", gravado: false, fonte: "manual" };
+    S.docs.set(id, S.draft); S.editing = id; render(); $("eh0")?.focus();
+    document.querySelector(`[data-id="${CSS.escape(id)}"]`)?.scrollIntoView({block:"center"});
+  };
+
+  // ---------- importar ----------
+  $("importBtn").onclick = () => { $("importPanel").hidden = false; $("importText").focus(); };
+  $("importCancel").onclick = () => { $("importPanel").hidden = true; $("importMsg").textContent = ""; };
+  function parseImport(txt){
+    txt = txt.trim();
+    if (txt.startsWith("[") || txt.startsWith("{")) {
+      let arr = JSON.parse(txt); if (!Array.isArray(arr)) arr = arr.guioes || arr.scripts || [arr];
+      return arr.map(o => ({ formato: o.formato || "", tema: o.tema || "", critic_score: o.critic_score || null, fonte: o.fonte || (o.citacao ? `${o.citacao.autor}, ${o.citacao.obra}` : "") || (o.ideia?.fonte_url || ""),
+        legenda: o.legenda || "", comentario_fixado: o.comentario_fixado || "",
+        hooks: (o.hooks || (o.hook ? [o.hook] : [])).map(h => typeof h === "string" ? {text:h,mecanismo:""} : {text:h.text ?? h.hook ?? "", mecanismo:h.mecanismo ?? ""}).slice(0,3),
+        corpo: o.corpo || o.guiao || "" })).filter(o => o.hooks.length && o.corpo);
+    }
+    return txt.split(/\n\s*\n\s*\n\s*\n/).map(block => {
+      const lines = block.split("\n"); if (/^\s*\d+\s*$/.test(lines[0])) lines.shift();
+      const cut = lines.findIndex(l => /^\s*[—–-]{1,3}\s*$/.test(l));
+      const head = (cut >= 0 ? lines.slice(0, cut) : lines.slice(0, 1)).join("\n"), body = (cut >= 0 ? lines.slice(cut + 1) : lines.slice(1)).join("\n");
+      const hooks = head.split(/\n\s*\n/).map(t => t.replace(/\s+/g," ").trim()).filter(Boolean).slice(0,3).map(t => ({text:t, mecanismo:""}));
+      const corpo = body.split("\n").map(l => l.trim()).filter(Boolean).join("\n");
+      return { hooks, corpo, formato:"", tema:"" };
+    }).filter(o => o.hooks.length && o.corpo);
+  }
+  $("importGo").onclick = async () => {
+    let items; try { items = parseImport($("importText").value); } catch { return $("importMsg").textContent = "Não consegui ler esse texto. Confirma que o JSON está completo."; }
+    if (!items.length) return $("importMsg").textContent = "Não encontrei guiões nesse texto.";
+    let n = dayList().reduce((m,s) => Math.max(m, s.n || 0), 0);
+    $("importGo").disabled = true;
+    try {
+      for (const it of items) { n++; await write(`${S.date}-${String(n).padStart(2,"0")}-${Date.now().toString(36).slice(-4)}`, { ...it, date: S.date, n, status: "aprovado", gravado: false, history: [] }, true); }
+      $("importMsg").textContent = `Importados ${items.length} guiões.`; $("importText").value = "";
+      setTimeout(() => { $("importPanel").hidden = true; $("importMsg").textContent = ""; }, 1500);
+    } catch {} finally { $("importGo").disabled = false; }
+  };
+
+  // ---------- exportar ----------
+  const asText = Q => Q.map((s,i) => `${i+1}\n\n${s.hooks.map(h => h.text).join("\n\n")}\n\n—\n\n${s.corpo}`).join("\n\n\n\n") + "\n";
+  $("exportBtn").onclick = async () => {
+    const Q = tpQueue(); if (!Q.length) return flash("Não há guiões para exportar neste dia.");
+    const dl = (window.claude && typeof window.claude.use === "function") ? await window.claude.use("downloads").catch(() => null) : null;
+    if (dl) { try { await dl.save({ filename: `teleprompter-${S.date}.txt`, data: asText(Q) }); } catch(e){ if (e.code !== "declined") flash("Não foi possível exportar (" + e.code + ")."); } return; }
+    const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([asText(Q)], { type: "text/plain" })); a.download = `teleprompter-${S.date}.txt`; a.click();
+  };
+
+  // ---------- datas ----------
+  const goDay = k => { S.date = addDays(S.date, k); S.editing = S.rejecting = null; S.db ? subscribe() : render(); };
+  $("prevDay").onclick = () => goDay(-1);
+  $("nextDay").onclick = () => goDay(1);
+
+  // ---------- teleprompter ----------
+  const P = { speed: store.get("tp.speed", 4), font: store.get("tp.font", 56), mirror: store.get("tp.mirror", false) };
+  const T = { open:false, queue:[], idx:0, playing:false, last:0, acc:0, shownAt:0, hideT:0, lock:null, curId:null };
+  const sc = $("tpScroll"), tx = $("tpText");
+
+  function tpRender(keepScroll){
+    const s = T.queue[T.idx];
+    tx.style.fontSize = P.font + "px"; tx.classList.toggle("mirror", !!P.mirror);
+    $("tpSpeed").textContent = "vel. " + P.speed; $("tpFont").textContent = P.font + " px";
+    $("tpMirror").classList.toggle("on", !!P.mirror);
+    if (!s) { tx.innerHTML = `<p>Não há guiões para gravar neste dia.</p>`; $("tpCount").textContent = ""; return; }
+    T.curId = s.id;
+    tx.innerHTML = `<div class="n">${esc(T.idx + 1)}</div>${s.hooks.map(h => `<p class="h">${esc(h.text)}</p>`).join("")}<hr>${s.corpo.split("\n").filter(Boolean).map(l => `<p>${esc(l)}</p>`).join("")}`;
+    $("tpCount").textContent = `guião ${T.idx + 1} de ${T.queue.length}`;
+    $("tpDone").classList.toggle("on", !!s.gravado);
+    if (!keepScroll) { sc.scrollTop = 0; T.acc = 0; T.shownAt = performance.now(); }
+    tpProgress();
+  }
+  const tpPct = () => { const max = sc.scrollHeight - sc.clientHeight; return max > 0 ? sc.scrollTop / max : 1; };
+  function tpProgress(){ $("tpProg").style.width = (T.queue.length ? ((T.idx + Math.min(tpPct(),1)) / T.queue.length) * 100 : 0) + "%"; }
+  function tpRefresh(){
+    const cur = T.curId; T.queue = tpQueue();
+    const i = T.queue.findIndex(s => s.id === cur); if (i >= 0) T.idx = i; else T.idx = Math.min(T.idx, Math.max(T.queue.length - 1, 0));
+    tpRender(i >= 0);
+  }
+  async function tpMarkIfRead(){
+    const s = T.queue[T.idx]; if (!s || s.gravado || !S.canWrite) return;
+    const readEnough = tpPct() >= 0.8 || (sc.scrollHeight <= sc.clientHeight && performance.now() - T.shownAt > 5000);
+    if (readEnough) { try { await write(s.id, { gravado: true, gravado_em: new Date().toISOString() }); } catch {} }
+  }
+  async function tpGo(k){
+    if (k > 0) await tpMarkIfRead();
+    const j = T.idx + k; if (j < 0 || j >= T.queue.length) return;
+    T.idx = j; tpRender(false);
+  }
+  function tpLoop(t){
+    if (!T.open) return;
+    if (T.playing) {
+      const dt = T.last ? Math.min((t - T.last) / 1000, 0.1) : 0;
+      T.acc += dt * P.speed * P.font * 0.09;
+      if (T.acc >= 1) { const px = Math.floor(T.acc); sc.scrollTop += px; T.acc -= px; }
+      tpProgress();
+    }
+    T.last = t; requestAnimationFrame(tpLoop);
+  }
+  function tpPlay(on){ T.playing = on ?? !T.playing; $("tpPlay").textContent = T.playing ? "Parar" : "Rolar"; $("tpPlay").classList.toggle("on", T.playing); T.last = 0; }
+  function tpShowBar(){ $("tpBar").classList.remove("hide"); clearTimeout(T.hideT); T.hideT = setTimeout(() => { if (T.playing) $("tpBar").classList.add("hide"); }, 3000); }
+  async function tpOpen(){
+    T.queue = tpQueue();
+    const first = T.queue.findIndex(s => !s.gravado); T.idx = first >= 0 ? first : 0;
+    T.open = true; $("tp").hidden = false; document.body.style.overflow = "hidden";
+    tpRender(false); tpPlay(false); tpShowBar(); requestAnimationFrame(tpLoop);
+    try { await document.documentElement.requestFullscreen?.(); } catch {}
+    try { T.lock = await navigator.wakeLock?.request("screen"); } catch {}
+    $("tpPlay").focus();
+  }
+  async function tpClose(){
+    await tpMarkIfRead();
+    T.open = false; tpPlay(false); $("tp").hidden = true; document.body.style.overflow = "";
+    try { if (document.fullscreenElement) await document.exitFullscreen(); } catch {}
+    try { await T.lock?.release(); } catch {} T.lock = null;
+    $("tpBtn").focus();
+  }
+  const setP = (k, v) => { P[k] = v; store.set("tp." + k, v); tpRender(true); };
+  $("tpBtn").onclick = tpOpen;
+  $("tpClose").onclick = tpClose;
+  $("tpPlay").onclick = () => { tpPlay(); tpShowBar(); };
+  $("tpPrev").onclick = () => tpGo(-1);
+  $("tpNext").onclick = () => tpGo(1);
+  $("tpSlower").onclick = () => setP("speed", Math.max(1, P.speed - 1));
+  $("tpFaster").onclick = () => setP("speed", Math.min(10, P.speed + 1));
+  $("tpSmaller").onclick = () => setP("font", Math.max(32, P.font - 4));
+  $("tpBigger").onclick = () => setP("font", Math.min(96, P.font + 4));
+  $("tpMirror").onclick = () => setP("mirror", !P.mirror);
+  $("tpDone").onclick = async () => { const s = T.queue[T.idx]; if (!s || !S.canWrite) return; try { await write(s.id, { gravado: !s.gravado, gravado_em: !s.gravado ? new Date().toISOString() : null }); } catch {} };
+  sc.addEventListener("scroll", tpProgress, { passive: true });
+  $("tp").addEventListener("pointerdown", e => { if (!e.target.closest(".tpbar")) tpShowBar(); });
+  $("tp").addEventListener("pointermove", tpShowBar);
+  document.addEventListener("visibilitychange", async () => { if (T.open && document.visibilityState === "visible" && !T.lock) { try { T.lock = await navigator.wakeLock?.request("screen"); } catch {} } });
+  document.addEventListener("keydown", e => {
+    if (!T.open) return;
+    const k = e.key;
+    if (k === " " || k === "Spacebar") { e.preventDefault(); tpPlay(); tpShowBar(); }
+    else if (k === "ArrowUp") { e.preventDefault(); setP("speed", Math.min(10, P.speed + 1)); tpShowBar(); }
+    else if (k === "ArrowDown") { e.preventDefault(); setP("speed", Math.max(1, P.speed - 1)); tpShowBar(); }
+    else if (k === "ArrowRight" || k === "PageDown") { e.preventDefault(); tpGo(1); }
+    else if (k === "ArrowLeft" || k === "PageUp") { e.preventDefault(); tpGo(-1); }
+    else if (k === "Escape") { e.preventDefault(); tpClose(); }
+    else if (k === "m" || k === "M") setP("mirror", !P.mirror);
+    else if (k === "+" || k === "=") setP("font", Math.min(96, P.font + 4));
+    else if (k === "-") setP("font", Math.max(32, P.font - 4));
+  });
+
+  // ---------- arranque ----------
+  render();
+  (async () => {
+    const use = n => (window.claude && typeof window.claude.use === "function") ? window.claude.use(n).catch(() => null) : Promise.resolve(null);
+    const [db, user] = await Promise.all([use("db"), use("user")]);
+    S.db = db; S.user = user;
+    if (user) { S.uid = await user.id(); const w = await user.can("data.write"); S.canWrite = w !== false; }
+    if (!db) {
+      try { JSON.parse(document.getElementById("snapshot").textContent || "[]").forEach(d => S.docs.set(d.id, norm(d.id, d))); } catch {}
+      S.readOnly = true; S.canWrite = false; S.loaded = true; return render();
+    }
+    subscribe();
+  })();
+  setInterval(() => { const t = dubai(new Date()); if (t !== S.today) { const wasToday = S.date === S.today; S.today = t; if (wasToday) { S.date = t; S.db ? subscribe() : render(); } else render(); } }, 60000);
+})();
+</script>
+
+</body></html>
