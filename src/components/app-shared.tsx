@@ -1,40 +1,58 @@
 import type { ReactNode } from "react";
-import { LayoutDashboardIcon, ScrollTextIcon, MonitorPlayIcon, LightbulbIcon, ChartPieIcon, ClapperboardIcon, BotIcon, UsersIcon, LibraryIcon, CoinsIcon } from "lucide-react";
+import {
+	LayoutGridIcon, ScrollTextIcon, MonitorPlayIcon, LightbulbIcon, BarChart3Icon, BotIcon,
+	ClapperboardIcon, LibraryIcon, UsersIcon, WalletIcon, FileTextIcon, HistoryIcon,
+} from "lucide-react";
 
 export type SidebarNavItem = {
 	title: string;
 	path?: string;
 	icon?: ReactNode;
 	isActive?: boolean;
+	/** Módulo do PRD ainda sem implementação: aparece desativado, sem link (AGENTS.md §4). */
+	soon?: boolean;
+	external?: boolean;
 	subItems?: SidebarNavItem[];
 };
 
 export type SidebarNavGroup = {
-	label: string;
+	label?: string;
 	items: SidebarNavItem[];
 };
 
 export const navGroups: SidebarNavGroup[] = [
 	{
+		items: [{ title: "Hoje", path: "/", icon: <LayoutGridIcon /> }],
+	},
+	{
 		label: "Dia a dia",
 		items: [
-			{ title: "Hoje", path: "/", icon: <LayoutDashboardIcon /> },
 			{ title: "Guiões", path: "/guioes", icon: <ScrollTextIcon /> },
 			{ title: "Teleprompter", path: "/teleprompter", icon: <MonitorPlayIcon /> },
 			{ title: "Ideias", path: "/ideias", icon: <LightbulbIcon /> },
-			{ title: "Desempenho", path: "/desempenho", icon: <ChartPieIcon /> },
 		],
 	},
 	{
-		label: "v1",
+		label: "Análise",
 		items: [
-			{ title: "Revisão", path: "/revisao", icon: <ClapperboardIcon /> },
-			{ title: "Agentes", path: "/agentes", icon: <BotIcon /> },
-			{ title: "Referências", path: "/referencias", icon: <UsersIcon /> },
-			{ title: "Biblioteca", path: "/biblioteca", icon: <LibraryIcon /> },
-			{ title: "Custos", path: "/custos", icon: <CoinsIcon /> },
+			{ title: "Desempenho", path: "/desempenho", icon: <BarChart3Icon /> },
+			{ title: "Sala dos agentes", path: "/agentes", icon: <BotIcon /> },
 		],
 	},
+	{
+		label: "Em breve",
+		items: [
+			{ title: "Revisão", icon: <ClapperboardIcon />, soon: true },
+			{ title: "Referências", icon: <UsersIcon />, soon: true },
+			{ title: "Biblioteca", icon: <LibraryIcon />, soon: true },
+			{ title: "Custos", icon: <WalletIcon />, soon: true },
+		],
+	},
+];
+
+export const footerNavLinks: SidebarNavItem[] = [
+	{ title: "PRD v2.1", path: "https://claude.ai/artifact/CboQfT6zRXsRbxDxW7QsMg", icon: <FileTextIcon />, external: true },
+	{ title: "Versão antiga", path: "/legacy/index.html", icon: <HistoryIcon />, external: true },
 ];
 
 export const navLinks: SidebarNavItem[] = [
@@ -43,4 +61,12 @@ export const navLinks: SidebarNavItem[] = [
 			item.subItems?.length ? [item, ...item.subItems] : [item]
 		)
 	),
+	...footerNavLinks,
 ];
+
+/** Item ativo para um pathname (o mais específico ganha). */
+export function activeFor(pathname: string): SidebarNavItem | undefined {
+	return navLinks
+		.filter((i) => i.path && !i.external && (i.path === "/" ? pathname === "/" : pathname.startsWith(i.path)))
+		.sort((a, b) => (b.path?.length ?? 0) - (a.path?.length ?? 0))[0];
+}

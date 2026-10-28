@@ -92,11 +92,11 @@ export default function AgentesPage() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Sala dos agentes</h1>
-          <p className="text-sm text-muted-foreground">Cada passo do motor aparece aqui em tempo real. Corridas simuladas ficam marcadas.</p>
+          <p className="text-sm text-muted-foreground">Cada passo do motor aparece aqui em tempo real. O ensaio testa a sala sem inventar resultados e fica marcado como ensaio.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <TeamCode />
-          <Button size="sm" disabled={!session || busy} onClick={simulate}><PlayIcon /> Simular corrida</Button>
+          <Button size="sm" disabled={!session || busy} onClick={simulate}><PlayIcon /> Ensaiar a sala</Button>
         </div>
       </div>
 
@@ -183,7 +183,7 @@ export default function AgentesPage() {
                 <button key={r.run_id} onClick={() => replay(r.run_id)} className="flex items-center justify-between gap-2 rounded-md border px-2.5 py-1.5 text-left text-xs hover:bg-muted">
                   <span className="tabular-nums">{new Date(r.created_at).toLocaleString("pt-PT", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Dubai" })}</span>
                   <span className="flex items-center gap-1.5">
-                    {r.simulated && <Badge variant="outline" className="text-[10px]">simulada</Badge>}
+                    {r.simulated && <Badge variant="outline" className="text-[10px]">ensaio</Badge>}
                     <span className="text-muted-foreground">{r.n} passos</span>
                     <RotateCcwIcon className="size-3 text-muted-foreground" />
                   </span>

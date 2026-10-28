@@ -36,7 +36,6 @@ Billing SaaS self-service e marketplace público de agentes; não há exclusão 
 - `src/lib/supabase.ts` define `DEFAULT_CLIENT = "numeiro"`; não equivale a isolamento multi-tenant.
 - `src/lib/data.ts`: `fetchGuioes` filtra `client_id`, mas `fetchIdeas` não filtra workspace; `updateGuiao` usa RPC `guiao_update`; autenticação atual usa código de equipa e token em localStorage.
 - `src/lib/types.ts`: `Guiao.status` apenas `aprovado | rejeitado`; `Guiao` tem `validado`, `gravado`, `hooks`, `corpo`, `history`; `Idea` tem `take_numeiro`. O esquema precisa de migração compatível e generalização.
-
 - `src/components/use-guioes.ts` tem default de cliente fixo. A autorização SQL/RLS e implementação de RPCs não estão incluídas no ZIP e exigem inspeção em ambiente seguro.
 - `src/components/app-search.tsx` tem pesquisa visual sem pesquisa funcional; links `#` foram identificados na auditoria.
 
@@ -603,39 +602,69 @@ Cada requisito abaixo tem ID único, prioridade de entrega (P0 crítico, P1 esse
 
 ## 5A. Requisitos adicionais — equipas duplas e operação multidisciplinar
 
-Os requisitos seguintes complementam e, em caso de conflito, prevalecem sobre os requisitos genéricos de Equipa, Perfil, Settings, Dashboard, Calendário e Biblioteca descritos acima. **TEAM-01 [P0] — Identidade única.** Um utilizador entra uma vez e tem um `auth_user_id` estável.
+Os requisitos seguintes complementam e, em caso de conflito, prevalecem sobre os requisitos genéricos de Equipa, Perfil, Settings, Dashboard, Calendário e Biblioteca descritos acima.
 
-**Aceitação:** login da agência com acesso aos clientes A e B alterna entre ambos sem novo login; logout invalida a sessão; conta do cliente A não vê B. **TEAM-02 [P0] — Dois diretórios de equipa.** `/agency/team` lista staff interno; `/w/[workspace]/settings/team` lista membros do cliente e colaboradores da agência atribuídos, identificados com etiquetas distintas.
+**TEAM-01 [P0] — Identidade única.** Um utilizador entra uma vez e tem um `auth_user_id` estável.
 
-**Aceitação:** Client Admin só pode convidar e gerir `client_staff` do seu cliente, não consegue editar `agency_staff` nem elevar autoridade. **TEAM-03 [P0] — Atribuições da agência.** Agency Owner/Admin delegado atribui membros internos a um ou vários clientes com papel e grants específicos por cliente.
+**Aceitação:** login da agência com acesso aos clientes A e B alterna entre ambos sem novo login; logout invalida a sessão; conta do cliente A não vê B.
 
-**Aceitação:** remover atribuição a B retira B do seletor, dashboard, API, pesquisa, notificações e ficheiros, mantendo A intacto. **TEAM-04 [P0] — Restrição de membros do cliente.** Convites client-side ficam vinculados ao workspace emissor e não podem aceitar outro workspace por alteração de payload.
+**TEAM-02 [P0] — Dois diretórios de equipa.** `/agency/team` lista staff interno; `/w/[workspace]/settings/team` lista membros do cliente e colaboradores da agência atribuídos, identificados com etiquetas distintas.
 
-**Aceitação:** testes negativos com URL, API, websocket, search e storage devolvem acesso negado em B. **TEAM-05 [P0] — Matriz de permissões configurável.** Suportar permissões `module.action` e escopos `workspace/project/assigned_only`; modelos por profissão são apenas sugestões.
+**Aceitação:** Client Admin só pode convidar e gerir `client_staff` do seu cliente, não consegue editar `agency_staff` nem elevar autoridade.
 
-**Aceitação:** um editor só altera itens atribuídos quando `assigned_only`; pode consultar módulo sem editar quando grant read-only. **TEAM-06 [P0] — Tarefas e responsáveis.** Cada tarefa tem workspace, projeto, responsável, criador, prioridade, estado, deadline, dependências, comentários e histórico.
+**TEAM-03 [P0] — Atribuições da agência.** Agency Owner/Admin delegado atribui membros internos a um ou vários clientes com papel e grants específicos por cliente.
+
+**Aceitação:** remover atribuição a B retira B do seletor, dashboard, API, pesquisa, notificações e ficheiros, mantendo A intacto.
+
+**TEAM-04 [P0] — Restrição de membros do cliente.** Convites client-side ficam vinculados ao workspace emissor e não podem aceitar outro workspace por alteração de payload.
+
+**Aceitação:** testes negativos com URL, API, websocket, search e storage devolvem acesso negado em B.
+
+**TEAM-05 [P0] — Matriz de permissões configurável.** Suportar permissões `module.action` e escopos `workspace/project/assigned_only`; modelos por profissão são apenas sugestões.
+
+**Aceitação:** um editor só altera itens atribuídos quando `assigned_only`; pode consultar módulo sem editar quando grant read-only.
+
+**TEAM-06 [P0] — Tarefas e responsáveis.** Cada tarefa tem workspace, projeto, responsável, criador, prioridade, estado, deadline, dependências, comentários e histórico.
 
 **Aceitação:** não é possível atribuir tarefa a utilizador sem acesso ao projeto; mudança de responsável notifica ambos; tarefa concluída permanece auditável.
 
 **TEAM-07 [P1] — Dashboard por âmbito.** Agency Staff tem vista `Os meus clientes` e `As minhas tarefas`; Client Staff entra diretamente no cliente.
 
-**Aceitação:** agregados globais nunca incluem clientes não autorizados; filtros persistem por utilizador e não vazam caches entre clientes. **TEAM-08 [P1] — Equipas funcionais e capacidade.** Criar equipas de Produção, Pós-produção, Clipping, Estratégia, Social e Copy; gerir carga por responsável, estado e prazo.
+**Aceitação:** agregados globais nunca incluem clientes não autorizados; filtros persistem por utilizador e não vazam caches entre clientes.
 
-**Aceitação:** capacidade apresenta tarefas pendentes por pessoa/cliente e respeita acesso a projetos privados. **TEAM-09 [P1] — Workflow adaptável por cliente.** Definir etapas, aprovadores, SLA e ações automáticas por tipo de conteúdo, incluindo clipping e vídeo longo.
+**TEAM-08 [P1] — Equipas funcionais e capacidade.** Criar equipas de Produção, Pós-produção, Clipping, Estratégia, Social e Copy; gerir carga por responsável, estado e prazo.
 
-**Aceitação:** fluxo de Cliente A não altera Cliente B; transições não autorizadas são rejeitadas; histórico imutável. **TEAM-10 [P1] — Aprovações sem conflito.** Aprovação pode exigir diretor criativo, cliente ou ambos; política opcional impede autoaprovação.
+**Aceitação:** capacidade apresenta tarefas pendentes por pessoa/cliente e respeita acesso a projetos privados.
 
-**Aceitação:** decisão guarda versão, ator, função e timestamp; nova versão exige nova aprovação quando configurado. **TEAM-11 [P1] — Freelancer/guest.** Acesso temporário limitado a projetos ou tarefas, com expiração e revogação.
+**TEAM-09 [P1] — Workflow adaptável por cliente.** Definir etapas, aprovadores, SLA e ações automáticas por tipo de conteúdo, incluindo clipping e vídeo longo.
 
-**Aceitação:** após expirar, não acede a conteúdo, uploads nem downloads; histórico mantém autoria. **TEAM-12 [P1] — Notificações direcionadas.** Atribuições, menções, aprovações, alterações e prazos notificam apenas utilizadores autorizados.
+**Aceitação:** fluxo de Cliente A não altera Cliente B; transições não autorizadas são rejeitadas; histórico imutável.
 
-**Aceitação:** remover membership impede novas notificações e invalida deep links anteriores. **TEAM-13 [P1] — Separação de settings.** `/agency/settings` controla políticas globais e clientes; `/w/[workspace]/settings` controla opções delegadas do cliente; `/profile` controla preferências pessoais.
+**TEAM-10 [P1] — Aprovações sem conflito.** Aprovação pode exigir diretor criativo, cliente ou ambos; política opcional impede autoaprovação.
 
-**Aceitação:** Client Admin não altera política global ou permissões superiores. **TEAM-14 [P1] — Produção e edição.** Sessões, shot lists, ficheiros brutos, versões de edição, clips e entregas são associados a tarefas e conteúdos.
+**Aceitação:** decisão guarda versão, ator, função e timestamp; nova versão exige nova aprovação quando configurado.
 
-**Aceitação:** videógrafo entrega material → editor recebe tarefa → envia versão → reviewer aprova → social manager agenda; todas as transições auditáveis. **TEAM-15 [P1] — Transferência e offboarding.** Remover um membro solicita reatribuição de tarefas pendentes e mantém versões e comentários.
+**TEAM-11 [P1] — Freelancer/guest.** Acesso temporário limitado a projetos ou tarefas, com expiração e revogação.
 
-**Aceitação:** sem tarefas órfãs invisíveis; propriedade de conteúdo permanece no workspace. **TEAM-16 [P0] — Segurança e testes de autorização.** Testar matriz de agência vs cliente em leitura, escrita, exportação, RPC, realtime, storage, search e jobs.
+**Aceitação:** após expirar, não acede a conteúdo, uploads nem downloads; histórico mantém autoria.
+
+**TEAM-12 [P1] — Notificações direcionadas.** Atribuições, menções, aprovações, alterações e prazos notificam apenas utilizadores autorizados.
+
+**Aceitação:** remover membership impede novas notificações e invalida deep links anteriores.
+
+**TEAM-13 [P1] — Separação de settings.** `/agency/settings` controla políticas globais e clientes; `/w/[workspace]/settings` controla opções delegadas do cliente; `/profile` controla preferências pessoais.
+
+**Aceitação:** Client Admin não altera política global ou permissões superiores.
+
+**TEAM-14 [P1] — Produção e edição.** Sessões, shot lists, ficheiros brutos, versões de edição, clips e entregas são associados a tarefas e conteúdos.
+
+**Aceitação:** videógrafo entrega material → editor recebe tarefa → envia versão → reviewer aprova → social manager agenda; todas as transições auditáveis.
+
+**TEAM-15 [P1] — Transferência e offboarding.** Remover um membro solicita reatribuição de tarefas pendentes e mantém versões e comentários.
+
+**Aceitação:** sem tarefas órfãs invisíveis; propriedade de conteúdo permanece no workspace.
+
+**TEAM-16 [P0] — Segurança e testes de autorização.** Testar matriz de agência vs cliente em leitura, escrita, exportação, RPC, realtime, storage, search e jobs.
 
 **Aceitação:** nenhuma combinação de identidade/token/ID externo permite acesso cruzado ou elevação de privilégios.
 
@@ -646,7 +675,6 @@ Os requisitos seguintes complementam e, em caso de conflito, prevalecem sobre os
 - Dois membros com o mesmo cargo profissional mas permissões diferentes.
 - Utilizador interno sem clientes atribuídos: dashboard vazio, sem acesso a conteúdo.
 - Transferência de tarefas de membro removido e manutenção de histórico.
-
 - Recurso partilhado por link: acesso exige autorização atual, mesmo após expiração/revogação do membership.
 - Mudança de workspace durante upload, job de IA ou publicação: o job mantém o workspace original e valida autorização no momento da submissão.
 
@@ -654,19 +682,33 @@ Os requisitos seguintes complementam e, em caso de conflito, prevalecem sobre os
 
 **FL-01 Onboarding:** criar conta → verificar email → criar workspace → escolher timezone/moeda → convidar equipa → aceitar convite → entrar com função correta.
 
-**Aceitação:** convites expirados/revogados falham; um utilizador de B não vê A. **FL-02 Curadoria editorial:** adicionar fonte → classificar → associar referência → criar guião → editar hooks/body/CTA → submeter → comentar → pedir alterações → nova versão → aprovar.
+**Aceitação:** convites expirados/revogados falham; um utilizador de B não vê A.
 
-**Aceitação:** comentários e histórico preservados; aprovação refere a versão correta. **FL-03 Produção:** guião aprovado → calendarizar → abrir fila → teleprompter → gravar múltiplos takes → associar media → revisão de vídeo → aprovado.
+**FL-02 Curadoria editorial:** adicionar fonte → classificar → associar referência → criar guião → editar hooks/body/CTA → submeter → comentar → pedir alterações → nova versão → aprovar.
 
-**Aceitação:** trocar data não perde seleção nem associa take ao guião errado. **FL-04 Publicação:** vídeo aprovado → preparar variantes → validar conta e permissões → agendar/publicar → registar URL/ID externo → sincronizar métricas.
+**Aceitação:** comentários e histórico preservados; aprovação refere a versão correta.
 
-**Aceitação:** retry não publica duplicado e falha de API não marca como publicado. **FL-05 IA:** fonte → agente gera proposta → revisão humana → criar versão de guião → registar custo e proveniência.
+**FL-03 Produção:** guião aprovado → calendarizar → abrir fila → teleprompter → gravar múltiplos takes → associar media → revisão de vídeo → aprovado.
 
-**Aceitação:** IA não publica nem aprova automaticamente sem política explícita; falha/cancelamento não gera conteúdo parcial aprovado. **FL-06 Multi-workspace:** membro de A e B alterna contexto → pesquisa, dashboard, notificações, ficheiros, analytics e custos refletem apenas workspace selecionado.
+**Aceitação:** trocar data não perde seleção nem associa take ao guião errado.
 
-**Aceitação:** testes negativos com ID manipulado, chamadas diretas e canais realtime. **FL-07 Offboarding:** remover membro → revogar sessões/permissões → preservar autoria e audit log → bloquear uploads e downloads protegidos.
+**FL-04 Publicação:** vídeo aprovado → preparar variantes → validar conta e permissões → agendar/publicar → registar URL/ID externo → sincronizar métricas.
 
-**Aceitação:** URLs temporárias respeitam expiração; acesso API recusado após revogação. **FL-08 Recuperação:** falha de rede durante edição → estado de erro → recuperação do rascunho e retry → ausência de duplicados.
+**Aceitação:** retry não publica duplicado e falha de API não marca como publicado.
+
+**FL-05 IA:** fonte → agente gera proposta → revisão humana → criar versão de guião → registar custo e proveniência.
+
+**Aceitação:** IA não publica nem aprova automaticamente sem política explícita; falha/cancelamento não gera conteúdo parcial aprovado.
+
+**FL-06 Multi-workspace:** membro de A e B alterna contexto → pesquisa, dashboard, notificações, ficheiros, analytics e custos refletem apenas workspace selecionado.
+
+**Aceitação:** testes negativos com ID manipulado, chamadas diretas e canais realtime.
+
+**FL-07 Offboarding:** remover membro → revogar sessões/permissões → preservar autoria e audit log → bloquear uploads e downloads protegidos.
+
+**Aceitação:** URLs temporárias respeitam expiração; acesso API recusado após revogação.
+
+**FL-08 Recuperação:** falha de rede durante edição → estado de erro → recuperação do rascunho e retry → ausência de duplicados.
 
 **Aceitação:** versão aprovada não é silenciosamente sobrescrita.
 
@@ -706,7 +748,6 @@ Os requisitos seguintes complementam e, em caso de conflito, prevalecem sobre os
 ## 8. API, serviços e arquitetura
 
 - Next.js App Router com server-side auth guard; Supabase Auth para utilizadores, Postgres/RLS para autorização, Storage privado para media e Realtime restrito.
-
 - Camada de serviço por domínio (workspaces, sources, scripts, reviews, production, media, publications, metrics, agents, billing-costs); validação de inputs no servidor com schemas versionados.
 - Mutations sensíveis via server actions ou endpoints com autenticação, autorização, rate limiting, audit log e idempotency key.
 - Jobs assíncronos para ingestão, IA, transcrição, thumbnails, publicação e métricas; queue com retry exponencial, dead-letter e observabilidade.
@@ -742,7 +783,6 @@ Os requisitos seguintes complementam e, em caso de conflito, prevalecem sobre os
 
 - **Disponibilidade alvo:** 99,9% mensal após lançamento, dependente de fornecedores; monitorização e alertas para incidentes.
 - **Performance alvo:** p75 LCP ≤ 2,5 s em desktop em condições de referência; ações simples p95 ≤ 800 ms no backend excluindo IA/uploads; paginação em listas.
-
 - **Acessibilidade:** WCAG 2.2 AA nas páginas críticas, teclado completo, focus states, labels e contraste.
 - **Compatibilidade:** Chrome, Safari, Firefox e Edge recentes; mobile responsivo, teleprompter testado em iOS/Android.
 - **Proteção:** HTTPS, CSP, CSRF quando aplicável, XSS-safe rendering, validação de URLs, rate limiting, MFA para admins configurável, segredo em vault, rotação de tokens.
@@ -773,9 +813,17 @@ Os requisitos seguintes complementam e, em caso de conflito, prevalecem sobre os
 
 ## 12. Backlog por dependências e entregáveis
 
-**Fase A — Fundação e segurança:** inventário SQL/RLS, auth individual, organizations/workspaces, membership, autorização, testes de isolamento, design system e CI. **Saída:** multi-tenant seguro. **Fase B — Núcleo editorial:** fontes, guiões, versões, revisão, teleprompter, pesquisa, notificações e dashboard real. **Saída:** ciclo editorial completo.
+**Fase A — Fundação e segurança:** inventário SQL/RLS, auth individual, organizations/workspaces, membership, autorização, testes de isolamento, design system e CI. **Saída:** multi-tenant seguro.
 
-**Fase C — Produção e colaboração:** calendário, tarefas, gravação, assets, revisão de vídeo, equipas e permissões. **Saída:** pipeline de produção rastreável. **Fase D — Distribuição e inteligência:** contas sociais, publicações, métricas, IA, agentes, referências, custos e relatórios. **Saída:** ciclo fechado com dados reais. **Fase E — Robustez e lançamento:** performance tuning, testes de carga, acessibilidade, incident response, restore drill, importação de dados e UAT multi-cliente. **Saída:** release 1.0. Não estimar datas/custos sem inventário SQL, desenho aprovado, equipa disponível e escolha de fornecedores. Cada etapa tem dependências técnicas e deve manter testes verdes.
+**Fase B — Núcleo editorial:** fontes, guiões, versões, revisão, teleprompter, pesquisa, notificações e dashboard real. **Saída:** ciclo editorial completo.
+
+**Fase C — Produção e colaboração:** calendário, tarefas, gravação, assets, revisão de vídeo, equipas e permissões. **Saída:** pipeline de produção rastreável.
+
+**Fase D — Distribuição e inteligência:** contas sociais, publicações, métricas, IA, agentes, referências, custos e relatórios. **Saída:** ciclo fechado com dados reais.
+
+**Fase E — Robustez e lançamento:** performance tuning, testes de carga, acessibilidade, incident response, restore drill, importação de dados e UAT multi-cliente. **Saída:** release 1.0.
+
+Não estimar datas/custos sem inventário SQL, desenho aprovado, equipa disponível e escolha de fornecedores. Cada etapa tem dependências técnicas e deve manter testes verdes.
 
 ## 13. Definition of Done por requisito
 
@@ -806,7 +854,6 @@ Os requisitos seguintes complementam e, em caso de conflito, prevalecem sobre os
 
 1. Criar `organizations`, `agency_memberships`, `workspace_access`, `permission_grants` e `functional_teams` com constraints e RLS; migrar membership antigo em transação e sem eliminar dados.
 2. Migrar `DEFAULT_CLIENT = "numeiro"` para workspace real com `organization_id`; não confiar em `client_id` vindo do frontend.
-
 3. Substituir códigos partilhados por Supabase Auth individual e convites por email; bloquear acesso legado após migração validada.
 4. Implementar middleware de autenticação, resolução do contexto e serviço central de autorização com testes de negação.
 5. Criar layout de agência (`/agency/...`) e layout do cliente (`/w/[slug]/...`), incluindo seletor apenas para utilizadores autorizados.
@@ -814,11 +861,19 @@ Os requisitos seguintes complementam e, em caso de conflito, prevalecem sobre os
 7. Construir diretórios de equipas separados, atribuições internas, gestão de papéis e convites client-side com teto de autoridade.
 8. Integrar tarefas, produção, clipping e aprovações com o conteúdo canónico e histórico.
 9. Adicionar testes E2E para dois clientes e duas equipas, incluindo ataques de alteração de IDs e remoção de permissões durante sessões ativas.
-10. Migrar clientes piloto com rollback, backups e reconciliação de contagens antes de ativar em produção. **Critério de release:** demonstrar em staging, com dados reais de teste, (a) um colaborador da agência a alternar entre dois clientes, (b) uma equipa do cliente a trabalhar apenas no seu workspace, (c) gestão de tarefas e aprovação entre especialidades, e (d) tentativas de acesso cruzado bloqueadas em UI, API, RLS e storage. --# PARTE II — Consolidação Viral Engine, decisões estratégicas e especificação operacional
+10. Migrar clientes piloto com rollback, backups e reconciliação de contagens antes de ativar em produção.
+
+**Critério de release:** demonstrar em staging, com dados reais de teste, (a) um colaborador da agência a alternar entre dois clientes, (b) uma equipa do cliente a trabalhar apenas no seu workspace, (c) gestão de tarefas e aprovação entre especialidades, e (d) tentativas de acesso cruzado bloqueadas em UI, API, RLS e storage.
+
+---
+
+# PARTE II — Consolidação Viral Engine, decisões estratégicas e especificação operacional
 
 ## 17. Fontes, precedência e rastreabilidade
 
-**Fontes consolidadas:** (A) PRD Viral Engine (web app) v1.0, 28-10-2026, 24 páginas; (B) ClipStudio PRD v1.0; (C) ClipStudio PRD v1.1 Agency + Client; (D) inspeção estática do repositório `clipstudio-main` fornecido. O documento A descreve um caso operacional concreto (Numeiro, 30 guiões, três hooks, 90 variações), não uma regra universal para todos os workspaces. B/C descrevem a plataforma multi-cliente. A versão 2.0 preserva ambos: **plataforma multi-workspace configurável + template operacional Viral Engine**. **Precedência:** segurança e isolamento multi-tenant > políticas organizacionais > configuração de workspace > templates de workflow > preferências pessoais. Os números e prazos do PRD Viral Engine são metas piloto, não compromissos universais. Estimativas de custos, capacidades de APIs, modelos LLM e datas devem ser revalidadas antes de implementação. A execução real do motor Python, as políticas RLS de produção e integrações não foram verificadas no ZIP; marcar `A VALIDAR`.
+**Fontes consolidadas:** (A) PRD Viral Engine (web app) v1.0, 28-10-2026, 24 páginas; (B) ClipStudio PRD v1.0; (C) ClipStudio PRD v1.1 Agency + Client; (D) inspeção estática do repositório `clipstudio-main` fornecido. O documento A descreve um caso operacional concreto (Numeiro, 30 guiões, três hooks, 90 variações), não uma regra universal para todos os workspaces. B/C descrevem a plataforma multi-cliente. A versão 2.0 preserva ambos: **plataforma multi-workspace configurável + template operacional Viral Engine**.
+
+**Precedência:** segurança e isolamento multi-tenant > políticas organizacionais > configuração de workspace > templates de workflow > preferências pessoais. Os números e prazos do PRD Viral Engine são metas piloto, não compromissos universais. Estimativas de custos, capacidades de APIs, modelos LLM e datas devem ser revalidadas antes de implementação. A execução real do motor Python, as políticas RLS de produção e integrações não foram verificadas no ZIP; marcar `A VALIDAR`.
 
 | Fonte Viral Engine | Decisão de consolidação | Referência |
 |---|---|---|
@@ -916,9 +971,19 @@ A aplicação gere a cadeia **Descoberta → Estratégia → Guião → Aprovaç
 
 ## 20. Preset operacional Viral Engine / Numeiro
 
-**Template, não hardcode.** Workspace define `target_scripts_per_day=30`, `hooks_per_script=3`, `target_variants_per_day=90`, `scheduled_run=18:00 Asia/Dubai`, `deadline=20:00`, `topup_limit=1`, `manual_generate_range=1..40`. São defaults retirados do PRD original e podem mudar por workspace. Definir capacidade real e custos antes de ativar 90 renders/dia. A conta do talento pode sugerir tema por texto/voz; a geração devolve
+**Template, não hardcode.** Workspace define `target_scripts_per_day=30`, `hooks_per_script=3`, `target_variants_per_day=90`, `scheduled_run=18:00 Asia/Dubai`, `deadline=20:00`, `topup_limit=1`, `manual_generate_range=1..40`. São defaults retirados do PRD original e podem mudar por workspace. Definir capacidade real e custos antes de ativar 90 renders/dia. A conta do talento pode sugerir tema por texto/voz; a geração devolve propostas sujeitas a aprovação. O talento pode rejeitar guião com motivo; a substituição é uma nova execução associada ao original.
 
-propostas sujeitas a aprovação. O talento pode rejeitar guião com motivo; a substituição é uma nova execução associada ao original. **Pipeline de agentes:** Aprendiz/Analista/Curioso/Repórter/Filósofo → Estratega (slots) → Hook Smith → Guionista → Crítico → Editor. Cada passo tem `agent_version`, `prompt_version`, `model`, `input_hash`, `output_ref`, `cost`, `duration`, `status`, `error`, `run_id`. Os modelos mencionados no PRD original são configurações históricas, não garantia de disponibilidade. Validação de factos, fontes e citações obrigatória; uma citação não verificada não entra num guião factual. Regras de qualidade (ex. três hooks distintos, nota mínima) são presets configuráveis e auditáveis, não regras universais. **Execuções:** agendadas, manuais, reposição, regenerar guião, regenerar hook e reprocessar vídeo. Job orchestration fora de funções HTTP curtas. `run` possui `workspace_id`, `requested_by`, `source`, `trigger`, `schedule_id`, `target`, `progress`, `step`, `started_at`, `finished_at`, `cost`, `error_code` e eventos. Botão “Gerar agora” exige grant e budget. Concorrência: política por workspace e tipo de job; locks transacionais e idempotência. Reposição só uma vez por ciclo configurado, com contabilização clara do número de aprovados. **Teleprompter:** hook 1/2/3 e corpo separados; blocos Hook/Body/CTA personalizados; espelho horizontal e vertical independentes; fullscreen, velocidade 1–10, letra 32–96px, comandos Bluetooth e exportação TXT. A regra original de marcar gravado ao ultrapassar 80% de scroll pode produzir falsos positivos: registar `viewed_80_percent` como telemetria, mas exigir ação “Marcar como gravado” ou confirmação no avanço; opção de auto-marcação apenas por política explícita do workspace. Não gravados passam para o dia seguinte sem perder ligação à sessão original. **Pós-produção:** ingestão de sessão multi-câmara e áudio com checksums, metadados e armazenamento externo escalável; segmentação por guião, seleção de takes, render de três variantes, legendas, capas, revisão lado a lado e exportação MP4/FCPXML (quando tecnicamente suportado). Render no worker separado; pré-visualização e estado assíncrono na web. Suporte a correção humana no Premiere/DaVinci. O vídeo bruto não deve ser armazenado por defeito no bucket de assets finais; retenção e localização por cliente. **Sala de agentes:** vista visual de agentes a trabalhar baseada exclusivamente em eventos persistidos; inclui modo acessível de tabela, estados, tempos, custos e falhas. Não inventar mensagens ou progresso. **Contador de reserva:** medir guiões gravados e vídeos aprovados ainda não publicados em dias de stock, por conta e por formato, com base na cadência configurada.
+**Pipeline de agentes:** Aprendiz/Analista/Curioso/Repórter/Filósofo → Estratega (slots) → Hook Smith → Guionista → Crítico → Editor. Cada passo tem `agent_version`, `prompt_version`, `model`, `input_hash`, `output_ref`, `cost`, `duration`, `status`, `error`, `run_id`. Os modelos mencionados no PRD original são configurações históricas, não garantia de disponibilidade. Validação de factos, fontes e citações obrigatória; uma citação não verificada não entra num guião factual. Regras de qualidade (ex. três hooks distintos, nota mínima) são presets configuráveis e auditáveis, não regras universais.
+
+**Execuções:** agendadas, manuais, reposição, regenerar guião, regenerar hook e reprocessar vídeo. Job orchestration fora de funções HTTP curtas. `run` possui `workspace_id`, `requested_by`, `source`, `trigger`, `schedule_id`, `target`, `progress`, `step`, `started_at`, `finished_at`, `cost`, `error_code` e eventos. Botão “Gerar agora” exige grant e budget. Concorrência: política por workspace e tipo de job; locks transacionais e idempotência. Reposição só uma vez por ciclo configurado, com contabilização clara do número de aprovados.
+
+**Teleprompter:** hook 1/2/3 e corpo separados; blocos Hook/Body/CTA personalizados; espelho horizontal e vertical independentes; fullscreen, velocidade 1–10, letra 32–96px, comandos Bluetooth e exportação TXT. A regra original de marcar gravado ao ultrapassar 80% de scroll pode produzir falsos positivos: registar `viewed_80_percent` como telemetria, mas exigir ação “Marcar como gravado” ou confirmação no avanço; opção de auto-marcação apenas por política explícita do workspace. Não gravados passam para o dia seguinte sem perder ligação à sessão original.
+
+**Pós-produção:** ingestão de sessão multi-câmara e áudio com checksums, metadados e armazenamento externo escalável; segmentação por guião, seleção de takes, render de três variantes, legendas, capas, revisão lado a lado e exportação MP4/FCPXML (quando tecnicamente suportado). Render no worker separado; pré-visualização e estado assíncrono na web. Suporte a correção humana no Premiere/DaVinci. O vídeo bruto não deve ser armazenado por defeito no bucket de assets finais; retenção e localização por cliente.
+
+**Sala de agentes:** vista visual de agentes a trabalhar baseada exclusivamente em eventos persistidos; inclui modo acessível de tabela, estados, tempos, custos e falhas. Não inventar mensagens ou progresso.
+
+**Contador de reserva:** medir guiões gravados e vídeos aprovados ainda não publicados em dias de stock, por conta e por formato, com base na cadência configurada.
 
 ## 21. Social accounts e publicação multi-canal
 
@@ -945,7 +1010,9 @@ Um workspace pode gerir N criadores e cada criador N contas em Instagram, TikTok
 
 ## 23. Modelo de dados adicional e eventos
 
-Acrescentar às entidades da Parte I: `creators`, `social_accounts`, `content_briefs`, `content_items`, `content_versions`, `hooks`, `takes`, `content_variants`, `publication_targets`, `metric_snapshots`, `agent_definitions`, `agent_versions`, `agent_runs`, `agent_events`, `run_steps`, `job_attempts`, `media_ingests`, `asset_versions`, `review_annotations`, `approval_policies`, `workflow_templates`, `workflow_instances`, `workflow_transitions`, `inbox_items`, `notification_preferences`, `capacity_plans`, `experiments`, `integration_connections`, `integration_syncs`, `workspace_budgets`, `audit_logs`. Reutilizar tabelas atuais por migração com mapping, não criar duplicados paralelos sem estratégia. Chaves de domínio `workspace_id` + FK; constraints de pertença cruzada e índices por `workspace_id`, `status`, `created_at`; índices únicos para idempotência e `external_platform_id` quando aplicável. Proibir cascades destrutivas sobre logs e publicações históricas. **Eventos de domínio:** `source.approved`, `script.submitted`, `script.approved`, `script.rejected`, `recording.confirmed`, `asset.uploaded`, `variant.ready`, `review.changes_requested`, `review.approved`, `publication.scheduled`, `publication.published`, `publication.failed`, `metrics.synced`, `run.failed`. Outbox transacional para publicar eventos; consumidores idempotentes; esquema versionado e dead-letter para falhas.
+Acrescentar às entidades da Parte I: `creators`, `social_accounts`, `content_briefs`, `content_items`, `content_versions`, `hooks`, `takes`, `content_variants`, `publication_targets`, `metric_snapshots`, `agent_definitions`, `agent_versions`, `agent_runs`, `agent_events`, `run_steps`, `job_attempts`, `media_ingests`, `asset_versions`, `review_annotations`, `approval_policies`, `workflow_templates`, `workflow_instances`, `workflow_transitions`, `inbox_items`, `notification_preferences`, `capacity_plans`, `experiments`, `integration_connections`, `integration_syncs`, `workspace_budgets`, `audit_logs`. Reutilizar tabelas atuais por migração com mapping, não criar duplicados paralelos sem estratégia. Chaves de domínio `workspace_id` + FK; constraints de pertença cruzada e índices por `workspace_id`, `status`, `created_at`; índices únicos para idempotência e `external_platform_id` quando aplicável. Proibir cascades destrutivas sobre logs e publicações históricas.
+
+**Eventos de domínio:** `source.approved`, `script.submitted`, `script.approved`, `script.rejected`, `recording.confirmed`, `asset.uploaded`, `variant.ready`, `review.changes_requested`, `review.approved`, `publication.scheduled`, `publication.published`, `publication.failed`, `metrics.synced`, `run.failed`. Outbox transacional para publicar eventos; consumidores idempotentes; esquema versionado e dead-letter para falhas.
 
 ## 24. Fluxos E2E detalhados e testes adicionais
 
@@ -969,13 +1036,27 @@ Acrescentar às entidades da Parte I: `creators`, `social_accounts`, `content_br
 
 ## 25. NFRs, qualidade e critérios de lançamento
 
-**Metas propostas para validar em staging:** p95 de navegação principal <= 2,5s em dispositivos-alvo; ações interativas com feedback <= 1s; atualização de progresso <= 10s quando online; teleprompter fluido no iPad de referência; WCAG 2.2 AA; zero vulnerabilidades críticas abertas; zero testes de isolamento falhados; backups e restore ensaiados; alertas de job e integração ativos; E2E críticos 100% verdes. 99,5% de disponibilidade é **objetivo de serviço**, não garantia automática do fornecedor. Definir SLO e janela de medição. Nenhuma rota morta, botão decorativo ou placeholder enganador em produção. Funcionalidade ainda indisponível deve estar escondida ou explicitamente marcada como não disponível.
+**Metas propostas para validar em staging:** p95 de navegação principal ≤ 2,5s em dispositivos-alvo; ações interativas com feedback ≤ 1s; atualização de progresso ≤ 10s quando online; teleprompter fluido no iPad de referência; WCAG 2.2 AA; zero vulnerabilidades críticas abertas; zero testes de isolamento falhados; backups e restore ensaiados; alertas de job e integração ativos; E2E críticos 100% verdes. 99,5% de disponibilidade é **objetivo de serviço**, não garantia automática do fornecedor. Definir SLO e janela de medição. Nenhuma rota morta, botão decorativo ou placeholder enganador em produção. Funcionalidade ainda indisponível deve estar escondida ou explicitamente marcada como não disponível.
 
 ## 26. Plano de entrega por dependências (escopo completo, sem cortes funcionais)
 
-**W0 — Inventário e contratos:** validar SQL/RLS/RPC, motor Python, contas sociais, formatos de media, serviços externos, custos e capacidades; congelar taxonomias e eventos. **W1 — Fundação:** auth, agency/client memberships, workspaces, políticas, RLS, storage, migração e testes de isolamento. **W2 — Conteúdo:** fontes, referências, briefs, guiões, versões, aprovações, teleprompter, pedidos do talento.
+**W0 — Inventário e contratos:** validar SQL/RLS/RPC, motor Python, contas sociais, formatos de media, serviços externos, custos e capacidades; congelar taxonomias e eventos.
 
-**W3 — Operações:** tarefas, produção, calendário, workload, inbox, templates e handoffs. **W4 — IA e jobs:** catálogo de agentes, presets, runs duráveis, custos, observabilidade, sala de agentes. **W5 — Media:** ingestão, clipping, edição, worker, variantes, biblioteca, revisão e exportações. **W6 — Distribuição e aprendizagem:** contas, calendário, publicação com aprovação, métricas, experimentos, repetir vencedor. **W7 — Hardening e rollout:** testes E2E, acessibilidade, desempenho, segurança, backup/restore, migração piloto e rollout gradual. Cada workstream entrega migração + API + UI + autorização + logs + testes + documentação; não declarar módulo concluído só porque a página existe. Entrega de W5 depende de worker real validado; W6 depende de API/plataforma autorizada, com fallback manual explicitamente testado.
+**W1 — Fundação:** auth, agency/client memberships, workspaces, políticas, RLS, storage, migração e testes de isolamento.
+
+**W2 — Conteúdo:** fontes, referências, briefs, guiões, versões, aprovações, teleprompter, pedidos do talento.
+
+**W3 — Operações:** tarefas, produção, calendário, workload, inbox, templates e handoffs.
+
+**W4 — IA e jobs:** catálogo de agentes, presets, runs duráveis, custos, observabilidade, sala de agentes.
+
+**W5 — Media:** ingestão, clipping, edição, worker, variantes, biblioteca, revisão e exportações.
+
+**W6 — Distribuição e aprendizagem:** contas, calendário, publicação com aprovação, métricas, experimentos, repetir vencedor.
+
+**W7 — Hardening e rollout:** testes E2E, acessibilidade, desempenho, segurança, backup/restore, migração piloto e rollout gradual.
+
+Cada workstream entrega migração + API + UI + autorização + logs + testes + documentação; não declarar módulo concluído só porque a página existe. Entrega de W5 depende de worker real validado; W6 depende de API/plataforma autorizada, com fallback manual explicitamente testado.
 
 ## 27. Decisões em aberto e pressupostos
 
@@ -990,15 +1071,15 @@ Acrescentar às entidades da Parte I: `creators`, `social_accounts`, `content_br
 
 ## 28. Definition of Ready / Done e controlo de alterações
 
-**Ready:** requisito com ID, owner, fluxo, protótipo, dados, permissões, dependências, erros, critérios de aceitação e testes; decisões abertas resolvidas ou documentadas. **Done:** migração aplicada em staging, RLS testada, API validada, UI funcional desktop/iPad/mobile, acessibilidade, logs, testes unitários/integrados/E2E, documentação atualizada e aprovação de produto. Mudanças ao PRD exigem entrada em `CHANGELOG`, impacto nos módulos, riscos e aprovação do owner; agentes não podem alterar silenciosamente regras de negócio. A implementação segue `AGENTS.md` (entregue separadamente), com este PRD como fonte funcional.
+**Ready:** requisito com ID, owner, fluxo, protótipo, dados, permissões, dependências, erros, critérios de aceitação e testes; decisões abertas resolvidas ou documentadas.
+
+**Done:** migração aplicada em staging, RLS testada, API validada, UI funcional desktop/iPad/mobile, acessibilidade, logs, testes unitários/integrados/E2E, documentação atualizada e aprovação de produto. Mudanças ao PRD exigem entrada em `CHANGELOG`, impacto nos módulos, riscos e aprovação do owner; agentes não podem alterar silenciosamente regras de negócio. A implementação segue `AGENTS.md` (entregue separadamente), com este PRD como fonte funcional.
 
 # PARTE III — Administração avançada, equipa em tempo real e evolução controlada (v2.1)
 
 ## 29. Princípio de produto: Content Operations OS
 
-**Decisão:** o ClipStudio é o sistema central de operações de conteúdo e clipping para organizações/agências e workspaces de criadores, não uma ferramenta isolada de geração. Todo o conteúdo tem identidade canónica e todo o trabalho tem responsável, estado, contexto, deadline e trilho de auditoria. A arquitetura suporta agência multi-cliente, equipa exclusiva do
-
-cliente, convidados temporários e múltiplas contas sociais por criador. Regras de acesso nunca são deduzidas do título profissional.
+**Decisão:** o ClipStudio é o sistema central de operações de conteúdo e clipping para organizações/agências e workspaces de criadores, não uma ferramenta isolada de geração. Todo o conteúdo tem identidade canónica e todo o trabalho tem responsável, estado, contexto, deadline e trilho de auditoria. A arquitetura suporta agência multi-cliente, equipa exclusiva do cliente, convidados temporários e múltiplas contas sociais por criador. Regras de acesso nunca são deduzidas do título profissional.
 
 ### 29.1 Padrão para incorporar pedidos novos
 
@@ -1008,55 +1089,99 @@ Qualquer pedido, incluindo um botão ou novo separador, recebe `change_id`, owne
 
 **CAP-01 [P0] Registo central de capacidades.** Cada feature/ação/API/job tem `feature_key` estável, módulo, descrição, risco, ações possíveis, escopos suportados, flag de disponibilidade, dono e versão. Uma feature não entra em produção sem registo; ocultar no menu não é autorização.
 
-**Aceitação:** nova funcionalidade registada aparece automaticamente no inventário de administração e nos testes de autorização. **CAP-02 [P0] Duas matrizes administrativas.** Vistas `pessoas × capacidades` e `funções × capacidades`, com pesquisa, filtros por agência/cliente/equipa/projeto, ações em lote, exportação, resumo de diferenças e preview antes de guardar.
+**Aceitação:** nova funcionalidade registada aparece automaticamente no inventário de administração e nos testes de autorização.
 
-**Aceitação:** Owner autorizado encontra todas as capacidades, sabe quem tem acesso e altera permissões sem editar código. **CAP-03 [P0] Papéis e exceções.** Templates por profissão (clipper, editor, SMM, videógrafo, estratega, copywriter) são pontos de partida; papéis customizados versionados e grants explícitos por pessoa, equipa, projeto ou recurso. A decisão é `deny-by-default`; `explicit deny` prevalece sobre allow; restrições de tenant, expiração, estado da conta e segregação de funções nunca podem ser ultrapassadas por grant local. `owner` é papel protegido e exige fluxo de transferência.
+**CAP-02 [P0] Duas matrizes administrativas.** Vistas `pessoas × capacidades` e `funções × capacidades`, com pesquisa, filtros por agência/cliente/equipa/projeto, ações em lote, exportação, resumo de diferenças e preview antes de guardar.
 
-**Aceitação:** dois editores com o mesmo cargo podem ter permissões distintas; cliente não pode conceder a si mesmo escopo de agência. **CAP-04 [P0] Permissões granulares.** Exemplos: `scripts.read/create/edit/submit/approve/delete`, `clipping.create/export`, `media.upload/download/share`, `review.comment/approve`, `publishing.schedule/publish`, `analytics.read`, `costs.read`, `team.invite/manage`, `permissions.manage`, `agents.configure/run`, `integrations.manage`. Separar leitura, edição, aprovação, publicação, download, exportação e gestão.
+**Aceitação:** Owner autorizado encontra todas as capacidades, sabe quem tem acesso e altera permissões sem editar código.
 
-**Aceitação:** utilizador autorizado a editar não recebe automaticamente poder de publicar ou aprovar. **CAP-05 [P0] Avaliação centralizada e explicável.** Função `authorize(actor, action, resource, context)` partilhada por APIs, jobs e camada de acesso a dados; RLS e storage como segunda linha. UI usa apenas `can()` para visibilidade/disabled, nunca como barreira única. Ecrã `Porque tem acesso?` apresenta papel/grant/escopo/expiração; simulador `Ver como utilizador` é somente leitura e não impersonation real.
+**CAP-03 [P0] Papéis e exceções.** Templates por profissão (clipper, editor, SMM, videógrafo, estratega, copywriter) são pontos de partida; papéis customizados versionados e grants explícitos por pessoa, equipa, projeto ou recurso. A decisão é `deny-by-default`; `explicit deny` prevalece sobre allow; restrições de tenant, expiração, estado da conta e segregação de funções nunca podem ser ultrapassadas por grant local. `owner` é papel protegido e exige fluxo de transferência.
 
-**Aceitação:** acesso negado por URL, API, Realtime, pesquisa, download e job mesmo que UI esteja desatualizada. **CAP-06 [P0] Gestão de ciclo de vida.** Convites com validade, aceitação, suspensão, remoção, acessos temporários com expiração, revisões periódicas de acessos, reatribuição de tarefas e revogação de tokens/sessões quando viável. URLs assinados previamente emitidos têm limites explícitos; para revogação imediata de ficheiros sensíveis usar proxy/rotação.
+**Aceitação:** dois editores com o mesmo cargo podem ter permissões distintas; cliente não pode conceder a si mesmo escopo de agência.
 
-**Aceitação:** membro removido perde novos acessos imediatamente, mantendo autoria e logs. **CAP-07 [P1] Controlo de mudanças sensíveis.** Preview do impacto (número de utilizadores/recursos), confirmação reforçada para publicação, finanças, integrações e permissões, aprovação por segunda pessoa quando configurada, trilho antes/depois, reversão segura e alertas de grants excessivos.
+**CAP-04 [P0] Permissões granulares.** Exemplos: `scripts.read/create/edit/submit/approve/delete`, `clipping.create/export`, `media.upload/download/share`, `review.comment/approve`, `publishing.schedule/publish`, `analytics.read`, `costs.read`, `team.invite/manage`, `permissions.manage`, `agents.configure/run`, `integrations.manage`. Separar leitura, edição, aprovação, publicação, download, exportação e gestão.
 
-**Aceitação:** alterações são atribuíveis, recuperáveis e não escalam privilégios. **CAP-08 [P1] Interface multi-cliente.** Administração da agência vê clientes autorizados e grants por cliente; administradores do cliente só veem o seu workspace e apenas podem delegar subconjunto permitido pela agência. Convidados podem receber acesso a uma peça/revisão com prazo e sem listar projetos.
+**Aceitação:** utilizador autorizado a editar não recebe automaticamente poder de publicar ou aprovar.
 
-**Aceitação:** nenhuma listagem ou contagem revela nomes de outros clientes. **CAP-09 [P1] Disponibilidade ≠ autorização.** Feature flags controlam rollout/planos/experiências; permissões controlam acesso a ações e dados. Uma flag ligada não concede acesso.
+**CAP-05 [P0] Avaliação centralizada e explicável.** Função `authorize(actor, action, resource, context)` partilhada por APIs, jobs e camada de acesso a dados; RLS e storage como segunda linha. UI usa apenas `can()` para visibilidade/disabled, nunca como barreira única. Ecrã `Porque tem acesso?` apresenta papel/grant/escopo/expiração; simulador `Ver como utilizador` é somente leitura e não impersonation real.
+
+**Aceitação:** acesso negado por URL, API, Realtime, pesquisa, download e job mesmo que UI esteja desatualizada.
+
+**CAP-06 [P0] Gestão de ciclo de vida.** Convites com validade, aceitação, suspensão, remoção, acessos temporários com expiração, revisões periódicas de acessos, reatribuição de tarefas e revogação de tokens/sessões quando viável. URLs assinados previamente emitidos têm limites explícitos; para revogação imediata de ficheiros sensíveis usar proxy/rotação.
+
+**Aceitação:** membro removido perde novos acessos imediatamente, mantendo autoria e logs.
+
+**CAP-07 [P1] Controlo de mudanças sensíveis.** Preview do impacto (número de utilizadores/recursos), confirmação reforçada para publicação, finanças, integrações e permissões, aprovação por segunda pessoa quando configurada, trilho antes/depois, reversão segura e alertas de grants excessivos.
+
+**Aceitação:** alterações são atribuíveis, recuperáveis e não escalam privilégios.
+
+**CAP-08 [P1] Interface multi-cliente.** Administração da agência vê clientes autorizados e grants por cliente; administradores do cliente só veem o seu workspace e apenas podem delegar subconjunto permitido pela agência. Convidados podem receber acesso a uma peça/revisão com prazo e sem listar projetos.
+
+**Aceitação:** nenhuma listagem ou contagem revela nomes de outros clientes.
+
+**CAP-09 [P1] Disponibilidade ≠ autorização.** Feature flags controlam rollout/planos/experiências; permissões controlam acesso a ações e dados. Uma flag ligada não concede acesso.
 
 **Aceitação:** feature off bloqueia operações relevantes com erro explícito, mesmo se a permissão existir.
 
 ### 30.1 Modelo lógico proposto (validar contra SQL real)
 
-`feature_registry(key,module,actions,risk,owner,version)`, `role_templates`, `role_versions`, `role_permissions`, `principal_grants(principal_type,principal_id,action,scope_type,scope_id,effect,expires_at,grante d_by)`, `policy_decisions` (amostrado e sem dados sensíveis), `access_reviews`, `permission_change_requests`, `feature_flags`. Índices e RLS por tenant; proibir chaves de autorização exclusivamente client-side. A semântica de precedência e de herança deve ser formalizada em testes determinísticos antes de implementar UI.
+`feature_registry(key,module,actions,risk,owner,version)`, `role_templates`, `role_versions`, `role_permissions`, `principal_grants(principal_type,principal_id,action,scope_type,scope_id,effect,expires_at,granted_by)`, `policy_decisions` (amostrado e sem dados sensíveis), `access_reviews`, `permission_change_requests`, `feature_flags`. Índices e RLS por tenant; proibir chaves de autorização exclusivamente client-side. A semântica de precedência e de herança deve ser formalizada em testes determinísticos antes de implementar UI.
 
 ## 31. Equipa, presença e centro operacional
 
 **OPS-01 [P0] Diretório e contadores.** Lista de colaboradores por agência, workspace, equipa e projeto; totais de membros, convidados, ativos, online, disponíveis, em tarefa, ausentes e bloqueados. Contagens deduplicadas por utilizador; visibilidade autorizada.
 
-**Aceitação:** utilizador com dois separadores abertos conta uma vez. **OPS-02 [P0] Estados distintos.** `online` = ligação Presence; `active` = atividade recente com timeout e consentimento; `working` = tarefa explicitamente iniciada; `available/busy/away/do-not-disturb` = estado manual ou calendário autorizado. Não equiparar online a produtividade nem usar presença como controlo laboral.
+**Aceitação:** utilizador com dois separadores abertos conta uma vez.
+
+**OPS-02 [P0] Estados distintos.** `online` = ligação Presence; `active` = atividade recente com timeout e consentimento; `working` = tarefa explicitamente iniciada; `available/busy/away/do-not-disturb` = estado manual ou calendário autorizado. Não equiparar online a produtividade nem usar presença como controlo laboral.
 
 **Aceitação:** desconexão e idle atualizam presença sem encerrar tarefa nem fabricar horas trabalhadas.
 
 **OPS-03 [P0] Minha área de trabalho.** Inbox universal de tarefas, menções, aprovações, bloqueios e pedidos; filtros por cliente, prioridade e prazo; `acknowledge`, snooze, delegar e concluir, sempre com autorização.
 
-**Aceitação:** o utilizador vê apenas itens autorizados, mesmo em agregação multi-cliente. **OPS-04 [P1] Quem trabalha em quê.** Cartões por membro com tarefa atual voluntariamente iniciada, projeto, cliente, estado, bloqueio, deadline e última atualização; ocultar detalhes privados de workspaces não autorizados.
+**Aceitação:** o utilizador vê apenas itens autorizados, mesmo em agregação multi-cliente.
 
-**Aceitação:** agência consegue identificar responsáveis e bloqueios; cliente A não vê tarefas de B. **OPS-05 [P1] Capacidade e workload.** Disponibilidade declarada, férias, capacidade semanal, estimativa vs. esforço real opcional, WIP limits, backlog, distribuição de tarefas, previsão de entregas e gargalos. Não inferir produtividade a partir de presença.
+**OPS-04 [P1] Quem trabalha em quê.** Cartões por membro com tarefa atual voluntariamente iniciada, projeto, cliente, estado, bloqueio, deadline e última atualização; ocultar detalhes privados de workspaces não autorizados.
 
-**Aceitação:** sobrecarga é sinalizada com base em esforço/capacidade configurados e sem atribuições duplicadas. **OPS-06 [P1] Planeamento e handoffs.** Workflow templates por formato/cliente, checklists de passagem, dependências, SLAs, escalonamentos, responsáveis substitutos e autoatribuição com aprovação onde necessário.
+**Aceitação:** agência consegue identificar responsáveis e bloqueios; cliente A não vê tarefas de B.
 
-**Aceitação:** conclusão de edição gera revisão uma vez (idempotência); falha/retry não duplica tarefas. **OPS-07 [P1] Colaboração e revisão.** Comentários com menções, timestamps, comparação de versões, aprovações, decisões e evidências, incluindo acesso externo restrito por recurso.
+**OPS-05 [P1] Capacidade e workload.** Disponibilidade declarada, férias, capacidade semanal, estimativa vs. esforço real opcional, WIP limits, backlog, distribuição de tarefas, previsão de entregas e gargalos. Não inferir produtividade a partir de presença.
 
-**Aceitação:** comentário não concede acesso ao asset; aprovação aplica-se à versão exata. **OPS-08 [P1] Auditoria de operações.** Histórico de alterações e decisões, relatórios de throughput, lead time, cycle time, tempo em espera, retrabalho, taxa de aprovação, clips por origem e atrasos por etapa. Métricas de equipa só são apresentadas com contexto e regras de privacidade definidas. **OPS-09 [P2] Automação inteligente.** Sugestões de atribuição por especialidade/capacidade, previsão de bloqueios, briefings automáticos de turno, recomendações de repetição de vencedores e alertas de qualidade. IA nunca altera permissões nem publica autonomamente. **OPS-10 [P1] Presença segura.** Supabase Realtime Presence com canais por workspace e RLS; atualização limitada para estado pouco frequente; Broadcast para cursores/colaboração intensiva. Indicador de atividade opcional e minimização de dados.
+**Aceitação:** sobrecarga é sinalizada com base em esforço/capacidade configurados e sem atribuições duplicadas.
+
+**OPS-06 [P1] Planeamento e handoffs.** Workflow templates por formato/cliente, checklists de passagem, dependências, SLAs, escalonamentos, responsáveis substitutos e autoatribuição com aprovação onde necessário.
+
+**Aceitação:** conclusão de edição gera revisão uma vez (idempotência); falha/retry não duplica tarefas.
+
+**OPS-07 [P1] Colaboração e revisão.** Comentários com menções, timestamps, comparação de versões, aprovações, decisões e evidências, incluindo acesso externo restrito por recurso.
+
+**Aceitação:** comentário não concede acesso ao asset; aprovação aplica-se à versão exata.
+
+**OPS-08 [P1] Auditoria de operações.** Histórico de alterações e decisões, relatórios de throughput, lead time, cycle time, tempo em espera, retrabalho, taxa de aprovação, clips por origem e atrasos por etapa. Métricas de equipa só são apresentadas com contexto e regras de privacidade definidas.
+
+**OPS-09 [P2] Automação inteligente.** Sugestões de atribuição por especialidade/capacidade, previsão de bloqueios, briefings automáticos de turno, recomendações de repetição de vencedores e alertas de qualidade. IA nunca altera permissões nem publica autonomamente.
+
+**OPS-10 [P1] Presença segura.** Supabase Realtime Presence com canais por workspace e RLS; atualização limitada para estado pouco frequente; Broadcast para cursores/colaboração intensiva. Indicador de atividade opcional e minimização de dados.
 
 **Aceitação:** utilizador sem acesso ao workspace não consegue subscrever o seu canal de presença.
 
 ## 32. Mecanismos adicionais para escalar clipping e conteúdo
 
-**SCALE-01 [P1] Content lineage:** de live/vlog original → timestamp de momento → clip → versão → aprovação → destino social → métricas e receita atribuível quando houver dados. **SCALE-02 [P1] Ingestão em lote:** upload resumível, deduplicação por hash, filas, quotas, estado por ficheiro e reprocessamento seletivo; links para bruto em storage apropriado. **SCALE-03 [P1] Clip factory:** deteção de momentos, transcrição pesquisável, criação de múltiplos formatos e variações, legendas e exportação; revisão humana antes de publicar. **SCALE-04 [P1] Publishing command center:** calendário multi-conta, prevenção de duplicados, validação de formatos/direitos, estados por destino, reconexão de tokens e fallback manual.
+**SCALE-01 [P1] Content lineage:** de live/vlog original → timestamp de momento → clip → versão → aprovação → destino social → métricas e receita atribuível quando houver dados.
 
-**SCALE-05 [P1] Quality gates:** checklist por cliente, guidelines de marca, verificação factual, áudio/legendas/formatos, direitos de música e consentimentos quando relevantes. **SCALE-06 [P1] Learning loop:** experimentos de hook, comparação por janela e conta, proveniência de métricas, limitações de atribuição, recomendações com evidência. **SCALE-07 [P2] Templates de operação:** duplicar configurações de workflow, papéis e checklists para novo cliente sem copiar dados, segredos ou acessos existentes. **SCALE-08 [P2] Portal de cliente:** aprovação externa, estado de entregas, relatórios e pedidos de conteúdo, sem acesso à administração da agência.
+**SCALE-02 [P1] Ingestão em lote:** upload resumível, deduplicação por hash, filas, quotas, estado por ficheiro e reprocessamento seletivo; links para bruto em storage apropriado.
+
+**SCALE-03 [P1] Clip factory:** deteção de momentos, transcrição pesquisável, criação de múltiplos formatos e variações, legendas e exportação; revisão humana antes de publicar.
+
+**SCALE-04 [P1] Publishing command center:** calendário multi-conta, prevenção de duplicados, validação de formatos/direitos, estados por destino, reconexão de tokens e fallback manual.
+
+**SCALE-05 [P1] Quality gates:** checklist por cliente, guidelines de marca, verificação factual, áudio/legendas/formatos, direitos de música e consentimentos quando relevantes.
+
+**SCALE-06 [P1] Learning loop:** experimentos de hook, comparação por janela e conta, proveniência de métricas, limitações de atribuição, recomendações com evidência.
+
+**SCALE-07 [P2] Templates de operação:** duplicar configurações de workflow, papéis e checklists para novo cliente sem copiar dados, segredos ou acessos existentes.
+
+**SCALE-08 [P2] Portal de cliente:** aprovação externa, estado de entregas, relatórios e pedidos de conteúdo, sem acesso à administração da agência.
 
 ## 33. Protocolo obrigatório de mudança (Feature Change Protocol)
 
@@ -1067,7 +1192,9 @@ Qualquer pedido, incluindo um botão ou novo separador, recebe `change_id`, owne
 5. **Build:** implementar vertical slice completo, sem placeholders, atrás de flag quando apropriado.
 6. **Verify:** testes unitários de políticas, integração, E2E com 2 clientes, acessibilidade, observabilidade, falhas e migração.
 7. **Release:** aprovação do owner, changelog, rollout, métricas de sucesso e plano de reversão.
-8. **Post-release:** medir uso, erros, retrabalho, custo e efeitos secundários. **GATE:** se qualquer etapa faltar, estado `NOT READY` ou `NOT DONE`; não declarar concluído.
+8. **Post-release:** medir uso, erros, retrabalho, custo e efeitos secundários.
+
+**GATE:** se qualquer etapa faltar, estado `NOT READY` ou `NOT DONE`; não declarar concluído.
 
 ## 34. Casos de aceitação críticos para administração e presença
 

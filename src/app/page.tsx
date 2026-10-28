@@ -1,83 +1,87 @@
 "use client";
 
-import Link from "next/link";
-import { useMemo } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { useEffect, useMemo, useState } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+import { Dashboard, type DashboardData } from "@/components/dashboard";
+import { DashboardSkeleton } from "@/components/dashboard-skeleton";
 import { TeamCode } from "@/components/team-code";
 import { useGuioes } from "@/components/use-guioes";
 import { niceDate, splitDay, todayDubai } from "@/lib/data";
-import { cn } from "@/lib/utils";
+import { fetchDesempenho, fmtCompact, fmtDay, type Desempenho } from "@/lib/desempenho";
+import { fetchHoje, pctDelta, type Hoje } from "@/lib/hoje";
+import { FORMATO_LABEL } from "@/lib/types";
 
-function Stage({ label, value, sub, later }: { label: string; value: string; sub?: string; later?: boolean }) {
-  return (
-    <Card className={cn(later && "border-dashed opacity-60")}>
-      <CardContent className="p-4">
-        <div className="text-xs text-muted-foreground">{label}</div>
-        <div className="mt-1 text-xl font-semibold tabular-nums">{value}</div>
-        {sub && <div className="text-xs text-muted-foreground">{sub}</div>}
-      </CardContent>
-    </Card>
-  );
-}
+// Preset do workspace Numeiro (PRD §20): 30 guiões/dia. Outros clientes terão o seu.
+const TARGET = 30;
 
-export default function Hoje() {
-  const date = todayDubai();
-  const { all, loading } = useGuioes(date);
-  const { day, carry } = useMemo(() => splitDay(all, date), [all, date]);
-  const ok = day.filter((g) => g.status !== "rejeitado");
-  const val = ok.filter((g) => g.validado).length;
-  const grav = ok.filter((g) => g.gravado).length;
-  const rej = day.filter((g) => g.status === "rejeitado");
-  const target = 30;
+export default function HojePage() {
+	const date = todayDubai();
+	const { all, loading, error: gErr } = useGuioes(date);
+	const [hoje, setHoje] = useState<Hoje | null>(null);
+	const [des, setDes] = useState<Desempenho | null>(null);
+	const [err, setErr] = useState("");
+	const [attempt, setAttempt] = useState(0);
 
-  return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Hoje</h1>
-          <p className="text-sm text-muted-foreground">{niceDate(date)} · hora de Dubai</p>
-        </div>
-        <TeamCode />
-      </div>
+	useEffect(() => {
+		Promise.all([fetchHoje(), fetchDesempenho()])
+			.then(([h, d]) => { setHoje(h); setDes(d); })
+			.catch((e: Error) => setErr(e.message));
+	}, [attempt]);
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
-        <Stage label="Guiões" value={loading ? "…" : `${ok.length} / ${target}`} sub={rej.length ? `${rej.length} rejeitados` : undefined} />
-        <Stage label="Validados" value={loading ? "…" : `${val} / ${ok.length}`} sub="pelo Creator" />
-        <Stage label="Gravados" value={loading ? "…" : `${grav} / ${ok.length}`} sub={carry.length ? `${carry.length} por gravar de dias anteriores` : undefined} />
-        <Stage label="Edição" value="—" sub="v1" later />
-        <Stage label="Revisão" value="—" sub="v1" later />
-      </div>
+	const data = useMemo<DashboardData | null>(() => {
+		if (!hoje || !des || loading) return null;
+		const { day, carry } = splitDay(all, date);
+		const ok = day.filter((g) => g.status !== "rejeitado");
+		const val = ok.filter((g) => g.validado).length;
+		const grav = ok.filter((g) => g.gravado).length;
+		const rej = day.length - ok.length;
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardContent className="flex flex-col gap-3 p-4">
-            <h2 className="font-medium">Validação de hoje</h2>
-            <Progress value={ok.length ? (val / ok.length) * 100 : 0} />
-            <p className="text-sm text-muted-foreground">{val} de {ok.length} guiões validados. {val < ok.length ? `Faltam ${ok.length - val}.` : "Pronto para gravar."}</p>
-            <div className="flex gap-2">
-              <Button size="sm" render={<Link href="/guioes" />} nativeButton={false}>Abrir guiões</Button>
-              <Button size="sm" variant="outline" render={<Link href="/teleprompter" />} nativeButton={false}>Teleprompter</Button>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="flex flex-col gap-2 p-4">
-            <h2 className="font-medium">O que pede atenção</h2>
-            <ul className="space-y-1.5 text-sm">
-              <li className="flex justify-between"><span>Guiões rejeitados pelo Creator</span><b className="tabular-nums">{rej.length}</b></li>
-              <li className="flex justify-between"><span>Por validar</span><b className="tabular-nums">{ok.length - val}</b></li>
-              <li className="flex justify-between"><span>Por gravar de dias anteriores</span><b className="tabular-nums">{carry.length}</b></li>
-            </ul>
-            {rej.length > 0 && (
-              <ul className="mt-2 space-y-1 border-t pt-2 text-xs text-muted-foreground">
-                {rej.slice(0, 5).map((g) => <li key={g.id}>#{g.n} {g.tema}: {g.motivo_rejeicao}</li>)}
-              </ul>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  );
+		const count = new Map<string, number>();
+		ok.forEach((g) => count.set(g.formato ?? "outros", (count.get(g.formato ?? "outros") ?? 0) + 1));
+		const sorted = [...count.entries()].sort((a, b) => b[1] - a[1]);
+		const top = sorted.slice(0, 4);
+		const rest = sorted.slice(4).reduce((t, [, n]) => t + n, 0);
+		const mix = [...top, ...(rest ? [["outros", rest] as [string, number]] : [])].map(([k, n]) => ({
+			key: k.replace(/[^a-z0-9]/gi, "_"),
+			label: FORMATO_LABEL[k] ?? k,
+			share: Math.round((n / Math.max(1, ok.length)) * 100),
+		}));
+
+		return {
+			today: date,
+			hoje,
+			guioesHoje: day,
+			mix,
+			stats: [
+				{ label: "Guiões para gravar", value: `${ok.length} / ${TARGET}`, footnote: rej ? `${rej} rejeitados hoje` : "meta do dia" },
+				{ label: "Validados pelo Creator", value: `${val} / ${ok.length}`, footnote: val < ok.length ? `faltam ${ok.length - val}` : "tudo validado" },
+				{ label: "Gravados", value: `${grav} / ${ok.length}`, footnote: carry.length ? `${carry.length} por gravar de dias anteriores` : "hoje" },
+				{ label: "Views (30 dias)", value: fmtCompact(hoje.views_30d), delta: hoje.views_prev_30d ? pctDelta(hoje.views_30d, hoje.views_prev_30d) : undefined, footnote: "vs 30 dias anteriores" },
+			],
+			prod: des.dias.slice(-10).map((d) => ({ day: fmtDay(d.date), validados: d.validados, gravados: d.gravados, rejeitados: d.rejeitados })),
+			semanas: des.semanas.slice(-7).map((s) => ({ day: fmtDay(s.semana), media: s.media })),
+		};
+	}, [hoje, des, loading, all, date]);
+
+	return (
+		<div className="flex flex-col gap-4">
+			<div className="flex flex-wrap items-end justify-between gap-3">
+				<div>
+					<h1 className="text-2xl font-semibold tracking-tight">Hoje</h1>
+					<p className="text-sm text-muted-foreground">{niceDate(date)} · hora de Dubai</p>
+				</div>
+				<TeamCode />
+			</div>
+			{(err || gErr) && (
+				<Alert variant="destructive">
+					<AlertDescription className="flex flex-wrap items-center justify-between gap-2">
+						<span>Não consegui carregar os dados: {err || gErr}</span>
+						<Button size="sm" variant="outline" onClick={() => { setErr(""); setAttempt((n) => n + 1); }}>Tentar de novo</Button>
+					</AlertDescription>
+				</Alert>
+			)}
+			{data ? <Dashboard data={data} /> : !err && <DashboardSkeleton />}
+		</div>
+	);
 }

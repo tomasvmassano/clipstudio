@@ -1,10 +1,7 @@
 "use client";
 
-import {
-	Avatar,
-	AvatarFallback,
-	AvatarImage,
-} from "@/components/ui/avatar";
+import Link from "next/link";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -14,62 +11,45 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { UserIcon, SettingsIcon, CreditCardIcon, LogOutIcon } from "lucide-react";
+import { useSession } from "@/components/session-provider";
+import { KeyRoundIcon, MonitorPlayIcon, BotIcon, FileTextIcon, LogOutIcon } from "lucide-react";
 
-const user = {
-	name: "Shaban Haider",
-	email: "shaban@efferd.com",
-	avatar: "https://github.com/shabanhr.png",
-};
+const initials = (s: string) => s.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase()).join("") || "?";
 
 export function NavUser() {
+	const { session, signOut, setDialogOpen } = useSession();
+	const name = session ? session.label ?? session.role : "Sem sessão";
+	const sub = session ? `${session.client_id} · ${session.role}` : "Só leitura";
 	return (
 		<DropdownMenu>
-			<DropdownMenuTrigger render={<Avatar className="size-8" />}><AvatarImage src={user.avatar} /><AvatarFallback>{user.name.charAt(0)}</AvatarFallback></DropdownMenuTrigger>
+			<DropdownMenuTrigger render={<Avatar className="size-8 cursor-pointer" aria-label="Menu da conta" />}>
+				<AvatarFallback className="text-xs">{session ? initials(name) : "?"}</AvatarFallback>
+			</DropdownMenuTrigger>
 			<DropdownMenuContent align="end" className="w-60">
 				<DropdownMenuGroup>
 					<DropdownMenuLabel className="pointer-events-none flex items-center gap-2">
 						<Avatar className="isolate size-8">
-							<AvatarImage src={user.avatar} />
-							<AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+							<AvatarFallback className="text-xs">{session ? initials(name) : "?"}</AvatarFallback>
 						</Avatar>
-						<div>
-							<span className="font-medium text-foreground">{user.name}</span>{" "}
-							<br />
-							<div className="max-w-full overflow-hidden text-ellipsis whitespace-nowrap text-muted-foreground text-xs">
-								{user.email}
-							</div>
+						<div className="min-w-0">
+							<span className="font-medium text-foreground">{name}</span>
+							<div className="truncate text-muted-foreground text-xs">{sub}</div>
 						</div>
 					</DropdownMenuLabel>
 				</DropdownMenuGroup>
 				<DropdownMenuSeparator />
 				<DropdownMenuGroup>
-					<DropdownMenuItem>
-						<UserIcon
-						/>
-						Account
-					</DropdownMenuItem>
-					<DropdownMenuItem>
-						<SettingsIcon
-						/>
-						Settings
-					</DropdownMenuItem>
+					<DropdownMenuItem render={<Link href="/teleprompter" />}><MonitorPlayIcon />Teleprompter</DropdownMenuItem>
+					<DropdownMenuItem render={<Link href="/agentes" />}><BotIcon />Sala dos agentes</DropdownMenuItem>
+					<DropdownMenuItem render={<a href="https://claude.ai/artifact/CboQfT6zRXsRbxDxW7QsMg" target="_blank" rel="noopener" />}><FileTextIcon />PRD v2.1</DropdownMenuItem>
 				</DropdownMenuGroup>
 				<DropdownMenuSeparator />
 				<DropdownMenuGroup>
-					<DropdownMenuItem>
-						<CreditCardIcon
-						/>
-						Plan & Billing
-					</DropdownMenuItem>
-				</DropdownMenuGroup>
-				<DropdownMenuSeparator />
-				<DropdownMenuGroup>
-					<DropdownMenuItem variant="destructive">
-						<LogOutIcon
-						/>
-						Log out
-					</DropdownMenuItem>
+					{session ? (
+						<DropdownMenuItem variant="destructive" onClick={signOut}><LogOutIcon />Sair</DropdownMenuItem>
+					) : (
+						<DropdownMenuItem onClick={() => setDialogOpen(true)}><KeyRoundIcon />Entrar com código</DropdownMenuItem>
+					)}
 				</DropdownMenuGroup>
 			</DropdownMenuContent>
 		</DropdownMenu>

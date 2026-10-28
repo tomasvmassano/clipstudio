@@ -54,38 +54,33 @@ export function subscribeAgents(clientId: string, onEvent: (e: AgentEvent) => vo
 
 type Sim = { agent: string; to?: string; status: AgentStatus; message: string; slot?: number; ms?: number };
 
-/** Uma corrida fictícia montada com guiões reais do dia, para ver a sala antes do motor ter chave. */
+/**
+ * Ensaio da sala: percorre os passos do motor para testar a animação e o tempo real.
+ * Não inventa resultados (regra do AGENTS.md §7 e PRD §20): cada mensagem diz só o que o passo faria,
+ * e usa apenas temas e hooks que já existem nos guiões do dia. Fica gravado com simulated=true.
+ */
 export function buildSimulation(gs: Guiao[]): Sim[] {
   const pick = gs.filter((g) => g.status !== "rejeitado").slice(0, 2);
   const ev: Sim[] = [
-    { agent: "analista", status: "start", message: "Bom dia. A ler os reels de ontem." },
-    { agent: "analista", to: "strategist", status: "talk", message: "Homens e mulheres continua a puxar: 2,4× a mediana nos últimos 7 dias. Notícias a 0,6×." },
-    { agent: "reporter", to: "strategist", status: "talk", message: "Três notícias com debate hoje. Nenhuma com fonte sólida o suficiente para um callout." },
-    { agent: "curioso", to: "strategist", status: "talk", message: "Tenho um facto: caranguejos num balde puxam-se uns aos outros para baixo. Dá para mecanismo." },
-    { agent: "filosofo", to: "writer", status: "talk", message: "Para amizade e inveja: La Rochefoucauld, 'na desgraça dos amigos há sempre algo que não nos desagrada'." },
+    { agent: "analista", status: "start", message: "[ensaio] Aqui lia os reels de ontem e passava o resumo ao Strategist." },
+    { agent: "analista", to: "strategist", status: "talk", message: "[ensaio] Resumo de desempenho seguiria aqui. Sem dados reais nesta corrida." },
+    { agent: "reporter", to: "strategist", status: "talk", message: "[ensaio] Notícias do dia seguiriam aqui, com fonte." },
+    { agent: "curioso", to: "strategist", status: "talk", message: "[ensaio] Factos verificáveis seguiriam aqui, com fonte." },
+    { agent: "filosofo", to: "writer", status: "talk", message: "[ensaio] Citações verificadas seguiriam aqui." },
   ];
-  pick.forEach((g, i) => {
+  pick.forEach((g) => {
     const slot = g.n;
-    const h = g.hooks ?? [];
-    const primeira = (g.corpo ?? "").split("\n").find(Boolean) ?? "";
     ev.push(
-      { slot, agent: "strategist", status: "think", message: `Slot ${slot}: a escolher tema e máquina.` },
-      { slot, agent: "strategist", to: "hooksmith", status: "talk", message: `Tema "${g.tema}". Formato ${g.formato}. Quero tese inteira no hook.` },
-      { slot, agent: "hooksmith", status: "think", message: "A escrever 8 hooks com mecanismos diferentes." },
-      { slot, agent: "hooksmith", to: "critic", status: "talk", message: `Melhores 3: "${h[0]?.text ?? ""}" e mais dois.` },
-      { slot, agent: "critic", to: "hooksmith", status: "talk", message: i === 0 ? "O 3.º está fraco (6/10). Troca." : "Os três passam. 8,4 de média." },
-      ...(i === 0 ? [{ slot, agent: "hooksmith", to: "critic", status: "talk" as const, message: `Trocado: "${h[2]?.text ?? ""}"` }] : []),
-      { slot, agent: "writer", status: "think", message: "A escrever o corpo na voz do Numeiro." },
-      { slot, agent: "writer", to: "editor", status: "talk", message: `Abre assim: "${primeira.slice(0, 140)}"` },
-      { slot, agent: "editor", to: "writer", status: "talk", message: i === 0 ? "Ritmo de robô: 41% de frases curtas. E acabaste com pergunta genérica. Refaz o fecho." : "Limpo. 0 problemas." },
-      ...(i === 0 ? [{ slot, agent: "writer", to: "editor", status: "talk" as const, message: "Fecho refeito com veredito. Frases curtas a 28%." }] : []),
-      { slot, agent: "critic", status: "done", message: `Guião ${slot} aprovado. Nota ${(8 + i * 0.3).toFixed(1)}.` },
+      { slot, agent: "strategist", status: "think", message: `[ensaio] Slot ${slot}: escolher tema e formato.` },
+      { slot, agent: "strategist", to: "hooksmith", status: "talk", message: `[ensaio] Tema do guião existente: "${g.tema}" (${g.formato}).` },
+      { slot, agent: "hooksmith", status: "think", message: "[ensaio] Escrever hooks." },
+      { slot, agent: "hooksmith", to: "critic", status: "talk", message: `[ensaio] Hook já existente: "${g.hooks?.[0]?.text ?? ""}"` },
+      { slot, agent: "critic", to: "writer", status: "talk", message: "[ensaio] A nota do Critic apareceria aqui." },
+      { slot, agent: "writer", to: "editor", status: "talk", message: "[ensaio] O corpo do guião passaria ao Editor." },
+      { slot, agent: "editor", status: "done", message: "[ensaio] As verificações do Editor apareceriam aqui." },
     );
   });
-  ev.push(
-    { agent: "editor", status: "done", message: "Guiões prontos e enviados para a página Guiões." },
-    { agent: "aprendiz", status: "done", message: "Anotado: hooks com número batem os de pergunta esta semana." },
-  );
+  ev.push({ agent: "aprendiz", status: "done", message: "[ensaio] Fim do ensaio. Nenhum guião foi criado ou alterado." });
   return ev;
 }
 

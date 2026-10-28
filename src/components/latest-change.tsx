@@ -4,12 +4,13 @@ import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { XIcon } from "lucide-react";
+import Link from "next/link";
 
 const latestChange = {
-	title: "Real-time funnels",
-	description:
-		"Build and analyze conversion funnels with live event streaming in real-time.",
-	url: "#",
+	badge: "NOVO",
+	title: "Sala dos agentes",
+	description: "Vê os bots a trabalhar.",
+	readMore: { href: "/agentes", label: "Abrir a sala" },
 } as const;
 
 export function LatestChange() {
@@ -22,24 +23,28 @@ export function LatestChange() {
 	return (
 		<div
 			className={cn(
-				"rounded-lg group/latest-change z-20 size-full justify-center border bg-background"
+				"rounded-lg group/latest-change size-full min-h-27 justify-center border bg-background",
+				"relative flex size-full flex-col gap-1 overflow-hidden px-4 pt-3 pb-1 *:text-nowrap",
+				"transition-opacity group-data-[collapsible=icon]:pointer-events-none group-data-[collapsible=icon]:opacity-0"
 			)}
 		>
-			<div className="relative flex size-full flex-col gap-1.5 overflow-hidden px-3 pt-4 pb-1">
-				<p className="font-heading font-medium text-xs">{latestChange.title}</p>
-				<span className="text-[10px] text-muted-foreground">
-					{latestChange.description}
-				</span>
-				<Button className="w-max px-0 font-light text-xs" size="sm" variant="link" render={<a href={latestChange.url} />} nativeButton={false}>Read more</Button>
-				<Button
-					className="absolute top-2 right-2 z-10 size-6 rounded-full opacity-0 transition-opacity group-hover/latest-change:opacity-100"
-					onClick={() => setIsOpen(false)}
-					size="icon-sm"
-					variant="secondary"
-				>
-					<XIcon className="size-3.5 text-muted-foreground" />
-				</Button>
-			</div>
+			<span className="font-light font-mono text-[10px] text-muted-foreground">
+				{latestChange.badge}
+			</span>
+			<p className="font-heading font-medium text-xs">{latestChange.title}</p>
+			<span className="text-[10px] text-muted-foreground">
+				{latestChange.description}
+			</span>
+			<Button className="w-max px-0 font-light text-xs" size="sm" variant="link" render={<Link href={latestChange.readMore.href} />} nativeButton={false}>{latestChange.readMore.label}</Button>
+			<Button
+				className="absolute top-2 right-2 z-10 size-6 rounded-full opacity-0 transition-opacity group-hover/latest-change:opacity-100"
+				onClick={() => setIsOpen(false)}
+				aria-label="Fechar"
+				size="icon-sm"
+				variant="ghost"
+			>
+				<XIcon className="size-3.5 text-muted-foreground" />{" "}
+			</Button>
 		</div>
 	);
 }

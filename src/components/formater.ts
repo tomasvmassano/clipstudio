@@ -1,5 +1,5 @@
-export const DASHBOARD_LOCALE = "en-US";
-export const DASHBOARD_CURRENCY = "USD";
+export const DASHBOARD_LOCALE = "pt-PT";
+export const DASHBOARD_CURRENCY = "EUR";
 
 /** Noon anchor avoids off-by-one labels around timezone boundaries for ISO date strings. */
 export function parseIsoCalendarDate(isoDate: string): Date {

@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/lib/utils";
+import Link from "next/link";
 import { LogoIcon } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,62 +8,61 @@ import {
 	SidebarContent,
 	SidebarFooter,
 	SidebarGroup,
-	SidebarGroupLabel,
 	SidebarHeader,
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
-	SidebarRail,
 } from "@/components/ui/sidebar";
-import { AppSearch } from "@/components/app-search";
-import { navGroups } from "@/components/app-shared";
-import { CustomTrigger } from "@/components/custom-trigger";
-import { ThemeSwitcher } from "@/components/theme-switcher";
-import { SettingsIcon } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { NavGroup } from "@/components/nav-group";
+import { footerNavLinks, navGroups } from "@/components/app-shared";
+import { LatestChange } from "@/components/latest-change";
+import { useSession } from "@/components/session-provider";
+import { MonitorPlayIcon, KeyRoundIcon, CheckIcon } from "lucide-react";
 
 export function AppSidebar() {
-	const pathname = usePathname();
+	const { session, setDialogOpen } = useSession();
 	return (
-		<Sidebar
-			className={cn(
-				"*:data-[slot=sidebar-inner]:bg-background",
-				"transition-[left,right,top,width] group-data-[collapsible=offcanvas]:top-[calc(var(--app-header-height)*0.5)]"
-			)}
-			collapsible="offcanvas"
-			variant="sidebar"
-		>
-			<SidebarHeader className="h-(--app-header-height,3rem) flex-row items-center justify-between">
-				<Button variant="ghost" render={<a href="#link" />} nativeButton={false}><LogoIcon /><span className="font-medium">Estúdio Numeiro</span></Button>
-				<CustomTrigger place="sidebar" />
+		<Sidebar collapsible="icon" variant="inset">
+			<SidebarHeader className="h-14 justify-center">
+				<SidebarMenuButton render={<Link href="/" />}><LogoIcon /><span className="font-medium">Estúdio Numeiro</span></SidebarMenuButton>
 			</SidebarHeader>
 			<SidebarContent>
 				<SidebarGroup>
-					<AppSearch />
+					<SidebarMenuItem className="flex items-center gap-2">
+						<SidebarMenuButton
+							className="min-w-8 bg-primary text-primary-foreground duration-200 ease-linear hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground"
+							tooltip="Abrir teleprompter"
+							render={<Link href="/teleprompter" />}
+						>
+							<MonitorPlayIcon />
+							<span>Gravar agora</span>
+						</SidebarMenuButton>
+						<Button
+							aria-label={session ? `Ligado: ${session.label ?? session.role}` : "Entrar com código de equipa"}
+							title={session ? `Ligado: ${session.label ?? session.role}` : "Entrar com código de equipa"}
+							className="size-8 group-data-[collapsible=icon]:opacity-0"
+							size="icon"
+							variant="outline"
+							onClick={() => { if (!session) setDialogOpen(true); }}
+						>
+							{session ? <CheckIcon className="text-emerald-500" /> : <KeyRoundIcon />}
+						</Button>
+					</SidebarMenuItem>
 				</SidebarGroup>
-				{navGroups.map((group) => (
-					<SidebarGroup key={group.label}>
-						<SidebarGroupLabel className="group-data-[collapsible=icon]:pointer-events-none">
-							{group.label}
-						</SidebarGroupLabel>
-						<SidebarMenu>
-							{group.items.map((item) => (
-								<SidebarMenuItem key={item.title}>
-									<SidebarMenuButton isActive={item.path === pathname} tooltip={item.title} render={<a href={item.path} />}>{item.icon}<span>{item.title}</span></SidebarMenuButton>
-								</SidebarMenuItem>
-							))}
-						</SidebarMenu>
-					</SidebarGroup>
+				{navGroups.map((group, index) => (
+					<NavGroup key={`sidebar-group-${index}`} {...group} />
 				))}
 			</SidebarContent>
-			<SidebarFooter className="px-4">
-				<div className="flex items-center pt-4 pb-2">
-					<ThemeSwitcher />
-					<Button className="text-muted-foreground" size="icon-sm" variant="ghost" render={<a aria-label="Settings" href="#" />} nativeButton={false}><SettingsIcon
-                    							/></Button>
-				</div>
+			<SidebarFooter>
+				<LatestChange />
+				<SidebarMenu className="mt-2">
+					{footerNavLinks.map((item) => (
+						<SidebarMenuItem key={item.title}>
+							<SidebarMenuButton className="text-muted-foreground" size="sm" render={<a href={item.path} target={item.path?.startsWith("http") ? "_blank" : undefined} rel="noopener" />}>{item.icon}<span>{item.title}</span></SidebarMenuButton>
+						</SidebarMenuItem>
+					))}
+				</SidebarMenu>
 			</SidebarFooter>
-			<SidebarRail />
 		</Sidebar>
 	);
 }
