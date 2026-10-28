@@ -1,4 +1,5 @@
-import { DEFAULT_CLIENT, supabase } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase";
+import { friendlyError, type Access } from "@/lib/access";
 
 export type Semana = { semana: string; n: number; views: number; media: number };
 export type ReelRow = {
@@ -30,9 +31,9 @@ export type Desempenho = {
 };
 
 /** Agregados do cliente (RPC security definer: nunca expõe transcrições). */
-export async function fetchDesempenho(clientId = DEFAULT_CLIENT, accountId: string | null = null): Promise<Desempenho> {
-  const { data, error } = await supabase().rpc("desempenho", { p_client: clientId, p_account: accountId });
-  if (error) throw new Error(error.message);
+export async function fetchDesempenho(access: Access, accountId: string | null = null): Promise<Desempenho> {
+  const { data, error } = await supabase().rpc("desempenho", { p_client: access.ws, p_account: accountId, p_token: access.token });
+  if (error) throw new Error(friendlyError(error.message));
   return data as Desempenho;
 }
 

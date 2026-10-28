@@ -12,24 +12,26 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useSession } from "@/components/session-provider";
-import { KeyRoundIcon, MonitorPlayIcon, BotIcon, FileTextIcon, LogOutIcon } from "lucide-react";
+import { LogInIcon, MonitorPlayIcon, BotIcon, FileTextIcon, LogOutIcon } from "lucide-react";
+import { ROLE_LABEL } from "@/lib/access";
 
 const initials = (s: string) => s.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase()).join("") || "?";
 
 export function NavUser() {
-	const { session, signOut, setDialogOpen } = useSession();
-	const name = session ? session.label ?? session.role : "Sem sessão";
-	const sub = session ? `${session.client_id} · ${session.role}` : "Só leitura";
+	const { mode, label, ws, signOut } = useSession();
+	const signed = mode === "user" || mode === "code";
+	const name = signed ? label ?? "" : "Sem sessão";
+	const sub = signed ? (ws ? `${ws.name} · ${ROLE_LABEL[ws.role] ?? ws.role}` : "Sem workspace") : "Entra para continuar";
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger render={<Avatar className="size-8 cursor-pointer" aria-label="Menu da conta" />}>
-				<AvatarFallback className="text-xs">{session ? initials(name) : "?"}</AvatarFallback>
+				<AvatarFallback className="text-xs">{signed ? initials(name) : "?"}</AvatarFallback>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="end" className="w-60">
 				<DropdownMenuGroup>
 					<DropdownMenuLabel className="pointer-events-none flex items-center gap-2">
 						<Avatar className="isolate size-8">
-							<AvatarFallback className="text-xs">{session ? initials(name) : "?"}</AvatarFallback>
+							<AvatarFallback className="text-xs">{signed ? initials(name) : "?"}</AvatarFallback>
 						</Avatar>
 						<div className="min-w-0">
 							<span className="font-medium text-foreground">{name}</span>
@@ -45,10 +47,10 @@ export function NavUser() {
 				</DropdownMenuGroup>
 				<DropdownMenuSeparator />
 				<DropdownMenuGroup>
-					{session ? (
+					{signed ? (
 						<DropdownMenuItem variant="destructive" onClick={signOut}><LogOutIcon />Sair</DropdownMenuItem>
 					) : (
-						<DropdownMenuItem onClick={() => setDialogOpen(true)}><KeyRoundIcon />Entrar com código</DropdownMenuItem>
+						<DropdownMenuItem render={<Link href="/login" />}><LogInIcon />Entrar</DropdownMenuItem>
 					)}
 				</DropdownMenuGroup>
 			</DropdownMenuContent>

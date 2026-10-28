@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import {
 	LayoutGridIcon, ScrollTextIcon, MonitorPlayIcon, LightbulbIcon, BarChart3Icon, BotIcon,
-	ClapperboardIcon, LibraryIcon, UsersIcon, WalletIcon, FileTextIcon, HistoryIcon,
+	ClapperboardIcon, LibraryIcon, ShieldCheckIcon, UsersIcon, WalletIcon, FileTextIcon, HistoryIcon,
 } from "lucide-react";
 
 export type SidebarNavItem = {
@@ -12,6 +12,8 @@ export type SidebarNavItem = {
 	/** Módulo do PRD ainda sem implementação: aparece desativado, sem link (AGENTS.md §4). */
 	soon?: boolean;
 	external?: boolean;
+	/** Capacidade necessária para ver o item (registo de capacidades, AGENTS §15). O servidor volta a verificar. */
+	cap?: string;
 	subItems?: SidebarNavItem[];
 };
 
@@ -22,22 +24,26 @@ export type SidebarNavGroup = {
 
 export const navGroups: SidebarNavGroup[] = [
 	{
-		items: [{ title: "Hoje", path: "/", icon: <LayoutGridIcon /> }],
+		items: [{ title: "Hoje", path: "/", icon: <LayoutGridIcon />, cap: "analytics.read" }],
 	},
 	{
 		label: "Dia a dia",
 		items: [
-			{ title: "Guiões", path: "/guioes", icon: <ScrollTextIcon /> },
-			{ title: "Teleprompter", path: "/teleprompter", icon: <MonitorPlayIcon /> },
-			{ title: "Ideias", path: "/ideias", icon: <LightbulbIcon /> },
+			{ title: "Guiões", path: "/guioes", icon: <ScrollTextIcon />, cap: "scripts.read" },
+			{ title: "Teleprompter", path: "/teleprompter", icon: <MonitorPlayIcon />, cap: "recording.use" },
+			{ title: "Ideias", path: "/ideias", icon: <LightbulbIcon />, cap: "sources.read" },
 		],
 	},
 	{
 		label: "Análise",
 		items: [
-			{ title: "Desempenho", path: "/desempenho", icon: <BarChart3Icon /> },
-			{ title: "Sala dos agentes", path: "/agentes", icon: <BotIcon /> },
+			{ title: "Desempenho", path: "/desempenho", icon: <BarChart3Icon />, cap: "analytics.read" },
+			{ title: "Sala dos agentes", path: "/agentes", icon: <BotIcon />, cap: "agents.read" },
 		],
+	},
+	{
+		label: "Administração",
+		items: [{ title: "Equipa", path: "/equipa", icon: <ShieldCheckIcon />, cap: "team.read" }],
 	},
 	{
 		label: "Em breve",

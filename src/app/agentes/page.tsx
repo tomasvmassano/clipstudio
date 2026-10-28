@@ -8,9 +8,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { TeamCode } from "@/components/team-code";
 import { useSession } from "@/components/session-provider";
-import { DEFAULT_CLIENT } from "@/lib/supabase";
+import { WorkspaceGate } from "@/components/workspace-gate";
+import type { Access } from "@/lib/access";
 import { fetchGuioes, todayDubai } from "@/lib/data";
-import { AGENTS, agentById, buildSimulation, fetchRun, fetchRuns, simulateRun, subscribeAgents, type AgentEvent } from "@/lib/agents";
+import { AGENTS, agentById, buildSimulation, fetchRun, fetchRuns, simulateRun, subscribeAgents, type AgentEvent, type RunRow } from "@/lib/agents";
 import { cn } from "@/lib/utils";
 
 const STEP_MS = 1500; // ritmo da reprodução: os eventos chegam em rajada, a sala mostra-os um a um
@@ -19,9 +20,12 @@ type Live = { speaking: string | null; to: string | null; bubble: Record<string,
 const empty = (): Live => ({ speaking: null, to: null, bubble: {}, done: new Set() });
 
 export default function AgentesPage() {
-  const { session } = useSession();
-  const clientId = session?.client_id ?? DEFAULT_CLIENT;
-  const [runs, setRuns] = useState<{ run_id: string; created_at: string; simulated: boolean; n: number }[]>([]);
+  return <WorkspaceGate need="agents.read">{(access) => <Sala access={access} />}</WorkspaceGate>;
+}
+
+function Sala({ access }: { access: Access }) {
+  const { can, mode } = useSession();
+  const [runs, setRuns] = useState<RunRow[]>([]);
   const [log, setLog] = useState<AgentEvent[]>([]);
   const [live, setLive] = useState<Live>(empty);
   const [busy, setBusy] = useState(false);
@@ -54,15 +58,25 @@ export default function AgentesPage() {
     return () => { if (timer.current) clearInterval(timer.current); };
   }, [play]);
 
-  const loadRuns = useCallback(() => fetchRuns(clientId).then(setRuns).catch((e) => setMsg(e.message)), [clientId]);
-  useEffect(() => { loadRuns(); }, [loadRuns]);
+  const loadRuns = useCallback(async () => {
+    try { const r = await fetchRuns(access); setRuns(r); return r; } catch (e) { setMsg((e as Error).message); return [] as RunRow[]; }
+  }, [access]);
+  useEffect(() => {
+    let alive = true;
+    fetchRuns(access).then((r) => { if (alive) setRuns(r); }).catch((e: Error) => { if (alive) setMsg(e.message); });
+    return () => { alive = false; };
+  }, [access]);
 
-  // tempo real
-  useEffect(() => subscribeAgents(clientId, (e) => {
-    queue.current.push(e);
-    queue.current.sort((x, y) => x.id - y.id);
-    if (e.status === "done" && e.agent === "aprendiz") setTimeout(loadRuns, 1000);
-  }), [clientId, loadRuns]);
+  // tempo real (só com login; no modo código a sala mostra a corrida ao terminar)
+  const live_ = mode === "user";
+  useEffect(() => {
+    const unsub = subscribeAgents(access, (e) => {
+      queue.current.push(e);
+      queue.current.sort((x, y) => x.id - y.id);
+      if (e.status === "done" && e.agent === "aprendiz") setTimeout(loadRuns, 1000);
+    });
+    return () => { unsub?.(); };
+  }, [access, loadRuns]);
 
   useEffect(() => { logEnd.current?.scrollIntoView({ block: "nearest" }); }, [log]);
 
@@ -70,16 +84,19 @@ export default function AgentesPage() {
     queue.current = [];
     setLog([]);
     setLive(empty());
-    try { queue.current = await fetchRun(runId); } catch (e) { setMsg((e as Error).message); }
+    try { queue.current = await fetchRun(access, runId); } catch (e) { setMsg((e as Error).message); }
   };
 
   const simulate = async () => {
-    if (!session) return;
     setBusy(true); setMsg("");
     try {
-      const gs = await fetchGuioes(todayDubai(), clientId, 0);
+      const gs = await fetchGuioes(access, todayDubai(), 0);
       setLog([]); setLive(empty()); queue.current = [];
-      await simulateRun(session.token, buildSimulation(gs));
+      await simulateRun(access, buildSimulation(gs));
+      if (!live_) {
+        const r = await loadRuns();
+        if (r[0]) queue.current = await fetchRun(access, r[0].run_id);
+      }
     } catch (e) { setMsg((e as Error).message); }
     finally { setBusy(false); }
   };
@@ -96,7 +113,7 @@ export default function AgentesPage() {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <TeamCode />
-          <Button size="sm" disabled={!session || busy} onClick={simulate}><PlayIcon /> Ensaiar a sala</Button>
+          {can("agents.rehearse") && <Button size="sm" disabled={busy} onClick={simulate}><PlayIcon /> Ensaiar a sala</Button>}
         </div>
       </div>
 

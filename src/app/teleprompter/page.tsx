@@ -3,6 +3,8 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useGuioes } from "@/components/use-guioes";
+import { WorkspaceGate } from "@/components/workspace-gate";
+import type { Access } from "@/lib/access";
 import { todayDubai, tpQueue } from "@/lib/data";
 import { cn } from "@/lib/utils";
 
@@ -31,11 +33,12 @@ function Btn({ on, label, onClick, aria }: { on?: boolean; label: string; onClic
 
 type Confirm = { id: string; n: number; then: "next" | "exit" };
 
-function TeleprompterInner() {
+function TeleprompterInner({ access }: { access: Access }) {
   const params = useSearchParams();
   const router = useRouter();
   const date = params.get("date") ?? todayDubai();
-  const { all, loading, patch, canWrite } = useGuioes(date);
+  const { all, loading, patch, caps } = useGuioes(access, date);
+  const canWrite = caps.record;
   const queue = useMemo(() => tpQueue(all, date), [all, date]);
 
   // null = ainda não escolhido: começa no primeiro por gravar
@@ -213,7 +216,7 @@ function TeleprompterInner() {
 export default function TeleprompterPage() {
   return (
     <Suspense fallback={<div className="fixed inset-0 bg-black" />}>
-      <TeleprompterInner />
+      <WorkspaceGate need="recording.use">{(access) => <TeleprompterInner access={access} />}</WorkspaceGate>
     </Suspense>
   );
 }

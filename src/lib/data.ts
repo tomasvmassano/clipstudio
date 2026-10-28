@@ -1,4 +1,5 @@
-import { supabase, DEFAULT_CLIENT } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase";
+import { friendlyError, type Access } from "@/lib/access";
 import type { Guiao, GuiaoPatch, Idea, Session } from "@/lib/types";
 
 // ---------- datas (sempre em Asia/Dubai) ----------
@@ -22,16 +23,15 @@ export function dayLabel(iso: string): string {
 }
 
 // ---------- guiões ----------
-export async function fetchGuioes(date: string, clientId = DEFAULT_CLIENT, carryDays = 3): Promise<Guiao[]> {
-  const { data, error } = await supabase()
-    .from("guioes")
-    .select("*")
-    .eq("client_id", clientId)
-    .gte("date", addDays(date, -carryDays))
-    .lte("date", date)
-    .order("date", { ascending: true })
-    .order("n", { ascending: true });
-  if (error) throw error;
+/** Guiões do dia e dos `carryDays` anteriores. Login: tabela com RLS. Código: RPC legacy_guioes. */
+export async function fetchGuioes(access: Access, date: string, carryDays = 3): Promise<Guiao[]> {
+  const from = addDays(date, -carryDays);
+  const sb = supabase();
+  const { data, error } = access.token
+    ? await sb.rpc("legacy_guioes", { p_token: access.token, p_from: from, p_to: date })
+    : await sb.from("guioes").select("*").eq("client_id", access.ws).gte("date", from).lte("date", date)
+        .order("date", { ascending: true }).order("n", { ascending: true });
+  if (error) throw new Error(friendlyError(error.message));
   return (data ?? []) as Guiao[];
 }
 
@@ -46,19 +46,21 @@ export function tpQueue(all: Guiao[], date: string): Guiao[] {
   return [...carry, ...day.filter((g) => g.status !== "rejeitado")];
 }
 
-export async function updateGuiao(id: string, patch: GuiaoPatch, token: string): Promise<Guiao> {
-  const { data, error } = await supabase().rpc("guiao_update", { p_id: id, p_patch: patch, p_token: token });
-  if (error) {
-    if (error.message.includes("codigo_invalido")) throw new Error("Código de equipa inválido. Pede um novo ao Tomás.");
-    throw new Error("Não foi possível guardar: " + error.message);
-  }
+export async function updateGuiao(access: Access, id: string, patch: GuiaoPatch): Promise<Guiao> {
+  const { data, error } = await supabase().rpc("guiao_update", { p_id: id, p_patch: patch, p_token: access.token });
+  if (error) throw new Error("Não foi possível guardar: " + friendlyError(error.message));
   return data as Guiao;
 }
 
-export function subscribeGuioes(clientId: string, onChange: () => void): () => void {
+/** Ao vivo só com login (postgres_changes respeita o RLS). No modo código a página recarrega de 20 em 20 s. */
+export function subscribeGuioes(access: Access, onChange: () => void): () => void {
+  if (access.token) {
+    const t = setInterval(onChange, 20000);
+    return () => clearInterval(t);
+  }
   const ch = supabase()
-    .channel("guioes-" + clientId)
-    .on("postgres_changes", { event: "*", schema: "public", table: "guioes", filter: `client_id=eq.${clientId}` }, onChange)
+    .channel("guioes-" + access.ws)
+    .on("postgres_changes", { event: "*", schema: "public", table: "guioes", filter: `client_id=eq.${access.ws}` }, onChange)
     .subscribe();
   return () => {
     supabase().removeChannel(ch);
@@ -66,9 +68,12 @@ export function subscribeGuioes(clientId: string, onChange: () => void): () => v
 }
 
 // ---------- ideias ----------
-export async function fetchIdeas(limit = 100): Promise<Idea[]> {
-  const { data, error } = await supabase().from("ideas").select("*").order("created_at", { ascending: false }).limit(limit);
-  if (error) throw error;
+export async function fetchIdeas(access: Access, limit = 100): Promise<Idea[]> {
+  const sb = supabase();
+  const { data, error } = access.token
+    ? await sb.rpc("legacy_ideas", { p_token: access.token, p_limit: limit })
+    : await sb.from("ideas").select("*").eq("client_id", access.ws).order("created_at", { ascending: false }).limit(limit);
+  if (error) throw new Error(friendlyError(error.message));
   return (data ?? []) as Idea[];
 }
 

@@ -10,18 +10,19 @@ import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { words } from "@/lib/data";
 import { FORMATO_LABEL, WPS, type Guiao, type GuiaoPatch, type Hook } from "@/lib/types";
+import type { ScriptCaps } from "@/components/use-guioes";
 
 const MECH = ["pergunta", "contra", "numero", "ego", "confissao", "segredo"];
 
 type Props = {
   g: Guiao;
   carried?: boolean;
-  canWrite: boolean;
+  caps: ScriptCaps;
   onPatch: (id: string, p: GuiaoPatch) => Promise<unknown>;
   onError: (msg: string) => void;
 };
 
-export function GuiaoCard({ g, carried, canWrite, onPatch, onError }: Props) {
+export function GuiaoCard({ g, carried, caps, onPatch, onError }: Props) {
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<"view" | "edit" | "reject">("view");
   const [busy, setBusy] = useState(false);
@@ -163,23 +164,27 @@ export function GuiaoCard({ g, carried, canWrite, onPatch, onError }: Props) {
               <Button size="sm" variant="ghost" onClick={() => setOpen(!open)}>
                 {open ? <ChevronUpIcon /> : <ChevronDownIcon />} {open ? "Recolher" : "Ver tudo"}
               </Button>
-              {canWrite && !rej && (
-                <>
-                  <Button size="sm" variant={g.validado ? "secondary" : "default"} disabled={busy} onClick={() => run({ validado: !g.validado })}>
-                    <CheckIcon /> {g.validado ? "Retirar validação" : "Validar"}
-                  </Button>
-                  <Button size="sm" variant="outline" onClick={() => { setDraft({ hooks: g.hooks, corpo: g.corpo, formato: g.formato ?? "", tema: g.tema ?? "" }); setMode("edit"); }}>
-                    <PencilIcon /> Editar
-                  </Button>
-                  <Button size="sm" variant="outline" onClick={() => setMode("reject")}>
-                    <XIcon /> Rejeitar
-                  </Button>
-                  <Button size="sm" variant="ghost" disabled={busy} onClick={() => run({ gravado: !g.gravado })}>
-                    <VideoIcon /> {g.gravado ? "Desmarcar gravado" : "Marcar gravado"}
-                  </Button>
-                </>
+              {!rej && caps.approve && (
+                <Button size="sm" variant={g.validado ? "secondary" : "default"} disabled={busy} onClick={() => run({ validado: !g.validado })}>
+                  <CheckIcon /> {g.validado ? "Retirar validação" : "Validar"}
+                </Button>
               )}
-              {canWrite && rej && (
+              {!rej && caps.edit && (
+                <Button size="sm" variant="outline" onClick={() => { setDraft({ hooks: g.hooks, corpo: g.corpo, formato: g.formato ?? "", tema: g.tema ?? "" }); setMode("edit"); }}>
+                  <PencilIcon /> Editar
+                </Button>
+              )}
+              {!rej && caps.reject && (
+                <Button size="sm" variant="outline" onClick={() => setMode("reject")}>
+                  <XIcon /> Rejeitar
+                </Button>
+              )}
+              {!rej && caps.record && (
+                <Button size="sm" variant="ghost" disabled={busy} onClick={() => run({ gravado: !g.gravado })}>
+                  <VideoIcon /> {g.gravado ? "Desmarcar gravado" : "Marcar gravado"}
+                </Button>
+              )}
+              {rej && caps.reject && (
                 <Button size="sm" variant="outline" disabled={busy} onClick={() => run({ status: "aprovado", motivo_rejeicao: "" })}>
                   <UndoIcon /> Repor
                 </Button>

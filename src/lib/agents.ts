@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { friendlyError, type Access } from "@/lib/access";
 import type { Guiao } from "@/lib/types";
 
 export type AgentStatus = "start" | "think" | "talk" | "done" | "error";
@@ -23,33 +24,36 @@ export const AGENTS: { id: string; nome: string; papel: string; x: number; y: nu
 ];
 export const agentById = (id: string | null | undefined) => AGENTS.find((a) => a.id === (id ?? "").toLowerCase());
 
-export async function fetchRuns(clientId: string, limit = 8) {
-  const { data, error } = await supabase()
-    .from("agent_feed").select("run_id, created_at, simulated").eq("client_id", clientId)
-    .order("created_at", { ascending: false }).limit(400);
-  if (error) throw error;
-  const seen = new Map<string, { run_id: string; created_at: string; simulated: boolean; n: number }>();
-  for (const r of data ?? []) {
-    const cur = seen.get(r.run_id);
-    if (cur) cur.n++;
-    else seen.set(r.run_id, { ...r, n: 1 });
-  }
-  return [...seen.values()].slice(0, limit);
+export type RunRow = { run_id: string; created_at: string; simulated: boolean; n: number };
+
+export async function fetchRuns(access: Access, limit = 8): Promise<RunRow[]> {
+  const { data, error } = await supabase().rpc("agent_runs", { p_ws: access.ws, p_token: access.token, p_limit: limit });
+  if (error) throw new Error(friendlyError(error.message));
+  return (data ?? []) as RunRow[];
 }
 
-export async function fetchRun(runId: string): Promise<AgentEvent[]> {
-  const { data, error } = await supabase().from("agent_feed").select("*").eq("run_id", runId).order("id");
-  if (error) throw error;
+export async function fetchRun(access: Access, runId: string): Promise<AgentEvent[]> {
+  const { data, error } = await supabase().rpc("agent_run_events", { p_ws: access.ws, p_run: runId, p_token: access.token });
+  if (error) throw new Error(friendlyError(error.message));
   return (data ?? []) as AgentEvent[];
 }
 
-/** Eventos novos em tempo real (broadcast do trigger em agent_log). */
-export function subscribeAgents(clientId: string, onEvent: (e: AgentEvent) => void): () => void {
-  const ch = supabase()
-    .channel("agents:" + clientId)
-    .on("broadcast", { event: "agent_event" }, (m) => onEvent(m.payload as AgentEvent))
-    .subscribe();
-  return () => { supabase().removeChannel(ch); };
+/**
+ * Tempo real: canal privado `agents:<ws>` (RLS em realtime.messages exige agents.read).
+ * Só com login; no modo código devolve null e a página atualiza ao recarregar.
+ */
+export function subscribeAgents(access: Access, onEvent: (e: AgentEvent) => void): (() => void) | null {
+  if (access.token) return null;
+  const sb = supabase();
+  let ch: ReturnType<typeof sb.channel> | null = null;
+  let closed = false;
+  sb.realtime.setAuth().then(() => {
+    if (closed) return;
+    ch = sb.channel("agents:" + access.ws, { config: { private: true } })
+      .on("broadcast", { event: "agent_event" }, (m) => onEvent(m.payload as AgentEvent))
+      .subscribe();
+  });
+  return () => { closed = true; if (ch) sb.removeChannel(ch); };
 }
 
 type Sim = { agent: string; to?: string; status: AgentStatus; message: string; slot?: number; ms?: number };
@@ -84,8 +88,8 @@ export function buildSimulation(gs: Guiao[]): Sim[] {
   return ev;
 }
 
-export async function simulateRun(token: string, events: Sim[]) {
-  const { data, error } = await supabase().rpc("agent_simulate", { p_token: token, p_events: events });
-  if (error) throw new Error(error.message.includes("codigo_invalido") ? "Código de equipa inválido." : error.message);
+export async function simulateRun(access: Access, events: Sim[]) {
+  const { data, error } = await supabase().rpc("agent_simulate", { p_ws: access.ws, p_events: events, p_token: access.token });
+  if (error) throw new Error(friendlyError(error.message));
   return data as number;
 }

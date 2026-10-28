@@ -20,15 +20,20 @@ import {
 } from "@/components/ui/sidebar";
 import { activeFor, type SidebarNavGroup } from "@/components/app-shared";
 import { ChevronRightIcon } from "lucide-react";
+import { useSession } from "@/components/session-provider";
 
 export function NavGroup({ label, items }: SidebarNavGroup) {
 	const pathname = usePathname();
 	const active = activeFor(pathname);
+	const { can, mode } = useSession();
+	// Antes de saber a sessão mostra tudo (evita saltos); depois só o que a capacidade permite.
+	const visible = items.filter((i) => !i.cap || mode === "loading" || can(i.cap));
+	if (visible.length === 0) return null;
 	return (
 		<SidebarGroup>
 			{label && <SidebarGroupLabel>{label}</SidebarGroupLabel>}
 			<SidebarMenu>
-				{items.map((item) => {
+				{visible.map((item) => {
 					const isActive = active?.path === item.path && !!item.path;
 					return (
 						<Collapsible className="group/collapsible" defaultOpen={isActive || item.subItems?.some((i) => active?.path === i.path)} key={item.title} render={<SidebarMenuItem />}>

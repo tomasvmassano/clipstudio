@@ -12,10 +12,16 @@ import { CsatResponsesChart } from "@/components/csat-responses-chart";
 import { FirstReplyTimeChart } from "@/components/first-reply-time-chart";
 import { RecentesCard, ReferenciasCard, TopReelsCard } from "@/components/desempenho-3";
 import { todayDubai } from "@/lib/data";
+import { WorkspaceGate } from "@/components/workspace-gate";
+import type { Access } from "@/lib/access";
 import { fetchDesempenho, fmtCompact, fmtDay, fmtInt, type Desempenho } from "@/lib/desempenho";
 import { pctDelta } from "@/lib/hoje";
 
 export default function DesempenhoPage() {
+	return <WorkspaceGate need="analytics.read">{(access) => <DesempenhoView access={access} />}</WorkspaceGate>;
+}
+
+function DesempenhoView({ access }: { access: Access }) {
 	const [d, setD] = useState<Desempenho | null>(null);
 	const [error, setError] = useState("");
 	const [account, setAccount] = useState<string>("todas");
@@ -24,11 +30,11 @@ export default function DesempenhoPage() {
 
 	useEffect(() => {
 		let alive = true;
-		fetchDesempenho(undefined, account === "todas" ? null : account)
+		fetchDesempenho(access, account === "todas" ? null : account)
 			.then((x) => { if (alive) setD(x); })
 			.catch((e: Error) => { if (alive) setError(e.message); });
 		return () => { alive = false; };
-	}, [account, attempt]);
+	}, [account, attempt, access]);
 
 	const conta = d?.contas.find((c) => c.id === account);
 	const clienteLabel = conta ? conta.handle : d?.contas[0]?.handle ?? "cliente";

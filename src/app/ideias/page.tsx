@@ -6,14 +6,24 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fetchIdeas } from "@/lib/data";
+import { WorkspaceGate } from "@/components/workspace-gate";
+import type { Access } from "@/lib/access";
 import type { Idea } from "@/lib/types";
 
 const FONTE: Record<string, string> = { reporter: "Repórter", curious: "Curioso", philosopher: "Filósofo", manual: "Manual" };
 
 export default function IdeiasPage() {
+  return <WorkspaceGate need="sources.read">{(access) => <Ideias access={access} />}</WorkspaceGate>;
+}
+
+function Ideias({ access }: { access: Access }) {
   const [ideas, setIdeas] = useState<Idea[] | null>(null);
   const [err, setErr] = useState("");
-  useEffect(() => { fetchIdeas().then(setIdeas).catch((e) => setErr(e.message)); }, []);
+  useEffect(() => {
+    let alive = true;
+    fetchIdeas(access).then((x) => { if (alive) setIdeas(x); }).catch((e: Error) => { if (alive) setErr(e.message); });
+    return () => { alive = false; };
+  }, [access]);
   return (
     <div className="flex flex-col gap-5">
       <div>

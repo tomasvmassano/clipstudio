@@ -9,7 +9,7 @@ import { useSession } from "@/components/session-provider";
 
 /** Diálogo único do código de equipa (montado no AppShell). */
 export function TeamCodeDialog() {
-  const { signIn, dialogOpen, setDialogOpen } = useSession();
+  const { signInCode, dialogOpen, setDialogOpen } = useSession();
   const [code, setCode] = useState("");
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
@@ -18,7 +18,7 @@ export function TeamCodeDialog() {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Entrar com o código de equipa</DialogTitle>
-          <DialogDescription>Sem código podes ler os guiões e usar o teleprompter. Com código podes validar, editar e rejeitar.</DialogDescription>
+          <DialogDescription>Acesso de transição para a equipa do cliente, até cada pessoa ter a sua conta. Quem tem conta deve entrar com email.</DialogDescription>
         </DialogHeader>
         <form
           className="flex flex-col gap-3"
@@ -26,7 +26,7 @@ export function TeamCodeDialog() {
             e.preventDefault();
             setBusy(true);
             setErr("");
-            const ok = await signIn(code);
+            const ok = await signInCode(code);
             setBusy(false);
             if (ok) { setDialogOpen(false); setCode(""); }
             else setErr("Código inválido. Confirma com o Tomás.");
@@ -45,12 +45,12 @@ export function TeamCodeDialog() {
 
 /** Botão de sessão para as páginas: abre o diálogo, ou mostra quem está ligado e permite sair. */
 export function TeamCode() {
-  const { session, ready, signOut, setDialogOpen } = useSession();
-  if (!ready) return null;
-  if (session) {
+  const { mode, label, signOut, setDialogOpen } = useSession();
+  if (mode === "loading") return null;
+  if (mode === "user" || mode === "code") {
     return (
       <Button size="sm" variant="ghost" className="text-muted-foreground" onClick={signOut} title="Sair">
-        <LogOutIcon /> {session.label ?? session.role}
+        <LogOutIcon /> {label}
       </Button>
     );
   }

@@ -7,6 +7,8 @@ import { Dashboard, type DashboardData } from "@/components/dashboard";
 import { DashboardSkeleton } from "@/components/dashboard-skeleton";
 import { TeamCode } from "@/components/team-code";
 import { useGuioes } from "@/components/use-guioes";
+import { WorkspaceGate } from "@/components/workspace-gate";
+import type { Access } from "@/lib/access";
 import { niceDate, splitDay, todayDubai } from "@/lib/data";
 import { fetchDesempenho, fmtCompact, fmtDay, type Desempenho } from "@/lib/desempenho";
 import { fetchHoje, pctDelta, type Hoje } from "@/lib/hoje";
@@ -16,18 +18,22 @@ import { FORMATO_LABEL } from "@/lib/types";
 const TARGET = 30;
 
 export default function HojePage() {
+	return <WorkspaceGate need="analytics.read">{(access) => <HojeView access={access} />}</WorkspaceGate>;
+}
+
+function HojeView({ access }: { access: Access }) {
 	const date = todayDubai();
-	const { all, loading, error: gErr } = useGuioes(date);
+	const { all, loading, error: gErr } = useGuioes(access, date);
 	const [hoje, setHoje] = useState<Hoje | null>(null);
 	const [des, setDes] = useState<Desempenho | null>(null);
 	const [err, setErr] = useState("");
 	const [attempt, setAttempt] = useState(0);
 
 	useEffect(() => {
-		Promise.all([fetchHoje(), fetchDesempenho()])
+		Promise.all([fetchHoje(access), fetchDesempenho(access)])
 			.then(([h, d]) => { setHoje(h); setDes(d); })
 			.catch((e: Error) => setErr(e.message));
-	}, [attempt]);
+	}, [attempt, access]);
 
 	const data = useMemo<DashboardData | null>(() => {
 		if (!hoje || !des || loading) return null;

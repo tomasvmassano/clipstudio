@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { LogoIcon } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import {
 	Sidebar,
@@ -17,14 +16,16 @@ import { NavGroup } from "@/components/nav-group";
 import { footerNavLinks, navGroups } from "@/components/app-shared";
 import { LatestChange } from "@/components/latest-change";
 import { useSession } from "@/components/session-provider";
-import { MonitorPlayIcon, KeyRoundIcon, CheckIcon } from "lucide-react";
+import { MonitorPlayIcon, LogInIcon, CheckIcon } from "lucide-react";
+import { WorkspaceSwitcher } from "@/components/workspace-switcher";
 
 export function AppSidebar() {
-	const { session, setDialogOpen } = useSession();
+	const { mode, label } = useSession();
+	const signed = mode === "user" || mode === "code";
 	return (
 		<Sidebar collapsible="icon" variant="inset">
 			<SidebarHeader className="h-14 justify-center">
-				<SidebarMenuButton render={<Link href="/" />}><LogoIcon /><span className="font-medium">Estúdio Numeiro</span></SidebarMenuButton>
+				<WorkspaceSwitcher />
 			</SidebarHeader>
 			<SidebarContent>
 				<SidebarGroup>
@@ -37,16 +38,15 @@ export function AppSidebar() {
 							<MonitorPlayIcon />
 							<span>Gravar agora</span>
 						</SidebarMenuButton>
-						<Button
-							aria-label={session ? `Ligado: ${session.label ?? session.role}` : "Entrar com código de equipa"}
-							title={session ? `Ligado: ${session.label ?? session.role}` : "Entrar com código de equipa"}
-							className="size-8 group-data-[collapsible=icon]:opacity-0"
-							size="icon"
-							variant="outline"
-							onClick={() => { if (!session) setDialogOpen(true); }}
-						>
-							{session ? <CheckIcon className="text-emerald-500" /> : <KeyRoundIcon />}
-						</Button>
+						{signed ? (
+							<span title={`Ligado: ${label}`} aria-label={`Ligado: ${label}`} className="flex size-8 items-center justify-center rounded-md border group-data-[collapsible=icon]:opacity-0">
+								<CheckIcon className="size-4 text-emerald-500" />
+							</span>
+						) : (
+							<Button aria-label="Entrar" title="Entrar" className="size-8 group-data-[collapsible=icon]:opacity-0" size="icon" variant="outline" render={<Link href="/login" />} nativeButton={false}>
+								<LogInIcon />
+							</Button>
+						)}
 					</SidebarMenuItem>
 				</SidebarGroup>
 				{navGroups.map((group, index) => (

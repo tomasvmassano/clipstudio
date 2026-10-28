@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-10-28 (W1 Fundação)
+
+- **W1-01 identidade e tenancy** (PRD §2, §3, §16, CAP-01..04, TEAM-01..03): organização ClipStudio, `workspace_access`, `agency_memberships`, `permission_grants` (allow/deny com expiração), `invitations`, `audit_events` append-only, registo de capacidades e `authorize(cap, ws)` deny-by-default. ADR-0001.
+- **W1-02 corte do acesso aos dados**: fim das leituras anónimas; RLS por `authorize()`; RPCs verificam o workspace (login) ou o token legado (`legacy_can`); escritas auditadas; canal de agentes privado (`agents:<ws>`); guiões no realtime.
+- **W1-03 app com login individual**: `/login` (email+palavra-passe; Google aparece só quando o fornecedor estiver ativo no Supabase; código de equipa como opção de transição), `/auth/callback` (PKCE, destino só interno), `src/proxy.ts` (verificação otimista, renova cookies), contexto de workspace com troca entre clientes autorizados, todas as páginas atrás de `WorkspaceGate` com a capacidade certa, menu lateral derivado das capacidades.
+- **Equipa (`/equipa`)**: membros, convites pendentes, convidar (papel até ao teu teto; staff da agência só pelo dono), cancelar convite. RPCs `workspace_team`, `revoke_invitation` (migração `20261028185835_w1_team_rpcs`).
+- Testes SQL (com rollback): `w1_isolation` 38/38, `w1_team` 21/21, `w1_data_access` 25/25. E2E Playwright (modo código e anónimo) 11/11.
+
+### Limitações conhecidas W1 (PARTIAL)
+
+- Tentativas negadas vão para o log da base (`RAISE LOG audit_denied`), não para `audit_events` (o rollback da exceção apagava-as).
+- Convites não enviam email: quem convida avisa a pessoa.
+- Google OAuth por configurar no Supabase (o botão fica escondido até lá).
+- Motor ainda não integrado (escreve em `generated`, `agent_log` sem `client_id`).
+- Consola de permissões (CAP-02: overrides por pessoa, papéis custom) fica para W1.1.
+- `tmp_import` ainda existe; extensão `citext` no schema `public`.
+- E2E com contas reais (agência A+B, cliente A, cliente B) depende de contas criadas pelo Tomás; os testes SQL cobrem esses casos com utilizadores simulados.
+
 ## 2026-10-28
 
 - **W0 (inventário e contratos)**: `docs/inventory/supabase.md`, `docs/inventory/engine-and-app.md`, `docs/feature-registry.md`, `docs/access-matrix.md`, `docs/workflow-registry.md`. As 15 migrações aplicadas estão agora em `supabase/migrations/` (segredos tapados; o repo é público).

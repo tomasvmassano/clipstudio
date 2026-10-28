@@ -1,4 +1,5 @@
-import { DEFAULT_CLIENT, supabase } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase";
+import { friendlyError, type Access } from "@/lib/access";
 
 export type HojeAgente = { agent: string; status: string; message: string | null; created_at: string; passos: number; simulated: boolean };
 export type HojeAtividade = { tipo: "validado" | "gravado" | "rejeitado" | "editado" | "corrida"; n: number | null; tema: string | null; at: string };
@@ -14,9 +15,9 @@ export type Hoje = {
 };
 
 /** Resumo do Hoje (RPC só de leitura; corridas de ensaio ficam de fora). */
-export async function fetchHoje(clientId = DEFAULT_CLIENT): Promise<Hoje> {
-  const { data, error } = await supabase().rpc("hoje_resumo", { p_client: clientId });
-  if (error) throw new Error(error.message);
+export async function fetchHoje(access: Access): Promise<Hoje> {
+  const { data, error } = await supabase().rpc("hoje_resumo", { p_client: access.ws, p_token: access.token });
+  if (error) throw new Error(friendlyError(error.message));
   return data as Hoje;
 }
 

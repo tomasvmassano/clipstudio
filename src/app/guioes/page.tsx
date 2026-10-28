@@ -11,6 +11,8 @@ import { DayNav } from "@/components/day-nav";
 import { GuiaoCard } from "@/components/guiao-card";
 import { TeamCode } from "@/components/team-code";
 import { useGuioes } from "@/components/use-guioes";
+import { WorkspaceGate } from "@/components/workspace-gate";
+import type { Access } from "@/lib/access";
 import { splitDay, teleprompterText, todayDubai, tpQueue, words } from "@/lib/data";
 import { WPS } from "@/lib/types";
 
@@ -25,11 +27,11 @@ function Stat({ v, l }: { v: string | number; l: string }) {
   );
 }
 
-function GuioesInner() {
+function GuioesInner({ access }: { access: Access }) {
   const [date, setDate] = useState(todayDubai());
   const [filter, setFilter] = useState<Filter>("todos");
   const [msg, setMsg] = useState("");
-  const { all, loading, error, patch, canWrite } = useGuioes(date);
+  const { all, loading, error, patch, caps, canWrite } = useGuioes(access, date);
   const { day, carry } = useMemo(() => splitDay(all, date), [all, date]);
   const isToday = date === todayDubai();
 
@@ -67,7 +69,7 @@ function GuioesInner() {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <TeamCode />
-          <Button size="sm" variant="outline" onClick={exportTxt}><DownloadIcon /> Exportar .txt</Button>
+          {caps.export && <Button size="sm" variant="outline" onClick={exportTxt}><DownloadIcon /> Exportar .txt</Button>}
           <Button size="sm" render={<Link href={`/teleprompter?date=${date}`} />} nativeButton={false}><MonitorPlayIcon /> Teleprompter</Button>
         </div>
       </div>
@@ -84,14 +86,14 @@ function GuioesInner() {
       {!canWrite && (
         <Alert>
           <AlertDescription>
-            Estás a ver sem código de equipa: podes ler e abrir o teleprompter. Para validar, editar ou rejeitar, entra com o código.
+            Tens acesso de leitura neste workspace: podes ler e abrir o teleprompter, mas não validar, editar nem rejeitar.
           </AlertDescription>
         </Alert>
       )}
       {canWrite && (
         <Alert>
           <AlertDescription>
-            <b>Como validar:</b> lê cada guião e carrega em <i>Validar</i> nos que gravas tal como estão, <i>Editar</i> para mudar uma frase, <i>Rejeitar</i> (com o motivo) nos que não dirias. O teleprompter leva todos os que não rejeitaste.
+            <b>Como validar:</b> lê cada guião e carrega em <i>Validar</i> nos que gravas tal como estão{caps.edit ? <>, <i>Editar</i> para mudar uma frase</> : null}{caps.reject ? <>, <i>Rejeitar</i> (com o motivo) nos que não dirias</> : null}. O teleprompter leva todos os que não rejeitaste.
           </AlertDescription>
         </Alert>
       )}
@@ -119,8 +121,8 @@ function GuioesInner() {
         </Alert>
       ) : (
         <div className="flex flex-col gap-3">
-          {isToday && filter === "todos" && carry.map((g) => <GuiaoCard key={g.id} g={g} carried canWrite={canWrite} onPatch={patch} onError={setMsg} />)}
-          {shown.map((g) => <GuiaoCard key={g.id} g={g} canWrite={canWrite} onPatch={patch} onError={setMsg} />)}
+          {isToday && filter === "todos" && carry.map((g) => <GuiaoCard key={g.id} g={g} carried caps={caps} onPatch={patch} onError={setMsg} />)}
+          {shown.map((g) => <GuiaoCard key={g.id} g={g} caps={caps} onPatch={patch} onError={setMsg} />)}
         </div>
       )}
     </div>
@@ -130,7 +132,7 @@ function GuioesInner() {
 export default function GuioesPage() {
   return (
     <Suspense fallback={<Skeleton className="h-40 w-full" />}>
-      <GuioesInner />
+      <WorkspaceGate need="scripts.read">{(access) => <GuioesInner access={access} />}</WorkspaceGate>
     </Suspense>
   );
 }
