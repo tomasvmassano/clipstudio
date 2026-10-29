@@ -57,6 +57,8 @@ Um `agency_member` sem atribuição a um workspace **não vê nada** desse works
 | `team.manage` / `permissions.manage` (ws) | ✓ | dentro do teto | — | — | — | — |
 | regras de `member_update` / `member_remove` | nunca a si próprio; só quem está ao seu nível ou abaixo; staff da agência só pelo dono da agência; o último dono do cliente não perde o papel nem é removido (exceto pelo dono da agência) |||||
 | `settings.manage` / `integrations.manage` | ✓ | ✓ | — | — | — | — |
+| ver `/definicoes` (`workspace_settings`) | ✓ | ✓ | ✓ | ✓ | ✓ | — (precisa de `team.read`) |
+| ver o logótipo (storage `branding`, URL assinado) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ (com `scripts.read`); nunca de outro cliente |
 
 Teto de autoridade: ninguém concede mais do que tem (R-12); um admin do cliente nunca cria papéis da agência nem convida staff da agência (TEAM-02, TEAM-04).
 

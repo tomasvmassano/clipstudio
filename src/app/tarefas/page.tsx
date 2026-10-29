@@ -36,7 +36,12 @@ function Tarefas({ access }: { access: Access }) {
   const router = useRouter();
   const manage = can("tasks.manage");
   const tz = ws?.timezone ?? "Asia/Dubai";
-  const [tab, setTab] = useState<Tab>(() => (mode === "user" && can("tasks.work") ? "mine" : "open"));
+  const [tab, setTab] = useState<Tab>(() => {
+    // ?tab=regras|templates|carga abre direto (ex.: a partir das Definições); o servidor volta a verificar
+    const q = params.get("tab");
+    if ((q === "regras" || q === "templates" || q === "carga") && manage && mode === "user") return q;
+    return mode === "user" && can("tasks.work") ? "mine" : "open";
+  });
   const [list, setList] = useState<Task[] | null>(null);
   const [err, setErr] = useState("");
   const [rev, setRev] = useState(0);

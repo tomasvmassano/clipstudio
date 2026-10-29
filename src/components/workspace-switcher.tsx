@@ -15,12 +15,24 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useSession } from "@/components/session-provider";
-import { ROLE_LABEL } from "@/lib/access";
+import { ROLE_LABEL, type WorkspaceCtx } from "@/lib/access";
+import { useLogoUrl } from "@/lib/branding";
 
 /**
  * Troca de workspace (PRD: o staff da agência alterna entre clientes autorizados; o staff do cliente fica no seu).
  * A lista vem de my_context(), que só devolve workspaces onde o utilizador tem acesso ativo.
  */
+/** Logótipo do cliente (se houver) ou o ícone da app; a cor da marca fica como fundo. */
+function WsMark({ ws }: { ws: WorkspaceCtx | null }) {
+	const url = useLogoUrl(ws?.logo_path);
+	if (url) {
+		// eslint-disable-next-line @next/next/no-img-element
+		return <img src={url} alt="" className="size-5 rounded-sm object-contain" style={{ backgroundColor: ws?.brand_color ?? undefined }} />;
+	}
+	if (ws?.brand_color) return <span aria-hidden className="size-4 rounded-sm" style={{ backgroundColor: ws.brand_color }} />;
+	return <LogoIcon />;
+}
+
 export function WorkspaceSwitcher() {
 	const { ws, workspaces, setWorkspace, canOrg } = useSession();
 	const router = useRouter();
@@ -30,7 +42,7 @@ export function WorkspaceSwitcher() {
 	if (workspaces.length <= 1 && !manage) {
 		return (
 			<SidebarMenuButton render={<Link href="/" />}>
-				<LogoIcon />
+				<WsMark ws={ws} />
 				<span className="truncate font-medium">{title}</span>
 			</SidebarMenuButton>
 		);
@@ -39,7 +51,7 @@ export function WorkspaceSwitcher() {
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger render={<SidebarMenuButton aria-label="Trocar de cliente" />}>
-				<LogoIcon />
+				<WsMark ws={ws} />
 				<span className="truncate font-medium">{title}</span>
 				<ChevronsUpDownIcon className="ml-auto size-4 opacity-60" />
 			</DropdownMenuTrigger>
