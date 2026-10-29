@@ -2,6 +2,13 @@
 
 ## 2026-10-29 (W4 Motor)
 
+- **W4-03 dados do motor por cliente, fase contract** (ADR-0016; migração `20261029113539_w4_engine_client_contract`).
+  - Chaves passam a (cliente, id): dois clientes podem acompanhar o mesmo criador, cada um com os seus reels, análises, temas, citações e meta.
+  - O worker do motor só vê e escreve o cliente da sua sessão; sem cliente não vê nada.
+  - Guiões, análises e referências só apontam para reels, temas e citações do mesmo cliente.
+  - Desempenho, Hoje e as vistas `v_*` filtram pelo cliente do reel. Saem os acessos de leitura antigos da API a estas tabelas.
+  - Testes: `w4_engine_isolation` 23/23 (regras novas); regressão `w2_references` 36/36.
+
 - **W4-03 dados do motor por cliente, fase expand** (PRD R-02, SCALE-07 parcial; ADR-0016; migrações `20261029111417_w4_engine_client_scope`, `20261029111654_w4_engine_client_fill`, `20261029111703_w4_engine_client_fill_nested`, `20261029111826_w4_engine_client_fill_definer`).
   - Reels, temas, citações, análises, guiões gerados, meta e relatórios do motor passam a pertencer a um cliente; os dados atuais ficam no Numeiro.
   - O motor (numeiro-engine) só lê e escreve no cliente da execução. Reels novos ficam ligados à conta do cliente e entram no Desempenho.
