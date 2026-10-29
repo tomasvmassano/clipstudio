@@ -2,6 +2,8 @@
 
 ## 2026-10-29 (W4 IA e jobs)
 
+- **W4-02b preços dos modelos** (FR-06-05; migração `20261029095100_w4_model_prices`): preços públicos da Anthropic registados com fonte e data (Opus 5.5 4/20 USD, Sonnet 5.5 2/10 USD, Haiku 5.5 0,10/0,50 USD por milhão de tokens de entrada/saída, Haiku com escalão acima de 100 000 tokens, pesquisa web 10 USD por 1000), convertidos para EUR ao câmbio do BCE de 28/10/2026. O motor passa a contar também as pesquisas web no custo. Com isto, o custo de cada execução deixa de ficar desconhecido e o limite diário passa a funcionar. Testes do worker 19/19.
+
 - **W4-02 worker do motor ligado à fila** (PRD FR-06-03, FR-06-05 parcial, FR-06-06 parcial; ADR-0011; migrações `20261029092137_w4_engine_worker`, `20261029093332_w4_worker_finish_cost_unknown`, `20261029093455_w4_worker_search_path`).
   - O motor passa a correr como worker (`python run.py worker`, repositório privado `numeiro-engine`): apanha as execuções da fila, usa a configuração da versão ativa e grava cada guião aprovado pelo Crítico diretamente na app, em revisão, no dia seguinte (ou no próprio dia, escolha nova na configuração).
   - Repetir não duplica guiões; cancelar pára entre guiões; reinício do alojamento devolve a execução à fila; o limite de custo diário pára a meio e fecha como parcial.
