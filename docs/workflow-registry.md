@@ -13,6 +13,10 @@ Membro (`workspace_access.status`): `active ⇄ suspended`, `active|suspended �
 
 `pendente → aceite` (email confirmado igual ao do convite) ou `pendente → cancelado` (revogado por quem convidou, expirado, ou bloqueado por cliente único: a pessoa já está ativa na equipa de outro cliente; fica `invitation.blocked` no histórico do cliente que convidou).
 
+## Staff da agência (`agency_memberships`, W1-13)
+
+`convidado → ativo` (aceita o convite com o email confirmado; entra sem clientes) · `ativo ⇄ suspenso` (`agency_member_update`, só o dono; suspenso perde logo o acesso a todos os clientes) · papel na agência muda entre membro, gestor e admin; o dono não muda aqui. Atribuir a um cliente (`agency_staff_assign`) e tirar (`member_remove`, tarefas abertas ficam sem responsável ou passam a quem escolheres). Eventos: `agency.invitation.create`, `agency.invitation.revoked`, `agency.member.updated`, `member.assigned`, `member.removed`.
+
 ## Layout do Início (`dashboard_layouts`, W1-10)
 
 `por omissão → personalizado` (`dashboard_layout_set`, com `dashboard.configure`) e `personalizado → por omissão` (`dashboard_layout_reset`). Um layout por cliente e função; cada mudança fica no histórico com antes e depois (`dashboard.layout_set`, `dashboard.layout_reset`). Widgets desconhecidos ou repetidos são recusados (22023).

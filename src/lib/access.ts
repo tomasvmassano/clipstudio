@@ -20,6 +20,8 @@ export type AppContext = {
   user: { id: string; email: string; confirmed: boolean };
   agency: { organization: string; name: string; role: string; status: string; capabilities?: string[] }[] | null;
   workspaces: WorkspaceCtx[];
+  /** Erro ao aceitar convites pendentes neste login (mostrado a quem ainda não tem clientes). */
+  invite_error?: string;
 };
 
 /** Capacidades do código de equipa (espelha legacy_can no SQL; o servidor é quem decide). */
@@ -31,10 +33,12 @@ export const LEGACY_CAPS = [
 /** Aceita convites pendentes para o email confirmado e devolve o contexto do utilizador. */
 export async function loadContext(): Promise<AppContext | null> {
   const sb = supabase();
-  await sb.rpc("accept_invitations").then(() => undefined, () => undefined);
+  // se aceitar convites falhar, a app abre na mesma e diz porquê (em vez de um "sem acesso" mudo)
+  const acc = await sb.rpc("accept_invitations");
   const { data, error } = await sb.rpc("my_context");
   if (error) throw new Error(friendlyError(error.message));
-  return (data as AppContext | null) ?? null;
+  const ctx = (data as AppContext | null) ?? null;
+  return ctx && acc.error ? { ...ctx, invite_error: friendlyError(acc.error.message) } : ctx;
 }
 
 /** Mensagens de erro do servidor em PT-PT. */
@@ -64,6 +68,10 @@ export function friendlyError(msg: string): string {
   if (msg.includes("configuracao_invalida")) return "Esta versão tem erros: corrige-os e guarda uma versão nova antes de ativar.";
   if (msg.includes("execucao_nao_encontrada")) return "Esta execução já não existe.";
   if (msg.includes("filtro_invalido")) return "Filtro inválido. Limpa os filtros e tenta de novo.";
+  if (msg.includes("ja_e_staff")) return "Essa pessoa já faz parte da equipa da agência.";
+  if (msg.includes("convite_pendente")) return "Já há um convite pendente para esse email.";
+  if (msg.includes("pessoa_e_equipa_de_cliente")) return "Essa pessoa faz parte da equipa de um cliente e não pode entrar na agência.";
+  if (msg.includes("dono_protegido")) return "O dono da agência não se altera aqui.";
   if (msg.includes("periodo_invalido")) return "Período inválido: o fim não pode ser antes do início.";
   if (msg.includes("periodo_demasiado_longo")) return "O período máximo é de um ano.";
   if (msg.includes("widget_desconhecido") || msg.includes("widgets_invalidos")) return "Há widgets repetidos ou que já não existem. Recarrega e tenta de novo.";
