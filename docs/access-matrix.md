@@ -50,6 +50,8 @@ Um `agency_member` sem atribuição a um workspace **não vê nada** desse works
 | `agents.read` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `agents.rehearse` / `run` | ✓ | ✓ | ✓ | — | — | — |
 | `agents.configure` | ✓ | ✓ | — | — | — | — |
+| custo de execuções e limite diário | precisa de `costs.read`; sem ela a app e o RPC omitem custo, tokens, gasto e limite |||||
+| worker do motor (`worker_claim`, `worker_heartbeat`, `worker_finish`, `agent_schedule_tick`) | só `service_role`; nenhum papel de utilizador nem o código de equipa |||||
 | `team.invite` (client_staff, mesmo workspace) | ✓ | ✓ | — | — | — | — |
 | `team.manage` / `permissions.manage` (ws) | ✓ | dentro do teto | — | — | — | — |
 | `settings.manage` / `integrations.manage` | ✓ | ✓ | — | — | — | — |

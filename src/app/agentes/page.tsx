@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { PlayIcon, RotateCcwIcon, RadioIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -113,6 +114,7 @@ function Sala({ access }: { access: Access }) {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <TeamCode />
+          <Button size="sm" variant="outline" nativeButton={false} render={<Link href="/agentes/configuracao" />}>Configuração e execuções</Button>
           {can("agents.rehearse") && <Button size="sm" disabled={busy} onClick={simulate}><PlayIcon /> Ensaiar a sala</Button>}
         </div>
       </div>

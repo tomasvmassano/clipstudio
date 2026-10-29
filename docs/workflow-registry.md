@@ -94,6 +94,15 @@ O motor continua a consumir só `status='nova'`; `selecionada` ainda não tem pr
 
 Cada gravação cria uma versão nova (append-only). `guioes.brief_id` aponta para a versão em vigor e `content_versions.brief_id` guarda o brief de cada versão, por isso a aprovação fica com o brief que estava em vigor (FR-17-03). Mudar o brief depois de aprovar não anula a aprovação; a app mostra "mudou depois da aprovação". Evento `brief.updated`.
 
+## Execuções dos agentes (`agent_jobs`, W4-01)
+
+`queued → running → succeeded`; `running → queued` (falha temporária, nova tentativa em `min(60, 2^tentativas)` min, ou lease expirado sem heartbeat); `running → failed` (falha definitiva) ou `dead` (esgotou tentativas, notificação `automation_error` a quem pode correr); `queued|running → cancelled` (em fila cancela já; a correr marca `cancel_requested` e o worker termina); `failed|dead|cancelled → queued` com Repetir (`agent_job_retry`, tentativas a zero).
+Uma execução por cliente, tipo e chave de idempotência (por defeito o dia no fuso do cliente). Cada execução fica presa à versão de configuração ativa quando entrou na fila. Não corre sem configuração ativa nem com o limite diário esgotado. Cada tentativa fica em `agent_job_attempts`.
+
+## Configuração dos agentes (`agent_config_versions`, W4-01)
+
+`draft → active → retired`. Versões nunca mudam nem se apagam; guardar cria sempre uma versão nova validada no servidor. Só uma ativa por cliente; ativar uma antiga é o rollback. Versões com erros não se ativam. Evento `agent.config_activated`.
+
 ## Revisão de media e publicação
 
 Media: `not_submitted → pending → changes_requested | approved | rejected`.
