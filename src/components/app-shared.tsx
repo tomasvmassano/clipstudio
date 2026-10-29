@@ -65,6 +65,7 @@ export const clientNavGroups: SidebarNavGroup[] = [
 			{ title: "Guiões", path: "/guioes", icon: <ScrollTextIcon />, cap: "scripts.read" },
 			{ title: "Revisão", path: "/revisao", icon: <ClapperboardIcon />, cap: "scripts.read" },
 			{ title: "Tarefas", path: "/tarefas", icon: <ListTodoIcon />, cap: "tasks.read" },
+			{ title: "Quem trabalha em quê", path: "/quem-trabalha", icon: <UsersRoundIcon />, cap: "ops.presence", flag: "ops.team_presence" },
 			{ title: "Calendário", path: "/calendario", icon: <CalendarDaysIcon />, cap: "calendar.read" },
 			{ title: "Teleprompter", path: "/teleprompter", icon: <MonitorPlayIcon />, cap: "recording.use" },
 			{ title: "Estilos de edição", path: "/edicao", icon: <FilmIcon />, cap: "scripts.read" },
