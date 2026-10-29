@@ -76,6 +76,7 @@ Sessão (`recording_sessions`): `aberta → fechada`, uma aberta por cliente e d
 | reordenar / saltar | `recording.use` | só itens da sessão; blocos `hook_N`, `body`, `cta` | auditoria `recording.queue_set` |
 | progresso | `recording.use` | retoma; ≥80% uma vez por conteúdo e sessão | `recording.viewed_80` (telemetria, não marca gravado) |
 | marcar take | `recording.confirm` | numerado por bloco, ligado à versão lida; idempotente por `client_ref`; não muda estados | `take.recorded` |
+| marca de tempo | `recording.use` | abrir, rolar, parar, mudar de bloco, take, "Gravaste?", sair; lote até 200; idempotente por `client_ref`; hora do dispositivo e do servidor; só acrescenta; não muda estados (W5-01, ING-03) | — (linha do tempo em `recording_timeline`) |
 | escolher / descartar take | `recording.confirm` | um escolhido por bloco; descartado fica guardado | `take.selected` |
 | fechar sessão | `recording.use` | não aceita mais takes; reabrir o dia cria sessão nova | `recording.session_closed` |
 

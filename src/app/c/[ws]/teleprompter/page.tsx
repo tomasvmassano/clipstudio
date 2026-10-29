@@ -11,8 +11,9 @@ import { useTpPrefs } from "@/components/teleprompter/use-prefs";
 import type { Access } from "@/lib/access";
 import { addDays, dayLabel, setProduction, subscribeGuioes, todayDubai } from "@/lib/data";
 import {
-  blockLabel, blocksOf, closeSession, isRecorded, createTake, openSession, permanentError, readOutbox, saveProgress, setQueue, updateTake, writeOutbox,
-  type BlockKey, type PendingTake, type RecordingSession, type SessionItem, type TakeRow,
+  blockLabel, blocksOf, closeSession, isRecorded, createTake, deviceId, fetchTimeline, flushMarks, openSession, permanentError, readMarks, readOutbox,
+  saveProgress, setQueue, updateTake, writeMarks, writeOutbox,
+  type BlockKey, type MarkKind, type PendingTake, type RecordingSession, type SessionItem, type TakeRow, type Timeline,
 } from "@/lib/recording";
 import { cn } from "@/lib/utils";
 
@@ -26,14 +27,17 @@ const subscribeOnline = (cb: () => void) => {
   return () => { window.removeEventListener("online", cb); window.removeEventListener("offline", cb); };
 };
 
-function Btn({ label, onClick, on, disabled, aria, className }: { label: string; onClick: () => void; on?: boolean; disabled?: boolean; aria?: string; className?: string }) {
+function Btn({ label, onClick, on, disabled, aria, className, expanded }: { label: string; onClick: () => void; on?: boolean; disabled?: boolean; aria?: string; className?: string; expanded?: boolean }) {
   return (
-    <button type="button" aria-label={aria ?? label} onClick={onClick} disabled={disabled}
+    <button type="button" aria-label={aria ?? label} aria-expanded={expanded} onClick={onClick} disabled={disabled}
       className={cn("min-h-11 rounded-xl border border-neutral-700 bg-neutral-900 px-3 text-sm font-semibold text-white disabled:opacity-40", on && "border-amber-400 bg-amber-400 text-black", className)}>
       {label}
     </button>
   );
 }
+
+const fmtSecs = (s: number) => (s >= 60 ? `${Math.floor(s / 60)} min ${Math.round(s % 60)} s` : `${Math.round(s * 10) / 10} s`);
+const fmtClock = (iso: string) => new Date(iso).toLocaleTimeString("pt-PT", { timeZone: "Asia/Dubai", hour: "2-digit", minute: "2-digit", second: "2-digit" });
 
 function TeleprompterInner({ access }: { access: Access }) {
   const params = useSearchParams();
@@ -134,6 +138,43 @@ function TeleprompterInner({ access }: { access: Access }) {
     await load();
   }, [access, load]);
 
+  // ---------- tempos de gravação (W5-01): marcas no dispositivo, enviadas em lote ----------
+  const [marksLeft, setMarksLeft] = useState(() => readMarks(access.ws).length);
+  const [marksRejected, setMarksRejected] = useState(0);
+  const marksFlushing = useRef(false);
+  const sendMarks = useCallback(async () => {
+    if (marksFlushing.current || !navigator.onLine) return;
+    marksFlushing.current = true;
+    try {
+      const r = await flushMarks(access);
+      setMarksLeft(r.left.length);
+      if (r.rejected) setMarksRejected((n) => n + r.rejected);
+    } finally { marksFlushing.current = false; }
+  }, [access]);
+  const onMark = useCallback((kind: MarkKind, content: string | null, block: BlockKey | null) => {
+    if (!session) return;
+    const list = readMarks(access.ws);
+    list.push({ ref: crypto.randomUUID(), session: session.id, kind, content, block, at: new Date().toISOString(), device: deviceId() });
+    writeMarks(access.ws, list);
+    setMarksLeft(list.length);
+    if (kind === "exit" || kind === "recorded" || kind === "pause") sendMarks();
+  }, [access.ws, session, sendMarks]);
+  useEffect(() => {
+    if (!online) return;
+    const t = setTimeout(sendMarks, 1000);
+    const iv = setInterval(sendMarks, 10000);
+    return () => { clearTimeout(t); clearInterval(iv); };
+  }, [online, sendMarks]);
+
+  const [timeline, setTimeline] = useState<Timeline | null>(null);
+  const [tlOpen, setTlOpen] = useState(false);
+  const [tlError, setTlError] = useState("");
+  const loadTimeline = useCallback(async () => {
+    if (!session) return;
+    try { await sendMarks(); setTimeline(await fetchTimeline(access, session.id)); setTlError(""); }
+    catch (e) { setTlError((e as Error).message); }
+  }, [access, session, sendMarks]);
+
   // ---------- progresso (retoma segura) ----------
   const prog = useRef<{ content: string; block: BlockKey | null; pct: number; sent: number; dirty: boolean } | null>(null);
   const onProgress = useCallback((content: string, block: BlockKey | null, pct: number) => {
@@ -210,7 +251,7 @@ function TeleprompterInner({ access }: { access: Access }) {
         <Prompter
           items={playable} start={view} prefs={prefs} update={update} keysFor={keysFor} canTake={canTake} takesFor={takesFor}
           online={online} pendingCount={outbox.filter((t) => !t.error).length}
-          onTake={onTake} onTakeUpdate={onTakeUpdate} onRecorded={onRecorded} onProgress={onProgress}
+          onTake={onTake} onTakeUpdate={onTakeUpdate} onRecorded={onRecorded} onProgress={onProgress} onMark={onMark}
           onSettings={() => setSettings(true)} onExit={() => { setView({ kind: "queue" }); load(); }}
         />
         {settingsPanel}
@@ -321,6 +362,43 @@ function TeleprompterInner({ access }: { access: Access }) {
                 );
               })}
             </ol>
+            <section aria-label="Tempos da sessão" className="flex flex-col gap-2 border-t border-neutral-800 pt-4">
+              <div className="flex flex-wrap items-center gap-2">
+                <Btn label={tlOpen ? "Esconder tempos da sessão" : "Tempos da sessão"} expanded={tlOpen}
+                  onClick={() => { const o = !tlOpen; setTlOpen(o); if (o) loadTimeline(); }} />
+                {tlOpen && <Btn label="Atualizar" onClick={loadTimeline} />}
+                <span className="text-xs text-neutral-500">
+                  {marksLeft > 0 ? `${marksLeft} marca${marksLeft > 1 ? "s" : ""} de tempo por enviar${online ? "…" : " (sem ligação)"}` : "Quando cada bloco foi lido, para o corte automático."}
+                </span>
+              </div>
+              {marksRejected > 0 && <p role="alert" className="text-sm text-red-300">{marksRejected} marca{marksRejected > 1 ? "s" : ""} de tempo recusada{marksRejected > 1 ? "s" : ""} pelo servidor.</p>}
+              {tlOpen && tlError && (
+                <p role="alert" className="text-sm text-red-300">Não deu para ler os tempos: {tlError} <button type="button" className="underline" onClick={loadTimeline}>Tentar de novo</button></p>
+              )}
+              {tlOpen && !tlError && !timeline && <p className="text-sm text-neutral-400" aria-busy="true">A carregar os tempos…</p>}
+              {tlOpen && timeline && (timeline.marks === 0 ? (
+                <p className="text-sm text-neutral-400">Ainda não há tempos nesta sessão. Ficam registados quando rolas o texto.</p>
+              ) : (
+                <ol className="flex flex-col gap-1 text-sm" aria-label="Tempos por guião">
+                  {timeline.items.filter((x) => x.first_at || x.takes.length || x.recorded_at).map((x) => (
+                    <li key={x.content_id} data-timeline={x.content_id} className="rounded-lg border border-neutral-800 px-3 py-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="w-8 text-right tabular-nums text-neutral-500">{x.n}</span>
+                        <span className="min-w-0 flex-1 truncate">{x.tema || "Sem tema"}</span>
+                        <span className="tabular-nums text-neutral-300">{fmtSecs(x.read_seconds)} a ler</span>
+                        {x.recorded_at && <span className="rounded bg-emerald-900 px-2 py-0.5 text-xs text-emerald-100">gravado às {fmtClock(x.recorded_at)}</span>}
+                      </div>
+                      {x.segments.length > 0 && (
+                        <p className="mt-1 text-xs tabular-nums text-neutral-400">
+                          {x.segments.map((sg) => `${sg.block ? blockLabel(sg.block) : "?"} ${fmtClock(sg.start)} · ${fmtSecs(sg.seconds)}`).join("  ·  ")}
+                        </p>
+                      )}
+                      {x.takes.length > 0 && <p className="mt-1 text-xs text-neutral-500">{x.takes.length} take{x.takes.length > 1 ? "s" : ""} marcado{x.takes.length > 1 ? "s" : ""}</p>}
+                    </li>
+                  ))}
+                </ol>
+              ))}
+            </section>
             <div className="flex flex-wrap gap-2 border-t border-neutral-800 pt-4">
               <Btn label="Terminar sessão" onClick={endSession} disabled={busy} />
               <span className="self-center text-xs text-neutral-500">O que não for gravado passa para o dia seguinte com os takes que já tem.</span>

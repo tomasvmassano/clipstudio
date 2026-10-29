@@ -143,3 +143,49 @@ export function writeLocalPrefs(p: TpPrefs) {
 }
 export const fetchServerPrefs = (device: string) => rpc<Partial<TpPrefs> | null>("tp_prefs_get", { p_device: device });
 export const saveServerPrefs = (device: string, p: TpPrefs) => rpc<TpPrefs>("tp_prefs_set", { p_device: device, p_prefs: p });
+
+// ---------- tempos de gravação (W5-01, ING-03) ----------
+// Cada marca (abrir guião, rolar, parar, mudar de bloco, take, confirmação, sair) leva a hora do dispositivo e um ref
+// gerado aqui: fica no dispositivo até o servidor a aceitar e reenviar não duplica. É a base do corte automático.
+export type MarkKind = "open" | "play" | "pause" | "block" | "take" | "recorded" | "not_recorded" | "exit";
+export type PendingMark = { ref: string; session: string; kind: MarkKind; content?: string | null; block?: BlockKey | null; at: string; device: string };
+export type TimelineSegment = { block: BlockKey | null; start: string; end: string; seconds: number; device: string | null };
+export type TimelineItem = {
+  content_id: string; n: number; tema: string | null; position: number; first_at: string | null; read_seconds: number;
+  segments: TimelineSegment[]; takes: { block: BlockKey; n: number; at: string; status: string; selected: boolean }[]; recorded_at: string | null;
+};
+export type Timeline = { session: { id: string; date: string }; marks: number; first_at: string | null; last_at: string | null; items: TimelineItem[] };
+
+const marksKey = (ws: string) => `tp.marks.${ws}`;
+const MARKS_KEEP = 3000;
+export function readMarks(ws: string): PendingMark[] {
+  try { const v = JSON.parse(localStorage.getItem(marksKey(ws)) ?? "[]"); return Array.isArray(v) ? (v as PendingMark[]) : []; } catch { return []; }
+}
+export function writeMarks(ws: string, list: PendingMark[]) {
+  try { localStorage.setItem(marksKey(ws), JSON.stringify(list.slice(-MARKS_KEEP))); } catch {}
+}
+export const addMarks = (access: Access, session: string, marks: PendingMark[]) =>
+  rpc<{ inserted: number; duplicates: number }>("recording_marks_add", {
+    p_session: session, p_token: access.token,
+    p_marks: marks.map((m) => ({ ref: m.ref, kind: m.kind, content: m.content ?? null, block: m.block ?? null, at: m.at, device: m.device })),
+  });
+export const fetchTimeline = (access: Access, session: string) => rpc<Timeline>("recording_timeline", { p_session: session, p_token: access.token });
+
+/** Envia as marcas guardadas, por sessão e em lotes de 200. Devolve as que ficam por enviar e as recusadas. */
+export async function flushMarks(access: Access, send = addMarks): Promise<{ left: PendingMark[]; rejected: number }> {
+  let left = readMarks(access.ws);
+  let rejected = 0;
+  while (left.length) {
+    const session = left[0].session;
+    const batch = left.filter((m) => m.session === session).slice(0, 200);
+    const refs = new Set(batch.map((m) => m.ref));
+    try { await send(access, session, batch); }
+    catch (e) {
+      if (!permanentError((e as { code?: string }).code)) break; // sem rede: fica para depois
+      rejected += batch.length; // recusadas pelo servidor (ex.: sessão de outro cliente): não ficam a repetir
+    }
+    left = readMarks(access.ws).filter((m) => !refs.has(m.ref));
+    writeMarks(access.ws, left);
+  }
+  return { left, rejected };
+}

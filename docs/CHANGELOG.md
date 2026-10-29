@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-29 (tempos de gravação)
+
+- **W5-01** base da edição automática (ING-03 parcial, ADR-0026). O teleprompter regista quando cada guião é aberto, quando rola e para, cada mudança de bloco, os takes, a resposta ao "Gravaste?" e a saída, com a hora do dispositivo e do servidor. Fica no dispositivo e é enviado em lotes (também sem rede, sem duplicar). Na fila, **Tempos da sessão** mostra por guião quanto tempo se leu cada bloco e a que horas. É o que o corte automático vai usar. Migração `20261029165727_w5_recording_marks` (aditiva). Testes: SQL 17/17, E2E 2/2.
+- PUB-03 (publicação assistida) registado como `adiado`: sem passos manuais, espera pela API (decisão do Tomás, 29/10).
+- Menu: o aviso da Base UI sobre o estado inicial dos grupos com submenu deixou de aparecer.
+
 ## 2026-10-29 (revisão de guiões)
 
 - **W2-06** revisão (FR-05-01, FR-05-02, FR-02-02; ADR-0025). Nova página **Revisão** no menu do cliente: guiões à espera de decisão com filtros por estado, responsável, prioridade, prazo e pesquisa, com o responsável, a prioridade e o prazo da tarefa de revisão. Cada guião tem **Comentários**: carregar numa frase para a comentar, responder, resolver e reabrir; cada comentário fica com a versão em que foi feito. O código de equipa do Numeiro também comenta. Migração `20261029162938_w2_review_comments`. Testes: SQL 33/33, E2E 3/3.

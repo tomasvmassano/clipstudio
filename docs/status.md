@@ -11,10 +11,10 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | Estado | Requisitos |
 |---|---|
 | feito | 22 |
-| parcial | 141 |
-| por começar | 95 |
+| parcial | 142 |
+| por começar | 93 |
 | bloqueado | 3 |
-| adiado | 2 |
+| adiado | 3 |
 | **total** | **263** |
 
 ## Pendentes abertos (bloqueados primeiro, depois por prioridade)
@@ -58,6 +58,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | CAP-06 | P0 | parcial | sem revisões periódicas de acessos nem revogação de sessões | Gestão de ciclo de vida |
 | OPS-01 | P0 | parcial | sem contadores online, disponíveis, em tarefa, ausentes; sem equipa e projeto | Diretório e contadores |
 | OPS-03 | P0 | parcial | sem acknowledge, snooze e delegar | Minha área de trabalho |
+| ING-03 | P0 | parcial | sem ingestão do ficheiro da câmara, transcrição com tempos por palavra e sincronização pelo áudio | Um ficheiro longo por câmara por sessão |
 | PERF-09 | P0 | parcial | só uma leitura por publicação; ligação ao conteúdo por inferência | Correções de dados imediatas |
 | FR-01-03 | P1 | parcial | sem "Minha fila" no Início; gravações e alertas fora da fila | Minha fila: tarefas, aprovações, gravações, prazos e alertas; clique abre objeto |
 | FR-01-04 | P1 | parcial | sem calendário compacto no Início | Calendário editorial compacto e atividade recente com ator e timestamp. |
@@ -572,7 +573,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 |---|---|---|---|---|
 | ING-01 | por começar | sem object storage nem Drive | só bucket branding | — |
 | ING-02 | por começar | sem ingestão da câmara | media.ingest planeada | — |
-| ING-03 | por começar | sem corte por tempos do teleprompter | recording_progress guarda tempos, sem ingestão | — |
+| ING-03 | parcial | sem ingestão do ficheiro da câmara, transcrição com tempos por palavra e sincronização pelo áudio | recording_marks, recording_marks_add, recording_timeline (W5-01, ADR-0026); w5_recording_marks 17/17; e2e/recording-marks.spec.ts 2/2 | — |
 | ING-04 | por começar | sem upload pelo telemóvel | nada no código | — |
 | EDL-01 | por começar | sem pacote de edição | edit.package.run planeada | — |
 | EDL-02 | por começar | sem revisão em lote de variantes | nada no código | — |
@@ -613,7 +614,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 |---|---|---|---|---|
 | PUB-01 | por começar | sem publicador | nada no código | — |
 | PUB-02 | por começar | sem agendador | nada no código | — |
-| PUB-03 | por começar | sem modo assistido | nada no código | — |
+| PUB-03 | adiado | decisão do Tomás 29/10: sem publicação manual, espera pela API oficial (PLAT-03) | — | — |
 | PUB-04 | por começar | sem publicações no calendário | limitação W3-02 | — |
 | PUB-05 | por começar | sem republicação agendada | nada no código | — |
 | PUB-06 | por começar | capacidades só planeadas | publishing.approve planeada | — |
