@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import {
 	Building2Icon, GaugeIcon, KeyRoundIcon, ScrollIcon, SettingsIcon, SlidersHorizontalIcon,
 	LayoutGridIcon, ScrollTextIcon, MonitorPlayIcon, LightbulbIcon, BarChart3Icon, BotIcon,
-	ClapperboardIcon, FilmIcon, FlaskConicalIcon, LibraryIcon, ShieldCheckIcon, UsersIcon, UsersRoundIcon, WalletIcon, FileTextIcon, HistoryIcon, InboxIcon, ListTodoIcon, CalendarDaysIcon,
+	BriefcaseBusinessIcon, ClapperboardIcon, FilmIcon, ReceiptIcon, FlaskConicalIcon, LibraryIcon, ShieldCheckIcon, UsersIcon, UsersRoundIcon, WalletIcon, FileTextIcon, HistoryIcon, InboxIcon, ListTodoIcon, CalendarDaysIcon,
 } from "lucide-react";
 
 export type SidebarNavItem = {
@@ -33,6 +33,8 @@ export const agencyNavGroups: SidebarNavGroup[] = [
 		items: [
 			{ title: "Painel", path: "/", icon: <GaugeIcon />, orgCap: "dashboard.agency" },
 			{ title: "Clientes", path: "/clientes", icon: <Building2Icon />, orgCap: "workspaces.read" },
+			{ title: "Negócio", path: "/negocio", icon: <BriefcaseBusinessIcon />, orgCap: "biz.read", flag: "biz.view" },
+			{ title: "Contratos e custos", path: "/negocio/contratos", icon: <ReceiptIcon />, orgCap: "biz.finance", flag: "biz.view" },
 			{ title: "Caixa de entrada", path: "/caixa", icon: <InboxIcon />, orgCap: "dashboard.agency" },
 			{ title: "Equipa da agência", path: "/equipa-agencia", icon: <UsersRoundIcon />, orgCap: "team.read" },
 			{ title: "Funcionalidades em teste", path: "/funcionalidades", icon: <FlaskConicalIcon />, orgCap: "flags.manage" },

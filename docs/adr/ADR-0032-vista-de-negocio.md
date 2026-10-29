@@ -1,0 +1,29 @@
+# ADR-0032 · Vista de negócio da agência com dois níveis de acesso
+
+**Estado:** aceite · **Data:** 2026-10-30 · **Requisitos:** BIZ-01, BIZ-02, BIZ-03, BIZ-04, BIZ-05, BIZ-06 (parcial cada um, ver Consequências); BIZ-09 registado como indisponível
+
+## Contexto
+O PRD §38 pede, no espaço da agência, uma métrica norte (atingimento de entrega), uma faixa "Precisa da tua atenção", KPIs e uma tabela por cliente, contratos por cliente e custos com margem. A mesma vista serve dois públicos: o staff da agência (operacional, só clientes atribuídos) e o dono (financeiro). BIZ-04 exige que o servidor construa a resposta por pessoa e que quem não tem acesso financeiro não receba nenhum total financeiro (com poucos clientes deduz-se um valor por subtração). AGENTS §2 e §5: deny by default, nunca confiar no browser.
+
+## Decisão
+- **Uma RPC de leitura, `biz_overview(mês, moeda)`**, `security definer`, que junta os clientes a que a pessoa tem acesso (dono: todos os ativos; staff: só `workspace_access` ativo como `agency_staff`) e, por cliente, só as métricas cujas capacidades a pessoa tem nesse cliente (`scripts.read`, `analytics.read`; a negação explícita retira-as e conta-as em `missing`). Os campos `fin` por cliente, os totais financeiros, o câmbio e os cartões financeiros só entram na resposta com `biz.finance` (âmbito org). Não há "esconder no browser".
+- **Registo de métricas `biz_metrics`**: cada KPI e coluna tem chave estável, nível (operacional/financeiro), capacidade e explicação. Métricas sem dados ficam registadas como indisponíveis com o motivo (saúde do cliente, BIZ-09).
+- **Capacidades novas:** `biz.read` (todos os papéis da agência; o âmbito por cliente vem das atribuições), `biz.finance` e `contracts.manage` (só `agency_owner` por defeito). Flag `biz.view` (org, por defeito "só o dono"); as RPCs recusam com `55000 funcionalidade_desligada` quando está desligada (CAP-09), depois de verificar a capacidade (assim a equipa do cliente recebe sempre 42501).
+- **Contratos (`client_contracts`) só de acrescentar:** cada gravação é uma versão nova com `effective_from`; concorrência otimista pela versão vista (40001). Valor em `numeric(12,2)` com moeda original EUR/AED, periodicidade (o MRR é o equivalente mensal), volumes, plataformas, prazo de publicação, renovação e estado de pagamento. Registo interno, não faturação.
+- **Câmbio (`fx_rates`)** escrito pelo dono, só de acrescentar; os totais usam a taxa mais recente e mostram taxa, data e fonte. Sem taxa, os valores noutra moeda ficam `null` e a resposta diz `fx_missing` (nunca uma conversão inventada).
+- **Custos (`agency_costs`)**: humanos, ferramentas e outros por mês, diretos a um cliente ou da agência repartidos por todos os clientes ativos (por igual ou pelos vídeos publicados). Não se apagam nem se mudam: anulam-se com motivo. Gravação idempotente por `client_ref`. Custo de IA vem de `agent_jobs.cost_eur` (já existente, W4).
+- **Atingimento (BIZ-01):** vídeos (conteúdos canónicos; um conteúdo em 3 plataformas conta 1) cuja primeira publicação (`publicacoes.published_at` ou transição de produção para `published`) caiu no mês e no prazo (data do guião + `deadline_days`), a dividir pelos vídeos contratados. Ritmo até hoje = no prazo ÷ (contratados × dias passados ÷ dias do mês); alerta abaixo de 90%, meta 95%. Atrasos (publicados fora do prazo e em atraso por publicar) separados em "do cliente" e "da agência".
+- **Itens parados (BIZ-02):** p50/p70 do tempo em cada etapa (editorial e produção) a partir de `content_transitions` dos últimos 90 dias do próprio cliente, com amostra mínima de 10 passagens; sem amostra a etapa fica "sem amostra", não com limiar inventado.
+- **Faixa:** no máximo 5 cartões por gravidade (crítico, alto, aviso), cada um com ação direta para a página que resolve; o resto conta como "mais N". Regras sem dados listadas com o motivo. Também aparece no topo do Painel da agência com a flag ligada.
+
+## Alternativas rejeitadas
+- Duas RPCs (operacional e financeira) e juntar no browser: duplicava a lista de clientes e tornava fácil um ecrã mostrar totais financeiros a quem não devia; uma resposta por pessoa é mais simples de testar.
+- Esconder colunas financeiras só na UI: viola BIZ-04.
+- Converter moedas com uma API de câmbio externa: não há integração aprovada; a taxa manual com data visível cumpre BIZ-05 sem dependência nova.
+- Calcular a saúde do cliente (BIZ-09) já com os dados que existem: faltam sentimento e histórico; um score parcial pareceria completo.
+
+## Pressupostos
+Prazo de cada vídeo = data do guião no calendário + N dias do contrato (7 por defeito). Atraso do cliente = aprovação pela equipa do cliente (ou código de equipa) mais de 48 h depois do envio, guião à espera de aprovação há mais de 48 h, ou gravação depois do dia planeado. Possível supressão só pela regra da mediana (mínimo 3 reels em 7 dias e 5 nos 30 anteriores); "posts perto de zero" fica indisponível até haver leituras por idade (PERF-03). Índice de desempenho usa a última leitura de views (não a mesma idade) e todas as publicações das contas do cliente, porque a origem `sistema`/`externo` (R-16) ainda não existe. Cliente em risco = fatura vencida há mais de 15 dias, margem abaixo de 50%, ou renovação em 30 dias com ritmo abaixo de 90%. Concentração calculada nos 3 últimos fins de mês com a taxa atual. O volume contratado (vídeos por mês) é operacional e o staff vê-o no atingimento; valores, pagamentos e renovações não.
+
+## Consequências
+Sem métricas inventadas: o que não tem dados aparece como indisponível. Falta: saúde do cliente (BIZ-09) e o cartão de renovação com saúde; filtro "Só o que fizemos" (R-16); AGI distinto de MRR (decisão pendente); custo de IA por execução em moeda diferente de EUR. Rollback no fim da migração `20261030000100_w6_biz.sql`.
