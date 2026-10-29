@@ -2,6 +2,15 @@
 
 ## 2026-10-29 (W4 IA e jobs)
 
+- **W4-02 worker do motor ligado à fila** (PRD FR-06-03, FR-06-05 parcial, FR-06-06 parcial; ADR-0011; migrações `20261029092137_w4_engine_worker`, `20261029093332_w4_worker_finish_cost_unknown`, `20261029093455_w4_worker_search_path`).
+  - O motor passa a correr como worker (`python run.py worker`, repositório privado `numeiro-engine`): apanha as execuções da fila, usa a configuração da versão ativa e grava cada guião aprovado pelo Crítico diretamente na app, em revisão, no dia seguinte (ou no próprio dia, escolha nova na configuração).
+  - Repetir não duplica guiões; cancelar pára entre guiões; reinício do alojamento devolve a execução à fila; o limite de custo diário pára a meio e fecha como parcial.
+  - Tokens e custo por chamada de agente e por execução. Sem preços dos modelos o custo fica desconhecido em vez de 0.
+  - A corrida diária passa a ser enfileirada pelo próprio Supabase a cada 5 minutos.
+  - Utilizador de base próprio para o worker, com o mínimo de acesso e sem login até ser configurado.
+  - Na página dos agentes, o progresso aparece em linguagem de pessoa (etapa, guiões gravados, chumbados, motivo de paragem) com link para os guiões do dia.
+  - Testes: `w4_worker` 30/30, `w4_agents` 44/44 (regressão), worker em mock 16/16, payload real do motor validado na base, E2E 7/7.
+
 - **W4-01 agentes: catálogo, configuração versionada e execuções duráveis** (PRD M06, FR-06 parcial, NFR durabilidade de jobs; ADR-0010; migração `20261029084441_w4_agents_config_jobs`).
   - `/agentes/configuracao`: catálogo dos 13 agentes do motor (etapa, modelo, o que lê e escreve), versão ativa, corrida diária, estado do worker e lista de execuções.
   - Configuração por cliente (voz, léxico, regras, formatos com proporções, produção, modelo por agente, agenda, limite de custo, áreas de notícias, leituras). Cada gravação é uma versão nova validada no servidor; ativar uma antiga volta atrás. O preset Numeiro é só a versão 1 deste cliente.

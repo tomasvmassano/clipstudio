@@ -98,7 +98,7 @@ function AgentesConfig({ access }: { access: Access }) {
               {workerAge === null ? <><AlertTriangleIcon className="size-4" /> Nunca ligado</> : workerAge > 10 ? <><AlertTriangleIcon className="size-4" /> Visto há {Math.round(workerAge)} min</> : <><CheckCircle2Icon className="size-4 text-emerald-600" /> Ligado</>}
             </CardTitle></CardHeader>
           <CardContent className="text-xs text-muted-foreground">
-            {workerAge === null ? "As execuções ficam em fila até o motor ser ligado à fila (próximo passo)." : `${o.worker!.id}${o.worker!.version ? ` · ${o.worker!.version}` : ""}`}
+            {workerAge === null ? "As execuções ficam em fila até o worker do motor estar alojado e ligado." : `${o.worker!.id}${o.worker!.version ? ` · ${o.worker!.version}` : ""}`}
           </CardContent>
         </Card>
       </div>
@@ -153,7 +153,7 @@ function Jobs({ o, busy, onRun, onCancel, onRetry }: { o: Overview; busy: boolea
                 </TableCell>
                 <TableCell className="tabular-nums">{j.attempts}/{j.max_attempts}</TableCell>
                 <TableCell className="text-xs text-muted-foreground">
-                  {j.progress ? Object.entries(j.progress).map(([k, v]) => `${k}: ${String(v)}`).join(" · ") : j.started_at ? `início ${fmtDue(j.started_at)}` : "—"}
+                  <JobProgress j={j} />
                   {j.finished_at && <div>fim {fmtDue(j.finished_at)}</div>}
                 </TableCell>
                 {o.can.costs && <TableCell className="tabular-nums text-xs">{j.cost_eur != null ? `${Number(j.cost_eur).toFixed(2)} EUR` : "—"}{j.tokens_in ? <div className="text-muted-foreground">{j.tokens_in + (j.tokens_out ?? 0)} tokens</div> : null}</TableCell>}
@@ -167,6 +167,32 @@ function Jobs({ o, busy, onRun, onCancel, onRetry }: { o: Overview; busy: boolea
         </Table>
       )}
     </div>
+  );
+}
+
+const STEP_LABEL: Record<string, string> = {
+  learner: "Aprendiz", daily_analyst: "Analista diário", curious: "Curioso", reporter: "Repórter", philosopher: "Filósofo",
+  guioes: "a escrever guiões", analyst: "a analisar referências",
+};
+
+/** Progresso e resultado em linguagem de pessoa; só mostra o que o worker reportou de facto. */
+function JobProgress({ j }: { j: Job }) {
+  const p = (j.progress ?? {}) as Record<string, unknown>;
+  const r = (j.result ?? {}) as Record<string, unknown>;
+  const n = (x: unknown) => (typeof x === "number" ? x : null);
+  const parts: string[] = [];
+  if (j.status === "running" && typeof p.etapa === "string") parts.push(STEP_LABEL[p.etapa] ?? p.etapa);
+  const saved = n(r.guioes) ?? n(p.guardados);
+  if (saved !== null) parts.push(`${saved} ${saved === 1 ? "guião gravado" : "guiões gravados"}${n(r.pedidos) ? ` de ${r.pedidos}` : ""}`);
+  if (n(p.chumbados)) parts.push(`${p.chumbados} chumbados pelo Crítico`);
+  if (n(r.analisados) !== null) parts.push(`${r.analisados} referências analisadas`);
+  if (r.parcial) parts.push(typeof r.motivo === "string" ? `parou: ${r.motivo}` : "parcial");
+  if (!parts.length) return <>{j.started_at ? `início ${fmtDue(j.started_at)}` : "—"}</>;
+  return (
+    <>
+      {parts.join(" · ")}
+      {saved ? (typeof r.dia === "string" ? <div><Link className="underline" href={`/guioes?date=${r.dia}`}>Ver guiões de {r.dia}</Link></div> : null) : null}
+    </>
   );
 }
 
@@ -289,6 +315,13 @@ function ConfigEditor({ access, o, onSaved }: { access: Access; o: Overview; onS
         <Card><CardHeader><CardTitle className="text-base">Agenda e custo</CardTitle></CardHeader>
           <CardContent className="flex flex-wrap items-end gap-4 text-sm">
             <label className="inline-flex items-center gap-2"><input type="checkbox" checked={!!cfg.schedule?.enabled} onChange={(e) => set({ schedule: { time: cfg.schedule?.time ?? "18:00", enabled: e.target.checked } })} /> Correr todos os dias</label>
+            <label className="flex flex-col gap-1">Guiões para
+              <select aria-label="Dia dos guiões" className="h-9 rounded-md border bg-background px-2 text-sm" value={String(cfg.pipeline.target_day_offset ?? 1)}
+                onChange={(e) => set({ pipeline: { ...cfg.pipeline, target_day_offset: Number(e.target.value) as 0 | 1 } })}>
+                <option value="1">o dia seguinte</option>
+                <option value="0">o próprio dia</option>
+              </select>
+            </label>
             <label className="flex flex-col gap-1">Hora (fuso do cliente)<Input type="time" value={cfg.schedule?.time ?? "18:00"} onChange={(e) => set({ schedule: { enabled: !!cfg.schedule?.enabled, time: e.target.value } })} /></label>
             {o.can.costs && <label className="flex flex-col gap-1">Limite de custo por dia (EUR)<Input type="number" step={0.5} min={0.5} value={cfg.budget_eur_day ?? ""} onChange={(e) => set({ budget_eur_day: e.target.value === "" ? null : Number(e.target.value) })} placeholder="sem limite" /></label>}
           </CardContent></Card>

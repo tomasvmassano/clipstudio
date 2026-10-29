@@ -99,6 +99,8 @@ Cada gravação cria uma versão nova (append-only). `guioes.brief_id` aponta pa
 `queued → running → succeeded`; `running → queued` (falha temporária, nova tentativa em `min(60, 2^tentativas)` min, ou lease expirado sem heartbeat); `running → failed` (falha definitiva) ou `dead` (esgotou tentativas, notificação `automation_error` a quem pode correr); `queued|running → cancelled` (em fila cancela já; a correr marca `cancel_requested` e o worker termina); `failed|dead|cancelled → queued` com Repetir (`agent_job_retry`, tentativas a zero).
 Uma execução por cliente, tipo e chave de idempotência (por defeito o dia no fuso do cliente). Cada execução fica presa à versão de configuração ativa quando entrou na fila. Não corre sem configuração ativa nem com o limite diário esgotado. Cada tentativa fica em `agent_job_attempts`.
 
+Worker (W4-02): cada guião aprovado pelo Crítico entra em `guioes` como `in_review` (versão 1, `created_kind = engine`, evento `script.created`) no dia alvo da execução; repetir o mesmo slot devolve o mesmo guião. Cancelar pára entre guiões; reinício do alojamento devolve a execução à fila; limite de custo atingido fecha como concluída parcial (`result.parcial`, `result.motivo`). A corrida diária é enfileirada pelo `pg_cron` a cada 5 min (`agent_schedule_tick`).
+
 ## Configuração dos agentes (`agent_config_versions`, W4-01)
 
 `draft → active → retired`. Versões nunca mudam nem se apagam; guardar cria sempre uma versão nova validada no servidor. Só uma ativa por cliente; ativar uma antiga é o rollback. Versões com erros não se ativam. Evento `agent.config_activated`.
