@@ -13,6 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { WorkspaceGate } from "@/components/workspace-gate";
 import { ContentChecklist } from "@/components/tasks/content-checklist";
+import { ContentDetails } from "@/components/content-details";
 import { useSession } from "@/components/session-provider";
 import type { Access } from "@/lib/access";
 import {
@@ -223,17 +224,17 @@ function ContentSheet({ access, onRefresh, c, today, data, busy, onClose, onMove
   const moves = nextProduction(c.production_status, data.can);
   return (
     <Sheet open onOpenChange={(v) => { if (!v) onClose(); }}>
-      <SheetContent className="w-full overflow-y-auto sm:max-w-md">
+      <SheetContent className="w-full overflow-y-auto sm:max-w-lg">
         <SheetHeader>
           <SheetTitle>Guião {c.n}{c.tema ? ` · ${c.tema}` : ""}</SheetTitle>
           <SheetDescription>{dayTitle(c.date)}{c.late ? " · atrasado" : ""}</SheetDescription>
         </SheetHeader>
         <div className="flex flex-col gap-4 px-4 pb-6 text-sm">
-          {c.hook && <p className="font-medium">{c.hook}</p>}
           <div className="flex flex-wrap gap-2">
             <Badge variant="outline">{PRODUCTION_LABEL[c.production_status]}</Badge>
             {c.open_tasks > 0 && <Badge variant="secondary">{c.open_tasks} tarefa{c.open_tasks > 1 ? "s" : ""} aberta{c.open_tasks > 1 ? "s" : ""}</Badge>}
           </div>
+          <ContentDetails access={access} id={c.id} date={c.date} />
           {moves.length > 0 && (
             <div className="flex flex-col gap-2">
               <h3 className="font-semibold">Produção</h3>
