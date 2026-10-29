@@ -855,7 +855,7 @@ Não estimar datas/custos sem inventário SQL, desenho aprovado, equipa disponí
 - Quais plataformas publicar diretamente na v1? **Default:** publicação manual universal e APIs oficiais apenas onde permissões forem aprovadas.
 - Quais métricas são indispensáveis por plataforma? **Default:** mostrar apenas as obtidas legalmente e com timestamp.
 - Aprovação do próprio guião permitida? **Default:** segregação opcional por workspace.
-- Armazenamento e processamento de vídeo: Supabase Storage versus storage especializado, conforme volume real e custos.
+- Armazenamento e processamento de vídeo: Supabase Storage versus storage especializado, conforme volume real e custos. **Resolvido (CHG-003, ING-01):** bruto em Google Drive sem prazo; trabalho, proxies e finais em object storage S3-compatível (proposta Cloudflare R2).
 - Limites de IA e quotas: por workspace e por agente, com alertas e bloqueio configuráveis.
 - Política de retenção e localização de dados: validar requisitos contratuais e regulatórios dos clientes.
 
@@ -1075,6 +1075,8 @@ Acrescentar às entidades da Parte I: `creators`, `social_accounts`, `content_br
 
 **W6 — Distribuição e aprendizagem:** contas, calendário, publicação com aprovação, métricas, experimentos, repetir vencedor.
 
+**Sequência revista (CHG-003):** a ordem de entrega a partir de W5/W6 está em §44; a medição de desempenho (parte do W6) passa para antes da media (W5). O âmbito de cada workstream não muda.
+
 **W7 — Hardening e rollout:** testes E2E, acessibilidade, desempenho, segurança, backup/restore, migração piloto e rollout gradual.
 
 Cada workstream entrega migração + API + UI + autorização + logs + testes + documentação; não declarar módulo concluído só porque a página existe. Entrega de W5 depende de worker real validado; W6 depende de API/plataforma autorizada, com fallback manual explicitamente testado.
@@ -1083,9 +1085,9 @@ Cada workstream entrega migração + API + UI + autorização + logs + testes + 
 
 1. Confirmar repositório e acesso ao motor Python, SQL migrations, funções RPC e RLS reais. **A VALIDAR**.
 2. Definir serviço de render, capacidade por dia, custo por minuto, formatos, retenção e armazenamento bruto. **A VALIDAR**.
-3. Confirmar integrações e direitos de acesso às APIs sociais e ao Metricool. **A VALIDAR**.
+3. Confirmar integrações e direitos de acesso às APIs sociais e ao Metricool. **Decidido (CHG-003, R-19):** só APIs oficiais; Metricool fora do plano. Aprovações em §43.
 4. Decidir se um cliente pode ter múltiplos criadores e subequipas; **proposta: sim**.
-5. Confirmar quem pode aprovar editorialmente e publicar por workspace; **proposta: políticas configuráveis**.
+5. Confirmar quem pode aprovar editorialmente e publicar por workspace; **decidido (CHG-003, PUB-06):** quem tiver a capacidade, atribuível por papel ou pessoa.
 6. Confirmar política de gravação do teleprompter; **proposta: confirmação explícita**.
 7. Revalidar metas, deadlines e orçamento do piloto Numeiro; os números originais são referência histórica, não promessa operacional.
 8. Confirmar idiomas e timezones: **proposta PT-PT inicial, timezone por workspace, armazenamento UTC**.
@@ -1207,7 +1209,7 @@ Qualquer pedido, incluindo um botão ou novo separador, recebe `change_id`, owne
 ## 33. Protocolo obrigatório de mudança (Feature Change Protocol)
 
 1. **Intake:** descrever problema e resultado esperado; atribuir ID e owner.
-2. **Impact analysis:** inventariar espaço (agência, cliente ou ambos, R-13), módulos, workspaces, funções, grants, dados, UI, API, RLS, storage, realtime, jobs, eventos, analytics, custos, privacidade e rollback.
+2. **Impact analysis:** inventariar espaço (agência, cliente ou ambos, R-13), impacto em aprovações das plataformas (scopes novos, ecrã de consentimento, UX de publicação TikTok; PLAT-04), módulos, workspaces, funções, grants, dados, UI, API, RLS, storage, realtime, jobs, eventos, analytics, custos, privacidade e rollback.
 3. **Design:** atualizar PRD, registo de capacidades, matriz de acesso, state machine, esquema e ADR quando houver decisão arquitetural.
 4. **Ready gate:** exemplos positivos e negativos (incluindo client A vs B, agência vs cliente, role vs grant individual, sessão revogada, múltiplos separadores, retry).
 5. **Build:** implementar vertical slice completo, sem placeholders, atrás de flag quando apropriado.
@@ -1236,6 +1238,139 @@ Referências externas consultadas em 2026-10-28: ClickUp (custom roles, workload
 
 ## 36. Registo de alterações
 
+- **CHG-003 — 2026-10-29:** Parte IV (§37-§44): R-16 origem sistema/externo, R-17 hipérbole de persona (decisão de produto, fora do âmbito factual do AGENTS §7), R-18 linhagem gravada no momento, R-19 só APIs oficiais; vista de negócio da agência (BIZ-01..09); ingestão, armazenamento (decide §14) e linha de edição (ING-01..04, EDL-01..06); centro de desempenho (PERF-01..09); variantes, estilos e republicação (VAR-01..07); publicação automática e calendário (PUB-01..06); aprovações das plataformas (PLAT-01..04); sequência de entrega revista (§44, medição antes de media). §26, §27, §14 e §33 com remissões. Origem: inbox de ideias IDEA-001..007.
 - **CHG-002 — 2026-10-29:** R-15 (falhas contidas, gestor único de canais, sessões que não caem por falhas de rede, gate de release com CI e E2E com conta real) em §25; QA-16 em §11. Origem: incidente de `/c/numeiro` a cair no erro do browser.
 - **CHG-001 — 2026-10-29:** espaço da agência e espaço do cliente (R-13), isolamento dos convites e cliente único (R-14), cliente no endereço, menu da agência e peças previstas; M01 com Painel da agência; §22 e §33 atualizados.
 - **v2.1 — 2026-10-28:** adicionados Centro de Acessos e Permissões, catálogo central de capacidades, grants individuais, simulador de acesso, equipa/presença/workload, protocolos de mudança, operação em escala e testes de isolamento.
+
+# PARTE IV — Linha de produção, medição e distribuição em escala (CHG-003)
+
+Esta parte acrescenta requisitos decididos pelo Tomás a 29/10/2026 a partir da inbox de ideias (IDEA-001 a IDEA-007). Não remove nada das Partes I a III; em caso de conflito com elas, prevalece esta parte nos pontos explicitamente marcados como decisão. Números marcados **[pressuposto]** são pontos de partida a calibrar com dados próprios, não metas contratuais. Os volumes do Numeiro (30 guiões, 3 hooks, ~90 vídeos/dia) continuam a ser **preset do workspace**, nunca regra global (AGENTS §7).
+
+## 37. Regras transversais novas
+
+R-16 (CHG-003). **Origem de cada publicação.** Toda a publicação importada ou publicada tem origem `sistema` (saiu de uma versão aprovada no ClipStudio, publicada pelo publicador ou à mão a partir de um render nosso, ou upload do telemóvel que passou pelo pacote de edição) ou `externo` (cliente, outro videógrafo, publicado fora do sistema). A classificação é automática (publicador = sistema; importada que corresponde a um render nosso por impressão digital de vídeo/áudio, legenda e duração = sistema; resto = externo) e pode ser corrigida à mão com auditoria. Vistas da agência, KPIs de entrega e alavancas "o que replicar" usam só `sistema` por defeito (filtro "Só o que fizemos"); `externo` é medido e serve de comparação.
+
+R-17 (CHG-003, decisão de produto). **Hipérbole de persona.** Frases de persona sobre o próprio criador (ex.: "o homem mais rico de Portugal", "o filho do Jeff Bezos") são permitidas em títulos e sobreposições, **apenas** a partir de uma lista de frases-persona aprovada por workspace, versionada e auditada. São hipérbole de personagem, não afirmação factual, e ficam fora do âmbito "factual" do AGENTS §7. Continuam bloqueadas: afirmações falsas que atribuam crimes, doenças ou atos a terceiros identificados; notícias inventadas sobre acontecimentos reais; números apresentados como dados verificados; promessas de ganhos financeiros. Pessoas reais famosas só aparecem em frases da lista aprovada. Frases-persona que envolvam outra pessoa (ex.: parceira) exigem consentimento registado dessa pessoa.
+
+R-18 (CHG-003). **Linhagem gravada no momento.** Cada vídeo publicado guarda, no momento da publicação, a ligação ao conteúdo canónico e as suas etiquetas (§40). A linhagem não é inferida depois. Sem linhagem não há medição de hooks, estilos nem republicações.
+
+R-19 (CHG-003, decisão). **Só APIs oficiais** para métricas e publicação (Instagram Graph API, TikTok API for Business e Content Posting API, YouTube Analytics e Data API). Ferramentas de terceiros (ex.: Metricool) ficam fora do plano; no máximo verificação manual pontual. Atrasos de dados são aceites (Instagram até 48 h; TikTok Business API até ao dia anterior UTC).
+
+## 38. Vista de negócio da agência (BIZ)
+
+Complementa R-04, M01 e o Painel da agência (CHG-001). Espaço: agência.
+
+**BIZ-01 [P0] Métrica norte: atingimento de entrega.** Vídeos publicados no prazo ÷ vídeos contratados no período, por cliente e total. Meta [pressuposto] 95% no mês; alerta abaixo de 90% no dia. Atrasos causados pelo cliente (aprovação, gravação) marcados à parte.
+
+**BIZ-02 [P0] Faixa "Precisa da tua atenção".** No máximo 5 cartões por gravidade, com ação direta. Operacionais: entrega do dia em risco; itens parados acima do p70 do tempo de ciclo da etapa (aviso a partir do p50); aprovação do cliente parada há mais de 48 h; possível supressão (mediana de views 7 d < 60% da dos 30 d anteriores, ou % de posts perto de zero a duplicar); saúde do cliente a cair. Financeiros: margem de entrega < 50%; custo de IA por vídeo +25% sem subida de volume; fatura vencida > 15 dias; renovação ≤ 30 dias com saúde amarela/vermelha; cliente > 20% do MRR durante 3+ meses (mostrado como tendência). Limiares [pressuposto].
+
+**BIZ-03 [P0] KPIs e tabela por cliente.** Operacionais: atingimento, aprovação à primeira, tempo de aprovação do cliente, índice de desempenho (§40). Financeiros: MRR/AGI, margem de entrega, clientes em risco. Tabela por cliente ordenada de causa (produção do dia, itens parados, aprovações) para resultado (desempenho, MRR, custo, margem).
+
+**BIZ-04 [P0] Dois níveis de acesso na mesma vista.** Operacional: staff da agência vê só os clientes atribuídos. Financeiro/administrativo (contratos, margens, custos, permissões, auditoria): dono e quem tiver a capacidade. Cada KPI e coluna tem capability key; o servidor constrói a resposta por pessoa e omite campos financeiros (nunca só esconder no browser). Staff sem acesso financeiro não vê **nenhum total financeiro** (com poucos clientes deduz-se um valor por subtração).
+
+**BIZ-05 [P1] Contratos por cliente.** Valor, moeda original (EUR/AED), volume contratado (guiões, vídeos, plataformas), data de renovação, estado de pagamento. Totais numa moeda base com alternância EUR/AED, taxa e data de conversão visíveis. Registo interno, não faturação (não colide com §0).
+
+**BIZ-06 [P1] Custos e margem por cliente.** Custo de IA por execução já existe (W4); acrescenta custo humano e ferramentas com regra de repartição; margem de entrega, custo por vídeo publicado e por 1.000 views.
+
+**BIZ-07 [P1] Pré-visualizar como papel.** "Ver como papel X no cliente Y": só leitura, avaliado no servidor com as capacidades do papel, faixa persistente "Pré-visualização como…", auditado com o dono como ator. Não existe "entrar como pessoa Z" (impersonação) neste âmbito. Concretiza o simulador de acesso de CAP-05.
+
+**BIZ-08 [P1] Cargos como modelos de permissões.** Mantêm-se os papéis de §3 (nomes PT-PT na UI). Ao convidar escolhe-se o cargo (Editor, Clipper, Copywriter, SMM, Videógrafo…), que pré-preenche grants típicos ajustáveis por pessoa (CAP-03). Sem papéis personalizados por agora.
+
+**BIZ-09 [P2] Saúde do cliente.** Score 0-100 (entrega 30, aprovações/resposta do cliente 20, resultados 20, sentimento 15, comercial 15 [pressuposto]); verde ≥ 75, vermelho < 50; só ativo com ~6 meses de histórico.
+
+## 39. Ingestão, armazenamento e linha de edição (ING, EDL)
+
+Complementa §8, M05, M08, SCALE-02, SCALE-03 e decide o ponto em aberto de §14 sobre armazenamento. Espaço: cliente.
+
+**ING-01 [P0] Armazenamento fora da app (decisão).** A app guarda só metadados, miniaturas e links assinados. **Bruto** em Google Drive da agência, sem prazo (arquivo pesquisável). **Cópias de trabalho, proxies e finais** em object storage S3-compatível (proposta: Cloudflare R2) com retenção: proxies e variantes rejeitadas apagadas ao fim de 7-14 dias [pressuposto]; finais aprovados guardados. Bucket e prefixo por workspace; acesso por URL assinada e curta.
+
+**ING-02 [P0] Entrada da câmara (Sony FX3).** Recomendado gravar XAVC HS 4K 100 Mbps 4:2:2 10-bit (~45 GB/h por câmara) com proxy HD em simultâneo. O proxy sobe primeiro e arranca transcrição, cortes e revisão; o 4K sobe depois e só entra no render final (o reframe 9:16 precisa do 4K). Entrada por pasta Drive vigiada ou upload direto retomável.
+
+**ING-03 [P0] Um ficheiro longo por câmara por sessão.** O sistema corta por guião usando os tempos do teleprompter (início, avanço e confirmação "Gravaste?" por guião) e a transcrição com tempos por palavra alinhada com o texto de cada guião; identifica hook 1/2/3, corpo e repetições; sincroniza câmaras pelo áudio. Aceita também um ficheiro por guião com o ID no nome.
+
+**ING-04 [P1] Modo rápido pelo telemóvel.** Upload pela app (PWA), retomável, para o object storage; cópia para o arquivo Drive. Pode vir sem guião: o sistema cria a identidade de conteúdo, transcreve, sugere hook e frases e corre o mesmo pacote. Normaliza à entrada: frame rate variável → constante, HDR → SDR, orientação e áudio.
+
+**EDL-01 [P0] Pacote de edição automático.** Quando a gravação de um guião entra, um job durável e idempotente gera o pacote definido no preset do workspace. Por defeito: 3 masters (um por hook, corpo montado uma vez, legendas queimadas); split screen imagem + frase-persona; split screen com vídeo de atenção + frase diferente; estilo S13 "Faixa de estatuto" (§41).
+
+**EDL-02 [P0] Revisão em lote.** Tudo entra numa fila com proxy 720p e notas do QC; aprovar, pedir alteração ou rejeitar por variante; aprovação presa à versão exata (AGENTS §2.6, §2.7). Interface pensada para ≤ 30 s por variante [pressuposto].
+
+**EDL-03 [P0] QC técnico em código antes de qualquer revisão por IA.** Texto dentro do retângulo seguro comum (x 60-960, y 210-1600 em 1080×1920), loudness, frames pretos ou congelados, duração, resolução, fps; distinção visual por pHash face à fonte e às irmãs (condição necessária, não suficiente).
+
+**EDL-04 [P1] Vídeos de atenção.** Biblioteca própria ou licenciada de loops (filmados pela agência ou stock licenciado); não usar gameplay de terceiros (risco de direitos). Estilo testável no piloto contra os outros.
+
+**EDL-05 [P1] Pós-produção multi-agente v2 (IDEA-002).** Ondas em paralelo (ingest em código; corte, cor, criativo, revisão do texto; produtor; design, som, packaging; QC; painel de personas e compliance). Acrescenta: notas do painel guardadas por vídeo e calibradas contra resultados reais a 24 h/72 h/7 d (personas que não preveem são revistas ou removidas); máximo 2 reruns, orçamento por vídeo, idempotência e dead-letter; custo por agente e por vídeo; memória de revisões do cliente (cada revisão vira regra que o produtor lê); routing de modelos por tarefa. O "All pass" passa a "pronto para revisão humana", nunca entrega direta.
+
+**EDL-06 [P1] Piloto.** ~100 renders, 4 estilos, ~40 publicados em 3-4 semanas. Avança se [pressuposto]: custo de render ≤ 0,05 USD/variante; QC à primeira ≥ 90%; ≥ 50% aprovadas sem edição; ≤ 30 s de revisão por variante; mediana das publicadas ≥ 0,5× a mediana da conta; zero alertas de saúde da conta.
+
+## 40. Centro de desempenho (PERF)
+
+Complementa M09, FR-17-04, §21, SCALE-06. Espaços: cliente e agência.
+
+**PERF-01 [P0] Hierarquia.** Cliente → criador/marca → conta (plataforma; camada A principal, B clips oficial, C trial, D parceiro) → publicação → conteúdo canónico (guião, hook, variante, geração).
+
+**PERF-02 [P0] Etiquetas obrigatórias à publicação (R-18).** Formato/máquina, tema, hook (texto e mecanismo: contra, número, ego, confissão, segredo, pergunta), estilo de edição, frase-persona, imagem/ativo, duração, tipo de fonte (guião, fonte longa, telemóvel, lifestyle), geração (original ou republicação N), conta e camada, hora local, origem (R-16).
+
+**PERF-03 [P0] Fotografias por idade.** Métricas às 1 h, 24 h, 72 h, 7 d e 30 d; comparação sempre na mesma idade; "vencedor" medido às 72 h.
+
+**PERF-04 [P0] Índice normalizado.** Views ÷ mediana móvel de 30 dias da própria conta. Nunca somar nem comparar views absolutas entre plataformas; no YouTube usar `engagedViews`.
+
+**PERF-05 [P0] Métricas por família.** Alcance (views, reach, % não seguidores/For You); hook (IG `reels_skip_rate`, view rate > 3 s, retenção inicial); retenção (% médio visto, % até ao fim); ressonância (partilhas, guardados e comentários por 1.000 views); crescimento (seguidores por 1.000 views; no Instagram só por conta/dia); saúde da conta (mediana a cair, % posts perto de zero, % For You a cair, estado da conta registado à mão); eficiência (custo por vídeo, por 1.000 views).
+
+**PERF-06 [P0] Vistas.** Por conta; por plataforma; por criador; por conteúdo (o mesmo conteúdo nas 3 plataformas); por hook (os 3 hooks sobre o mesmo corpo como experiência natural); por estilo, tema, formato e frase-persona; por geração; por camada (inclui canibalização entre contas).
+
+**PERF-07 [P1] Alavancas "o que replicar".** Índice mediano por atributo, só mostrado com amostra mínima de 10-20 publicações [pressuposto]; o motor (Aprendiz/Estratega) lê e propõe o mix da semana, sempre com aprovação humana (AGENTS §7). Relatório semanal: top 10, piores 10, hooks vencedores por plataforma, estilos a cortar.
+
+**PERF-08 [P0] Ligar contas.** Botão ou link "Ligar conta" por workspace: a pessoa entra na plataforma e aceita as permissões; nunca se pedem palavras-passe. Tokens cifrados por workspace e conta, renovação automática, alerta e "religar" quando expiram (AGENTS §8). Pré-requisitos: Instagram profissional; TikTok Business ou Creator; YouTube com acesso ao canal certo. Ao ligar: escolher camada, importar o histórico disponível (publicações antigas entram como `externo` até haver correspondência).
+
+**PERF-09 [P0] Correções de dados imediatas.** Recolher `shares`; guardar várias leituras por publicação; ligar cada publicação ao conteúdo canónico.
+
+## 41. Variantes, estilos e republicação (VAR)
+
+Complementa SCALE-01, SCALE-03, SCALE-05, SCALE-06.
+
+**VAR-01 [P0] Receita de variante.** Uma variante só conta como nova se mudar pelo menos 2 de 5 elementos: segmento, tese do título, ativo de contexto, narração/comentário, estrutura. Layout, cor, letra e troca de imagem sem nova tese contam zero (o YouTube penaliza "template-based changes" desde 01/10/2026; o Instagram não conta bordos, legendas nem marca d'água como originalidade). Variantes irmãs para a mesma plataforma diferem em ≥ 2 elementos entre si.
+
+**VAR-02 [P0] Catálogo de estilos por workspace.** Ponto de partida para o Numeiro (1080×1920, retângulo seguro comum): S01 Prova, S02 Gancho visual, S03 Manchete, S04 Contraponto, S05 Responde ao comentário, S06 Número, S07 Narrador, S08 Reação, S09 Top 3 narrado, S10 Série, S11 Carrossel, S12 Cortes de contexto, S13 Faixa de estatuto (foto de estatuto em cima, faixa vermelha em pincelada na junção com título amarelo em negrito e contorno preto, vídeo de lifestyle em baixo). Cada estilo é um template versionado com especificação de layout, nível de transformação e plataforma preferida.
+
+**VAR-03 [P0] Motor frase-imagem.** A imagem é a prova, o título a afirmação, o clip a voz. Entradas: transcrição e afirmações do clip, bíblia de estilo do workspace, biblioteca de imagens etiquetada (cena, emoção, classe, direitos, pessoas e consentimento, validade, usos por conta). Tensões: estatuto + número, contradição, curiosidade, identidade, desafio, pergunta. **Títulos curtos e secos** (decisão): afirmação comprimida, sem "diz que" (ex.: "40 mil € no voo foi barato."), alvo 3-7 palavras, uma linha sempre que possível [pressuposto]. Frases-persona segundo R-17. Deduplicação semântica, par tese-imagem único por conta, limite de reutilização de imagem e de estrutura de frase por conta.
+
+**VAR-04 [P0] Verificador antes da revisão humana.** Classifica cada título: persona (lista aprovada, R-17), opinião atribuída, facto (exige fonte datada), terceiro identificado (revisão com marca jurídica), afirmações com validade (expiram). Verifica PT-PT. Contas de clips podem ter idioma próprio (ex.: PT-BR) se o workspace o definir.
+
+**VAR-05 [P1] Republicação de vencedores.** Candidatos: índice ≥ 2-3× às 72 h/7 d [pressuposto]; classificados perene, ligado a notícia ou afirmação datada (os dois últimos exigem revalidação). Regras por plataforma [pressuposto]: Instagram sem idênticos, intervalo ≥ 30 dias, ≤ 15% de republicações em 30 dias; TikTok idêntico com cautela, ≥ 21 dias, ≤ 20%; YouTube Shorts sem idênticos, ≥ 30 dias, ≤ 10%. Regra de paragem: prever a geração seguinte como última × 0,55 e não agendar se ficar abaixo da mediana da conta. Instagram Trial Reels como teste quando disponível.
+
+**VAR-06 [P1] Fontes longas e lifestyle.** Para escalar, o pacote aceita fontes longas (diretos, versões estendidas) e imagens de lifestyle/eventos como fonte de segmentos, não só guiões.
+
+**VAR-07 [P2] Distribuição por camadas.** Contas principais não crescem em volume por variantes; crescimento por contas oficiais de clips identificadas por ângulo, Trial Reels e, por decisão futura, rede contratada de clippers com teto de orçamento, licença revogável, aprovação por submissão e obrigação de remoção. Nunca contas que se façam passar por fãs independentes (políticas de comportamento enganador). Temas de risco bloqueados antes de chegarem a contas de terceiros.
+
+## 42. Publicação automática e calendário (PUB)
+
+Complementa M11, M12, FR-12-01..04, SCALE-04, R-08.
+
+**PUB-01 [P0] Publicador.** Cada versão aprovada recebe conta, plataforma e hora; um job durável publica pela API oficial, guarda o ID da publicação (liga a PERF) e nunca duplica após retry (R-08). Estado por destino e alerta em falha. Aprovar em lote = autorizar a publicação agendada (AGENTS §2.7).
+
+**PUB-02 [P0] Limites das APIs como restrições do agendador** (verificados 2026-10-29): Instagram 100 publicações por API por conta em 24 h móveis; TikTok ~15/dia por conta de criador, partilhado entre apps, e só público depois da auditoria do Content Posting API; YouTube 100 uploads/dia por projeto por defeito. O agendador lê o limite em tempo real; o excedente nunca falha em silêncio.
+
+**PUB-03 [P0] Modo assistido.** Para o que excede o limite da API (ou antes de uma aprovação): pacote de publicação (vídeo final, legenda, hashtags, hora) numa fila no telemóvel; quem publica toca, publica e confirma; a publicação é ligada pela importação de métricas e conta como `sistema`. Decisão: **TikTok com a mesma cadência do Instagram e YouTube**, usando automático até ao limite e assistido no resto.
+
+**PUB-04 [P0] Calendário de publicações.** Publicações no calendário de M11 por conta e plataforma; arrastar para mudar; conflitos visíveis (variantes do mesmo corpo nunca na mesma conta no mesmo dia; quotas de republicação; limites de API).
+
+**PUB-05 [P1] Republicação agendada.** Às 72 h/7 d, vencedores geram propostas no calendário a +30, +40 e +50 dias (intervalos de VAR-05), com o tipo de versão (igual onde permitido, ou com camada nova). Entram como "republicação proposta" na revisão em lote; se uma geração ficar abaixo do previsto, as seguintes são canceladas sozinhas.
+
+**PUB-06 [P0] Quem aprova.** Quem tiver a capacidade: `publishing.approve` (originais) e `publishing.republish.approve` (republicações), atribuíveis por papel ou pessoa (CAP-03/04). Sem pessoa fixa.
+
+## 43. Aprovações das plataformas (PLAT)
+
+**PLAT-01 [P0] Pré-requisitos, já.** Domínio próprio da app antes de qualquer submissão (mudar domínio, redirect URI, nome ou logo depois obriga a nova verificação na Google); páginas públicas de política de privacidade (dados Meta, TikTok e Google), termos e eliminação de dados; Business Verification da empresa na Meta; apps registadas no TikTok for Developers e na Google Cloud com domínio verificado.
+
+**PLAT-02 [P0] Fase A, só leitura.** Submeter quando "ligar conta + importar métricas + ver no dashboard" funcionar em produção: Instagram `instagram_business_basic` + `instagram_business_manage_insights`; TikTok Login Kit e dados de conta/vídeo Business; YouTube `youtube.readonly` + `yt-analytics.readonly`.
+
+**PLAT-03 [P0] Fase B, publicação.** Submeter quando aprovar → agendar → publicar funcionar: `instagram_business_content_publish`; TikTok `video.publish` e auditoria do Content Posting API (ecrã de publicação com nome do criador, escolha de privacidade, conteúdo comercial, consentimento de música); `youtube.upload`. Até lá, TikTok em modo assistido (PUB-03).
+
+**PLAT-04 [P0] Quando voltar a pedir.** Código e ecrãs novos com as mesmas permissões: não. Meta: permissões novas → App Review; Data Use Checkup anual; app inativa volta a review. Google: scopes novos → verificação; mudar nome, logo, redirect URI, homepage ou link de privacidade → verificação da marca. TikTok: mudanças à configuração da app aprovada (produtos, scopes, URLs) → nova review. Novas permissões testam-se numa app/projeto de teste separado e só se ativam depois de aprovadas (feature flag, CAP-09).
+
+## 44. Sequência de entrega (altera §26 na ordem, não no âmbito)
+
+A medição passa para antes da media. Ordem: (0) PLAT-01 em paralelo, fora do código; (1) BIZ operacional, BIZ-07, BIZ-08 e páginas públicas; (2) PERF base (ligar contas, importação, fotografias, origem, etiquetas) e submissão da fase A; (3) ING-01..04; (4) EDL-01..04 e piloto EDL-06 com os estilos base; (5) PUB-01..04 e submissão da fase B; (6) PERF completo e BIZ financeiro; (7) EDL-05, VAR-03..07 e PUB-05. Cada passo é aditivo (expandir/contrair), com módulos novos atrás de flag e testes de isolamento de §22.
+
+**Decisões de §14 e §27 resolvidas por esta parte:** armazenamento (ING-01); integrações (R-19, só APIs oficiais); quem aprova publicação (PUB-06); política de gravação continua com confirmação explícita. Em aberto: entidade legal para a Business Verification e domínio definitivo; plano/espaço Google Workspace para o arquivo de bruto; formato de gravação atual da FX3; lista de contas sociais por plataforma e tipo.

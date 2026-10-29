@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-29 (CHG-003 PRD Parte IV)
+
+- **CHG-003 linha de produção, medição e distribuição em escala** (só documentação; PRD Parte IV §37-§44). Regras R-16 (origem sistema/externo), R-17 (hipérbole de persona, decisão de produto; AGENTS §7 com a exceção), R-18 (linhagem gravada no momento), R-19 (só APIs oficiais). Requisitos BIZ (vista de negócio), ING/EDL (ingestão, armazenamento, pacote de edição, revisão em lote), PERF (centro de desempenho), VAR (variantes, estilos, republicação), PUB (publicação automática, modo assistido, calendário), PLAT (aprovações das plataformas). Sequência de entrega revista em §44: medição antes de media. 12 capacidades novas registadas como planeadas. Sem alteração funcional.
+
 ## 2026-10-29 (CI)
 
 - **Vercel salta builds sem mudanças na app** (`vercel.json` → `scripts/vercel-ignore.sh`): commits só de documentação, migrações e testes SQL, testes unitários ou CI deixam de gastar deploys do limite diário. Na dúvida, constrói.
