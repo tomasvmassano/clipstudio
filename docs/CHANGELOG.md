@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-29 (perfil)
+
+- **W1-15** perfil (FR-14-01, ADR-0024) em `/perfil` e `/c/[ws]/perfil`, com entrada no menu da conta: nome, fotografia (bucket privado `avatars`), email verificado, mudar a palavra-passe (com a atual), "Esqueci-me da palavra-passe" no login, verificação em dois passos (TOTP) com o passo do código no login e aplicada no servidor (sessão sem código não acede a nada), fuso, tema, cliente ao entrar, terminar sessão em todos os dispositivos e histórico de segurança. Migração `20261029153629_w1_profile_mfa`. Testes: SQL 24/24, E2E 3/3 (incluindo REST e RPC recusados em aal1).
+- FR-13-01 registado como `adiado`: o envio por email espera pela escolha do domínio (decisão do Tomás, 29/10).
+
 ## 2026-10-29 (convites por email)
 
 - **W1-14** convites com link (FR-13-01, ADR-0023). Convidar envia o convite logo; cada convite tem Reenviar (token novo, validade renovada para 14 dias, máximo 5 envios, um por minuto) e Cancelar. A pessoa abre `/convite`, vê quem convidou, para onde e com que papel, e aceita (entrando com esse email) ou recusa sem precisar de conta. Expirados e recusados ficam na lista 30 dias. Email pelo Resend quando `RESEND_API_KEY` e `INVITE_FROM` estiverem no Vercel; sem isso a app mostra o link para copiar. Migração `20261029151140_w1_invite_delivery` (aditiva). Testes: SQL 25/25, E2E 5/5, unitários 6/6.

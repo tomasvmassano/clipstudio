@@ -17,7 +17,12 @@ export type WorkspaceCtx = {
 };
 
 export type AppContext = {
-  user: { id: string; email: string; confirmed: boolean };
+  user: {
+    id: string; email: string; confirmed: boolean;
+    display_name?: string | null; avatar_path?: string | null; timezone?: string | null; theme?: "system" | "light" | "dark"; preferred_workspace?: string | null;
+  };
+  /** A pessoa tem MFA ativo e esta sessão ainda não passou o código (aal1): o servidor recusa tudo até passar. */
+  mfa_required?: boolean;
   agency: { organization: string; name: string; role: string; status: string; capabilities?: string[] }[] | null;
   workspaces: WorkspaceCtx[];
   /** Erro ao aceitar convites pendentes neste login (mostrado a quem ainda não tem clientes). */
@@ -68,6 +73,12 @@ export function friendlyError(msg: string): string {
   if (msg.includes("configuracao_invalida")) return "Esta versão tem erros: corrige-os e guarda uma versão nova antes de ativar.";
   if (msg.includes("execucao_nao_encontrada")) return "Esta execução já não existe.";
   if (msg.includes("filtro_invalido")) return "Filtro inválido. Limpa os filtros e tenta de novo.";
+  if (msg.includes("mfa_necessario")) return "Confirma primeiro o código da verificação em dois passos.";
+  if (msg.includes("fuso_invalido")) return "Fuso horário inválido.";
+  if (msg.includes("tema_invalido")) return "Tema inválido.";
+  if (msg.includes("nome_longo")) return "O nome tem de ter até 80 caracteres.";
+  if (msg.includes("caminho_invalido")) return "Imagem inválida. Escolhe outra.";
+  if (msg.includes("demasiados_eventos")) return "Demasiadas alterações de segurança seguidas. Espera um pouco.";
   if (msg.includes("aguarda_para_reenviar")) return "Acabaste de enviar este convite. Espera um minuto antes de reenviar.";
   if (msg.includes("limite_envios")) return "Este convite já foi enviado 5 vezes. Cancela-o e cria um novo se for preciso.";
   if (msg.includes("convite_fechado")) return "Este convite já foi aceite, recusado ou cancelado.";
