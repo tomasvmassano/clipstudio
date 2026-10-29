@@ -91,3 +91,23 @@ export function fromLocalInput(v: string, tz = "Asia/Dubai"): string | null {
   const local = new Date(toLocalInput(asUtc.toISOString(), tz) + ":00Z");
   return new Date(asUtc.getTime() - (local.getTime() - asUtc.getTime())).toISOString();
 }
+
+// ---------- templates, checklist e carga (W3-03) ----------
+export type TemplateItem = { title: string; kind: TaskKind; priority: TaskPriority; offset_days: number; hour: number; assignee_id: string | null;
+  depends_on: number[]; assignee_email?: string | null; assignee_has_access?: boolean | null };
+export type Template = { id: string; workspace_id: string; name: string; description: string | null; items: TemplateItem[]; checklist: string[]; active: boolean; applied: number };
+export type ChecklistItem = { id: string; label: string; done: boolean; done_label: string | null; done_at: string | null; from_template: boolean };
+export type Workload = {
+  wip_limit: number | null; unassigned: number;
+  people: { user_id: string; email: string; has_access: boolean; open: number; doing: number; blocked: number; overdue: number; due_7d: number; done_7d: number; over_limit: boolean }[];
+};
+export const fetchTemplates = (access: Access) => rpc<Template[]>("templates_list", { p_ws: access.ws, p_token: access.token });
+export const saveTemplate = (access: Access, t: Record<string, unknown>) => rpc<Template>("template_save", { p_ws: access.ws, p_tpl: t });
+export const cloneTemplate = (id: string, target: string) => rpc<Template>("template_clone", { p_tpl: id, p_target_ws: target });
+export const applyTemplate = (access: Access, id: string, content: string) =>
+  rpc<{ tasks_created: number; tasks: number; checklist: ChecklistItem[] }>("template_apply", { p_tpl: id, p_content: content, p_token: access.token });
+export const fetchChecklist = (access: Access, content: string) => rpc<ChecklistItem[]>("checklist_list", { p_content: content, p_token: access.token });
+export const addChecklist = (access: Access, content: string, label: string) => rpc<ChecklistItem[]>("checklist_add", { p_content: content, p_label: label, p_token: access.token });
+export const toggleChecklist = (access: Access, id: string, done: boolean) => rpc<ChecklistItem[]>("checklist_toggle", { p_item: id, p_done: done, p_token: access.token });
+export const fetchWorkload = (access: Access) => rpc<Workload>("workload", { p_ws: access.ws, p_token: access.token });
+export const setWipLimit = (access: Access, limit: number | null) => rpc<Workload>("workload_set_limit", { p_ws: access.ws, p_limit: limit });

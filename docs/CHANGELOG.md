@@ -17,12 +17,17 @@
   - Automações de tarefas reagem a "em edição" e "pronto" (ex.: gravado → passa a edição → tarefa para o editor, fecha quando fica pronto).
   - Guiões e teleprompter passam a tratar em edição e pronto como já gravados.
   - Testes: `w3_calendar` 39/39, `w2_content` 47/47 (regressão do `content_production`). E2E em workspace de teste isolado 18/18 (modo código).
+- **W3-03 templates de produção, checklists e carga** (PRD FR-11-04, FR-17-08, FR-17-09, TEAM-08 parcial; ADR-0009; migração `20261029081024_w3_templates_checklists_workload`).
+  - Tarefas → Templates: lista de tarefas com dia relativo ao guião, hora, responsável e "depois da anterior", mais uma checklist. Copiar para outro cliente (só quem gere os dois; sem responsáveis).
+  - No calendário, o detalhe do guião tem a checklist (quem marcou e quando) e "Aplicar template": cria as tarefas com prazos e dependências e a checklist. Aplicar de novo não duplica.
+  - Tarefas → Carga: por pessoa, abertas, em curso, bloqueadas, atrasadas, próximos 7 dias e feitas na semana, com limite opcional que só avisa.
+  - Testes: `w3_templates` 35/35. E2E em workspace de teste isolado 7/7 (modo código, só leitura).
 - Limitações W3-02: sem vista por equipa/plataforma/campanha nem deteção de sobrecarga (FR-11-03), sem publicações no calendário (W6), sem templates e checklists (FR-11-04). O motor cria guiões numerados 1..30 por dia: um guião movido para um dia futuro antes da corrida do motor pode partilhar o número com um novo (contrato do motor a fechar no W4; **UNVERIFIED**).
 
 ### Limitações conhecidas W3-01 (PARTIAL)
 
 - Sem lembretes de prazo agendados (o atraso aparece na lista e na caixa, mas não gera notificação sozinho) nem escalonamento por SLA (FR-17-06).
-- Sem projetos nem campanhas: o âmbito é o cliente. Sem templates de tarefas (FR-11-04) nem carga por pessoa (TEAM-08): próximos passos do W3.
+- Sem projetos nem campanhas: o âmbito é o cliente. Templates e carga entregues no W3-03; sem estimativas de horas nem disponibilidade por pessoa, sem equipas funcionais (TEAM-08) nem redistribuição em lote (FR-17-07).
 - Sair da equipa não pede reatribuição automaticamente; as tarefas ficam em "Sem responsável".
 - Notificações só dentro da app (sem email/push).
 

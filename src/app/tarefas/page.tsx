@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AlertTriangleIcon, BotIcon, CalendarClockIcon, Link2Icon, MessageSquareIcon, PlusIcon, RotateCwIcon, UserXIcon } from "lucide-react";
+import { AlertTriangleIcon, BarChart3Icon, BotIcon, LayersIcon, CalendarClockIcon, Link2Icon, MessageSquareIcon, PlusIcon, RotateCwIcon, UserXIcon } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,11 +14,13 @@ import { WorkspaceGate } from "@/components/workspace-gate";
 import { useSession } from "@/components/session-provider";
 import { NewTaskDialog, TaskSheet } from "@/components/tasks/task-sheet";
 import { RulesPanel } from "@/components/tasks/rules-panel";
+import { TemplatesPanel } from "@/components/tasks/templates-panel";
+import { WorkloadPanel } from "@/components/tasks/workload-panel";
 import type { Access } from "@/lib/access";
 import { fetchAssignees, fetchTasks, fmtDue, KIND_LABEL, PRIORITY_LABEL, STATUS_LABEL, type Assignee, type Task, type TaskScope } from "@/lib/tasks";
 import { cn } from "@/lib/utils";
 
-type Tab = TaskScope | "regras";
+type Tab = TaskScope | "regras" | "templates" | "carga";
 
 export default function TarefasPage() {
   return (
@@ -43,7 +45,7 @@ function Tarefas({ access }: { access: Access }) {
   const openId = params.get("task");
 
   useEffect(() => {
-    if (tab === "regras") return;
+    if (tab === "regras" || tab === "templates" || tab === "carga") return;
     let alive = true;
     fetchTasks(access, tab)
       .then((x) => { if (alive) { setList(x); setErr(""); } })
@@ -80,8 +82,10 @@ function Tarefas({ access }: { access: Access }) {
           {manage && <ToggleGroupItem value="unassigned"><UserXIcon /> Sem responsável</ToggleGroupItem>}
           <ToggleGroupItem value="done">Feitas</ToggleGroupItem>
           {manage && mode === "user" && <ToggleGroupItem value="regras"><BotIcon /> Automações</ToggleGroupItem>}
+          {manage && mode === "user" && <ToggleGroupItem value="templates"><LayersIcon /> Templates</ToggleGroupItem>}
+          {manage && <ToggleGroupItem value="carga"><BarChart3Icon /> Carga</ToggleGroupItem>}
         </ToggleGroup>
-        {tab !== "regras" && list && (counts.overdue > 0 || counts.blocked > 0) && (
+        {tab !== "regras" && tab !== "templates" && tab !== "carga" && list && (counts.overdue > 0 || counts.blocked > 0) && (
           <span className="text-sm text-muted-foreground">
             {counts.overdue > 0 && <span className="text-destructive">{counts.overdue} atrasada{counts.overdue > 1 ? "s" : ""}</span>}
             {counts.overdue > 0 && counts.blocked > 0 && " · "}
@@ -96,6 +100,10 @@ function Tarefas({ access }: { access: Access }) {
 
       {tab === "regras" ? (
         <RulesPanel access={access} people={people} />
+      ) : tab === "templates" ? (
+        <TemplatesPanel access={access} people={people} />
+      ) : tab === "carga" ? (
+        <WorkloadPanel access={access} />
       ) : err ? (
         <Alert variant="destructive">
           <AlertDescription className="flex flex-wrap items-center justify-between gap-2">
