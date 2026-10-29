@@ -74,6 +74,7 @@ export const clientNavGroups: SidebarNavGroup[] = [
 		label: "Análise",
 		items: [
 			{ title: "Desempenho", path: "/desempenho", icon: <BarChart3Icon />, cap: "analytics.read" },
+			{ title: "Centro de desempenho", path: "/desempenho/centro", icon: <GaugeIcon />, cap: "analytics.read", flag: "perf.center" },
 			{ title: "Sala dos agentes", path: "/agentes", icon: <BotIcon />, cap: "agents.read" },
 			{ title: "Agentes e execuções", path: "/agentes/configuracao", icon: <SlidersHorizontalIcon />, cap: "agents.read" },
 		],

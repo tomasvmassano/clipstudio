@@ -50,3 +50,18 @@ on conflict do nothing;
 
 -- W5-02: ponto de partida do catálogo de estilos e do preset de edição do numeiro (a migração só semeia se o cliente já existir)
 select public._edit_seed('numeiro', 'system', 'fixture');
+
+-- W6 PERF: leituras sintéticas por idade dos 100 reels de teste da conta numeiro-ig (números inventados, só para testes e E2E).
+-- Fração das views finais a cada idade, com variação determinística para os índices não serem todos iguais.
+insert into perf_readings (workspace_id, reel_id, captured_at, views, likes, comments, shares, source)
+select r.client_id, r.id, r.taken_at + make_interval(secs => a.s), round(r.views * a.f * (0.6 + ((g * 37) % 80) / 100.0)),
+       round(r.likes * a.f), round(r.comments * a.f), 0, 'scraper'
+from reels r
+join lateral (select substring(r.id from '(\d+)$')::int g) x on true
+cross join (values (86400, 0.4), (259200, 0.7), (604800, 0.85), (2592000, 0.95)) a(s, f)
+where r.client_id = 'numeiro' and r.account_id = 'numeiro-ig' and r.taken_at + make_interval(secs => a.s) < now()
+on conflict do nothing;
+insert into perf_accounts (account_id, workspace_id, tier, creator) values ('numeiro-ig', 'numeiro', 'A', 'Numeiro') on conflict do nothing;
+insert into script_analysis (client_id, reel_id, hook, formato_norm)
+select 'numeiro', 'FXitsnumeiro' || g, 'Hook de teste ' || g, (array['mecanismo','paradoxo','tabu'])[1 + g % 3]
+from generate_series(1, 60) g on conflict do nothing;

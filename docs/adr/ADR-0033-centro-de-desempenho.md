@@ -1,0 +1,29 @@
+# ADR-0033 · Centro de desempenho: fotografias por idade, índice por conta, origem e linhagem
+
+**Estado:** aceite · **Data:** 2026-10-30 · **Requisitos:** PERF-01 a PERF-07 (parcial), R-16 (parcial), R-18 (estrutura); PERF-08 e PERF-09 fora (R-19 adiado: sem APIs oficiais)
+
+## Contexto
+O PRD §40 pede medir cada publicação contra o normal da própria conta, sempre na mesma idade, e saber de onde veio cada vídeo (R-16) com as etiquetas gravadas no momento da publicação (R-18). Hoje as métricas vêm só do scraping (Apify) feito pelo motor (numeiro-engine), que guarda em `reels` o último valor visto (`greatest`) e não guarda histórico. Nada é publicado pela app ainda. O motor continua a escrever nas tabelas atuais e não pode partir.
+
+## Decisão
+- **Publicação** = reel de uma conta do cliente (`accounts.role = 'client'`); referências nunca entram. Tudo é derivado das tabelas do motor, sem as alterar.
+- **Leituras** (`perf_readings`, só de acrescentar): `perf_capture` guarda uma leitura por cada atualização do scraper (`reels.updated_at`), idempotente; o estado atual de `reels` conta sempre como mais uma leitura. Corre de hora a hora (`perf-tick`, pg_cron) com `perf_sync_lineage`; uma falha num cliente fica no log e não pára os outros.
+- **Fotografia à idade T** (1 h, 24 h, 72 h, 7 d, 30 d) = a leitura mais próxima de `published_at + T` dentro de ±25% de T. Sem leitura na janela não há fotografia; nunca se interpola.
+- **Índice à idade T** = views à idade T ÷ mediana das views à idade T das publicações da mesma conta publicadas nos 30 dias anteriores. Base mínima 5 [pressuposto]; abaixo disso "amostra insuficiente". Views absolutas só aparecem em grupos de uma única conta; nunca se somam nem comparam entre contas ou plataformas. YouTube usa as views do scraping (engagedViews só com a API oficial). "Vencedor" e alavancas medem-se às 72 h.
+- **Famílias de métricas** (PERF-05) declaradas no servidor (`_perf_families`): disponíveis com scraping: views, comentários e gostos por 1.000 views, partilhas por 1.000 quando a recolha as devolve, mediana a cair, % perto de zero, estado registado à mão. O resto (alcance, % não seguidores, skip rate, retenção, seguidores por 1.000, % For You, custos por vídeo) aparece como indisponível, nunca estimado.
+- **Saúde da conta**: mediana das views às 72 h das publicadas nos últimos 7 dias vs nos 30 anteriores, "a cair" abaixo de 60% [pressuposto, BIZ-02]; % de posts com índice às 72 h abaixo de 0,1 nos últimos 30 dias, "a duplicar" face aos 30 anteriores.
+- **Hierarquia** (PERF-01): `perf_accounts` guarda camada (A principal, B clips oficial, C trial, D parceiro), criador/marca e estado registado à mão, por conta.
+- **Origem e linhagem** (`publication_lineage`, uma linha por publicação): `gravada` = escrita pelo publicador via `perf_record_lineage` (capacidade `publishing.publish`) ou `_perf_record_lineage` (service_role), com conta, conteúdo e versão exata validados contra o próprio cliente, hook (índice, texto, mecanismo), formato, máquina, tema, estilo e versão, frase-persona, ativo, duração, tipo de fonte, geração (republicação = pai + 1), camada e hora local; idempotente por (conta, id externo); imutável por trigger, só a origem se corrige. `inferida` = importada, origem `externo`, ligada por inferência marcada como tal (`publicacoes` → guião; `generated.posted_reel_id` do motor com `match_score`; `script_analysis`/`reel_themes`). A correção manual da origem (`perf_origin_set`) exige motivo e fica no histórico; a sincronização nunca a desfaz.
+- **"Só o que fizemos"** (R-16) ligado por defeito nas vistas e nas alavancas; as externas servem de comparação ao desligar.
+- **Alavancas** (PERF-07): índice mediano às 72 h por formato, tema, mecanismo do hook, estilo, frase-persona, geração, plataforma, camada, hora local e duração, nos últimos 90 dias; só mostrado com 15 publicações com índice [pressuposto, PRD 10-20]. Relatório semanal: publicadas entre há 10 e há 3 dias (todas já com 72 h), top 10, piores 10, hooks vencedores por plataforma, estilos abaixo de 0,8 com amostra mínima.
+- **Acesso**: ler com `analytics.read` (inclui o código de equipa, só leitura); capacidade nova `analytics.manage` (dono, admin e gestor do cliente) para camada, criador, estado da conta e origem. Tabelas fechadas à API; só RPCs `security definer` com verificação por cliente. Limiares num só sítio (`_perf_params`), devolvidos à UI.
+- **Disponibilidade**: flag `perf.center` (por defeito só o dono da agência). Rota nova `/c/[ws]/desempenho/centro`; a página Desempenho atual não muda.
+
+## Alternativas rejeitadas
+- Trigger em `reels` para gravar leituras: mais preciso ao segundo, mas uma falha no trigger partiria a escrita do motor. A recolha horária a partir de `updated_at` dá o mesmo instante de leitura sem tocar no motor.
+- Índice sobre a última leitura (como o `outlier` do motor): compara vídeos com idades diferentes, contra PERF-03.
+- Interpolar views entre leituras para preencher idades: inventa valores; contra AGENTS §4.
+- Inferir a linhagem só na leitura, sem tabela: não dá onde gravar a correção de origem nem a linhagem do publicador (R-18).
+
+## Consequências
+As fotografias começam a contar a partir da primeira recolha; o histórico antigo só tem a leitura atual, por isso muitas publicações antigas não têm índice até haver leituras nas idades certas. Com scraping diário, a fotografia de 1 h quase nunca existe. Falta: publicador a chamar `perf_record_lineage` (PUB), correspondência por impressão digital de render (R-16, origem `correspondencia`), ligação de contas pela API oficial (PERF-08) e famílias indisponíveis, leitura das alavancas pelo motor (Aprendiz/Estratega) para propor o mix da semana com aprovação, custos por vídeo (BIZ-06). Desempenho: tudo é calculado na hora a partir de `reels`; com milhares de publicações por cliente pode ser preciso materializar as fotografias. Rollback no fim da migração.
