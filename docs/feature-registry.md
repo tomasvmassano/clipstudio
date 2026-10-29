@@ -56,6 +56,6 @@ Estado: **ativo** (existe e é verificado no servidor por `authorize()`; também
 | `agents.run` | Agentes | A | ws | ativo | `agent_job_enqueue` (Correr agora, idempotente por tipo e dia), `agent_job_cancel`, `agent_job_retry`; executado pelo worker do motor (W4-02), que grava guiões em revisão |
 | `agents.configure` | Agentes | A | ws | ativo | `agent_config_save` (versão nova validada), `agent_config_activate` (ativar ou voltar atrás), `agent_config_get` |
 | `integrations.manage` | Settings (M15) | A | ws | W6 | — |
-| `settings.manage` | Settings | A | ws | ativo (parcial) | dados gerais do cliente: nome, @, fuso, moeda, aprovação obrigatória para gravar (`workspace_update`); resto do M15 por fazer |
+| `settings.manage` | Settings | A | ws | ativo (parcial) | `/definicoes`: nome, @, fuso, moeda, logótipo (bucket privado `branding`), cor da marca, só gravar aprovados (`workspace_update`, `workspace_settings`); limite de tarefas por pessoa com `tasks.manage`; integrações, notificações, segurança e dados do M15 por fazer |
 
 Regras: ter `edit` não dá `approve` nem `publish` (CAP-04); uma feature flag ligada não concede acesso (CAP-09); toda a key nova entra aqui no mesmo PR em que nasce, senão o CI falha (PRD §34).

@@ -2,6 +2,12 @@
 
 ## 2026-10-29 (W1 Fundação, fecho)
 
+- **W1-07 definições do cliente** (PRD M15 FR-15-01, FR-15-02 parcial, FR-15-08 parcial; ADR-0013; migrações `20261029103605_w1_settings_branding`, `20261029103627_w1_settings_branding_strict`).
+  - `/definicoes` (Administração): nome, @, fuso, moeda, logótipo e cor da marca; regra "só se gravam guiões aprovados"; limite de tarefas abertas por pessoa; atalhos para agentes, templates, automações e equipa; arquivar (dono da agência).
+  - Logótipo num bucket privado: só quem trabalha no cliente o vê, só quem gere as definições o muda, nunca de outro cliente; PNG, JPG ou WebP até 500 KB. Aparece no seletor de cliente, com a cor da marca.
+  - Tarefas aceita `?tab=templates|regras|carga`.
+  - Testes: `w1_settings` 20/20; regressão `w1_clients` 55/55.
+
 - **W1-06 clientes e gestão de equipa** (PRD §2, §3, CAP-03, CAP-06, CAP-08, SCALE-07, FL-01, TEAM-15, M15 parcial; ADR-0012; migrações `20261029100534_w1_clients_team`, `20261029101111_w1_drop_tmp_import`).
   - `/clientes` (agência): lista dos clientes com equipa, convites e estado da configuração dos agentes; criar cliente (nome, @, fuso, moeda), com opção de começar com a estrutura de outro cliente (formatos e regras dos agentes, templates, automações; nunca a voz, léxico, notícias, pessoas, guiões nem dados); editar; arquivar com motivo e confirmação; recuperar.
   - O dono da agência vê todos os clientes; o admin da agência só os atribuídos; a equipa de um cliente não tem acesso à lista.

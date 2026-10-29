@@ -9,6 +9,8 @@ export type WorkspaceCtx = {
   handle: string | null;
   timezone: string;
   currency: string;
+  logo_path?: string | null;
+  brand_color?: string | null;
   role: string;
   affiliation: "agency_staff" | "client_staff";
   capabilities: string[];
@@ -61,6 +63,8 @@ export function friendlyError(msg: string): string {
   if (msg.includes("orcamento_esgotado")) return "O limite de custo diário dos agentes já foi atingido hoje.";
   if (msg.includes("configuracao_invalida")) return "Esta versão tem erros: corrige-os e guarda uma versão nova antes de ativar.";
   if (msg.includes("execucao_nao_encontrada")) return "Esta execução já não existe.";
+  if (msg.includes("logotipo_invalido")) return "Esse logótipo não foi encontrado. Carrega-o outra vez.";
+  if (msg.includes("cor_invalida")) return "Cor inválida (formato #RRGGBB).";
   if (msg.includes("nome_invalido")) return "O nome tem de ter entre 2 e 80 caracteres.";
   if (msg.includes("handle_invalido")) return "O @ só pode ter letras minúsculas, números, ponto e underscore (até 30).";
   if (msg.includes("fuso_invalido")) return "Fuso horário desconhecido.";
