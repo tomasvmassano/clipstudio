@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-29 (blocos personalizados)
+
+- **W2-08** blocos personalizados no teleprompter (FR-03-02, ADR-0030). No editor do guião, uma linha começada por `## Nome` divide o corpo num bloco com nome (ex.: `## Prova`). Cada bloco tem os seus takes, salta-se na fila e aparece com o nome no teleprompter e no cartão. Como faz parte do texto, mudar blocos cria versão nova. Migração `20261029190902_w2_custom_blocks` (só alarga o que é aceite). Testes: SQL 12/12, E2E 1/1.
+
 ## 2026-10-29 (campanhas e filtros do teleprompter)
 
 - **W2-07** campanha, responsável, plataformas e etiquetas no guião (FR-02-03) e fila do teleprompter filtrável (FR-03-01), ADR-0029. Cada guião tem **Detalhes**: escolher ou criar uma campanha ou série, o responsável, as plataformas e etiquetas. Aparecem no cartão. Mudar isto não cria versão nem tira a aprovação; quem fica responsável recebe notificação. No teleprompter a fila filtra por campanha e por responsável ("só os meus"), por dispositivo. Nova capacidade `projects.manage` (dono, admin, gestor). Migração `20261029185412_w2_content_meta` (aditiva). Testes: SQL 30/30, E2E 2/2.

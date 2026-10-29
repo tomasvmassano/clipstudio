@@ -174,3 +174,8 @@ Campanha (`projects`): `ativa ↔ arquivada`. Arquivar não tira os guiões; só
 | --- | --- | --- | --- |
 | criar / mudar campanha | `projects.manage` | nome único no cliente; fim ≥ início | auditoria `project.created` / `project.updated` |
 | campanha, responsável, plataformas, etiquetas do guião | `scripts.edit` | campanha ativa do mesmo cliente; responsável com `scripts.edit`; não cria versão | `script.meta_changed`; notificação `script_assigned` |
+
+
+## Blocos do teleprompter (W2-08, FR-03-02)
+
+Ordem: Hook 1..N, Body (texto antes da primeira marca), blocos personalizados (`## Nome` no corpo, chave `x_<nome>`), CTA. Takes, saltos de bloco, retoma e marcas de tempo usam estas chaves; um take num bloco do corpo exige o bloco no texto atual. Mudar marcas é editar o texto (versão nova).

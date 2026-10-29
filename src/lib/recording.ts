@@ -3,7 +3,7 @@ import { friendlyError, type Access } from "@/lib/access";
 
 /* Teleprompter: sessões de gravação, fila, takes e preferências (PRD M03, ADR-0006). */
 
-export type BlockKey = `hook_${number}` | "body" | "cta";
+export type BlockKey = `hook_${number}` | "body" | "cta" | `x_${string}`;
 export type TakeRow = {
   id: string; block_key: BlockKey; take_number: number; status: "ok" | "discarded"; selected: boolean; notes: string | null;
   version_id: string | null; session_id: string; created_label: string | null; created_at: string;
@@ -31,15 +31,50 @@ export const isRecorded = (s: string) => ["recorded", "editing", "ready", "publi
 
 export type Block = { key: BlockKey; label: string; text: string };
 
-/** Blocos de um guião pela ordem de gravação: Hook 1..N, Body, CTA (se existir). */
+/** Chave de um bloco personalizado a partir do nome (igual a _block_slug no servidor). */
+export function blockSlug(label: string): string {
+  const from = "áàâãäéèêëíìîïóòôõöúùûüçñ", to = "aaaaaeeeeiiiiooooouuuucn";
+  const t = Array.from(label.trim().toLowerCase()).map((c) => { const i = from.indexOf(c); return i >= 0 ? to[i] : c; }).join("");
+  const slug = t.replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "").slice(0, 24);
+  return slug || "bloco";
+}
+
+/** Uma linha "## Nome" no corpo começa um bloco personalizado (FR-03-02). */
+export const MARKER = /^\s*##\s*(\S.*)$/;
+const customLabels = new Map<string, string>();
+
+/**
+ * Blocos de um guião pela ordem de gravação: Hook 1..N, Body (o texto antes da primeira marca), blocos personalizados
+ * e CTA (se existir). Igual a _content_block_keys no servidor.
+ */
 export function blocksOf(c: SessionContent): Block[] {
   const out: Block[] = [];
   (c.hooks ?? []).forEach((h, i) => { if (h?.text?.trim()) out.push({ key: `hook_${i + 1}`, label: `Hook ${i + 1}`, text: h.text }); });
-  if (c.corpo?.trim()) out.push({ key: "body", label: "Body", text: c.corpo });
+  const pre: string[] = [];
+  const parts: Block[] = [];
+  for (const line of (c.corpo ?? "").split("\n")) {
+    const m = line.match(MARKER);
+    if (m) {
+      const label = m[1].trim();
+      const base = `x_${blockSlug(label)}` as BlockKey;
+      let key = base, n = 1;
+      while (parts.some((p) => p.key === key)) { n += 1; key = `${base.slice(0, 23)}_${n}` as BlockKey; }
+      customLabels.set(key, label);
+      parts.push({ key, label, text: "" });
+    } else if (parts.length) {
+      const last = parts[parts.length - 1];
+      last.text = last.text ? `${last.text}\n${line}` : line;
+    } else pre.push(line);
+  }
+  const body = pre.join("\n");
+  if (body.trim()) out.push({ key: "body", label: "Body", text: body });
+  out.push(...parts.map((p) => ({ ...p, text: p.text.trim() })));
   if (c.cta?.trim()) out.push({ key: "cta", label: "CTA", text: c.cta });
   return out;
 }
-export const blockLabel = (k: string) => (k === "body" ? "Body" : k === "cta" ? "CTA" : k.startsWith("hook_") ? `Hook ${k.slice(5)}` : k);
+export const blockLabel = (k: string) =>
+  k === "body" ? "Body" : k === "cta" ? "CTA" : k.startsWith("hook_") ? `Hook ${k.slice(5)}`
+    : k.startsWith("x_") ? customLabels.get(k) ?? k.slice(2).replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase()) : k;
 
 async function rpc<T>(fn: string, args: Record<string, unknown>): Promise<T> {
   const { data, error } = await supabase().rpc(fn, args);
