@@ -22,16 +22,20 @@ import {
 import { activeFor, type SidebarNavGroup } from "@/components/app-shared";
 import { ChevronRightIcon } from "lucide-react";
 import { useSession } from "@/components/session-provider";
-import { stripWs } from "@/lib/ws-path";
+import { stripWs, wsIdFromPath } from "@/lib/ws-path";
+import { useFlags } from "@/lib/flags";
 
 /** base: prefixo do cliente (/c/<cliente>) para os caminhos relativos do menu do cliente; vazio na agência. */
 export function NavGroup({ label, items, base = "", all }: SidebarNavGroup & { base?: string; all: SidebarNavGroup[] }) {
 	const pathname = usePathname();
 	const active = activeFor(base ? stripWs(pathname) : pathname, all);
 	const href = (p?: string) => (base ? `${base}${p === "/" ? "" : p ?? ""}` || "/" : p ?? "/");
-	const { can, canOrg, mode } = useSession();
+	const { can, canOrg, mode, access } = useSession();
+	const needsFlags = items.some((i) => i.flag);
+	const flags = useFlags(base ? wsIdFromPath(pathname) : null, access?.token ?? null, needsFlags && mode !== "loading");
 	// Antes de saber a sessão mostra tudo (evita saltos); depois só o que a capacidade permite.
 	const visible = items.filter((i) => {
+		if (i.flag && !flags?.has(i.flag)) return false;
 		if (i.orgCap) return mode !== "loading" && canOrg(i.orgCap);
 		return !i.cap || mode === "loading" || can(i.cap);
 	});
