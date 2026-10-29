@@ -49,6 +49,22 @@ Sessão (`recording_sessions`): `aberta → fechada`, uma aberta por cliente e d
 | escolher / descartar take | `recording.confirm` | um escolhido por bloco; descartado fica guardado | `take.selected` |
 | fechar sessão | `recording.use` | não aceita mais takes; reabrir o dia cria sessão nova | `recording.session_closed` |
 
+## Tarefas (`tasks`, W3-01)
+
+`todo → doing → done`, `* → blocked` (motivo obrigatório) `→ todo/doing`, `* → cancelled` (só `tasks.manage`). Concluir exige dependências fechadas. Tarefas não se apagam; histórico em `task_events` (append-only).
+
+| Ação | Capacidade | Regra | Evento / notificação |
+| --- | --- | --- | --- |
+| criar | `tasks.manage` | responsável tem de ter `tasks.work` no cliente; idempotente por `client_ref` | `task.created`; notifica o responsável |
+| mudar estado / bloquear | `tasks.work` (só o responsável) ou `tasks.manage` | `lock_version` (PT409) | `task.<estado>`; bloqueio e conclusão avisam quem criou |
+| reatribuir, prazo, prioridade | `tasks.manage` | idem | notifica o novo e o anterior responsável |
+| dependências | `tasks.manage` | mesmo cliente, sem ciclos | histórico |
+| comentar / mencionar | `tasks.work` | mencionados têm de ter acesso atual | notifica mencionados e o responsável |
+
+Handoffs (`task_rules`, por cliente): `on_event` cria uma tarefa com `dedup_key = regra:entidade:versão` (repetir não duplica) e `complete_on` fecha-a como `system`. Eventos aceites: `script.created`, `script.submitted`, `script.approved`, `script.rejected`, `review.changes_requested`, `recording.confirmed`, `request.created`, `source.approved`. Se o responsável da regra perdeu acesso, a tarefa nasce sem responsável e aparece em "Sem responsável".
+
+Caixa de entrada: notificações, tarefas minhas, guiões `in_review` onde posso aprovar e tarefas sem dono; tudo filtrado pelo acesso atual (quem perde acesso deixa de ver). Marcar lido não altera nada.
+
 ## Fontes e pedidos do talento (`ideas`, W2-03)
 
 `nova → triagem → selecionada → usada`, ou `descartada` (motivo obrigatório). `kind = source | talent_request`.
@@ -75,7 +91,7 @@ Publicação (por destino/conta): `draft → scheduled → processing → publis
 
 ## Eventos de domínio (PRD §23)
 
-`source.approved`, `script.submitted`, `script.approved`, `script.rejected`, `script.version_created`, `recording.confirmed`, `recording.session_opened`, `recording.viewed_80`, `take.recorded`, `take.selected`, `asset.uploaded`, `variant.ready`, `review.changes_requested`, `review.approved`, `publication.scheduled`, `publication.published`, `publication.failed`, `metrics.synced`, `run.started`, `run.step`, `run.failed`, `run.completed`. Publicados por outbox transacional; consumidores idempotentes.
+`source.approved`, `script.submitted`, `script.approved`, `script.rejected`, `script.version_created`, `recording.confirmed`, `recording.session_opened`, `recording.viewed_80`, `take.recorded`, `take.selected`, `task.created`, `task.todo`, `task.doing`, `task.blocked`, `task.done`, `task.cancelled`, `asset.uploaded`, `variant.ready`, `review.changes_requested`, `review.approved`, `publication.scheduled`, `publication.published`, `publication.failed`, `metrics.synced`, `run.started`, `run.step`, `run.failed`, `run.completed`. Publicados por outbox transacional; consumidores idempotentes.
 
 ## Mapeamento de hoje (`guioes`)
 

@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import {
 	LayoutGridIcon, ScrollTextIcon, MonitorPlayIcon, LightbulbIcon, BarChart3Icon, BotIcon,
-	ClapperboardIcon, LibraryIcon, ShieldCheckIcon, UsersIcon, WalletIcon, FileTextIcon, HistoryIcon,
+	ClapperboardIcon, LibraryIcon, ShieldCheckIcon, UsersIcon, WalletIcon, FileTextIcon, HistoryIcon, InboxIcon, ListTodoIcon,
 } from "lucide-react";
 
 export type SidebarNavItem = {
@@ -24,12 +24,16 @@ export type SidebarNavGroup = {
 
 export const navGroups: SidebarNavGroup[] = [
 	{
-		items: [{ title: "Hoje", path: "/", icon: <LayoutGridIcon />, cap: "analytics.read" }],
+		items: [
+			{ title: "Hoje", path: "/", icon: <LayoutGridIcon />, cap: "analytics.read" },
+			{ title: "Caixa de entrada", path: "/caixa", icon: <InboxIcon />, cap: "tasks.work" },
+		],
 	},
 	{
 		label: "Dia a dia",
 		items: [
 			{ title: "Guiões", path: "/guioes", icon: <ScrollTextIcon />, cap: "scripts.read" },
+			{ title: "Tarefas", path: "/tarefas", icon: <ListTodoIcon />, cap: "tasks.read" },
 			{ title: "Teleprompter", path: "/teleprompter", icon: <MonitorPlayIcon />, cap: "recording.use" },
 			{ title: "Fontes", path: "/fontes", icon: <LightbulbIcon />, cap: "sources.read" },
 			{ title: "Referências", path: "/referencias", icon: <UsersIcon />, cap: "references.read" },

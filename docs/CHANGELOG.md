@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-10-29 (W3 Operações)
+
+- **W3-01 tarefas, handoffs e caixa de entrada** (PRD TEAM-06, TEAM-12, FR-11-02 parcial, FR-17-01, FR-17-05, TEAM-15 parcial; ADR-0007; migração `20261029071504_w3_tasks_handoffs_inbox`).
+  - `/tarefas`: As minhas, Abertas, Sem responsável, Feitas e Automações. Cada tarefa tem tipo, responsável, prazo, prioridade, estado, motivo de bloqueio, dependências, guião ou fonte ligados, comentários com menções e histórico.
+  - Só se atribui a quem tem acesso a tarefas no cliente. O responsável muda o estado das suas; quem gere muda tudo. Edições concorrentes não se sobrepõem.
+  - Automações por cliente: por exemplo "guião enviado para revisão → tarefa Rever guião {n} para a Ana, prazo 24 h, fecha quando for aprovado ou rejeitado". Repetir o mesmo evento não duplica tarefas.
+  - `/caixa`: notificações, as minhas tarefas, guiões à espera da minha aprovação e tarefas sem responsável, de todos os clientes a que tenho acesso. Marcar lido não aprova nada. Quem perde acesso deixa de receber e de ver.
+  - Capacidade nova `tasks.work`; `tasks.read` e `tasks.manage` ativas. O código de equipa só lê tarefas.
+  - Testes: `w3_tasks` 53/53, `w2_content` 47/47 (regressão com o consumidor de eventos). E2E em workspace de teste isolado 20/20 (modo código, só leitura).
+
+### Limitações conhecidas W3-01 (PARTIAL)
+
+- Sem lembretes de prazo agendados (o atraso aparece na lista e na caixa, mas não gera notificação sozinho) nem escalonamento por SLA (FR-17-06).
+- Sem projetos nem campanhas: o âmbito é o cliente. Sem templates de tarefas (FR-11-04) nem carga por pessoa (TEAM-08): próximos passos do W3.
+- Sair da equipa não pede reatribuição automaticamente; as tarefas ficam em "Sem responsável".
+- Notificações só dentro da app (sem email/push).
+
 ## 2026-10-29 (CHG-000 processo)
 
 - **CHG-000 PRD com fonte única e trabalho por PR** (PRD §28, §33; AGENTS §10, §11, §15; ADR-0004). O PRD só é escrito neste repo e só muda em PRs só de documentação com `docs/changes/CHG-NNN.md`; o workflow `PRD guard` chumba o resto. `CLAUDE.md` ganha a secção "Change workflow": nada de push direto para `main`, merge por PR com checks verdes e preview verificado, migrações em expandir/contrair. Sem alteração funcional.
