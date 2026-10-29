@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import {
-	SlidersHorizontalIcon,
+	Building2Icon, SlidersHorizontalIcon,
 	LayoutGridIcon, ScrollTextIcon, MonitorPlayIcon, LightbulbIcon, BarChart3Icon, BotIcon,
 	ClapperboardIcon, LibraryIcon, ShieldCheckIcon, UsersIcon, WalletIcon, FileTextIcon, HistoryIcon, InboxIcon, ListTodoIcon, CalendarDaysIcon,
 } from "lucide-react";
@@ -15,6 +15,8 @@ export type SidebarNavItem = {
 	external?: boolean;
 	/** Capacidade necessária para ver o item (registo de capacidades, AGENTS §15). O servidor volta a verificar. */
 	cap?: string;
+	/** Capacidade de âmbito agência (não depende do cliente aberto). */
+	orgCap?: string;
 	subItems?: SidebarNavItem[];
 };
 
@@ -51,7 +53,10 @@ export const navGroups: SidebarNavGroup[] = [
 	},
 	{
 		label: "Administração",
-		items: [{ title: "Equipa", path: "/equipa", icon: <ShieldCheckIcon />, cap: "team.read" }],
+		items: [
+			{ title: "Clientes", path: "/clientes", icon: <Building2Icon />, orgCap: "workspaces.read" },
+			{ title: "Equipa", path: "/equipa", icon: <ShieldCheckIcon />, cap: "team.read" },
+		],
 	},
 	{
 		label: "Em breve",

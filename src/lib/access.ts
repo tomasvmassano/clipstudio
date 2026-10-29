@@ -16,7 +16,7 @@ export type WorkspaceCtx = {
 
 export type AppContext = {
   user: { id: string; email: string; confirmed: boolean };
-  agency: { organization: string; name: string; role: string; status: string }[] | null;
+  agency: { organization: string; name: string; role: string; status: string; capabilities?: string[] }[] | null;
   workspaces: WorkspaceCtx[];
 };
 
@@ -61,6 +61,19 @@ export function friendlyError(msg: string): string {
   if (msg.includes("orcamento_esgotado")) return "O limite de custo diário dos agentes já foi atingido hoje.";
   if (msg.includes("configuracao_invalida")) return "Esta versão tem erros: corrige-os e guarda uma versão nova antes de ativar.";
   if (msg.includes("execucao_nao_encontrada")) return "Esta execução já não existe.";
+  if (msg.includes("nome_invalido")) return "O nome tem de ter entre 2 e 80 caracteres.";
+  if (msg.includes("handle_invalido")) return "O @ só pode ter letras minúsculas, números, ponto e underscore (até 30).";
+  if (msg.includes("fuso_invalido")) return "Fuso horário desconhecido.";
+  if (msg.includes("moeda_invalida")) return "Moeda inválida (código de 3 letras, ex.: EUR).";
+  if (msg.includes("organizacao_ambigua")) return "Pertences a mais de uma agência: este caso ainda não é suportado.";
+  if (msg.includes("cliente_origem_invalido")) return "O cliente de onde querias copiar não existe nesta agência.";
+  if (msg.includes("membro_nao_encontrado")) return "Esta pessoa já não está na equipa. Recarrega.";
+  if (msg.includes("nao_a_si_proprio")) return "Não podes mudar o teu próprio acesso. Pede a outra pessoa com permissão.";
+  if (msg.includes("ultimo_dono")) return "É o último dono do cliente. Passa primeiro a posse a outra pessoa.";
+  if (msg.includes("estado_invalido")) return "Estado inválido.";
+  if (msg.includes("nao_e_staff_da_agencia")) return "Essa pessoa não faz parte da equipa da agência.";
+  if (msg.includes("ja_e_equipa_do_cliente")) return "Essa pessoa já é da equipa do cliente.";
+  if (msg.includes("campo_desconhecido")) return "Pedido com um campo que não existe. Recarrega a página.";
   if (msg.includes("dependencia_invalida")) return "Cada tarefa do template só pode depender de tarefas acima dela.";
   if (msg.includes("template_nao_encontrado")) return "Este template já não existe ou está desligado.";
   if (msg.includes("nome_obrigatorio")) return "Dá um nome ao template.";

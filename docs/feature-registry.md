@@ -8,12 +8,12 @@ Estado: **ativo** (existe e é verificado no servidor por `authorize()`; também
 
 | Key | Módulo | Risco | Âmbitos | Estado | Onde hoje |
 | --- | --- | --- | --- | --- | --- |
-| `workspaces.read` | Agência | B | org | W1 | — |
-| `workspaces.create` | Agência | A | org | W1 | — |
-| `workspaces.archive` | Agência | A | org | W1 | — |
+| `workspaces.read` | Agência | B | org | ativo | `/clientes` (`workspaces_list`): dono vê todos, admin da agência só os atribuídos |
+| `workspaces.create` | Agência | A | org | ativo | Novo cliente (`workspace_create`), opcionalmente com a estrutura de outro cliente sem dados privados |
+| `workspaces.archive` | Agência | A | org | ativo | Arquivar com motivo e confirmação, recuperar (`workspace_archive`, `workspace_restore`) |
 | `team.read` | Equipa (M13) | B | org, ws | ativo | `/equipa` (`workspace_team`) |
 | `team.invite` | Equipa | A | org, ws | ativo | Convidar / Cancelar convite (`invite_member`, `revoke_invitation`) |
-| `team.manage` | Equipa | A | org, ws | W1 | — |
+| `team.manage` | Equipa | A | org, ws | ativo | `/equipa`: mudar papel, suspender, reativar, remover com reatribuição de tarefas (`member_update`, `member_remove`); dono da agência atribui staff (`agency_staff_assign`) |
 | `permissions.manage` | CAP | A | org, ws | W1 | — |
 | `audit.read` | CAP | M | org, ws | W1 | — |
 | `scripts.read` | Guiões (M02) | B | ws, proj, own | ativo | `/guioes`, `/`, teleprompter |
@@ -56,6 +56,6 @@ Estado: **ativo** (existe e é verificado no servidor por `authorize()`; também
 | `agents.run` | Agentes | A | ws | ativo | `agent_job_enqueue` (Correr agora, idempotente por tipo e dia), `agent_job_cancel`, `agent_job_retry`; executado pelo worker do motor (W4-02), que grava guiões em revisão |
 | `agents.configure` | Agentes | A | ws | ativo | `agent_config_save` (versão nova validada), `agent_config_activate` (ativar ou voltar atrás), `agent_config_get` |
 | `integrations.manage` | Settings (M15) | A | ws | W6 | — |
-| `settings.manage` | Settings | A | ws | W1 | — |
+| `settings.manage` | Settings | A | ws | ativo (parcial) | dados gerais do cliente: nome, @, fuso, moeda, aprovação obrigatória para gravar (`workspace_update`); resto do M15 por fazer |
 
 Regras: ter `edit` não dá `approve` nem `publish` (CAP-04); uma feature flag ligada não concede acesso (CAP-09); toda a key nova entra aqui no mesmo PR em que nasce, senão o CI falha (PRD §34).

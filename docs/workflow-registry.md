@@ -4,6 +4,11 @@
 
 Fonte: PRD v2.1 §4 (estados), §20 (teleprompter), §23 (eventos), AGENTS §6. Cada transição guarda ator, timestamp, versão, estado anterior e novo, motivo e correlation id. Estados editorial, produção, revisão de media e publicação são **independentes**.
 
+## Clientes e membros (W1-06)
+
+Cliente: `active → archived → active`. Arquivar exige motivo, corta logo o acesso de toda a equipa (`authorize` só aceita clientes ativos), cancela execuções em fila e pede cancelamento das que estão a correr; recuperar devolve tudo como estava. Nada é apagado.
+Membro (`workspace_access.status`): `active ⇄ suspended`, `active|suspended → removed`. Removido perde o acesso já, fica no histórico e as tarefas abertas passam para quem for escolhido (ou ficam sem responsável), com evento `reassigned` e notificação. Um convite novo aceite reativa o acesso com o papel do convite. Tudo com antes e depois em `audit_events`.
+
 ## Editorial (por `content_version`)
 
 ```

@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-10-29 (W1 Fundação, fecho)
+
+- **W1-06 clientes e gestão de equipa** (PRD §2, §3, CAP-03, CAP-06, CAP-08, SCALE-07, FL-01, TEAM-15, M15 parcial; ADR-0012; migrações `20261029100534_w1_clients_team`, `20261029101111_w1_drop_tmp_import`).
+  - `/clientes` (agência): lista dos clientes com equipa, convites e estado da configuração dos agentes; criar cliente (nome, @, fuso, moeda), com opção de começar com a estrutura de outro cliente (formatos e regras dos agentes, templates, automações; nunca a voz, léxico, notícias, pessoas, guiões nem dados); editar; arquivar com motivo e confirmação; recuperar.
+  - O dono da agência vê todos os clientes; o admin da agência só os atribuídos; a equipa de um cliente não tem acesso à lista.
+  - `/equipa`: mudar papel, suspender, reativar e remover membros (nunca a si próprio, só até ao seu nível, o último dono do cliente fica protegido); ao remover, as tarefas abertas passam para quem escolheres. O dono da agência atribui staff da agência a um cliente sem convite. Voltar a convidar quem foi removido reativa o acesso.
+  - Menu: Clientes em Administração e "Gerir clientes" no seletor de cliente.
+  - Removida a função antiga `tmp_import`.
+  - Testes: `w1_clients` 55/55; regressão `w1_team` 21/21 e `w1_isolation` 38/38.
+
 ## 2026-10-29 (W4 IA e jobs)
 
 - **W4-02b preços dos modelos** (FR-06-05; migração `20261029095100_w4_model_prices`): preços públicos da Anthropic registados com fonte e data (Opus 5.5 4/20 USD, Sonnet 5.5 2/10 USD, Haiku 5.5 0,10/0,50 USD por milhão de tokens de entrada/saída, Haiku com escalão acima de 100 000 tokens, pesquisa web 10 USD por 1000), convertidos para EUR ao câmbio do BCE de 28/10/2026. O motor passa a contar também as pesquisas web no custo. Com isto, o custo de cada execução deixa de ficar desconhecido e o limite diário passa a funcionar. Testes do worker 19/19.

@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { CheckIcon, ChevronsUpDownIcon } from "lucide-react";
+import { Building2Icon, CheckIcon, ChevronsUpDownIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { LogoIcon } from "@/components/logo";
 import { SidebarMenuButton } from "@/components/ui/sidebar";
 import {
@@ -10,6 +11,7 @@ import {
 	DropdownMenuGroup,
 	DropdownMenuItem,
 	DropdownMenuLabel,
+	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useSession } from "@/components/session-provider";
@@ -20,10 +22,12 @@ import { ROLE_LABEL } from "@/lib/access";
  * A lista vem de my_context(), que só devolve workspaces onde o utilizador tem acesso ativo.
  */
 export function WorkspaceSwitcher() {
-	const { ws, workspaces, setWorkspace } = useSession();
+	const { ws, workspaces, setWorkspace, canOrg } = useSession();
+	const router = useRouter();
 	const title = ws?.name ?? "ClipStudio";
+	const manage = canOrg("workspaces.read");
 
-	if (workspaces.length <= 1) {
+	if (workspaces.length <= 1 && !manage) {
 		return (
 			<SidebarMenuButton render={<Link href="/" />}>
 				<LogoIcon />
@@ -52,6 +56,12 @@ export function WorkspaceSwitcher() {
 						</DropdownMenuItem>
 					))}
 				</DropdownMenuGroup>
+				{manage && (
+					<>
+						<DropdownMenuSeparator />
+						<DropdownMenuItem onClick={() => router.push("/clientes")}><Building2Icon className="size-4" /> Gerir clientes</DropdownMenuItem>
+					</>
+				)}
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);
