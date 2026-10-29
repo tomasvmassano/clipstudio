@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import {
 	Collapsible,
@@ -41,22 +42,26 @@ export function NavGroup({ label, items, base = "", all }: SidebarNavGroup & { b
 			<SidebarMenu>
 				{visible.map((item) => {
 					const isActive = active?.path === item.path && !!item.path;
+					const childActive = !!item.subItems?.some((i) => active?.path === i.path);
+					if (item.subItems?.length) {
+						return (
+							<SubGroup key={item.title} active={isActive || childActive}>
+								<CollapsibleTrigger render={<SidebarMenuButton isActive={isActive} />}>{item.icon}<span>{item.title}</span><ChevronRightIcon className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" /></CollapsibleTrigger>
+								<CollapsibleContent>
+									<SidebarMenuSub>
+										{item.subItems.map((subItem) => (
+											<SidebarMenuSubItem key={subItem.title}>
+												<SidebarMenuSubButton isActive={active?.path === subItem.path} render={<Link href={href(subItem.path)} />}>{subItem.icon}<span>{subItem.title}</span></SidebarMenuSubButton>
+											</SidebarMenuSubItem>
+										))}
+									</SidebarMenuSub>
+								</CollapsibleContent>
+							</SubGroup>
+						);
+					}
 					return (
-						<Collapsible className="group/collapsible" defaultOpen={isActive || item.subItems?.some((i) => active?.path === i.path)} key={item.title} render={<SidebarMenuItem />}>
-							{item.subItems?.length ? (
-								<>
-									<CollapsibleTrigger render={<SidebarMenuButton isActive={isActive} />}>{item.icon}<span>{item.title}</span><ChevronRightIcon className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" /></CollapsibleTrigger>
-									<CollapsibleContent>
-										<SidebarMenuSub>
-											{item.subItems.map((subItem) => (
-												<SidebarMenuSubItem key={subItem.title}>
-													<SidebarMenuSubButton isActive={active?.path === subItem.path} render={<Link href={href(subItem.path)} />}>{subItem.icon}<span>{subItem.title}</span></SidebarMenuSubButton>
-												</SidebarMenuSubItem>
-											))}
-										</SidebarMenuSub>
-									</CollapsibleContent>
-								</>
-							) : item.soon || !item.path ? (
+						<SidebarMenuItem key={item.title}>
+							{item.soon || !item.path ? (
 								<>
 									<SidebarMenuButton aria-disabled="true" className="cursor-default opacity-50 hover:bg-transparent" tooltip={`${item.title}: ainda não disponível`}>{item.icon}<span>{item.title}</span></SidebarMenuButton>
 									<SidebarMenuBadge className="text-[10px] font-normal text-muted-foreground">em breve</SidebarMenuBadge>
@@ -64,10 +69,22 @@ export function NavGroup({ label, items, base = "", all }: SidebarNavGroup & { b
 							) : (
 								<SidebarMenuButton isActive={isActive} tooltip={item.title} render={<Link href={href(item.path)} />}>{item.icon}<span>{item.title}</span></SidebarMenuButton>
 							)}
-						</Collapsible>
+						</SidebarMenuItem>
 					);
 				})}
 			</SidebarMenu>
 		</SidebarGroup>
+	);
+}
+
+/** Grupo com submenu: estado controlado (abre quando um filho fica ativo), sem mudar o defaultOpen depois de montar. */
+function SubGroup({ active, children }: { active: boolean; children: ReactNode }) {
+	const [open, setOpen] = useState(active);
+	const [wasActive, setWasActive] = useState(active);
+	if (active !== wasActive) { setWasActive(active); if (active) setOpen(true); }
+	return (
+		<Collapsible className="group/collapsible" open={open} onOpenChange={setOpen} render={<SidebarMenuItem />}>
+			{children}
+		</Collapsible>
 	);
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { blockLabel, blocksOf, isRecorded, type BlockKey, type SessionItem, type TakeRow, type TpAction, type TpPrefs } from "@/lib/recording";
+import { blockLabel, blocksOf, isRecorded, type BlockKey, type MarkKind, type SessionItem, type TakeRow, type TpAction, type TpPrefs } from "@/lib/recording";
 import { keyMap } from "@/components/teleprompter/use-prefs";
 import { cn } from "@/lib/utils";
 
@@ -27,6 +27,8 @@ type Props = {
   onProgress: (contentId: string, block: BlockKey | null, pct: number) => void;
   onSettings: () => void;
   onExit: () => void;
+  /** tempos de gravação (W5-01): o pai guarda no dispositivo e envia */
+  onMark?: (kind: MarkKind, contentId: string | null, block: BlockKey | null) => void;
 };
 
 function Btn({ on, label, onClick, aria, disabled }: { on?: boolean; label: string; onClick: () => void; aria?: string; disabled?: boolean }) {
@@ -162,6 +164,24 @@ export function Prompter(p: Props) {
   const report = p.onProgress;
   useEffect(() => { if (cur) report(cur.content_id, block, progress); }, [cur, block, progress, report]);
 
+  // tempos de gravação: abrir guião, rolar, parar e mudar de bloco enquanto rola (ING-03)
+  const markRef = useRef(p.onMark);
+  useEffect(() => { markRef.current = p.onMark; }, [p.onMark]);
+  const mark = useCallback((kind: MarkKind, content: string | null, b: BlockKey | null) => { markRef.current?.(kind, content, b); }, []);
+  const marked = useRef<{ content: string | null; block: BlockKey | null; playing: boolean }>({ content: null, block: null, playing: false });
+  useEffect(() => {
+    const prev = marked.current;
+    const content = curKey ?? null;
+    const changed = content !== prev.content;
+    // ao mudar de guião o bloco ainda é o do anterior: lê-se da posição real
+    const b = changed ? cbRef.current() : block;
+    if (changed && content) mark("open", content, null);
+    if (playing && !prev.playing) mark("play", content, b);
+    else if (!playing && prev.playing) mark("pause", prev.content, prev.block);
+    else if (playing && (changed || b !== prev.block)) mark("block", content, b);
+    marked.current = { content, block: b, playing };
+  }, [curKey, block, playing, mark]);
+
   const shouldAsk = useCallback(() => {
     if (!cur || recorded || !canTake || !prefs.confirm_on_advance) return null;
     const el = scrollRef.current;
@@ -197,27 +217,31 @@ export function Prompter(p: Props) {
   const exit = useCallback(() => {
     const g = shouldAsk();
     if (g) { setPlaying(false); setConfirm({ id: g.content_id, n: g.content.n, takes: takes.filter((t) => t.status === "ok").length, then: "exit" }); return; }
+    if (playing) mark("pause", curKey ?? null, block);
+    mark("exit", null, null);
     p.onExit();
-  }, [shouldAsk, takes, p]);
+  }, [shouldAsk, takes, p, playing, mark, curKey, block]);
 
   const answer = useCallback(async (yes: boolean) => {
     const c = confirm;
     if (!c) return;
     setConfirm(null);
+    mark(yes ? "recorded" : "not_recorded", c.id, null);
     if (yes) { try { await p.onRecorded(c.id, true); flash(`Guião ${c.n} marcado como gravado.`); } catch (e) { flash(`Não ficou marcado: ${(e as Error).message}`, true); } }
-    if (c.then === "exit") p.onExit();
+    if (c.then === "exit") { mark("exit", null, null); p.onExit(); }
     else step(1);
-  }, [confirm, p, step, flash]);
+  }, [confirm, p, step, flash, mark]);
 
   const markTake = useCallback(async () => {
     if (!cur || !canTake) return;
     const b = currentBlock() ?? blocks[0]?.key;
     if (!b) return;
+    mark("take", cur.content_id, b);
     try {
       const t = await p.onTake(cur.content_id, b);
       flash(t.pending ? `${blockLabel(b)} · take ${t.take_number || "novo"} guardado no dispositivo (sem ligação, envio depois)` : `${blockLabel(b)} · take ${t.take_number} marcado`);
     } catch (e) { flash(`Take não marcado: ${(e as Error).message}`, true); }
-  }, [cur, canTake, currentBlock, blocks, p, flash]);
+  }, [cur, canTake, currentBlock, blocks, p, flash, mark]);
 
   const showBar = useCallback(() => {
     setBarVisible(true);
@@ -348,7 +372,7 @@ export function Prompter(p: Props) {
         <Btn label="↕" aria="Espelho vertical" on={prefs.mirror_v} onClick={() => update((x) => ({ mirror_v: !x.mirror_v }))} />
         {canTake && cur && <Btn label={`Take${block ? ` ${blockLabel(block)}` : ""}`} aria="Marcar take do bloco atual" onClick={markTake} />}
         {cur && <Btn label={`Takes (${takes.filter((t) => t.status === "ok").length})`} aria="Ver takes" on={showTakes} onClick={() => setShowTakes((x) => !x)} />}
-        {canTake && cur && toggleable && <Btn label="Gravado" on={recorded} onClick={() => p.onRecorded(cur.content_id, !recorded).catch((e: Error) => flash(`Não ficou marcado: ${e.message}`, true))} />}
+        {canTake && cur && toggleable && <Btn label="Gravado" on={recorded} onClick={() => { mark(recorded ? "not_recorded" : "recorded", cur.content_id, null); p.onRecorded(cur.content_id, !recorded).catch((e: Error) => flash(`Não ficou marcado: ${e.message}`, true)); }} />}
         <Btn label={isFs ? "Sair do ecrã inteiro" : "Ecrã inteiro"} onClick={toggleFs} />
         <Btn label="Definições" onClick={() => { setPlaying(false); p.onSettings(); }} />
         <Btn label="Fila" aria="Voltar à fila" onClick={exit} />

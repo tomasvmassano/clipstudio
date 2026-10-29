@@ -77,4 +77,6 @@ Teto de autoridade: ninguém concede mais do que tem (R-12); um admin do cliente
 
 ## Mapeamento de hoje
 
+Tempos de gravação (W5-01): escrever com `recording.use`, ler com `recording.use` ou `scripts.read`; a tabela `recording_marks` não tem leitura direta.
+
 O código de equipa `studio_tokens(role='creator')` do Numeiro corresponde a um `contributor` com `scripts.approve`, `scripts.reject` e `recording.confirm` por grant (W2: também `scripts.submit`, para poder reaprovar depois de editar, e `requests.create`, para pedir temas, e `references.read`; W3: `tasks.read` e `calendar.read`, só leitura, porque o código não tem identidade para ser responsável; não tem `scripts.create`, `scripts.delete`, `sources.create` nem `sources.triage`). Na migração W1 cada pessoa que usa o código recebe uma conta individual com esse papel. O código só é desligado depois de a migração estar validada (AGENTS §5).
