@@ -1,6 +1,14 @@
 # Changelog
 
-## 2026-10-29 (W4 Motor)
+## 2026-10-29 (W1 Início e agência)
+
+- **W1-10 Início por cliente e painel da agência** (PRD FR-01-01, FR-01-02, FR-01-06 parcial, R-04; ADR-0017; migração `20261029114823_w1_dashboard`).
+  - O Hoje passa a **Início**: escolhes o período (7, 30, 90 dias ou datas tuas) e cada número compara com o período anterior do mesmo tamanho. Cada número tem a explicação de como se calcula (toca no ⓘ).
+  - Números: fontes, guiões criados, à espera de aprovação, aprovados, gravados, publicados, views, engagement, custo dos agentes e tarefas concluídas, cada um só para quem tem permissão.
+  - **Personalizar** (dono e admin do cliente): escolher e ordenar os widgets de cada função; repor o original; tudo no histórico.
+  - **Agência** (`/agencia`, equipa da agência): os teus clientes lado a lado com totais, variação e "Abrir"; diz quantos clientes ficaram de fora de cada número por falta de acesso.
+  - A meta de guiões por dia vem da configuração dos agentes do cliente (já não é 30 fixo).
+  - Testes: `w1_dashboard` 38/38; E2E em modo código 16/16 (período, explicação, comparação, permissões, telemóvel).
 
 - **W4-03 dados do motor por cliente, fase contract** (ADR-0016; migração `20261029113539_w4_engine_client_contract`).
   - Chaves passam a (cliente, id): dois clientes podem acompanhar o mesmo criador, cada um com os seus reels, análises, temas, citações e meta.

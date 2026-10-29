@@ -9,6 +9,10 @@ Fonte: PRD v2.1 §4 (estados), §20 (teleprompter), §23 (eventos), AGENTS §6. 
 Cliente: `active → archived → active`. Arquivar exige motivo, corta logo o acesso de toda a equipa (`authorize` só aceita clientes ativos), cancela execuções em fila e pede cancelamento das que estão a correr; recuperar devolve tudo como estava. Nada é apagado.
 Membro (`workspace_access.status`): `active ⇄ suspended`, `active|suspended → removed`. Removido perde o acesso já, fica no histórico e as tarefas abertas passam para quem for escolhido (ou ficam sem responsável), com evento `reassigned` e notificação. Um convite novo aceite reativa o acesso com o papel do convite. Tudo com antes e depois em `audit_events`.
 
+## Layout do Início (`dashboard_layouts`, W1-10)
+
+`por omissão → personalizado` (`dashboard_layout_set`, com `dashboard.configure`) e `personalizado → por omissão` (`dashboard_layout_reset`). Um layout por cliente e função; cada mudança fica no histórico com antes e depois (`dashboard.layout_set`, `dashboard.layout_reset`). Widgets desconhecidos ou repetidos são recusados (22023).
+
 ## Editorial (por `content_version`)
 
 ```

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import {
-	Building2Icon, KeyRoundIcon, ScrollIcon, SettingsIcon, SlidersHorizontalIcon,
+	Building2Icon, GaugeIcon, KeyRoundIcon, ScrollIcon, SettingsIcon, SlidersHorizontalIcon,
 	LayoutGridIcon, ScrollTextIcon, MonitorPlayIcon, LightbulbIcon, BarChart3Icon, BotIcon,
 	ClapperboardIcon, LibraryIcon, ShieldCheckIcon, UsersIcon, WalletIcon, FileTextIcon, HistoryIcon, InboxIcon, ListTodoIcon, CalendarDaysIcon,
 } from "lucide-react";
@@ -28,7 +28,8 @@ export type SidebarNavGroup = {
 export const navGroups: SidebarNavGroup[] = [
 	{
 		items: [
-			{ title: "Hoje", path: "/", icon: <LayoutGridIcon />, cap: "analytics.read" },
+			{ title: "Início", path: "/", icon: <LayoutGridIcon /> },
+			{ title: "Agência", path: "/agencia", icon: <GaugeIcon />, orgCap: "dashboard.agency" },
 			{ title: "Caixa de entrada", path: "/caixa", icon: <InboxIcon />, cap: "tasks.work" },
 		],
 	},
