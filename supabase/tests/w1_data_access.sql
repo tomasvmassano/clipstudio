@@ -74,7 +74,7 @@ begin
   -- código de equipa (anon)
   perform set_config('request.jwt.claims', '{"role":"anon"}', true);
   execute 'set local role anon';
-  insert into t values ('código lê guiões de A', true, (select count(*) from public.legacy_guioes(tok, '2026-10-28', '2026-10-28')) = 30);
+  insert into t values ('código lê guiões de A', true, (select count(*) from public.legacy_guioes(tok, current_date - 3, current_date + 3)) = 30);
   begin j := public.desempenho('ws_test_b', null, tok); insert into t values ('código de A não lê B', false, true);
   exception when insufficient_privilege then insert into t values ('código de A não lê B', false, false); end;
   begin perform public.guiao_update('ws_test_b-2026-10-28-01','{"validado":true}'::jsonb, tok); insert into t values ('código de A não valida B', false, true);

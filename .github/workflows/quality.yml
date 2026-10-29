@@ -30,3 +30,21 @@ jobs:
         run: npm test
       - name: Build
         run: npm run build
+  db:
+    # Testes SQL (RLS, RPCs, isolamento) numa base descartável: todas as migrações + dados sintéticos.
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+      TZ: UTC
+    steps:
+      - uses: actions/checkout@v4
+      - name: Migrações e testes SQL
+        run: bash scripts/db/test.sh

@@ -20,13 +20,14 @@ begin
    ('numeiro',u_mgr,'client_staff','manager'),('numeiro',u_con,'client_staff','contributor'),('numeiro',u_rev,'client_staff','reviewer'),
    ('numeiro',u_view,'client_staff','viewer'),('ws_test_b',u_b,'client_staff','workspace_admin');
   update guioes set editorial_status = 'archived', archived_from = 'in_review' where id = ga;
+  update guioes set date = today - 1 where id in (g3, g4);  -- por gravar de ontem
   create temp table t(name text, expected boolean, got boolean) on commit drop;
   grant all on t to authenticated, anon;
   execute 'set local role authenticated';
 
   -- leitura
   perform set_config('request.jwt.claims', json_build_object('sub', u_mgr, 'role','authenticated')::text, true);
-  j := calendar_range('numeiro', '2026-10-26', '2026-11-01');
+  j := calendar_range('numeiro', today - 3, today + 3);
   insert into t values ('calendário traz os guiões do intervalo, sem arquivados', true,
     jsonb_array_length(j->'contents') = 29 and not exists (select 1 from jsonb_array_elements(j->'contents') c where c->>'id' = ga));
   insert into t values ('guiões de dias passados por gravar marcados atrasados', true,

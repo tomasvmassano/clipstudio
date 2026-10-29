@@ -25,7 +25,11 @@ begin
   g := guiao_update('numeiro-2026-10-28-30', '{"corpo":"texto novo"}'::jsonb);
   insert into t values ('editar guião validado anula a validação', false, g.validado);
   insert into t values ('validado_em limpo', true, g.validado_em is null);
-  insert into t values ('versão anterior guardada como validada', true, (g.history->0->>'validado')::boolean);
+  -- desde W2-01 a versão aprovada fica em content_versions, imutável (R-06); o campo history deixou de ser escrito
+  execute 'reset role';
+  insert into t values ('versão aprovada anterior guardada', true,
+    (select v.corpo from guioes g2 join content_versions v on v.id = g2.approved_version_id where g2.id = 'numeiro-2026-10-28-30') <> 'texto novo');
+  execute 'set local role authenticated';
   begin perform guiao_update('numeiro-2026-10-28-29', '{"status":"x","tema":"t"}'::jsonb); st := 'none';
   exception when others then st := sqlstate; end;
   insert into t values ('status inventado recusado (22023)', true, st = '22023');

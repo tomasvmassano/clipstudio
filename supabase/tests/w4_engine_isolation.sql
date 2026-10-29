@@ -59,7 +59,7 @@ begin
   begin insert into reels (id, url) values ('ENGNULL', 'u'); st := 'none'; exception when others then st := sqlstate; end;
   insert into t values ('reel sem cliente nem conta recusado (23502)', true, st = '23502');
   -- reel de B com a conta de A (dados adulterados): não aparece a ninguém
-  insert into reels (client_id, id, platform, owner, role, url, views, outlier, account_id) values ('ws_eng_b', 'ENGMIX', 'instagram', 'x', 'reference', 'https://x.test/m', 1, 99, 'cobraalive-ig');
+  insert into reels (client_id, id, platform, owner, role, url, views, outlier, account_id) values ('ws_eng_b', 'ENGMIX', 'instagram', 'x', 'reference', 'https://x.test/m', 1, 99, (select id from accounts where client_id = 'numeiro' and role = 'reference' limit 1));
 
   execute 'set local role authenticated';
   perform set_config('request.jwt.claims', json_build_object('sub', u_a, 'role','authenticated')::text, true);

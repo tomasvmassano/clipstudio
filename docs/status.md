@@ -12,9 +12,9 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 |---|---|
 | feito | 17 |
 | parcial | 145 |
-| por começar | 98 |
+| por começar | 97 |
 | bloqueado | 3 |
-| adiado | 0 |
+| adiado | 1 |
 | **total** | **263** |
 
 ## Pendentes abertos (bloqueados primeiro, depois por prioridade)
@@ -431,7 +431,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | QA-02 | parcial | realtime, storage de media e URL/API com contas reais não testados | w1_isolation 38/38, w4_engine_isolation 23/23, w1_settings (bucket) | — |
 | QA-03 | parcial | sessão revogada não testada | convite expirado e membro removido em w1_team, w1_clients | — |
 | QA-04 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | w2_content 47/47; E2E de escrita 23/23 (W2) | — |
-| QA-05 | feito |  | dedup por url_normalized e URL inválido em w2_sources 41/41 | — |
+| QA-05 | feito |  | dedup por url_normalized e URL inválido em w2_sources 41/41; corre no CI em cada PR (job db, base descartável) | — |
 | QA-06 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | w2_teleprompter 52/52; E2E 28/28 (offline, dois dispositivos, iPad) | — |
 | QA-07 | por começar | sem revisão de vídeo | nada no código | — |
 | QA-08 | por começar | sem upload de media | nada no código | — |
@@ -554,7 +554,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | R-16 | por começar | origem sistema/externo inexistente | capacidade performance.origin.override só planeada (feature-registry) | — |
 | R-17 | por começar | lista de frases-persona versionada inexistente | persona.manage só planeada; AGENTS §7 | — |
 | R-18 | por começar | linhagem no momento da publicação inexistente (sem publicador) | nada no código | — |
-| R-19 | por começar | métricas atuais vêm de scraping Apify (engine/scrape.py), contra R-19; sem APIs oficiais | engine/scrape.py ApifyClient; ADR-0005 | — |
+| R-19 | adiado | decisão do Tomás 29/10: métricas passam a vir da API oficial no futuro; por agora continua o Apify (engine/scrape.py). Fecha com PERF-08/PLAT-02 | engine/scrape.py ApifyClient; ADR-0005 | — |
 
 ## 38. Vista de negócio da agência (BIZ)
 

@@ -4,7 +4,7 @@ declare
   org uuid := (select id from organizations where slug='clipstudio');
   u_con uuid := gen_random_uuid(); u_mgr uuid := gen_random_uuid(); u_view uuid := gen_random_uuid(); u_b uuid := gen_random_uuid();
   tok text := (select token from studio_tokens where client_id='numeiro' limit 1);
-  d date := '2026-10-28'; g1 text := 'numeiro-2026-10-28-01'; g2 text := 'numeiro-2026-10-28-02'; g30 text := 'numeiro-2026-10-28-30';
+  d date := (now() at time zone 'Asia/Dubai')::date; g1 text := 'numeiro-2026-10-28-01'; g2 text := 'numeiro-2026-10-28-02'; g30 text := 'numeiro-2026-10-28-30';
   grej text := 'numeiro-2026-10-28-05'; grec text := 'numeiro-2026-10-28-06'; gb text := 'ws_test_b-2026-10-28-01';
   s jsonb; s2 jsonb; sid uuid; sidb uuid; j jsonb; t1 uuid; t2 uuid; ref1 uuid := gen_random_uuid(); n0 int; ev int;
   st text; msg text; ok int := 0; bad int := 0; res text := ''; r record;
@@ -17,6 +17,7 @@ begin
   insert into workspace_access (workspace_id, user_id, affiliation_type, workspace_role) values
    ('numeiro',u_con,'client_staff','contributor'),('numeiro',u_mgr,'client_staff','manager'),
    ('numeiro',u_view,'client_staff','viewer'),('ws_test_b',u_b,'client_staff','workspace_admin');
+  update guioes set date = d where client_id = 'numeiro';  -- a fila do dia d tem os 30 guiões
   update guioes set editorial_status = 'rejected' where id = grej;
   update guioes set production_status = 'recorded' where id = grec;
   create temp table t(name text, expected boolean, got boolean) on commit drop;

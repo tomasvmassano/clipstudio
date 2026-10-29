@@ -69,6 +69,7 @@ begin
   insert into t values ('worker não lê a fila fora das funções (42501)', true, st = '42501');
   begin perform agent_config_save('ws_w_a', cfg); st := 'none'; exception when others then st := sqlstate; end;
   insert into t values ('worker não muda configurações', true, st <> 'none');
+  perform set_config('engine.client_id', 'ws_w_a', true);  -- o PgDB do worker fixa o cliente ao ligar (W4-03)
   begin insert into agent_log (run_id, agent, model, client_id, tokens_in, tokens_out) values ('run-t', 'writer', 'm', 'ws_w_a', 10, 20); st := 'none';
   exception when others then st := sqlstate; end;
   insert into t values ('worker escreve no log dos agentes com tokens', true, st = 'none');
