@@ -11,8 +11,8 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | Estado | Requisitos |
 |---|---|
 | feito | 22 |
-| parcial | 145 |
-| por começar | 90 |
+| parcial | 146 |
+| por começar | 89 |
 | bloqueado | 3 |
 | adiado | 3 |
 | **total** | **263** |
@@ -54,7 +54,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | CAP-02 | P0 | parcial | sem filtros por equipa/projeto, ações em lote, exportação, diff e preview antes de guardar | Duas matrizes administrativas |
 | CAP-03 | P0 | parcial | sem papéis personalizados versionados nem modelos por profissão; grants só por pessoa | Papéis e exceções |
 | CAP-04 | P0 | parcial | capacidades de clipping, media, review, publishing, integrations sem uso | Permissões granulares |
-| CAP-05 | P0 | parcial | sem simulador "Ver como utilizador"; authorize() só por workspace, sem recurso | Avaliação centralizada e explicável |
+| CAP-05 | P0 | parcial | authorize() só por workspace, sem recurso; verificação com conta real (R-15) | Avaliação centralizada e explicável |
 | CAP-06 | P0 | parcial | sem revisões periódicas de acessos nem revogação de sessões | Gestão de ciclo de vida |
 | OPS-01 | P0 | parcial | sem contadores online, disponíveis, em tarefa, ausentes; sem equipa e projeto | Diretório e contadores |
 | OPS-03 | P0 | parcial | sem acknowledge, snooze e delegar | Minha área de trabalho |
@@ -117,6 +117,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | OPS-07 | P1 | parcial | sem timestamps, comparação de versões e acesso externo | Colaboração e revisão |
 | OPS-08 | P1 | parcial | sem relatórios de throughput, lead/cycle time e retrabalho | Auditoria de operações |
 | SCALE-05 | P1 | parcial | sem guidelines de marca, verificação factual, áudio, direitos | Quality gates: |
+| BIZ-07 | P1 | parcial | faixa persistente ao navegar a app como o papel (hoje é uma vista no separador Ver como); verificação com conta real | Pré-visualizar como papel |
 | FR-01-06 | P2 | parcial | filtros persistentes por utilizador por fazer | Estados vazios explicativos, loading, erro/retry, filtros persistentes por utili |
 | FR-02-06 | P2 | parcial | sem diff visual entre versões | Histórico de versões com diff e restauro, conflitos de edição e autoria. |
 | FR-02-07 | P2 | parcial | sem pesquisa, ordenação, vistas guardadas nem impressão | Filtros, pesquisa, ordenação, vistas guardadas, exportação e impressão. |
@@ -513,7 +514,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | CAP-02 | parcial | sem filtros por equipa/projeto, ações em lote, exportação, diff e preview antes de guardar | /permissoes por pessoa e por papel; w1_permissions 35/35; W1-08 | — |
 | CAP-03 | parcial | sem papéis personalizados versionados nem modelos por profissão; grants só por pessoa | permission_grants allow/deny com prazo, deny prevalece; w1_permissions 35/35 | — |
 | CAP-04 | parcial | capacidades de clipping, media, review, publishing, integrations sem uso | capabilities separadas por ação; feature-registry.md | — |
-| CAP-05 | parcial | sem simulador "Ver como utilizador"; authorize() só por workspace, sem recurso | authorize(), access_explain "porquê"; w1_permissions 35/35 | — |
+| CAP-05 | parcial | authorize() só por workspace, sem recurso; verificação com conta real (R-15) | authorize(), access_explain "porquê"; w1_permissions 35/35; simulador Ver como pessoa ou papel (access_simulate, W1-16); w1_access_simulate 11/11; e2e/see-as.spec.ts | — |
 | CAP-06 | parcial | sem revisões periódicas de acessos nem revogação de sessões | convites com validade, suspender, remover com reatribuição; w1_clients 55/55 | — |
 | CAP-07 | parcial | sem preview de impacto, segunda aprovação nem alertas de grants excessivos | motivo obrigatório, antes/depois no audit (W1-08, W1-09) | — |
 | CAP-08 | parcial | convidados com acesso a uma peça por fazer | /clientes e grants por cliente; admin do cliente só o seu; w1_clients 55/55 | — |
@@ -566,7 +567,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | BIZ-04 | por começar | sem vista de negócio | finance.read planeada | — |
 | BIZ-05 | por começar | sem contratos | finance.manage planeada | — |
 | BIZ-06 | por começar | sem custo humano, ferramentas e margem | só custo de IA por execução (W4) | — |
-| BIZ-07 | por começar | sem pré-visualização como papel | access.preview planeada | — |
+| BIZ-07 | parcial | faixa persistente ao navegar a app como o papel (hoje é uma vista no separador Ver como); verificação com conta real | access_simulate por papel, só leitura e auditado (W1-16) | — |
 | BIZ-08 | por começar | sem cargos como modelos (job_title existe mas não pré-preenche grants) | workspace_access.job_title | — |
 | BIZ-09 | por começar | sem score de saúde | nada no código | — |
 
