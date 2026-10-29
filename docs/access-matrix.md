@@ -8,10 +8,10 @@ Fonte: PRD v2.1 §3 (papéis), §5A (TEAM-01…16), CAP-03/05/08. **PROPOSTA de 
 
 | Capacidade | agency_owner | agency_admin | agency_manager | agency_member |
 | --- | --- | --- | --- | --- |
-| `workspaces.read` | todos (auditado) | delegados | atribuídos | atribuídos |
-| `workspaces.create` / `archive` | ✓ | se delegado | — | — |
+| `workspaces.read` (lista `/clientes`) | todos, incluindo arquivados | só os atribuídos | — (troca pelos atribuídos no seletor) | — (idem) |
+| `workspaces.create` / `archive` | ✓ | — (delegar exige grants de âmbito org, por fazer) | — | — |
 | `team.invite` (staff interno) | ✓ | se delegado | — | — |
-| `team.manage` (atribuir staff a clientes) | ✓ | se delegado | — | — |
+| `team.manage` (atribuir staff a clientes, `agency_staff_assign`) | ✓ | — (idem) | — | — |
 | `permissions.manage` (org) | ✓ | limitado | — | — |
 | `costs.read_agency` | ✓ | se delegado | — | — |
 | `audit.read` (org) | ✓ | ✓ | — | — |
@@ -55,6 +55,7 @@ Um `agency_member` sem atribuição a um workspace **não vê nada** desse works
 | `engine_worker` nas tabelas | lê e escreve só as tabelas de pesquisa do motor; não lê `guioes`, `workspace_access`, `agent_jobs` nem configurações; guiões só por `worker_save_script` |||||
 | `team.invite` (client_staff, mesmo workspace) | ✓ | ✓ | — | — | — | — |
 | `team.manage` / `permissions.manage` (ws) | ✓ | dentro do teto | — | — | — | — |
+| regras de `member_update` / `member_remove` | nunca a si próprio; só quem está ao seu nível ou abaixo; staff da agência só pelo dono da agência; o último dono do cliente não perde o papel nem é removido (exceto pelo dono da agência) |||||
 | `settings.manage` / `integrations.manage` | ✓ | ✓ | — | — | — | — |
 
 Teto de autoridade: ninguém concede mais do que tem (R-12); um admin do cliente nunca cria papéis da agência nem convida staff da agência (TEAM-02, TEAM-04).

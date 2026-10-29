@@ -23,6 +23,8 @@ type Ctx = {
   ws: WorkspaceCtx | null;
   access: Access | null;
   can: (cap: string) => boolean;
+  /** Capacidades de âmbito agência (criar clientes, etc.). O servidor volta a verificar. */
+  canOrg: (cap: string) => boolean;
   setWorkspace: (id: string) => void;
   signInCode: (token: string) => Promise<boolean>;
   signOut: () => Promise<void>;
@@ -33,7 +35,7 @@ type Ctx = {
 };
 
 const SessionCtx = createContext<Ctx>({
-  mode: "loading", email: null, label: null, workspaces: [], ws: null, access: null, can: () => false,
+  mode: "loading", email: null, label: null, workspaces: [], ws: null, access: null, can: () => false, canOrg: () => false,
   setWorkspace: () => {}, signInCode: async () => false, signOut: async () => {}, refresh: async () => {}, error: "",
   dialogOpen: false, setDialogOpen: () => {},
 });
@@ -121,6 +123,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     ws,
     access,
     can: (cap) => !!ws?.capabilities.includes(cap),
+    canOrg: (cap) => mode === "user" && !!ctx?.agency?.some((a) => a.status === "active" && a.capabilities?.includes(cap)),
     setWorkspace: (id) => { store.set(WS_KEY, id); setWsId(id); },
     signInCode: async (token) => {
       const s = await checkToken(token.trim());

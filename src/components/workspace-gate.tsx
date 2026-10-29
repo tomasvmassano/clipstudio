@@ -13,7 +13,7 @@ import type { Access } from "@/lib/access";
  * `need` esconde a página a quem não tem a capacidade (o servidor recusaria de qualquer forma).
  */
 export function WorkspaceGate({ need, children }: { need?: string; children: (access: Access) => ReactNode }) {
-  const { mode, access, workspaces, email, can, error, refresh, signOut } = useSession();
+  const { mode, access, workspaces, email, can, canOrg, error, refresh, signOut } = useSession();
 
   if (mode === "loading") {
     return (
@@ -30,6 +30,16 @@ export function WorkspaceGate({ need, children }: { need?: string; children: (ac
         <AlertDescription className="flex flex-wrap items-center justify-between gap-3">
           <span>{error || "Precisas de entrar para ver isto."}</span>
           <Button size="sm" render={<Link href="/login" />} nativeButton={false}>Entrar</Button>
+        </AlertDescription>
+      </Alert>
+    );
+  }
+  if (mode === "user" && workspaces.length === 0 && canOrg("workspaces.create")) {
+    return (
+      <Alert>
+        <AlertDescription className="flex flex-wrap items-center justify-between gap-3">
+          <span>Ainda não há clientes ativos. Cria o primeiro para começar.</span>
+          <Button size="sm" render={<Link href="/clientes" />} nativeButton={false}>Ir para Clientes</Button>
         </AlertDescription>
       </Alert>
     );

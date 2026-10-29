@@ -25,9 +25,12 @@ import { useSession } from "@/components/session-provider";
 export function NavGroup({ label, items }: SidebarNavGroup) {
 	const pathname = usePathname();
 	const active = activeFor(pathname);
-	const { can, mode } = useSession();
+	const { can, canOrg, mode } = useSession();
 	// Antes de saber a sessão mostra tudo (evita saltos); depois só o que a capacidade permite.
-	const visible = items.filter((i) => !i.cap || mode === "loading" || can(i.cap));
+	const visible = items.filter((i) => {
+		if (i.orgCap) return mode !== "loading" && canOrg(i.orgCap);
+		return !i.cap || mode === "loading" || can(i.cap);
+	});
 	if (visible.length === 0) return null;
 	return (
 		<SidebarGroup>
