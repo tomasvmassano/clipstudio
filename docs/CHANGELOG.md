@@ -1,6 +1,15 @@
 # Changelog
 
-## 2026-10-29 (W1 Início e agência)
+## 2026-10-29 (W1 Espaços da agência e do cliente)
+
+- **W1-11 espaço da agência e espaço do cliente** (PRD §2, R-01, R-03, R-04; ADR-0018; migração `20261029121252_w1_single_client_staff`).
+  - A equipa da agência entra no **Painel da agência**, com menu próprio: Painel, Clientes, Caixa de entrada de todos os clientes e, em breve, equipa da agência, calendário de todos, custos, histórico e definições da agência.
+  - Carregar num cliente abre o **espaço do cliente** (`/c/<cliente>/…`) com o menu operacional e a administração desse cliente; "← Agência" volta ao painel e o seletor salta para outro cliente.
+  - A equipa de um cliente e o código de equipa vão direto para o seu cliente e não veem nada da agência; um cliente a que não tens acesso (ou que não existe) mostra a mesma mensagem.
+  - Links antigos (`/guioes`, `/tarefas?tab=…`) continuam a funcionar e abrem o último cliente.
+  - Convites: quem já pertence à equipa de um cliente não pode entrar na equipa de outro; o convite é cancelado e fica no histórico.
+  - Correção: a sessão por código já não termina por uma falha de rede a meio de uma navegação.
+  - Testes: `w1_invite_isolation` 23/23 (convite da agência ao cliente, do cliente à sua equipa, cliente único, staff da agência); E2E da estrutura 15/15; regressão do Início 15/16 (a única diferença é a esperada: `/agencia` com código passa a abrir o próprio cliente).
 
 - **W1-10 Início por cliente e painel da agência** (PRD FR-01-01, FR-01-02, FR-01-06 parcial, R-04; ADR-0017; migração `20261029114823_w1_dashboard`).
   - O Hoje passa a **Início**: escolhes o período (7, 30, 90 dias ou datas tuas) e cada número compara com o período anterior do mesmo tamanho. Cada número tem a explicação de como se calcula (toca no ⓘ).

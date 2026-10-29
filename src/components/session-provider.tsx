@@ -1,11 +1,12 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { checkToken, loadSession, saveSession } from "@/lib/data";
 import { LEGACY_CAPS, loadContext, type Access, type AppContext, type WorkspaceCtx } from "@/lib/access";
 import type { Session } from "@/lib/types";
+import { clientPath, stripWs, wsIdFromPath } from "@/lib/ws-path";
 
 /**
  * Sessão da app (ADR-0001):
@@ -20,11 +21,19 @@ type Ctx = {
   email: string | null;
   label: string | null;
   workspaces: WorkspaceCtx[];
+  /** Cliente aberto (vem do endereço /c/<cliente>); null no espaço da agência ou sem acesso. */
   ws: WorkspaceCtx | null;
+  /** Cliente pedido no endereço, mesmo que a pessoa não tenha acesso (para dizer "sem acesso"). */
+  wsRequested: string | null;
+  /** Nome da agência de quem é staff (null para a equipa de um cliente e para o código). */
+  agencyName: string | null;
+  /** Último cliente aberto neste browser que ainda está na lista (para os redirecionamentos). */
+  lastWs: () => string | null;
   access: Access | null;
   can: (cap: string) => boolean;
   /** Capacidades de âmbito agência (criar clientes, etc.). O servidor volta a verificar. */
   canOrg: (cap: string) => boolean;
+  /** Abre outro cliente, na mesma página se estiver dentro de um cliente. */
   setWorkspace: (id: string) => void;
   signInCode: (token: string) => Promise<boolean>;
   signOut: () => Promise<void>;
@@ -35,7 +44,8 @@ type Ctx = {
 };
 
 const SessionCtx = createContext<Ctx>({
-  mode: "loading", email: null, label: null, workspaces: [], ws: null, access: null, can: () => false, canOrg: () => false,
+  mode: "loading", email: null, label: null, workspaces: [], ws: null, wsRequested: null, agencyName: null, lastWs: () => null,
+  access: null, can: () => false, canOrg: () => false,
   setWorkspace: () => {}, signInCode: async () => false, signOut: async () => {}, refresh: async () => {}, error: "",
   dialogOpen: false, setDialogOpen: () => {},
 });
@@ -58,12 +68,14 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [mode, setMode] = useState<Mode>("loading");
   const [ctx, setCtx] = useState<AppContext | null>(null);
   const [legacy, setLegacy] = useState<Session | null>(null);
-  const [wsId, setWsId] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const params = useSearchParams();
   const router = useRouter();
+  const pathname = usePathname();
+  const wsId = wsIdFromPath(pathname);
 
+  const k = params.get("k");
   const resolve = useCallback(async () => {
     try {
       const { data } = await supabase().auth.getSession();
@@ -74,21 +86,16 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         setLegacy(null);
         saveSession(null); // quem entra com conta deixa de ter o código guardado neste browser
         setCodeCookie(false);
-        const saved = store.get(WS_KEY);
-        const list = c?.workspaces ?? [];
-        setWsId(list.find((w) => w.id === saved)?.id ?? list[0]?.id ?? null);
         setMode("user");
         return;
       }
-      const k = params.get("k");
       const s = k ? await checkToken(k) : loadSession();
-      if (k) history.replaceState(null, "", location.pathname);
+      if (k) history.replaceState(null, "", location.pathname);  // o código nunca fica no endereço
       if (s && (k || (await checkToken(s.token)))) {
         saveSession(s);
         setCodeCookie(true);
         setLegacy(s);
         setCtx(null);
-        setWsId(s.client_id);
         setMode("code");
         return;
       }
@@ -98,10 +105,13 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       setCtx(null);
       setMode("anon");
     } catch (e) {
+      // falha de rede ou pedido interrompido: não termina a sessão por código guardada (o servidor valida o código em cada pedido)
       setError((e as Error).message);
-      setMode("anon");
+      const saved = k ? null : loadSession();
+      if (saved) { setLegacy(saved); setCtx(null); setMode("code"); return; }
+      setMode((m) => (m === "loading" ? "anon" : m));
     }
-  }, [params]);
+  }, [k]);
 
   useEffect(() => {
     // INITIAL_SESSION dispara ao subscrever, por isso também cobre o primeiro carregamento.
@@ -113,6 +123,12 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
   const workspaces = useMemo(() => (mode === "code" && legacy ? [legacyWorkspace(legacy)] : ctx?.workspaces ?? []), [mode, legacy, ctx]);
   const ws = workspaces.find((w) => w.id === wsId) ?? null;
+  // lembra o último cliente aberto (só para escolher para onde redirecionar as rotas antigas)
+  useEffect(() => { if (ws) store.set(WS_KEY, ws.id); }, [ws]);
+  const lastWs = useCallback(() => {
+    const saved = store.get(WS_KEY);
+    return workspaces.find((w) => w.id === saved)?.id ?? workspaces[0]?.id ?? null;
+  }, [workspaces]);
   const access = useMemo<Access | null>(() => (ws ? { ws: ws.id, token: mode === "code" ? legacy?.token ?? null : null } : null), [ws, mode, legacy]);
 
   const value: Ctx = {
@@ -121,18 +137,21 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     label: mode === "code" ? legacy?.label ?? "Código de equipa" : ctx?.user.email ?? null,
     workspaces,
     ws,
+    wsRequested: wsId,
+    agencyName: mode === "user" ? ctx?.agency?.find((a) => a.status === "active")?.name ?? null : null,
+    lastWs,
     access,
     can: (cap) => !!ws?.capabilities.includes(cap),
     canOrg: (cap) => mode === "user" && !!ctx?.agency?.some((a) => a.status === "active" && a.capabilities?.includes(cap)),
-    setWorkspace: (id) => { store.set(WS_KEY, id); setWsId(id); },
+    setWorkspace: (id) => { store.set(WS_KEY, id); router.push(clientPath(id, wsId ? stripWs(pathname) : "")); },
     signInCode: async (token) => {
-      const s = await checkToken(token.trim());
+      const s = await checkToken(token.trim()).catch(() => null);
       if (!s) return false;
       saveSession(s);
       setCodeCookie(true);
       setLegacy(s);
-      setWsId(s.client_id);
       setMode("code");
+      router.push(clientPath(s.client_id));
       return true;
     },
     signOut: async () => {

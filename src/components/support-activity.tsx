@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { WsLink } from "@/components/ws-link";
 import { cn } from "@/lib/utils";
 import type { ComponentProps } from "react";
 import { Button } from "@/components/ui/button";
@@ -50,7 +50,7 @@ export function SupportActivity({
 				)}
 			</CardContent>
 			<div className="flex items-center justify-center">
-				<Button size="sm" variant="ghost" render={<Link href="/guioes" />} nativeButton={false}>Abrir guiões
+				<Button size="sm" variant="ghost" render={<WsLink href="/guioes" />} nativeButton={false}>Abrir guiões
 					<ArrowRightIcon aria-hidden="true" data-icon="inline-end" /></Button>
 			</div>
 		</Card>

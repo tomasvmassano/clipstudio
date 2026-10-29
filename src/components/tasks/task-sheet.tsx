@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { WsLink } from "@/components/ws-link";
 import { useCallback, useEffect, useState } from "react";
 import { BotIcon, Loader2Icon, RotateCwIcon, XIcon } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -193,11 +193,11 @@ export function TaskSheet({ access, id, people, tz, onClose, onChange }: {
                 ) : PRIORITY_LABEL[t.priority]}</dd>
                 {t.content && <>
                   <dt className="text-muted-foreground">Guião</dt>
-                  <dd><Link className="underline underline-offset-2" href={`/guioes?date=${t.content.date}`}>Guião {t.content.n}{t.content.tema ? ` · ${t.content.tema}` : ""}</Link></dd>
+                  <dd><WsLink className="underline underline-offset-2" href={`/guioes?date=${t.content.date}`}>Guião {t.content.n}{t.content.tema ? ` · ${t.content.tema}` : ""}</WsLink></dd>
                 </>}
                 {t.source && <>
                   <dt className="text-muted-foreground">Fonte</dt>
-                  <dd><Link className="underline underline-offset-2" href="/fontes">{t.source.titulo}</Link></dd>
+                  <dd><WsLink className="underline underline-offset-2" href="/fontes">{t.source.titulo}</WsLink></dd>
                 </>}
               </dl>
               {t.description && <p className="whitespace-pre-wrap text-sm">{t.description}</p>}

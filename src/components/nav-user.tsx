@@ -1,5 +1,6 @@
 "use client";
 
+import { WsLink } from "@/components/ws-link";
 import Link from "next/link";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -41,8 +42,8 @@ export function NavUser() {
 				</DropdownMenuGroup>
 				<DropdownMenuSeparator />
 				<DropdownMenuGroup>
-					<DropdownMenuItem render={<Link href="/teleprompter" />}><MonitorPlayIcon />Teleprompter</DropdownMenuItem>
-					<DropdownMenuItem render={<Link href="/agentes" />}><BotIcon />Sala dos agentes</DropdownMenuItem>
+					<DropdownMenuItem render={<WsLink href="/teleprompter" />}><MonitorPlayIcon />Teleprompter</DropdownMenuItem>
+					<DropdownMenuItem render={<WsLink href="/agentes" />}><BotIcon />Sala dos agentes</DropdownMenuItem>
 					<DropdownMenuItem render={<a href="https://claude.ai/artifact/CboQfT6zRXsRbxDxW7QsMg" target="_blank" rel="noopener" />}><FileTextIcon />PRD v2.1</DropdownMenuItem>
 				</DropdownMenuGroup>
 				<DropdownMenuSeparator />

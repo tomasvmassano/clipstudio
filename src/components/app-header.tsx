@@ -8,13 +8,15 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { AppBreadcrumbs } from "@/components/app-breadcrumbs";
 import { CustomSidebarTrigger } from "@/components/custom-sidebar-trigger";
-import { activeFor } from "@/components/app-shared";
+import { activeFor, agencyNavGroups, clientNavGroups } from "@/components/app-shared";
+import { stripWs, wsIdFromPath } from "@/lib/ws-path";
 import { NavUser } from "@/components/nav-user";
 import { Link2Icon, CheckIcon, SunMoonIcon } from "lucide-react";
 
 export function AppHeader() {
 	const pathname = usePathname();
-	const activeItem = activeFor(pathname);
+	const inClient = !!wsIdFromPath(pathname);
+	const activeItem = inClient ? activeFor(stripWs(pathname), clientNavGroups) : activeFor(pathname, agencyNavGroups);
 	const { setTheme, resolvedTheme } = useTheme();
 	const [copied, setCopied] = useState(false);
 
