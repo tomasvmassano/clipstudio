@@ -33,6 +33,11 @@ export type Guiao = {
   notas: string | null;
   lock_version: number;
   created_at: string;
+  // W2-07 (FR-02-03): metadados que não são texto do guião (não criam versão)
+  project_id?: string | null;
+  owner_id?: string | null;
+  tags?: string[];
+  platforms?: string[];
 };
 
 export type EditorialStatus = "draft" | "in_review" | "changes_requested" | "approved" | "rejected" | "archived";

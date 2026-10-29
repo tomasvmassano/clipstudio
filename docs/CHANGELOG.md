@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-29 (campanhas e filtros do teleprompter)
+
+- **W2-07** campanha, responsável, plataformas e etiquetas no guião (FR-02-03) e fila do teleprompter filtrável (FR-03-01), ADR-0029. Cada guião tem **Detalhes**: escolher ou criar uma campanha ou série, o responsável, as plataformas e etiquetas. Aparecem no cartão. Mudar isto não cria versão nem tira a aprovação; quem fica responsável recebe notificação. No teleprompter a fila filtra por campanha e por responsável ("só os meus"), por dispositivo. Nova capacidade `projects.manage` (dono, admin, gestor). Migração `20261029185412_w2_content_meta` (aditiva). Testes: SQL 30/30, E2E 2/2.
+
 ## 2026-10-29 (QC técnico dos vídeos)
 
 - **EDL-03** QC técnico em código no motor (numeiro-engine #7, ADR-0028): formato 1080×1920, fps, duração, áudio, loudness e pico, troços pretos e congelados, retângulo seguro do layout e distinção por pHash face à fonte e às irmãs. `python run.py qc video.mp4`. Limites por cliente, pressupostos até ao piloto. O motor passa a ter CI com os testes do worker e do QC (vídeos gerados por ffmpeg). Também no motor: alojamento no Hetzner por cloud-init (numeiro-engine #6).

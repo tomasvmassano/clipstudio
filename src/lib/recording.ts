@@ -14,6 +14,7 @@ export type SessionContent = {
   id: string; n: number; date: string; tema: string | null; formato: string | null;
   hooks: { text: string; mecanismo?: string }[]; corpo: string; cta: string | null;
   editorial_status: string; production_status: string; current_version_id: string | null;
+  project_id?: string | null; owner_id?: string | null; tags?: string[]; platforms?: string[];
 };
 export type SessionItem = {
   content_id: string; position: number; skipped: boolean; skipped_blocks: BlockKey[]; carried: boolean;

@@ -9,11 +9,14 @@ import type { BriefFields, ContentContext, ContentHistory, ContentPatch, Editori
 import { fetchContext, fetchSources, linkSource, saveBrief } from "@/lib/sources";
 import { fetchReferences, linkReference } from "@/lib/references";
 import { useSession } from "@/components/session-provider";
+import { fetchOwners, fetchProjects, saveProject, setContentMeta, type MetaPatch, type Owner, type Project, type ProjectList } from "@/lib/projects";
 
 /** O que o utilizador pode fazer aos guiões neste workspace (o servidor volta a verificar cada ação). */
 export type ScriptCaps = {
   create: boolean; edit: boolean; submit: boolean; approve: boolean; reject: boolean; archive: boolean; record: boolean; export: boolean; refs: boolean;
   comment: boolean;
+  /** gerir campanhas e séries */
+  projects: boolean;
 };
 
 /** Ações sobre um guião; cada uma devolve a linha atualizada e já a põe na lista. */
@@ -31,6 +34,11 @@ export type ScriptActions = {
   references: () => Promise<Reference[]>;
   linkRef: (id: string, refId: number, link: boolean) => Promise<ContentContext>;
   reload: () => Promise<void>;
+  /** Campanha, responsável, plataformas e etiquetas (W2-07): não cria versão. */
+  meta: (id: string, patch: MetaPatch) => Promise<Guiao>;
+  projects: (fresh?: boolean) => Promise<ProjectList>;
+  saveProject: (id: string | null, fields: Partial<Pick<Project, "name" | "kind" | "status" | "starts_on" | "ends_on">>) => Promise<ProjectList>;
+  owners: () => Promise<Owner[]>;
 };
 
 /** Guiões de um dia (mais os de dias anteriores por gravar), ao vivo. */
@@ -89,6 +97,7 @@ export function useScriptCaps(): ScriptCaps {
     export: can("scripts.export"),
     refs: can("references.read"),
     comment: can("review.comment"),
+    projects: can("projects.manage"),
   };
 }
 
@@ -104,6 +113,10 @@ export function useScriptActions(access: Access, put: (g: Guiao) => Guiao, reloa
       catch (e) { if ((e as { code?: string }).code === "PT409") await reload(); throw e; }
     },
     record: async (id, recorded) => put(await setProduction(access, id, recorded ? "recorded" : "not_started")),
+    meta: async (id, patch) => put(await setContentMeta(access, id, patch)),
+    projects: (fresh) => fetchProjects(access, fresh),
+    saveProject: (id, fields) => saveProject(access, id, fields),
+    owners: () => fetchOwners(access),
     duplicate: async (id) => put(await duplicateContent(access, id)),
     restore: async (id, versionId, lock) => put(await restoreVersion(access, id, versionId, lock)),
     history: (id: string) => fetchHistory(access, id),

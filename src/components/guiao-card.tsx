@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ArchiveIcon, CheckIcon, ChevronDownIcon, ChevronUpIcon, CopyIcon, ExternalLinkIcon, HistoryIcon, Loader2Icon, MessageSquareWarningIcon,
-  MessagesSquareIcon, MoreHorizontalIcon, NotebookTextIcon, PencilIcon, PlusIcon, SendIcon, Trash2Icon, UndoIcon, VideoIcon, XIcon,
+  MessagesSquareIcon, MoreHorizontalIcon, NotebookTextIcon, PencilIcon, PlusIcon, SendIcon, TagIcon, Trash2Icon, UndoIcon, UserIcon, VideoIcon, XIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +21,8 @@ import type { ScriptActions, ScriptCaps } from "@/components/use-guioes";
 import { HistorySheet } from "@/components/guiao-history";
 import { CommentsSheet } from "@/components/guiao-comments";
 import { BriefSheet } from "@/components/guiao-brief";
+import { DetailsSheet, metaNames, useMetaLists } from "@/components/guiao-details";
+import { KIND_LABEL, PLATFORMS } from "@/lib/projects";
 
 const MECH = ["pergunta", "contra", "numero", "ego", "confissao", "segredo"];
 
@@ -62,6 +64,9 @@ export function GuiaoCard({ g, carried, caps, actions, onError, startInEdit, ope
   const [briefOpen, setBriefOpen] = useState(false);
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [nComments, setNComments] = useState<number | undefined>(openComments);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const lists = useMetaLists(actions);
+  const names = metaNames(g, lists.projects, lists.owners);
 
   const st = g.editorial_status;
   const dead = st === "rejected" || st === "archived";
@@ -90,6 +95,10 @@ export function GuiaoCard({ g, carried, caps, actions, onError, startInEdit, ope
       {g.production_status === "cancelled" && <Badge variant="outline">cancelado</Badge>}
       {g.formato && <Badge variant="outline">{FORMATO_LABEL[g.formato] ?? g.formato}</Badge>}
       {g.tema && <Badge variant="secondary" className="max-w-[18rem] truncate">{g.tema}</Badge>}
+      {names.project && <Badge variant="outline" data-meta="project">{KIND_LABEL[names.project.kind]}: {names.project.name}</Badge>}
+      {g.owner_id && <Badge variant="outline" data-meta="owner"><UserIcon />{names.owner ?? "responsável"}</Badge>}
+      {(g.platforms ?? []).map((p) => <Badge key={p} variant="outline">{PLATFORMS.find((x) => x.v === p)?.l ?? p}</Badge>)}
+      {(g.tags ?? []).map((t) => <span key={t} className="text-muted-foreground">#{t}</span>)}
       {carried && <Badge variant="outline" className="border-amber-500/50 text-amber-600 dark:text-amber-400">por gravar de {g.date}</Badge>}
       {st === "draft" && g.approved_version_id && <span className="text-muted-foreground">tem uma versão anterior aprovada</span>}
       <span className="text-muted-foreground tabular-nums">~{dur}s</span>
@@ -213,6 +222,9 @@ export function GuiaoCard({ g, carried, caps, actions, onError, startInEdit, ope
               <Button size="sm" variant="ghost" onClick={() => setCommentsOpen(true)}>
                 <MessagesSquareIcon /> Comentários{nComments ? ` (${nComments})` : ""}
               </Button>
+              <Button size="sm" variant="ghost" onClick={() => setDetailsOpen(true)}>
+                <TagIcon /> Detalhes
+              </Button>
               <Button size="sm" variant="ghost" onClick={() => setBriefOpen(true)}>
                 <NotebookTextIcon /> Brief e fontes
               </Button>
@@ -241,6 +253,7 @@ export function GuiaoCard({ g, carried, caps, actions, onError, startInEdit, ope
         </div>
       </CardContent>
       <BriefSheet g={g} open={briefOpen} onOpenChange={setBriefOpen} actions={actions} canEdit={caps.edit && st !== "archived"} canRefs={caps.refs} />
+      {detailsOpen && <DetailsSheet g={g} open={detailsOpen} onOpenChange={setDetailsOpen} actions={actions} canEdit={caps.edit && st !== "archived"} canProjects={caps.projects} />}
       <CommentsSheet g={g} open={commentsOpen} onOpenChange={setCommentsOpen} onCount={setNComments} />
       <HistorySheet g={g} open={historyOpen} onOpenChange={setHistoryOpen} actions={actions} canRestore={caps.edit && st !== "archived"} onError={onError} />
     </Card>

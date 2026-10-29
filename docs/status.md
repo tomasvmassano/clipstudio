@@ -26,7 +26,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | PLAT-03 | P0 | bloqueado | depende de PLAT-01 e do publicador (PUB-01) | Fase B, publicação |
 | FR-01-02 | P0 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | Widgets configuráveis por função e por workspace; comparação temporal e explicaç |
 | FR-02-01 | P0 | parcial | sem eliminação definitiva com confirmação (só arquivo) | CRUD de guiões, duplicação, arquivo, recuperação e eliminação com confirmação. |
-| FR-03-01 | P0 | parcial | sem filtros por campanha e responsável | Fila de gravação por data, campanha e responsável, apenas conteúdos elegíveis; r |
+| FR-03-01 | P0 | parcial | verificação com conta real (R-15) | Fila de gravação por data, campanha e responsável, apenas conteúdos elegíveis; r |
 | FR-03-02 | P0 | parcial | sem blocos personalizados | Blocos identificados Hook 1, Hook 2, Body, CTA e personalizados; seleção e repet |
 | FR-04-01 | P0 | parcial | sem anexo; edição dos campos da fonte não confirmada | CRUD de fontes com URL, título, origem, data, idioma, autor, tags, categoria, re |
 | FR-04-02 | P0 | parcial | sem RSS nem integrações | Adicionar manualmente, por URL, RSS e integrações autorizadas; rastreio de data  |
@@ -65,7 +65,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | VAR-02 | P0 | parcial | layouts de S01 a S12 (equipa criativa); render real dos estilos | Catálogo de estilos por workspace |
 | FR-01-03 | P1 | parcial | sem "Minha fila" no Início; gravações e alertas fora da fila | Minha fila: tarefas, aprovações, gravações, prazos e alertas; clique abre objeto |
 | FR-01-04 | P1 | parcial | sem calendário compacto no Início | Calendário editorial compacto e atividade recente com ator e timestamp. |
-| FR-02-03 | P1 | parcial | faltam campanha, plataforma, responsável e tags no guião | Campos: título, cliente/workspace, campanha, tema, formato, plataforma, responsá |
+| FR-02-03 | P1 | parcial | título próprio (usa o tema); verificação com conta real (R-15) | Campos: título, cliente/workspace, campanha, tema, formato, plataforma, responsá |
 | FR-02-05 | P1 | parcial | sem ações em lote | Enviar para revisão, aprovar/rejeitar/pedir alterações com comentário obrigatóri |
 | FR-03-03 | P1 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | Espelhamento horizontal e vertical independentes; velocidade, fonte, line-height |
 | FR-03-04 | P1 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | Play/pause, scroll manual, fullscreen por gesto, atalhos configuráveis, controlo |
@@ -209,7 +209,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 |---|---|---|---|---|
 | FR-02-01 | parcial | sem eliminação definitiva com confirmação (só arquivo) | content_create/duplicate, arquivar/recuperar; w2_content 47/47; W2-02 | — |
 | FR-02-02 | feito |  | editor por blocos com autosave e indicador W2-02; content_save; comentários no cartão do guião (W2-06 content_comments (bloco, frase citada, versão, respostas, resolver), /c/[ws]/revisao; w2_review_comments 33/33; e2e/review.spec.ts 3/3; ADR-0025) | 2026-10-29 (E2E) |
-| FR-02-03 | parcial | faltam campanha, plataforma, responsável e tags no guião | guioes: título, cliente, tema, formato, data; fontes ligadas (content_sources) | — |
+| FR-02-03 | parcial | título próprio (usa o tema); verificação com conta real (R-15) | guioes: título, cliente, tema, formato, data; fontes ligadas (content_sources); campanha, responsável, plataformas, etiquetas (content_meta_set, projects; W2-07, ADR-0029); w2_content_meta 30/30; e2e/content-meta.spec.ts | — |
 | FR-02-04 | feito |  | editorial_status e production_status independentes; w2_content 47/47, w3_calendar 39/39 | — |
 | FR-02-05 | parcial | sem ações em lote | content_transition com motivo obrigatório na rejeição; W2-02; w2_content | — |
 | FR-02-06 | parcial | sem diff visual entre versões | content_history, content_restore_version, lock_version; guiao-history.tsx; W2-02 | — |
@@ -220,7 +220,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
-| FR-03-01 | parcial | sem filtros por campanha e responsável | recording_session_open, recording_queue_set; w2_teleprompter 52/52; W2-05 | — |
+| FR-03-01 | parcial | verificação com conta real (R-15) | recording_session_open, recording_queue_set; w2_teleprompter 52/52; W2-05; filtros por campanha e responsável na fila (W2-07, ADR-0029); e2e/content-meta.spec.ts | — |
 | FR-03-02 | parcial | sem blocos personalizados | blocos Hook/Body/CTA e takes (take_create/update); w2_teleprompter 52/52 | — |
 | FR-03-03 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | espelho H/V, velocidade, letra, entrelinha, margens, contraste; W2-05; E2E 28/28 (não versionado) | — |
 | FR-03-04 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | play/pause, scroll, ecrã inteiro por duplo toque, atalhos BT; teleprompter/prompter.tsx; W2-05 | — |

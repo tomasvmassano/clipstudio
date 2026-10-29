@@ -164,3 +164,13 @@ Estilo (`edit_styles`): `rascunho → ativo → rascunho`, qualquer um `→ arqu
 | ativar | `styles.manage` | layout com pelo menos uma camada e sem problemas | `edit.style_status` |
 | rascunho / arquivar | `styles.manage` | recusado se o preset atual usa o estilo | `edit.style_status` |
 | gravar preset | `styles.manage` | 1 a 12 saídas (`master`, `split_image_persona`, `split_attention`, `style`); estilos têm de estar ativos; fixa a versão de cada estilo; versão esperada (40001) | `edit.preset_saved` |
+
+
+## Metadados do guião e campanhas (W2-07, FR-02-03, FR-03-01)
+
+Campanha (`projects`): `ativa ↔ arquivada`. Arquivar não tira os guiões; só deixa de se poder escolher.
+
+| Ação | Capacidade | Regra | Evento |
+| --- | --- | --- | --- |
+| criar / mudar campanha | `projects.manage` | nome único no cliente; fim ≥ início | auditoria `project.created` / `project.updated` |
+| campanha, responsável, plataformas, etiquetas do guião | `scripts.edit` | campanha ativa do mesmo cliente; responsável com `scripts.edit`; não cria versão | `script.meta_changed`; notificação `script_assigned` |

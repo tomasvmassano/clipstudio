@@ -16,6 +16,7 @@ import {
   type BlockKey, type MarkKind, type PendingTake, type RecordingSession, type SessionItem, type TakeRow, type Timeline,
 } from "@/lib/recording";
 import { cn } from "@/lib/utils";
+import { fetchOwners, fetchProjects, KIND_LABEL, type Owner, type ProjectList } from "@/lib/projects";
 
 /*
  * Teleprompter (PRD M03): fila de gravação do dia partilhada entre dispositivos, blocos Hook/Body/CTA, takes,
@@ -43,7 +44,7 @@ function TeleprompterInner({ access }: { access: Access }) {
   const params = useSearchParams();
   const router = useRouter();
   const date = params.get("date") ?? todayDubai();
-  const { mode, can } = useSession();
+  const { mode, can, email } = useSession();
   const canTake = can("recording.confirm");
   const { prefs, update, keysFor, syncError } = useTpPrefs(mode === "user");
   const online = useSyncExternalStore(subscribeOnline, () => navigator.onLine, () => true);
@@ -193,8 +194,35 @@ function TeleprompterInner({ access }: { access: Access }) {
     return () => clearInterval(iv);
   }, [access, session]);
 
+  // ---------- filtros da fila (FR-03-01): por campanha e responsável, neste dispositivo ----------
+  type Filter = { project: string; owner: string };
+  const filterKey = `tp.filter.${access.ws}`;
+  const [filter, setFilterState] = useState<Filter>(() => {
+    try { return { project: "", owner: "", ...JSON.parse(localStorage.getItem(filterKey) ?? "{}") } as Filter; } catch { return { project: "", owner: "" }; }
+  });
+  const setFilter = (f: Filter) => { setFilterState(f); try { localStorage.setItem(filterKey, JSON.stringify(f)); } catch {} };
+  const [projects, setProjects] = useState<ProjectList | null>(null);
+  const [owners, setOwners] = useState<Owner[] | null>(null);
+  useEffect(() => {
+    let alive = true;
+    Promise.all([fetchProjects(access), fetchOwners(access)])
+      .then(([p, o]) => { if (alive) { setProjects(p); setOwners(o); } })
+      .catch(() => { if (alive) { setProjects({ can_manage: false, projects: [] }); setOwners([]); } });   // sem listas, a fila continua sem filtros
+    return () => { alive = false; };
+  }, [access]);
+  const me = owners?.find((o) => o.email === email)?.user_id ?? null;
+  const matches = useCallback((i: SessionItem) => {
+    const c = i.content;
+    if (filter.project === "none" ? !!c.project_id : filter.project && c.project_id !== filter.project) return false;
+    if (filter.owner === "none") return !c.owner_id;
+    if (filter.owner === "me") return !!me && c.owner_id === me;
+    return !filter.owner || c.owner_id === filter.owner;
+  }, [filter, me]);
+  const filtering = !!(filter.project || filter.owner);
+
   // ---------- fila ----------
-  const items = useMemo(() => session?.items ?? [], [session]);
+  const allItems = useMemo(() => session?.items ?? [], [session]);
+  const items = useMemo(() => allItems.filter(matches), [allItems, matches]);
   const playable = useMemo(() => items.filter((i) => !i.skipped && blocksOf(i.content).some((b) => !i.skipped_blocks.includes(b.key))), [items]);
 
   const saveQueue = useCallback(async (next: SessionItem[]) => {
@@ -206,16 +234,19 @@ function TeleprompterInner({ access }: { access: Access }) {
     } catch (e) { setError((e as Error).message); }
     finally { setBusy(false); }
   }, [access, session]);
+  // reordenar dentro da vista filtrada troca com o vizinho visível; a fila partilhada guarda-se inteira
   const move = (i: number, k: number) => {
     const j = i + k;
     if (j < 0 || j >= items.length) return;
-    const next = [...items];
-    [next[i], next[j]] = [next[j], next[i]];
+    const a = allItems.findIndex((x) => x.content_id === items[i].content_id);
+    const b = allItems.findIndex((x) => x.content_id === items[j].content_id);
+    const next = [...allItems];
+    [next[a], next[b]] = [next[b], next[a]];
     saveQueue(next);
   };
-  const toggleSkip = (it: SessionItem) => saveQueue(items.map((x) => (x.content_id === it.content_id ? { ...x, skipped: !x.skipped } : x)));
+  const toggleSkip = (it: SessionItem) => saveQueue(allItems.map((x) => (x.content_id === it.content_id ? { ...x, skipped: !x.skipped } : x)));
   const toggleBlock = (it: SessionItem, b: BlockKey) =>
-    saveQueue(items.map((x) => (x.content_id === it.content_id
+    saveQueue(allItems.map((x) => (x.content_id === it.content_id
       ? { ...x, skipped_blocks: x.skipped_blocks.includes(b) ? x.skipped_blocks.filter((y) => y !== b) : [...x.skipped_blocks, b] } : x)));
 
   const resume = useMemo(() => {
@@ -294,16 +325,37 @@ function TeleprompterInner({ access }: { access: Access }) {
         )}
         {session?.require_approval && <p className="text-sm text-neutral-400">Neste cliente só entram na fila guiões aprovados.</p>}
 
+        {session && allItems.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2 text-sm" role="group" aria-label="Filtrar a fila">
+            <select aria-label="Campanha" className="h-11 rounded-xl border border-neutral-700 bg-neutral-900 px-3" value={filter.project}
+              onChange={(e) => setFilter({ ...filter, project: e.target.value })}>
+              <option value="">Todas as campanhas</option>
+              <option value="none">Sem campanha</option>
+              {(projects?.projects ?? []).map((p) => <option key={p.id} value={p.id}>{KIND_LABEL[p.kind]} · {p.name}</option>)}
+            </select>
+            <select aria-label="Responsável" className="h-11 rounded-xl border border-neutral-700 bg-neutral-900 px-3" value={filter.owner}
+              onChange={(e) => setFilter({ ...filter, owner: e.target.value })}>
+              <option value="">Todos os responsáveis</option>
+              {me && <option value="me">Só os meus</option>}
+              <option value="none">Sem responsável</option>
+              {(owners ?? []).map((o) => <option key={o.user_id} value={o.user_id}>{o.label}</option>)}
+            </select>
+            {filtering && <Btn label="Limpar filtros" onClick={() => setFilter({ project: "", owner: "" })} />}
+            {filtering && <span className="text-neutral-400">{items.length} de {allItems.length} guiões</span>}
+          </div>
+        )}
         {loading && !session ? (
           <p className="text-neutral-400" aria-busy="true">A carregar a fila…</p>
-        ) : session && items.length === 0 ? (
+        ) : session && allItems.length === 0 ? (
           <p className="text-neutral-300">Não há guiões para gravar neste dia. Os guiões rejeitados e arquivados não entram na fila.</p>
+        ) : session && items.length === 0 ? (
+          <p className="text-neutral-300">Nenhum guião da fila corresponde aos filtros. <button type="button" className="underline" onClick={() => setFilter({ project: "", owner: "" })}>Limpar filtros</button></p>
         ) : session ? (
           <>
             <div className="flex flex-wrap items-center gap-2">
               {resume && <Btn on label={`Retomar no guião ${resume.n}${resume.block ? ` · ${blockLabel(resume.block)}` : ""} (${Math.round(resume.pct * 100)}%)`} onClick={() => start(resume.index, { pct: resume.pct, block: resume.block })} />}
               <Btn on={!resume} label={playable.length ? `Começar no guião ${playable[firstOpen]?.content.n ?? ""}` : "Nada para ler"} disabled={!playable.length} onClick={() => start(firstOpen)} />
-              <span className="text-sm text-neutral-400">{playable.length} na fila · {items.filter((i) => isRecorded(i.content.production_status)).length} gravados{busy ? " · a guardar…" : ""}</span>
+              <span className="text-sm text-neutral-400">{playable.length} na fila{filtering ? " filtrada" : ""} · {items.filter((i) => isRecorded(i.content.production_status)).length} gravados{busy ? " · a guardar…" : ""}</span>
             </div>
             <ol className="flex flex-col gap-2" aria-label="Fila de gravação">
               {items.map((it, i) => {
