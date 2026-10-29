@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-29 (W4 Motor)
+
+- **W4-03 dados do motor por cliente, fase expand** (PRD R-02, SCALE-07 parcial; ADR-0016; migrações `20261029111417_w4_engine_client_scope`, `20261029111654_w4_engine_client_fill`, `20261029111703_w4_engine_client_fill_nested`, `20261029111826_w4_engine_client_fill_definer`).
+  - Reels, temas, citações, análises, guiões gerados, meta e relatórios do motor passam a pertencer a um cliente; os dados atuais ficam no Numeiro.
+  - O motor (numeiro-engine) só lê e escreve no cliente da execução. Reels novos ficam ligados à conta do cliente e entram no Desempenho.
+  - Referências e Descobrir só usam reels e análises do próprio cliente, mesmo que a conta diga outra coisa.
+  - Até à fase contract, o mesmo reel ou tema em dois clientes dá erro em vez de misturar dados.
+  - Testes: `w4_engine_isolation` 20/20; regressão `w2_references` 36/36; motor `test_pgdb` 8/8 (Postgres local) e `test_worker` 19/19.
+
 ## 2026-10-29 (W1 Fundação, fecho)
 
 - **W1-09 histórico de ações** (PRD R-05, CAP-07 parcial, FR-15-06 parcial; ADR-0015; migração `20261029110013_w1_audit_list`).
