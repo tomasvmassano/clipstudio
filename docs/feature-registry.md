@@ -71,6 +71,7 @@ Estado: **ativo** (existe e é verificado no servidor por `authorize()`; também
 | `publishing.approve` | Aprovar publicação de originais (PUB-06) | A | ws, conta | W6 (CHG-003) | — |
 | `publishing.republish.approve` | Aprovar republicações (PUB-05/06) | A | ws, conta | W6 (CHG-003) | — |
 | `integrations.manage` | Settings (M15) | A | ws | W6 | — |
+| — (própria pessoa) | Perfil (M14) | todos com conta | user | ativo (W1-15) | `/perfil` e `/c/[ws]/perfil`: nome, fotografia, palavra-passe, verificação em dois passos, fuso, tema, cliente preferido, terminar sessões, histórico de segurança (`profile_update`, `my_security_log`, `security_event`); sem capacidade: cada pessoa só mexe no que é seu |
 | `settings.manage` | Settings | A | ws | ativo (parcial) | `/definicoes`: nome, @, fuso, moeda, logótipo (bucket privado `branding`), cor da marca, só gravar aprovados (`workspace_update`, `workspace_settings`); limite de tarefas por pessoa com `tasks.manage`; integrações, notificações, segurança e dados do M15 por fazer |
 
 Regras: ter `edit` não dá `approve` nem `publish` (CAP-04); uma feature flag ligada não concede acesso (CAP-09); toda a key nova entra aqui no mesmo PR em que nasce, senão o CI falha (PRD §34).

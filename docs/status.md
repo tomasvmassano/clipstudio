@@ -10,11 +10,11 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | Estado | Requisitos |
 |---|---|
-| feito | 18 |
+| feito | 19 |
 | parcial | 144 |
-| por começar | 97 |
+| por começar | 95 |
 | bloqueado | 3 |
-| adiado | 1 |
+| adiado | 2 |
 | **total** | **263** |
 
 ## Pendentes abertos (bloqueados primeiro, depois por prioridade)
@@ -40,8 +40,8 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-10-01 | P0 | parcial | sem módulo Custos; worker por alojar | Consumo de IA por agente, modelo, execução e workspace. |
 | FR-11-01 | P0 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | Calendário editorial por dia, semana e mês; drag and drop com validação. |
 | FR-11-02 | P0 | parcial | sem revisões nem publicações no calendário | Tarefas, gravações, revisões, publicações, responsáveis, deadlines e dependência |
-| FR-13-01 | P0 | parcial | envio real por email: falta o Tomás criar a conta Resend, verificar o domínio e pôr RESEND_API_KEY, INVITE_FROM e APP_URL no Vercel; até lá o link é copiado à mão | Convidar por email com expiração, aceitar/recusar, reenviar e revogar convite. |
-| FR-14-02 | P0 | parcial | sem perfil: idioma, fuso e notificações pessoais em falta | Idioma, timezone, tema, notificações e preferências do teleprompter. |
+| FR-14-01 | P0 | parcial | recuperação por email depende do SMTP do Supabase (limitado) até haver domínio (FR-13-01 adiado); verificação com a conta real do Tomás em produção | Nome, avatar, email verificado, password reset e MFA quando disponível. |
+| FR-14-02 | P0 | parcial | notificações pessoais e idioma (só PT-PT); preferências do teleprompter já existiam | Idioma, timezone, tema, notificações e preferências do teleprompter. |
 | FR-15-01 | P0 | parcial | sem idioma configurável (só PT-PT) | Geral: nome, logótipo, idioma, timezone, moeda e branding. |
 | FR-15-02 | P0 | parcial | sem categorias, estados e regras de aprovação configuráveis | Conteúdo: categorias, formatos, estados, templates, regras de aprovação e checkl |
 | TEAM-05 | P0 | parcial | âmbitos projeto e assigned_only não aplicados; sem modelos por profissão | Matriz de permissões configurável |
@@ -90,7 +90,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-13-03 | P1 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | Múltiplos workspaces por utilizador, papéis independentes e mudança de contexto  |
 | FR-13-04 | P1 | parcial | sem transferência de propriedade | Desativar membro, transferir propriedade, impedir remoção do último Owner. |
 | FR-13-05 | P1 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | Auditoria de convites, alterações de papéis e ações críticas. |
-| FR-14-04 | P1 | parcial | sem workspace preferido explícito (abre o último) | Lista de workspaces e seleção de workspace preferido. |
+| FR-14-03 | P1 | parcial | lista de sessões e dispositivos individuais | Sessões/dispositivos ativos, terminar sessões e histórico de segurança. |
 | FR-15-04 | P1 | parcial | sem política de aprovação de IA nas definições | IA: prompts, modelos, limites, permissões e política de aprovação. |
 | FR-16-03 | P1 | parcial | sem preferências de notificação; deep links não confirmados para todos os tipos | Inbox de notificações, marcar como lida, deep links e preferências. |
 | FR-16-04 | P1 | parcial | sem notificações de integrações | Menções, atribuições, aprovações, falhas de automação e integrações. |
@@ -333,7 +333,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
-| FR-13-01 | parcial | envio real por email: falta o Tomás criar a conta Resend, verificar o domínio e pôr RESEND_API_KEY, INVITE_FROM e APP_URL no Vercel; até lá o link é copiado à mão | invite_member, revoke_invitation, accept_invitations, expiração 14 dias; w1_team 21/21; W1-14 link com token, reenviar, recusar, expirados e recusados na lista; w1_invite_delivery 25/25; e2e/invites.spec.ts 5/5; ADR-0023 | 2026-10-29 (E2E) |
+| FR-13-01 | adiado | Decisão do Tomás, 29/10: o envio real por email fica para quando houver domínio (por decidir). Falta conta Resend, domínio verificado, RESEND_API_KEY, INVITE_FROM e APP_URL no Vercel; até lá o link é copiado à mão | invite_member, revoke_invitation, accept_invitations, expiração 14 dias; w1_team 21/21; W1-14 link com token, reenviar, recusar, expirados e recusados na lista; w1_invite_delivery 25/25; e2e/invites.spec.ts 5/5; ADR-0023 | 2026-10-29 (E2E) |
 | FR-13-02 | feito |  | papéis workspace_owner..viewer + role_capabilities; w1_isolation 38/38, w1_permissions 35/35 | — |
 | FR-13-03 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | workspace_access por pessoa, workspace-switcher; W1-03, W1-11 | — |
 | FR-13-04 | parcial | sem transferência de propriedade | member_update suspender, último dono protegido (_last_client_owner); w1_clients 55/55 | — |
@@ -344,10 +344,10 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
-| FR-14-01 | por começar | sem página /perfil; sem avatar, reset de password e MFA | nada em src/app (só login) | — |
-| FR-14-02 | parcial | sem perfil: idioma, fuso e notificações pessoais em falta | preferências do teleprompter e theme-switcher | — |
-| FR-14-03 | por começar | sem sessões/dispositivos nem histórico de segurança | nada no código | — |
-| FR-14-04 | parcial | sem workspace preferido explícito (abre o último) | workspace-switcher; my_context | — |
+| FR-14-01 | parcial | recuperação por email depende do SMTP do Supabase (limitado) até haver domínio (FR-13-01 adiado); verificação com a conta real do Tomás em produção | W1-15 /perfil: nome, fotografia, email verificado, mudar e recuperar palavra-passe, MFA TOTP aplicado no servidor (_mfa_ok); w1_profile_mfa 24/24; e2e/profile.spec.ts 3/3; ADR-0024 | 2026-10-29 (E2E) |
+| FR-14-02 | parcial | notificações pessoais e idioma (só PT-PT); preferências do teleprompter já existiam | preferências do teleprompter e theme-switcher; fuso e tema no perfil (W1-15) | — |
+| FR-14-03 | parcial | lista de sessões e dispositivos individuais | terminar sessão em todos os dispositivos e histórico de segurança (W1-15, my_security_log) | — |
+| FR-14-04 | feito |  | workspace-switcher; my_context; cliente preferido no perfil, usado ao entrar (W1-15); e2e/profile.spec.ts | 2026-10-29 (E2E) |
 | FR-14-05 | por começar | sem exportação nem eliminação dos próprios dados | nada no código | — |
 
 ## M15 — Settings

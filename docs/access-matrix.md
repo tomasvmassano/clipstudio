@@ -60,6 +60,7 @@ Um `agency_member` sem atribuição a um workspace **não vê nada** desse works
 | Convites (W1-11) | equipa de cliente só convida para o seu cliente, nunca staff da agência nem acima do seu papel; uma pessoa da equipa de um cliente só pertence a um cliente (convite para outro é cancelado e registado) |||||
 | Equipa da agência (W1-13) | ver: dono e admin da agência; convidar, mudar papel, suspender, atribuir: só o dono; ninguém se altera a si próprio; dono protegido; cada pessoa mostra só os clientes que quem vê pode ver; equipa de cliente e membros da agência sem `team.read` recusados (42501) |||||
 | `team.invite` (client_staff, mesmo workspace) | ✓ | ✓ | — | — | — | — |
+| Perfil (W1-15) | cada pessoa só lê e muda o seu (RPCs com `auth.uid()`; tabela fechada); avatar só na pasta `<uid>/`; cliente preferido só entre os seus; com MFA ligado, sessão sem código (aal1) não passa em `_authorize` nem `_org_can` |||||
 | Enviar/reenviar convite (W1-14) | quem tem `team.invite` no espaço do convite (cliente) ou na agência (convites da agência); dono da agência em todos; outro cliente 42501/403; anónimo 42501 |||||
 | Abrir ou recusar pelo link (W1-14) | qualquer pessoa com o token do email, sem conta; aceitar exige entrar com o email do convite (confirmado); token errado não revela nada |||||
 | `team.manage` / `permissions.manage` (ws) | ✓ | dentro do teto | — | — | — | — |

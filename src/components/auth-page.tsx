@@ -16,7 +16,7 @@ import { friendlyError } from "@/lib/access";
 import { safeNext } from "@/lib/safe-next";
 
 /** Bloco efferd auth-5 adaptado: email primeiro, depois palavra-passe (entrar ou criar), Google só se estiver ativo. */
-type Step = "email" | "password" | "signup" | "code" | "sent";
+type Step = "email" | "password" | "signup" | "code" | "sent" | "mfa" | "reset_sent";
 
 function authError(msg: string): string {
 	const m = msg.toLowerCase();
@@ -34,12 +34,13 @@ function authError(msg: string): string {
 export function AuthPage() {
 	const params = useSearchParams();
 	const router = useRouter();
-	const { mode, signInCode } = useSession();
+	const { mode, signInCode, mfaRequired, refresh, signOut } = useSession();
 	const next = useMemo(() => safeNext(params.get("next")), [params]);
 	const [step, setStep] = useState<Step>("email");
 	const [email, setEmail] = useState(() => params.get("email") ?? "");
 	const [password, setPassword] = useState("");
 	const [code, setCode] = useState("");
+	const [otp, setOtp] = useState("");
 	const [busy, setBusy] = useState(false);
 	const [error, setError] = useState(() => (params.get("erro") ? authError(params.get("erro")!) : ""));
 	const [google, setGoogle] = useState(false);
@@ -52,7 +53,11 @@ export function AuthPage() {
 		if (err) queueMicrotask(() => setError(authError(err)));
 	}, []);
 
-	useEffect(() => { if (mode === "user" || mode === "code") router.replace(next); }, [mode, next, router]);
+	useEffect(() => {
+		// com MFA ativo a sessão só serve depois do código (o servidor recusa tudo até lá)
+		if (mode === "user" && mfaRequired) { queueMicrotask(() => setStep("mfa")); return; }
+		if (mode === "user" || mode === "code") router.replace(next);
+	}, [mode, mfaRequired, next, router]);
 
 	// Nada de botões decorativos: o Google só aparece quando o fornecedor está ligado no Supabase.
 	useEffect(() => {
@@ -84,12 +89,29 @@ export function AuthPage() {
 				else if (!data.session) setStep("sent");
 			} else if (step === "code") {
 				if (!(await signInCode(code))) setError("Código inválido. Confirma com quem gere a equipa.");
+			} else if (step === "mfa") {
+				const { data: f, error: fe } = await sb.auth.mfa.listFactors();
+				const factor = f?.totp?.find((x) => x.status === "verified");
+				if (fe || !factor) { setError("Não encontrei a app de autenticação desta conta. Sai e entra de novo."); return; }
+				const { error } = await sb.auth.mfa.challengeAndVerify({ factorId: factor.id, code: otp.replace(/\s/g, "") });
+				if (error) setError(error.message.toLowerCase().includes("invalid") ? "Código errado ou expirado. Usa o código que está agora na app." : authError(error.message));
+				else await refresh();
 			}
 		} catch (err) {
 			setError(authError((err as Error).message));
 		} finally {
 			setBusy(false);
 		}
+	};
+
+	const forgot = async () => {
+		if (!email.trim()) { setError("Escreve o teu email primeiro."); return; }
+		setBusy(true); setError("");
+		const { error } = await supabase().auth.resetPasswordForEmail(email.trim(), {
+			redirectTo: `${location.origin}/auth/callback?next=${encodeURIComponent("/perfil?recuperar=1")}`,
+		});
+		setBusy(false);
+		if (error) setError(authError(error.message)); else setStep("reset_sent");
 	};
 
 	const withGoogle = async () => {
@@ -104,6 +126,8 @@ export function AuthPage() {
 		signup: "Criar conta",
 		code: "Código de equipa",
 		sent: "Confirma o teu email",
+		mfa: "Verificação em dois passos",
+		reset_sent: "Vê o teu email",
 	}[step];
 	const subtitle = {
 		email: "Cada pessoa entra com a sua conta e vê só os clientes a que tem acesso.",
@@ -111,6 +135,8 @@ export function AuthPage() {
 		signup: `Usa o email do convite (${email}). Sem convite, a conta fica sem clientes.`,
 		code: "Acesso de transição para a equipa do cliente, até cada pessoa ter a sua conta.",
 		sent: `Enviámos um link para ${email}. Abre-o uma vez, neste browser. Depois disso entras só com a palavra-passe.`,
+		mfa: "Escreve o código de 6 dígitos da tua app de autenticação.",
+		reset_sent: `Se ${email} tiver conta, recebe um link para escolher uma palavra-passe nova. Abre-o neste browser.`,
 	}[step];
 
 	return (
@@ -159,8 +185,8 @@ export function AuthPage() {
 						</>
 					)}
 
-					{step === "sent" ? (
-						<Button className="w-full" variant="outline" onClick={() => go("password")}>Já confirmei, entrar</Button>
+					{step === "sent" || step === "reset_sent" ? (
+						<Button className="w-full" variant="outline" onClick={() => go("password")}>{step === "sent" ? "Já confirmei, entrar" : "Voltar a entrar"}</Button>
 					) : (
 						<form className="space-y-2" onSubmit={submit}>
 							{step === "email" && (
@@ -196,17 +222,36 @@ export function AuthPage() {
 									</InputGroup>
 								</>
 							)}
-							<Button className="w-full" type="submit" disabled={busy || (step === "email" ? !email.trim() : step === "code" ? !code.trim() : !password)}>
+							{step === "mfa" && (
+								<>
+									<label className="text-start text-muted-foreground text-xs" htmlFor="otp">Código da app</label>
+									<InputGroup>
+										<InputGroupInput id="otp" autoFocus inputMode="numeric" autoComplete="one-time-code" placeholder="123456" maxLength={8} value={otp} onChange={(e) => setOtp(e.target.value)} />
+										<InputGroupAddon align="inline-start"><KeyRoundIcon /></InputGroupAddon>
+									</InputGroup>
+								</>
+							)}
+							<Button className="w-full" type="submit" disabled={busy || (step === "email" ? !email.trim() : step === "code" ? !code.trim() : step === "mfa" ? otp.replace(/\s/g, "").length < 6 : !password)}>
 								{busy && <Loader2Icon className="animate-spin" data-icon="inline-start" />}
-								{{ email: "Continuar com email", password: "Entrar", signup: "Criar conta", code: "Entrar com código" }[step]}
+								{{ email: "Continuar com email", password: "Entrar", signup: "Criar conta", code: "Entrar com código", mfa: "Verificar" }[step]}
 							</Button>
 						</form>
 					)}
 
 					<div className="flex flex-col gap-1 text-sm text-muted-foreground">
 						{step === "password" && (
-							<button type="button" className="text-start underline underline-offset-4 hover:text-primary" onClick={() => go("signup")}>
-								Ainda não tenho conta, criar uma
+							<>
+								<button type="button" className="text-start underline underline-offset-4 hover:text-primary" disabled={busy} onClick={forgot}>
+									Esqueci-me da palavra-passe
+								</button>
+								<button type="button" className="text-start underline underline-offset-4 hover:text-primary" onClick={() => go("signup")}>
+									Ainda não tenho conta, criar uma
+								</button>
+							</>
+						)}
+						{step === "mfa" && (
+							<button type="button" className="text-start underline underline-offset-4 hover:text-primary" onClick={() => void signOut()}>
+								Sair e entrar com outra conta
 							</button>
 						)}
 						{step === "signup" && (

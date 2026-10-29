@@ -3,8 +3,8 @@ import { as, expect, expectNoCrash, settle } from "./helpers";
 
 // QA-16, R-15: cada rota principal abre por URL direta e refresh, sem página de erro e sem erros na consola.
 const CLIENT = ["", "/caixa", "/guioes", "/tarefas", "/calendario", "/teleprompter", "/fontes", "/referencias", "/desempenho",
-  "/agentes", "/agentes/configuracao", "/equipa", "/permissoes", "/historico", "/definicoes"];
-const AGENCY = ["/", "/clientes", "/caixa", "/equipa-agencia"];
+  "/agentes", "/agentes/configuracao", "/equipa", "/permissoes", "/historico", "/definicoes", "/perfil"];
+const AGENCY = ["/", "/clientes", "/caixa", "/equipa-agencia", "/perfil"];
 
 for (const role of ["owner", "clientA"] as const) {
   const t = as(role);

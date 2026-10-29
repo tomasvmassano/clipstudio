@@ -31,6 +31,10 @@ type Ctx = {
   lastWs: () => string | null;
   /** Motivo, se aceitar os convites deste login falhou. */
   inviteError: string | null;
+  /** Perfil da própria pessoa (nome, avatar, fuso, tema, cliente preferido). */
+  profile: AppContext["user"] | null;
+  /** Sessão com MFA por passar: a app manda para o passo do código. */
+  mfaRequired: boolean;
   access: Access | null;
   can: (cap: string) => boolean;
   /** Capacidades de âmbito agência (criar clientes, etc.). O servidor volta a verificar. */
@@ -46,7 +50,7 @@ type Ctx = {
 };
 
 const SessionCtx = createContext<Ctx>({
-  mode: "loading", email: null, label: null, workspaces: [], ws: null, wsRequested: null, agencyName: null, lastWs: () => null, inviteError: null,
+  mode: "loading", email: null, label: null, workspaces: [], ws: null, wsRequested: null, agencyName: null, lastWs: () => null, inviteError: null, profile: null, mfaRequired: false,
   access: null, can: () => false, canOrg: () => false,
   setWorkspace: () => {}, signInCode: async () => false, signOut: async () => {}, refresh: async () => {}, error: "",
   dialogOpen: false, setDialogOpen: () => {},
@@ -118,7 +122,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // INITIAL_SESSION dispara ao subscrever, por isso também cobre o primeiro carregamento.
     const { data } = supabase().auth.onAuthStateChange((evt) => {
-      if (evt === "INITIAL_SESSION" || evt === "SIGNED_IN" || evt === "SIGNED_OUT" || evt === "USER_UPDATED") void resolve();
+      if (evt === "INITIAL_SESSION" || evt === "SIGNED_IN" || evt === "SIGNED_OUT" || evt === "USER_UPDATED" || evt === "MFA_CHALLENGE_VERIFIED") void resolve();
     });
     return () => data.subscription.unsubscribe();
   }, [resolve]);
@@ -127,22 +131,33 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const ws = workspaces.find((w) => w.id === wsId) ?? null;
   // lembra o último cliente aberto (só para escolher para onde redirecionar as rotas antigas)
   useEffect(() => { if (ws) store.set(WS_KEY, ws.id); }, [ws]);
+  // cliente preferido do perfil (FR-14-04) primeiro, depois o último aberto neste browser
+  const preferred = ctx?.user.preferred_workspace ?? null;
   const lastWs = useCallback(() => {
     const saved = store.get(WS_KEY);
-    return workspaces.find((w) => w.id === saved)?.id ?? workspaces[0]?.id ?? null;
-  }, [workspaces]);
+    return workspaces.find((w) => w.id === preferred)?.id ?? workspaces.find((w) => w.id === saved)?.id ?? workspaces[0]?.id ?? null;
+  }, [workspaces, preferred]);
+  // MFA por passar: o servidor já recusa tudo; a app leva ao passo do código em vez de mostrar "sem acesso"
+  const mfaRequired = mode === "user" && !!ctx?.mfa_required;
+  useEffect(() => {
+    if (mfaRequired && !pathname.startsWith("/login") && !pathname.startsWith("/convite")) {
+      router.replace(`/login?mfa=1&next=${encodeURIComponent(pathname)}`);
+    }
+  }, [mfaRequired, pathname, router]);
   const access = useMemo<Access | null>(() => (ws ? { ws: ws.id, token: mode === "code" ? legacy?.token ?? null : null } : null), [ws, mode, legacy]);
 
   const value: Ctx = {
     mode,
     email: ctx?.user.email ?? null,
-    label: mode === "code" ? legacy?.label ?? "Código de equipa" : ctx?.user.email ?? null,
+    label: mode === "code" ? legacy?.label ?? "Código de equipa" : ctx?.user.display_name || ctx?.user.email || null,
     workspaces,
     ws,
     wsRequested: wsId,
     agencyName: mode === "user" ? ctx?.agency?.find((a) => a.status === "active")?.name ?? null : null,
     lastWs,
     inviteError: ctx?.invite_error ?? null,
+    profile: mode === "user" ? ctx?.user ?? null : null,
+    mfaRequired,
     access,
     can: (cap) => !!ws?.capabilities.includes(cap),
     canOrg: (cap) => mode === "user" && !!ctx?.agency?.some((a) => a.status === "active" && a.capabilities?.includes(cap)),

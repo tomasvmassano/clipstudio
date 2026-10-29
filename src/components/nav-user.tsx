@@ -2,7 +2,9 @@
 
 import { WsLink } from "@/components/ws-link";
 import Link from "next/link";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useEffect, useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { avatarUrl } from "@/lib/profile";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -13,13 +15,15 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useSession } from "@/components/session-provider";
-import { LogInIcon, MonitorPlayIcon, BotIcon, FileTextIcon, LogOutIcon } from "lucide-react";
+import { LogInIcon, MonitorPlayIcon, BotIcon, FileTextIcon, LogOutIcon, UserRoundIcon } from "lucide-react";
 import { ROLE_LABEL } from "@/lib/access";
 
 const initials = (s: string) => s.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase()).join("") || "?";
 
 export function NavUser() {
-	const { mode, label, ws, signOut } = useSession();
+	const { mode, label, ws, signOut, profile } = useSession();
+	const [img, setImg] = useState<string | null>(null);
+	useEffect(() => { let alive = true; avatarUrl(profile?.avatar_path).then((u) => { if (alive) setImg(u); }); return () => { alive = false; }; }, [profile?.avatar_path]);
 	const signed = mode === "user" || mode === "code";
 	const name = signed ? label ?? "" : "Sem sessão";
 	const sub = signed ? (ws ? `${ws.name} · ${ROLE_LABEL[ws.role] ?? ws.role}` : "Sem workspace") : "Entra para continuar";
@@ -27,14 +31,14 @@ export function NavUser() {
 		<DropdownMenu>
 			<DropdownMenuTrigger render={<button type="button" className="rounded-full focus-visible:outline-2 focus-visible:outline-ring" aria-label="Menu da conta" />}>
 				<Avatar className="size-8 cursor-pointer">
-					<AvatarFallback className="text-xs">{signed ? initials(name) : "?"}</AvatarFallback>
+					{img && <AvatarImage src={img} alt="" />}<AvatarFallback className="text-xs">{signed ? initials(name) : "?"}</AvatarFallback>
 				</Avatar>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="end" className="w-60">
 				<DropdownMenuGroup>
 					<DropdownMenuLabel className="pointer-events-none flex items-center gap-2">
 						<Avatar className="isolate size-8">
-							<AvatarFallback className="text-xs">{signed ? initials(name) : "?"}</AvatarFallback>
+							{img && <AvatarImage src={img} alt="" />}<AvatarFallback className="text-xs">{signed ? initials(name) : "?"}</AvatarFallback>
 						</Avatar>
 						<div className="min-w-0">
 							<span className="font-medium text-foreground">{name}</span>
@@ -44,6 +48,7 @@ export function NavUser() {
 				</DropdownMenuGroup>
 				<DropdownMenuSeparator />
 				<DropdownMenuGroup>
+					{mode === "user" && <DropdownMenuItem render={<WsLink href="/perfil" />}><UserRoundIcon />Perfil</DropdownMenuItem>}
 					<DropdownMenuItem render={<WsLink href="/teleprompter" />}><MonitorPlayIcon />Teleprompter</DropdownMenuItem>
 					<DropdownMenuItem render={<WsLink href="/agentes" />}><BotIcon />Sala dos agentes</DropdownMenuItem>
 					<DropdownMenuItem render={<a href="https://claude.ai/artifact/CboQfT6zRXsRbxDxW7QsMg" target="_blank" rel="noopener" />}><FileTextIcon />PRD v2.1</DropdownMenuItem>
