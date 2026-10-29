@@ -45,7 +45,7 @@ function GuioesInner({ access }: { access: Access }) {
     para: ok.length,
     val: ok.filter((g) => g.editorial_status === "approved").length,
     rever: ok.filter((g) => toReview(g.editorial_status)).length,
-    grav: ok.filter((g) => g.production_status === "recorded").length,
+    grav: ok.filter((g) => ["recorded", "editing", "ready", "published"].includes(g.production_status)).length,
     rej: day.filter((g) => g.editorial_status === "rejected").length,
     min: Math.round(ok.reduce((t, g) => t + (words(g.corpo) + words(g.hooks[0]?.text)) / WPS, 0) / 60),
   };
@@ -55,7 +55,7 @@ function GuioesInner({ access }: { access: Access }) {
     if (filter === "aprovados") return g.editorial_status === "approved";
     if (filter === "rejeitados") return g.editorial_status === "rejected";
     if (filter === "arquivados") return g.editorial_status === "archived";
-    if (filter === "gravados") return g.production_status === "recorded";
+    if (filter === "gravados") return ["recorded", "editing", "ready", "published"].includes(g.production_status);
     return g.editorial_status !== "archived";
   });
 

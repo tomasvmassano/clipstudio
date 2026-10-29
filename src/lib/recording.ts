@@ -25,6 +25,9 @@ export type RecordingSession = {
   require_approval: boolean; items: SessionItem[];
 };
 
+/** Já gravado (inclui em edição, pronto e publicado). */
+export const isRecorded = (s: string) => ["recorded", "editing", "ready", "published"].includes(s);
+
 export type Block = { key: BlockKey; label: string; text: string };
 
 /** Blocos de um guião pela ordem de gravação: Hook 1..N, Body, CTA (se existir). */

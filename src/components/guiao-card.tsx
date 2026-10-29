@@ -14,6 +14,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { PRODUCTION_LABEL } from "@/lib/calendar";
 import { recordable, words } from "@/lib/data";
 import { EDITORIAL_LABEL, FORMATO_LABEL, WPS, type EditorialStatus, type Guiao, type Hook } from "@/lib/types";
 import type { ScriptActions, ScriptCaps } from "@/components/use-guioes";
@@ -59,7 +60,8 @@ export function GuiaoCard({ g, carried, caps, actions, onError, startInEdit }: P
 
   const st = g.editorial_status;
   const dead = st === "rejected" || st === "archived";
-  const recorded = g.production_status === "recorded";
+  const recorded = ["recorded", "editing", "ready", "published"].includes(g.production_status);
+  const toggleable = ["not_started", "scheduled", "recorded"].includes(g.production_status);
   const dur = Math.round((words(g.corpo) + words(g.hooks[0]?.text) + words(g.cta)) / WPS);
 
   const run = async (fn: () => Promise<unknown>) => {
@@ -78,7 +80,9 @@ export function GuiaoCard({ g, carried, caps, actions, onError, startInEdit }: P
   const meta = (
     <div className="flex flex-wrap items-center gap-1.5 text-xs">
       <Badge variant="outline" className={STATUS_STYLE[st]}>{EDITORIAL_LABEL[st]}</Badge>
-      {recorded && <Badge className="bg-emerald-600 text-white">gravado</Badge>}
+      {recorded && <Badge className="bg-emerald-600 text-white">{PRODUCTION_LABEL[g.production_status].toLowerCase()}</Badge>}
+      {g.production_status === "scheduled" && <Badge variant="outline">agendado</Badge>}
+      {g.production_status === "cancelled" && <Badge variant="outline">cancelado</Badge>}
       {g.formato && <Badge variant="outline">{FORMATO_LABEL[g.formato] ?? g.formato}</Badge>}
       {g.tema && <Badge variant="secondary" className="max-w-[18rem] truncate">{g.tema}</Badge>}
       {carried && <Badge variant="outline" className="border-amber-500/50 text-amber-600 dark:text-amber-400">por gravar de {g.date}</Badge>}
@@ -196,7 +200,7 @@ export function GuiaoCard({ g, carried, caps, actions, onError, startInEdit }: P
                   <PencilIcon /> Editar
                 </Button>
               )}
-              {recordable(g) && caps.record && (
+              {recordable(g) && caps.record && toggleable && (
                 <Button size="sm" variant="ghost" disabled={busy} onClick={() => run(() => actions.record(g.id, !recorded))}>
                   <VideoIcon /> {recorded ? "Desmarcar gravado" : "Marcar gravado"}
                 </Button>

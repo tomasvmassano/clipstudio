@@ -24,17 +24,21 @@ approved | rejected → archived   (regras)
 | approved → in_review | `scripts.approve` | retirar aprovação | `script.unapproved` |
 | * → archived, archived → (estado anterior) | `scripts.delete` | sem eliminação definitiva | `script.archived`, `script.restored` |
 
-## Produção (por conteúdo)
+## Produção (por conteúdo, W3-02)
 
-`not_started → scheduled → recording → recorded → editing → ready → published` ou `cancelled`.
+`not_started → scheduled → recorded → editing → ready → published` (publicação no W6), `cancelled` a partir de qualquer estado menos publicado. `recording` fica reservado para a sessão aberta.
 
-| De → para | Capacidade | Regra |
-| --- | --- | --- |
-| scheduled → recording | `recording.use` | abrir o teleprompter numa sessão |
-| recording → recorded | `recording.confirm` | **só com confirmação explícita**; ler 80% gera só a telemetria `viewed_80_percent` (PRD §20) |
-| recorded → recording | `recording.confirm` | desmarcar (take falhado) |
+| De → para | Capacidade | Regra | Evento |
+| --- | --- | --- | --- |
+| not_started ↔ scheduled | `calendar.schedule` | não para rejeitados/arquivados | `production.scheduled` / `production.not_started` |
+| not_started/scheduled → recorded | `recording.confirm` | **só com confirmação explícita**; ler 80% gera só a telemetria `recording.viewed_80` (PRD §20); exige aprovado se o cliente o pedir | `recording.confirmed` |
+| recorded → not_started | `recording.confirm` | desfazer (take falhado) | `recording.undone` |
+| recorded/ready → editing, editing → recorded | `production.update` | — | `production.editing` / `production.recorded` |
+| editing → ready | `production.update` | — | `production.ready` |
+| * → cancelled, cancelled → not_started | `calendar.schedule` | não publicado | `production.cancelled` / `production.not_started` |
+| mudar de dia | `calendar.schedule` | não para o passado (fuso do cliente), até +400 dias, `lock_version` (PT409), não arquivado/cancelado/publicado; `n` passa a ser o seguinte no dia novo | `script.rescheduled` |
 
-Por defeito conteúdos `rejected` não entram na fila do teleprompter; o workspace pode exigir `approved` para gravar.
+`gravado` (legado) = recorded, editing, ready ou published. O teleprompter só transita para o dia seguinte o que está por gravar ou agendado. Por defeito conteúdos `rejected` não entram na fila do teleprompter; o workspace pode exigir `approved` para gravar.
 
 ## Sessão de gravação e takes (W2-05)
 
@@ -61,7 +65,7 @@ Sessão (`recording_sessions`): `aberta → fechada`, uma aberta por cliente e d
 | dependências | `tasks.manage` | mesmo cliente, sem ciclos | histórico |
 | comentar / mencionar | `tasks.work` | mencionados têm de ter acesso atual | notifica mencionados e o responsável |
 
-Handoffs (`task_rules`, por cliente): `on_event` cria uma tarefa com `dedup_key = regra:entidade:versão` (repetir não duplica) e `complete_on` fecha-a como `system`. Eventos aceites: `script.created`, `script.submitted`, `script.approved`, `script.rejected`, `review.changes_requested`, `recording.confirmed`, `request.created`, `source.approved`. Se o responsável da regra perdeu acesso, a tarefa nasce sem responsável e aparece em "Sem responsável".
+Handoffs (`task_rules`, por cliente): `on_event` cria uma tarefa com `dedup_key = regra:entidade:versão` (repetir não duplica) e `complete_on` fecha-a como `system`. Eventos aceites: `script.created`, `script.submitted`, `script.approved`, `script.rejected`, `review.changes_requested`, `recording.confirmed`, `production.editing`, `production.ready` (W3-02), `request.created`, `source.approved`. Se o responsável da regra perdeu acesso, a tarefa nasce sem responsável e aparece em "Sem responsável".
 
 Caixa de entrada: notificações, tarefas minhas, guiões `in_review` onde posso aprovar e tarefas sem dono; tudo filtrado pelo acesso atual (quem perde acesso deixa de ver). Marcar lido não altera nada.
 

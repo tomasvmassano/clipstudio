@@ -41,6 +41,9 @@ Estado: **ativo** (existe e é verificado no servidor por `authorize()`; também
 | `clipping.export` | Clipping | M | ws, proj | W5 | — |
 | `tasks.read` | Tarefas (M11, TEAM-06) | B | ws, proj, own | ativo | `/tarefas` (lista, detalhe, comentários, histórico); também o código de equipa |
 | `tasks.work` | Tarefas | B | ws, own | ativo | mudar estado/bloquear as tarefas de que é responsável, comentar e mencionar; caixa de entrada `/caixa` |
+| `calendar.read` | Calendário (M11) | B | ws | ativo | `/calendario` (dia, semana, mês; guiões, tarefas e sessões); também o código de equipa |
+| `calendar.schedule` | Calendário | M | ws, proj | ativo | reagendar guiões (arrastar ou "Mover para"), agendar, tirar da agenda, cancelar, reativar |
+| `production.update` | Calendário | M | ws, own | ativo | gravado → em edição → pronto (e voltar) |
 | `tasks.manage` | Tarefas | M | ws, proj | ativo | criar, atribuir, prazos, prioridades, dependências, cancelar; automações de handoff (`task_rule_save`) |
 | `publishing.schedule` | Publicação (M12) | A | ws, conta | W6 | — |
 | `publishing.publish` | Publicação | A | ws, conta | W6 | — |

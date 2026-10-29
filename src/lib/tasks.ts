@@ -37,7 +37,7 @@ export const KIND_LABEL: Record<TaskKind, string> = { task: "Tarefa", review: "R
 export const PRIORITY_LABEL: Record<TaskPriority, string> = { low: "Baixa", normal: "Normal", high: "Alta", urgent: "Urgente" };
 export const EVENT_LABEL: Record<string, string> = {
   "script.created": "Guião criado", "script.submitted": "Guião enviado para revisão", "script.approved": "Guião aprovado",
-  "script.rejected": "Guião rejeitado", "review.changes_requested": "Pedidas alterações ao guião", "recording.confirmed": "Guião marcado como gravado",
+  "script.rejected": "Guião rejeitado", "review.changes_requested": "Pedidas alterações ao guião", "recording.confirmed": "Guião marcado como gravado", "production.editing": "Guião passou a edição", "production.ready": "Guião pronto",
   "request.created": "Pedido do talento criado", "source.approved": "Fonte selecionada",
 };
 export const HISTORY_LABEL: Record<string, string> = {

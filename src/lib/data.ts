@@ -40,7 +40,7 @@ export const recordable = (g: Guiao) => g.editorial_status !== "rejected" && g.e
 
 export function splitDay(all: Guiao[], date: string) {
   const day = all.filter((g) => g.date === date);
-  const carry = all.filter((g) => g.date < date && recordable(g) && g.production_status !== "recorded");
+  const carry = all.filter((g) => g.date < date && recordable(g) && ["not_started", "scheduled", "recording"].includes(g.production_status));
   return { day, carry };
 }
 
