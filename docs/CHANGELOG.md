@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-29 (PRD)
+
+- **CHG-004** registo de estado por requisito (`docs/status.md`) validado no CI, início e fim de tarefa pelo registo, adiamentos registados e revisão automática diária. PRD §33, §36.
+
 ## 2026-10-29 (CHG-003 PRD Parte IV)
 
 - **CHG-003 linha de produção, medição e distribuição em escala** (só documentação; PRD Parte IV §37-§44). Regras R-16 (origem sistema/externo), R-17 (hipérbole de persona, decisão de produto; AGENTS §7 com a exceção), R-18 (linhagem gravada no momento), R-19 (só APIs oficiais). Requisitos BIZ (vista de negócio), ING/EDL (ingestão, armazenamento, pacote de edição, revisão em lote), PERF (centro de desempenho), VAR (variantes, estilos, republicação), PUB (publicação automática, modo assistido, calendário), PLAT (aprovações das plataformas). Sequência de entrega revista em §44: medição antes de media. 12 capacidades novas registadas como planeadas. Sem alteração funcional.

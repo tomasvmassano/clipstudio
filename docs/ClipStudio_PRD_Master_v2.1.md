@@ -1219,6 +1219,15 @@ Qualquer pedido, incluindo um botão ou novo separador, recebe `change_id`, owne
 
 **GATE:** se qualquer etapa faltar, estado `NOT READY` ou `NOT DONE`; não declarar concluído.
 
+**Registo de estado (CHG-004, vinculativo).** O estado de cada requisito com ID vive num único sítio do repositório, `docs/status.md`: uma linha por ID com estado (`feito`, `parcial`, `por começar`, `bloqueado`, `adiado`), o que falta, evidência (PR, testes) e data da última verificação com conta real (R-15). Regras:
+- Cada tarefa começa pelos *pendentes abertos* do registo e diz o que acontece a cada `parcial` ou `bloqueado` deixado pela tarefa anterior (fechar já, ou manter com dono e motivo). Não se abre âmbito novo sem isso.
+- Cada PR que mexe na app atualiza as linhas dos IDs que toca; o CI recusa o PR se não o fizer, e recusa o registo se faltar um ID do PRD, se houver estados inválidos ou se `parcial`/`bloqueado`/`adiado` não disserem o que falta.
+- Uma alteração ao PRD que acrescente ou retire IDs atualiza o registo no mesmo PR (os IDs novos entram como `por começar`).
+- Saltar ou adiar algo por decisão do owner fica registado como `adiado`, com a decisão e a data; nunca fica em silêncio.
+- `feito` exige evidência; com UI, exige também verificação com conta real.
+- Uma revisão automática diária, numa sessão independente, confere o registo contra o código, a base de dados e os PRs e entrega ao owner o que foi feito, o que falta, o que está pendente dele e a ordem recomendada.
+- O repositório é a memória do projeto: nenhuma sessão depende do histórico de conversa para saber o que está pendente.
+
 ## 34. Casos de aceitação críticos para administração e presença
 
 - Agency editor autorizado em A e B alterna com o mesmo login; permissões de A não se aplicam a B.
@@ -1238,6 +1247,7 @@ Referências externas consultadas em 2026-10-28: ClickUp (custom roles, workload
 
 ## 36. Registo de alterações
 
+- **CHG-004 — 2026-10-29:** registo de estado por requisito (`docs/status.md`) validado no CI, regra de início e fim de tarefa, adiamentos registados e revisão automática diária, em §33.
 - **CHG-003 — 2026-10-29:** Parte IV (§37-§44): R-16 origem sistema/externo, R-17 hipérbole de persona (decisão de produto, fora do âmbito factual do AGENTS §7), R-18 linhagem gravada no momento, R-19 só APIs oficiais; vista de negócio da agência (BIZ-01..09); ingestão, armazenamento (decide §14) e linha de edição (ING-01..04, EDL-01..06); centro de desempenho (PERF-01..09); variantes, estilos e republicação (VAR-01..07); publicação automática e calendário (PUB-01..06); aprovações das plataformas (PLAT-01..04); sequência de entrega revista (§44, medição antes de media). §26, §27, §14 e §33 com remissões. Origem: inbox de ideias IDEA-001..007.
 - **CHG-002 — 2026-10-29:** R-15 (falhas contidas, gestor único de canais, sessões que não caem por falhas de rede, gate de release com CI e E2E com conta real) em §25; QA-16 em §11. Origem: incidente de `/c/numeiro` a cair no erro do browser.
 - **CHG-001 — 2026-10-29:** espaço da agência e espaço do cliente (R-13), isolamento dos convites e cliente único (R-14), cliente no endereço, menu da agência e peças previstas; M01 com Painel da agência; §22 e §33 atualizados.
