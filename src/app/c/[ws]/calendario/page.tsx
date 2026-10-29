@@ -24,6 +24,8 @@ import {
 import { todayDubai } from "@/lib/data";
 import { fromLocalInput, toLocalInput, updateTask } from "@/lib/tasks";
 import { cn } from "@/lib/utils";
+import { useFlags } from "@/lib/flags";
+import { PubCalendar } from "@/components/pub/pub-calendar";
 
 /*
  * Calendário (PRD M11 FR-11-01/02): guiões por dia com o estado de produção, tarefas pelo prazo e sessões de gravação.
@@ -44,12 +46,42 @@ const PROD_CLASS: Record<string, string> = {
 export default function CalendarioPage() {
   return (
     <Suspense fallback={<Skeleton className="h-96 w-full" />}>
-      <WorkspaceGate need="calendar.read">{(access) => <Calendario access={access} />}</WorkspaceGate>
+      <WorkspaceGate need="calendar.read">{(access) => <CalendarLayers access={access} />}</WorkspaceGate>
     </Suspense>
   );
 }
 
 type Drag = { kind: "content"; item: CalContent } | { kind: "task"; item: CalTask };
+
+/*
+ * Camada de publicações (PUB-04, ADR-0036) atrás da flag pub.planning. Com a flag desligada (ou enquanto carrega) o
+ * calendário é exatamente o de sempre.
+ */
+function CalendarLayers({ access }: { access: Access }) {
+  const { mode } = useSession();
+  const flags = useFlags(access.ws, access.token, mode !== "loading");
+  const params = useSearchParams();
+  const router = useRouter();
+  if (!flags?.has("pub.planning")) return <Calendario access={access} />;
+  const layer = params.get("l") === "pub" ? "pub" : "prod";
+  const view = (["month", "week", "day"].includes(params.get("v") ?? "") ? params.get("v") : "week") as CalView;
+  const anchor = /^\d{4}-\d{2}-\d{2}$/.test(params.get("d") ?? "") ? params.get("d")! : todayDubai();
+  const go = (l: "pub" | "prod", v: CalView, d: string) => router.replace(wsPath(`/calendario?v=${v}&d=${d}${l === "pub" ? "&l=pub" : ""}`), { scroll: false });
+  return (
+    <div className="flex flex-col gap-4">
+      <div role="tablist" aria-label="Camadas do calendário" className="inline-flex w-fit gap-1 rounded-lg border p-1">
+        {([["prod", "Produção"], ["pub", "Publicações"]] as const).map(([k, label]) => (
+          <button key={k} type="button" role="tab" aria-selected={layer === k}
+            className={cn("rounded-md px-3 py-1 text-sm", layer === k ? "bg-primary text-primary-foreground" : "hover:bg-muted")}
+            onClick={() => go(k, view, anchor)}>{label}</button>
+        ))}
+      </div>
+      {layer === "pub"
+        ? <PubCalendar access={access} view={view} anchor={anchor} today={todayDubai()} onNav={(v, d) => go("pub", v, d)} />
+        : <Calendario access={access} />}
+    </div>
+  );
+}
 
 function Calendario({ access }: { access: Access }) {
   const { ws } = useSession();
