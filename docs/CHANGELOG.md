@@ -2,6 +2,13 @@
 
 ## 2026-10-29 (W1 Fundação, fecho)
 
+- **W1-08 consola de permissões** (PRD CAP-02, CAP-03, CAP-05, CAP-07 parcial; ADR-0014; migrações `20261029105036_w1_permissions_console`, `20261029105538_w1_capability_labels`).
+  - `/permissoes` (Administração): por pessoa, cada capacidade com o estado (pelo papel, exceção, negado, sem acesso), o porquê e as ações permitir, negar e retirar exceção, com motivo obrigatório e prazo opcional; por papel, a matriz papéis × capacidades; e a lista das exceções ativas.
+  - Quem não gere permissões vê "As tuas permissões" com o porquê de cada uma.
+  - Regras no servidor: só se dá o que se tem, nunca a si próprio nem acima do seu nível, staff da agência só pelo dono, negar prevalece, uma exceção ativa por pessoa e capacidade, nada se apaga e tudo fica auditado.
+  - Todas as capacidades passam a ter nome em português no registo.
+  - Testes: `w1_permissions` 35/35; regressão `w1_isolation` 38/38.
+
 - **W1-07 definições do cliente** (PRD M15 FR-15-01, FR-15-02 parcial, FR-15-08 parcial; ADR-0013; migrações `20261029103605_w1_settings_branding`, `20261029103627_w1_settings_branding_strict`).
   - `/definicoes` (Administração): nome, @, fuso, moeda, logótipo e cor da marca; regra "só se gravam guiões aprovados"; limite de tarefas abertas por pessoa; atalhos para agentes, templates, automações e equipa; arquivar (dono da agência).
   - Logótipo num bucket privado: só quem trabalha no cliente o vê, só quem gere as definições o muda, nunca de outro cliente; PNG, JPG ou WebP até 500 KB. Aparece no seletor de cliente, com a cor da marca.
@@ -137,7 +144,7 @@
 - Convites não enviam email: quem convida avisa a pessoa.
 - Google OAuth por configurar no Supabase (o botão fica escondido até lá).
 - Motor ainda não integrado (escreve em `generated`, `agent_log` sem `client_id`).
-- Consola de permissões (CAP-02: overrides por pessoa, papéis custom) fica para W1.1.
+- Consola de permissões (CAP-02): feita no W1-08, exceto papéis personalizados.
 - `tmp_import` ainda pode ser chamada por anónimos (protegida só por token fixo) e escreve em `reels`/`script_analysis`: apagar quando confirmares que já não é usada.
 - Código de equipa: sem expiração nem limite de tentativas em `studio_whoami`, e o `?k=` fica nos logs do servidor antes de sair do URL. Aceitável só durante a transição; retirar quando o Numeiro tiver conta.
 - Extensão `citext` no schema `public`.

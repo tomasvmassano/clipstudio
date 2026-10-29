@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import {
-	Building2Icon, SettingsIcon, SlidersHorizontalIcon,
+	Building2Icon, KeyRoundIcon, SettingsIcon, SlidersHorizontalIcon,
 	LayoutGridIcon, ScrollTextIcon, MonitorPlayIcon, LightbulbIcon, BarChart3Icon, BotIcon,
 	ClapperboardIcon, LibraryIcon, ShieldCheckIcon, UsersIcon, WalletIcon, FileTextIcon, HistoryIcon, InboxIcon, ListTodoIcon, CalendarDaysIcon,
 } from "lucide-react";
@@ -56,6 +56,7 @@ export const navGroups: SidebarNavGroup[] = [
 		items: [
 			{ title: "Clientes", path: "/clientes", icon: <Building2Icon />, orgCap: "workspaces.read" },
 			{ title: "Equipa", path: "/equipa", icon: <ShieldCheckIcon />, cap: "team.read" },
+			{ title: "Permissões", path: "/permissoes", icon: <KeyRoundIcon />, cap: "team.read" },
 			{ title: "Definições", path: "/definicoes", icon: <SettingsIcon />, cap: "team.read" },
 		],
 	},

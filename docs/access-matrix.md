@@ -55,6 +55,8 @@ Um `agency_member` sem atribuição a um workspace **não vê nada** desse works
 | `engine_worker` nas tabelas | lê e escreve só as tabelas de pesquisa do motor; não lê `guioes`, `workspace_access`, `agent_jobs` nem configurações; guiões só por `worker_save_script` |||||
 | `team.invite` (client_staff, mesmo workspace) | ✓ | ✓ | — | — | — | — |
 | `team.manage` / `permissions.manage` (ws) | ✓ | dentro do teto | — | — | — | — |
+| regras de `grant_set` / `grant_revoke` | só com `permissions.manage`; nunca a si próprio; só a quem está ao seu nível ou abaixo; staff da agência só pelo dono da agência; permitir só o que o próprio tem (negar é sempre possível dentro do teto); motivo obrigatório; prazo até um ano; uma exceção ativa por pessoa e capacidade; nada se apaga (fica `revoked_at`) |||||
+| `access_explain` ("porque tem acesso?") | cada pessoa sobre si; sobre outros só com `permissions.manage` no mesmo cliente |||||
 | regras de `member_update` / `member_remove` | nunca a si próprio; só quem está ao seu nível ou abaixo; staff da agência só pelo dono da agência; o último dono do cliente não perde o papel nem é removido (exceto pelo dono da agência) |||||
 | `settings.manage` / `integrations.manage` | ✓ | ✓ | — | — | — | — |
 | ver `/definicoes` (`workspace_settings`) | ✓ | ✓ | ✓ | ✓ | ✓ | — (precisa de `team.read`) |
