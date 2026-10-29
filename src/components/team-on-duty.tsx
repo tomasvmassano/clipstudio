@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { WsLink } from "@/components/ws-link";
 import { cn } from "@/lib/utils";
 import type { ComponentProps } from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -73,7 +73,7 @@ export function TeamOnDuty({
 									<DropdownMenuContent align="end" className="min-w-52">
 										<DropdownMenuLabel className="font-normal text-muted-foreground text-xs">{ag.nome}</DropdownMenuLabel>
 										<DropdownMenuSeparator />
-										<DropdownMenuItem className="gap-2" render={<Link href="/agentes" />}>
+										<DropdownMenuItem className="gap-2" render={<WsLink href="/agentes" />}>
 											<BotIcon className="size-4 opacity-70" />
 											Ver na sala
 										</DropdownMenuItem>

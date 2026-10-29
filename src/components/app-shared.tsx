@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import {
 	Building2Icon, GaugeIcon, KeyRoundIcon, ScrollIcon, SettingsIcon, SlidersHorizontalIcon,
 	LayoutGridIcon, ScrollTextIcon, MonitorPlayIcon, LightbulbIcon, BarChart3Icon, BotIcon,
-	ClapperboardIcon, LibraryIcon, ShieldCheckIcon, UsersIcon, WalletIcon, FileTextIcon, HistoryIcon, InboxIcon, ListTodoIcon, CalendarDaysIcon,
+	ClapperboardIcon, LibraryIcon, ShieldCheckIcon, UsersIcon, UsersRoundIcon, WalletIcon, FileTextIcon, HistoryIcon, InboxIcon, ListTodoIcon, CalendarDaysIcon,
 } from "lucide-react";
 
 export type SidebarNavItem = {
@@ -25,11 +25,32 @@ export type SidebarNavGroup = {
 	items: SidebarNavItem[];
 };
 
-export const navGroups: SidebarNavGroup[] = [
+/** Menu do espaço da agência (tudo o que não está dentro de um cliente). */
+export const agencyNavGroups: SidebarNavGroup[] = [
+	{
+		items: [
+			{ title: "Painel", path: "/", icon: <GaugeIcon />, orgCap: "dashboard.agency" },
+			{ title: "Clientes", path: "/clientes", icon: <Building2Icon />, orgCap: "workspaces.read" },
+			{ title: "Caixa de entrada", path: "/caixa", icon: <InboxIcon />, orgCap: "dashboard.agency" },
+		],
+	},
+	{
+		label: "Em breve",
+		items: [
+			{ title: "Equipa da agência", icon: <UsersRoundIcon />, soon: true },
+			{ title: "Calendário de todos", icon: <CalendarDaysIcon />, soon: true },
+			{ title: "Custos", icon: <WalletIcon />, soon: true },
+			{ title: "Histórico da agência", icon: <ScrollIcon />, soon: true },
+			{ title: "Definições da agência", icon: <SettingsIcon />, soon: true },
+		],
+	},
+];
+
+/** Menu do espaço de um cliente. Os caminhos são relativos ao cliente: "/guioes" abre /c/<cliente>/guioes. */
+export const clientNavGroups: SidebarNavGroup[] = [
 	{
 		items: [
 			{ title: "Início", path: "/", icon: <LayoutGridIcon /> },
-			{ title: "Agência", path: "/agencia", icon: <GaugeIcon />, orgCap: "dashboard.agency" },
 			{ title: "Caixa de entrada", path: "/caixa", icon: <InboxIcon />, cap: "tasks.work" },
 		],
 	},
@@ -53,9 +74,8 @@ export const navGroups: SidebarNavGroup[] = [
 		],
 	},
 	{
-		label: "Administração",
+		label: "Administração do cliente",
 		items: [
-			{ title: "Clientes", path: "/clientes", icon: <Building2Icon />, orgCap: "workspaces.read" },
 			{ title: "Equipa", path: "/equipa", icon: <ShieldCheckIcon />, cap: "team.read" },
 			{ title: "Permissões", path: "/permissoes", icon: <KeyRoundIcon />, cap: "team.read" },
 			{ title: "Histórico", path: "/historico", icon: <ScrollIcon />, cap: "audit.read" },
@@ -77,18 +97,11 @@ export const footerNavLinks: SidebarNavItem[] = [
 	{ title: "Versão antiga", path: "/legacy/index.html", icon: <HistoryIcon />, external: true },
 ];
 
-export const navLinks: SidebarNavItem[] = [
-	...navGroups.flatMap((group) =>
-		group.items.flatMap((item) =>
-			item.subItems?.length ? [item, ...item.subItems] : [item]
-		)
-	),
-	...footerNavLinks,
-];
+const flat = (groups: SidebarNavGroup[]) => groups.flatMap((g) => g.items.flatMap((i) => (i.subItems?.length ? [i, ...i.subItems] : [i])));
 
-/** Item ativo para um pathname (o mais específico ganha). */
-export function activeFor(pathname: string): SidebarNavItem | undefined {
-	return navLinks
+/** Item ativo para um caminho já sem o prefixo do cliente (o mais específico ganha). */
+export function activeFor(pathname: string, groups: SidebarNavGroup[]): SidebarNavItem | undefined {
+	return flat(groups)
 		.filter((i) => i.path && !i.external && (i.path === "/" ? pathname === "/" : pathname.startsWith(i.path)))
 		.sort((a, b) => (b.path?.length ?? 0) - (a.path?.length ?? 0))[0];
 }

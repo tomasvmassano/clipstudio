@@ -120,9 +120,11 @@ export function saveSession(s: Session | null) {
     else localStorage.removeItem(KEY);
   } catch {}
 }
+/** null = código inválido ou revogado; erro de rede ou pedido interrompido lança (não é motivo para terminar a sessão). */
 export async function checkToken(token: string): Promise<Session | null> {
   const { data, error } = await supabase().rpc("studio_whoami", { p_token: token });
-  if (error || !data || !data.length) return null;
+  if (error) throw new Error(error.message);
+  if (!data || !data.length) return null;
   const r = data[0] as { client_id: string; role: string; label: string | null };
   return { token, client_id: r.client_id, role: r.role, label: r.label };
 }

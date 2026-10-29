@@ -13,27 +13,44 @@ import {
 	SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { NavGroup } from "@/components/nav-group";
-import { footerNavLinks, navGroups } from "@/components/app-shared";
+import { agencyNavGroups, clientNavGroups, footerNavLinks } from "@/components/app-shared";
 import { LatestChange } from "@/components/latest-change";
 import { useSession } from "@/components/session-provider";
-import { MonitorPlayIcon, LogInIcon, CheckIcon } from "lucide-react";
-import { WorkspaceSwitcher } from "@/components/workspace-switcher";
+import { ArrowLeftIcon, MonitorPlayIcon, LogInIcon, CheckIcon } from "lucide-react";
+import { AgencySwitcher, WorkspaceSwitcher } from "@/components/workspace-switcher";
+import { clientPath } from "@/lib/ws-path";
 
 export function AppSidebar() {
-	const { mode, label } = useSession();
+	const { mode, label, ws, wsRequested, canOrg } = useSession();
 	const signed = mode === "user" || mode === "code";
+	// espaço do cliente quando o endereço é /c/<cliente>; o resto é o espaço da agência
+	const inClient = !!wsRequested;
+	const base = ws ? clientPath(ws.id) : "";
+	const groups = inClient ? clientNavGroups : agencyNavGroups;
 	return (
 		<Sidebar collapsible="icon" variant="inset">
 			<SidebarHeader className="h-14 justify-center">
-				<WorkspaceSwitcher />
+				{inClient ? <WorkspaceSwitcher /> : <AgencySwitcher />}
 			</SidebarHeader>
 			<SidebarContent>
+				{inClient && canOrg("dashboard.agency") && (
+					<SidebarGroup className="pb-0">
+						<SidebarMenu>
+							<SidebarMenuItem>
+								<SidebarMenuButton className="text-muted-foreground" tooltip="Voltar à agência" render={<Link href="/" />}>
+									<ArrowLeftIcon /><span>Agência</span>
+								</SidebarMenuButton>
+							</SidebarMenuItem>
+						</SidebarMenu>
+					</SidebarGroup>
+				)}
+				{inClient && (
 				<SidebarGroup>
 					<SidebarMenuItem className="flex items-center gap-2">
 						<SidebarMenuButton
 							className="min-w-8 bg-primary text-primary-foreground duration-200 ease-linear hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground"
 							tooltip="Abrir teleprompter"
-							render={<Link href="/teleprompter" />}
+							render={<Link href={`${base}/teleprompter`} />}
 						>
 							<MonitorPlayIcon />
 							<span>Gravar agora</span>
@@ -49,8 +66,14 @@ export function AppSidebar() {
 						)}
 					</SidebarMenuItem>
 				</SidebarGroup>
-				{navGroups.map((group, index) => (
-					<NavGroup key={`sidebar-group-${index}`} {...group} />
+				)}
+				{!signed && !inClient && (
+					<SidebarGroup>
+						<Button size="sm" variant="outline" render={<Link href="/login" />} nativeButton={false}><LogInIcon /> Entrar</Button>
+					</SidebarGroup>
+				)}
+				{groups.map((group, index) => (
+					<NavGroup key={`sidebar-group-${index}`} {...group} base={inClient ? base : ""} all={groups} />
 				))}
 			</SidebarContent>
 			<SidebarFooter>

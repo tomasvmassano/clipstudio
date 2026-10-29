@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { WsLink } from "@/components/ws-link";
 import { useEffect, useState } from "react";
 import { RotateCwIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -72,11 +72,11 @@ export function ContentDetails({ access, id, date }: { access: Access; id: strin
           <h3 className="font-semibold">Tarefas {tasks.length > 0 && <span className="font-normal text-muted-foreground">({tasks.filter((t) => t.status === "done").length}/{tasks.length} feitas)</span>}</h3>
           {tasks.length === 0 && <p className="text-muted-foreground">Sem tarefas ligadas.</p>}
           {tasks.map((t) => (
-            <Link key={t.id} href={`/tarefas?task=${t.id}`} className="flex flex-wrap items-center gap-2 rounded-md px-1 py-0.5 hover:bg-muted">
+            <WsLink key={t.id} href={`/tarefas?task=${t.id}`} className="flex flex-wrap items-center gap-2 rounded-md px-1 py-0.5 hover:bg-muted">
               <span className={t.status === "done" || t.status === "cancelled" ? "text-muted-foreground line-through" : ""}>{t.title}</span>
               <Badge variant={t.status === "blocked" ? "destructive" : "outline"}>{STATUS_LABEL[t.status]}</Badge>
               <span className="text-xs text-muted-foreground">{t.assignee_email ?? "sem responsável"}{t.due_at ? ` · ${fmtDue(t.due_at, tz)}` : ""}</span>
-            </Link>
+            </WsLink>
           ))}
         </section>
       )}

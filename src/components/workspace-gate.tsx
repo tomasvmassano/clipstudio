@@ -7,13 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSession } from "@/components/session-provider";
 import type { Access } from "@/lib/access";
+import { clientPath } from "@/lib/ws-path";
 
 /**
  * Porta comum das páginas: só mostra o conteúdo com sessão e workspace escolhido.
  * `need` esconde a página a quem não tem a capacidade (o servidor recusaria de qualquer forma).
  */
 export function WorkspaceGate({ need, children }: { need?: string; children: (access: Access) => ReactNode }) {
-  const { mode, access, workspaces, email, can, canOrg, error, refresh, signOut } = useSession();
+  const { mode, access, workspaces, email, can, canOrg, error, refresh, signOut, wsRequested, lastWs } = useSession();
 
   if (mode === "loading") {
     return (
@@ -59,11 +60,22 @@ export function WorkspaceGate({ need, children }: { need?: string; children: (ac
       </Alert>
     );
   }
-  if (!access) return null;
+  if (!access) {
+    // cliente no endereço a que não tens acesso (ou que não existe: a mensagem é a mesma de propósito)
+    const home = canOrg("dashboard.agency") ? "/" : lastWs() ? clientPath(lastWs()!) : "/";
+    return (
+      <Alert>
+        <AlertDescription className="flex flex-wrap items-center justify-between gap-3">
+          <span>{wsRequested ? "Não tens acesso a este cliente, ou ele não existe." : "Escolhe um cliente para continuar."}</span>
+          <Button size="sm" render={<Link href={home} />} nativeButton={false}>{canOrg("dashboard.agency") ? "Voltar à agência" : "Ir para o meu cliente"}</Button>
+        </AlertDescription>
+      </Alert>
+    );
+  }
   if (need && !can(need)) {
     return (
       <Alert>
-        <AlertDescription>Não tens permissão para esta página neste workspace. Se precisas dela, pede a quem gere a equipa.</AlertDescription>
+        <AlertDescription>Não tens permissão para esta página neste cliente. Se precisas dela, pede a quem gere a equipa.</AlertDescription>
       </Alert>
     );
   }

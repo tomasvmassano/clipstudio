@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { WsLink } from "@/components/ws-link";
 import { cn } from "@/lib/utils";
 import type { ComponentProps } from "react";
 import { Badge } from "@/components/ui/badge";
@@ -79,7 +79,7 @@ export function RecentConversations({
 					</TableBody>
 				</Table>
 				<div className="flex justify-center border-t py-3">
-					<Button size="sm" variant="ghost" render={<Link href="/guioes" />} nativeButton={false}>Ver todos os guiões
+					<Button size="sm" variant="ghost" render={<WsLink href="/guioes" />} nativeButton={false}>Ver todos os guiões
 						<ArrowRightIcon aria-hidden="true" data-icon="inline-end" /></Button>
 				</div>
 			</CardContent>

@@ -50,7 +50,7 @@ Estado: **ativo** (existe e é verificado no servidor por `authorize()`; também
 | `social_accounts.manage` | Publicação | A | ws | W6 | — |
 | `analytics.read` | Desempenho (M09) | B | ws, conta | ativo | `/desempenho`, `/` |
 | `dashboard.configure` | Início (M01) | M | ws | ativo | `/` Personalizar: widgets e ordem por função no cliente (`dashboard_layouts_get`, `dashboard_layout_set`, `dashboard_layout_reset`), auditado |
-| `dashboard.agency` | Agência | B | org | ativo | `/agencia`: clientes a que a pessoa tem acesso lado a lado, com totais e comparação (`agency_dashboard`) |
+| `dashboard.agency` | Agência | B | org | ativo | `/` (Painel, entrada da equipa da agência; ADR-0018): clientes a que a pessoa tem acesso lado a lado, com totais e comparação (`agency_dashboard`); menu próprio do espaço da agência, com `/clientes` e `/caixa` de todos os clientes |
 | `costs.read` | Custos (M10) | M | ws | ativo (parcial) | custo e tokens por execução e gasto do dia em `/agentes/configuracao`, limite diário na configuração; módulo Custos completo mais tarde |
 | `costs.read_agency` | Custos | A | org | W4 | — |
 | `agents.read` | Agentes (M06) | B | ws | ativo | `/agentes`, `/agentes/configuracao` (catálogo, versão ativa, estado do worker, execuções sem custo) |

@@ -21,10 +21,13 @@ import {
 import { activeFor, type SidebarNavGroup } from "@/components/app-shared";
 import { ChevronRightIcon } from "lucide-react";
 import { useSession } from "@/components/session-provider";
+import { stripWs } from "@/lib/ws-path";
 
-export function NavGroup({ label, items }: SidebarNavGroup) {
+/** base: prefixo do cliente (/c/<cliente>) para os caminhos relativos do menu do cliente; vazio na agência. */
+export function NavGroup({ label, items, base = "", all }: SidebarNavGroup & { base?: string; all: SidebarNavGroup[] }) {
 	const pathname = usePathname();
-	const active = activeFor(pathname);
+	const active = activeFor(base ? stripWs(pathname) : pathname, all);
+	const href = (p?: string) => (base ? `${base}${p === "/" ? "" : p ?? ""}` || "/" : p ?? "/");
 	const { can, canOrg, mode } = useSession();
 	// Antes de saber a sessão mostra tudo (evita saltos); depois só o que a capacidade permite.
 	const visible = items.filter((i) => {
@@ -47,7 +50,7 @@ export function NavGroup({ label, items }: SidebarNavGroup) {
 										<SidebarMenuSub>
 											{item.subItems.map((subItem) => (
 												<SidebarMenuSubItem key={subItem.title}>
-													<SidebarMenuSubButton isActive={active?.path === subItem.path} render={<Link href={subItem.path ?? "/"} />}>{subItem.icon}<span>{subItem.title}</span></SidebarMenuSubButton>
+													<SidebarMenuSubButton isActive={active?.path === subItem.path} render={<Link href={href(subItem.path)} />}>{subItem.icon}<span>{subItem.title}</span></SidebarMenuSubButton>
 												</SidebarMenuSubItem>
 											))}
 										</SidebarMenuSub>
@@ -59,7 +62,7 @@ export function NavGroup({ label, items }: SidebarNavGroup) {
 									<SidebarMenuBadge className="text-[10px] font-normal text-muted-foreground">em breve</SidebarMenuBadge>
 								</>
 							) : (
-								<SidebarMenuButton isActive={isActive} tooltip={item.title} render={<Link href={item.path} />}>{item.icon}<span>{item.title}</span></SidebarMenuButton>
+								<SidebarMenuButton isActive={isActive} tooltip={item.title} render={<Link href={href(item.path)} />}>{item.icon}<span>{item.title}</span></SidebarMenuButton>
 							)}
 						</Collapsible>
 					);
