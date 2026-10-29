@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-30 (vaga 2: pesquisa, publicações planeadas e aprendizagem)
+
+Tudo atrás de funcionalidades em teste (só o dono da agência até as ligar).
+
+- **W7 Pesquisa global** (FR-16-01, FR-16-02, FR-01-05, FR-17-07; ADR-0035). Ctrl/Cmd+K pesquisa guiões, fontes, referências, tarefas, campanhas, pessoas e estilos só nos clientes e entidades que a pessoa pode ver, com sugestões, #etiquetas e IDs; ações rápidas para criar fonte, guião, campanha e tarefa. Operações em lote nos guiões (responsável, campanha, etiquetas, aprovar, reagendar, exportar CSV) com pré-visualização, confirmação, idempotência e auditoria.
+- **W7 Publicações planeadas** (PUB-02, PUB-04, PUB-06, TEAM-10, FR-21-01, 02, 04, VAR-01; ADR-0036). Separador **Publicações** no calendário: planear por conta e plataforma, arrastar, conflitos e limites das APIs (verificados a 29/10, editáveis só pelo dono da agência), variantes com a receita de 5 elementos, aprovação presa à versão e ao destino que deixa de valer quando algo muda, política por cliente (agência, cliente ou ambos; autoaprovação opcionalmente proibida), aprovação em lote, contas de destino "por ligar". Nada publica: a publicação automática chega quando as plataformas aprovarem a app.
+- **W7 Aprendizagem** (FR-17-10, 11, 12, SCALE-06, BIZ-08, FR-14-05, FR-10-05; ADR-0037). Categoria ao rejeitar ou pedir alterações e painel de retrabalho; experiências de hooks e formatos com amostra mínima e critério de decisão; repetir vencedor como rascunho; recomendações com evidência e limitações; cargos no convite que pré-preenchem papel e exceções; exportar os meus dados e pedir eliminação; custos dos agentes por guião e publicação com tendência e CSV.
+- Testes: SQL 1355/1355 (novos w7_busca 71, w7_pub 91, w7_learn 101); E2E 109/109; unitários search-format, pub-rules, learn-format.
+
 ## 2026-10-30 (vaga 1: negócio, desempenho e área de trabalho)
 
 Tudo atrás de funcionalidades em teste: só o dono da agência vê até as ligar em **Funcionalidades em teste**.

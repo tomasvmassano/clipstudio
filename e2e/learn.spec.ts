@@ -76,7 +76,7 @@ as("clientA")("experiência com amostra insuficiente nunca declara líder", asyn
   await expect(detail.getByText("A decorrer")).toBeVisible();
   await expect(detail.getByText("amostra insuficiente").first()).toBeVisible();
   await expect(detail.getByText("Sem líder enquanto houver variantes com amostra insuficiente.")).toBeVisible();
-  await expect(detail.getByRole("option", { name: /Confirmada \(critério por cumprir\)/ })).toBeDisabled();
+  await expect(detail.getByRole("option", { name: /Confirmada \(critério por cumprir\)/ })).toHaveAttribute("disabled", "");
   await page.keyboard.press("Escape");
   await page.getByRole("tab", { name: "Vencedores" }).click();
   await expect(page.getByText(/Repetir cria um guião em rascunho/)).toBeVisible();
@@ -89,7 +89,7 @@ as("clientA")("experiência com amostra insuficiente nunca declara líder", asyn
 as("clientA")("custos por guião: página, vídeo indisponível e CSV", async ({ page, errors }) => {
   await page.goto(`/c/${WS_A}/custos`);
   await expect(page.getByRole("heading", { name: "Custos por guião e publicação" })).toBeVisible();
-  await expect(page.getByText("Por vídeo")).toBeVisible();
+  await expect(page.getByText("Por vídeo", { exact: true })).toBeVisible();
   await expect(page.getByText("indisponível", { exact: true })).toBeVisible();
   const [dl] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name: "Exportar CSV" }).click()]);
   expect(dl.suggestedFilename()).toMatch(/^custos-numeiro-6m\.csv$/);
@@ -106,7 +106,7 @@ as("clientA")("convidar com cargo pré-seleciona papel e exceções", async ({ p
   const email = `e2e-learn-${Date.now() % 1_000_000}@e2e.test`;
   await page.goto(`/c/${WS_A}/equipa`);
   await page.getByLabel("Cargo").selectOption("smm");
-  await expect(page.getByLabel(/Agendar publicações/)).toBeChecked();
+  await expect(page.getByLabel(/Agendar publicações|Planear publicações/)).toBeChecked();
   await page.locator("#inv-email").fill(email);
   await page.getByRole("button", { name: "Convidar" }).click();
   await expect.poll(() => sql(`select job_title || '|' || array_to_string(suggested_grants, ',') from invitations where email = '${email}'`)[0])
@@ -117,7 +117,7 @@ as("clientA")("convidar com cargo pré-seleciona papel e exceções", async ({ p
 as("clientA")("os meus dados: descarregar JSON e pedir eliminação", async ({ page, errors }) => {
   await page.goto("/perfil");
   const card = page.locator("[data-my-data]");
-  await expect(card.getByText("Os meus dados")).toBeVisible();
+  await expect(card.getByText("Os meus dados", { exact: true })).toBeVisible();
   const [dl] = await Promise.all([page.waitForEvent("download"), card.getByRole("button", { name: "Descarregar os meus dados (JSON)" }).click()]);
   expect(dl.suggestedFilename()).toMatch(/^os-meus-dados-\d{4}-\d{2}-\d{2}\.json$/);
   await card.getByRole("button", { name: "Pedir eliminação" }).click();

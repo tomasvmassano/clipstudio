@@ -238,6 +238,7 @@ function Palette({ wsId, wsName, multi, token, actions, access, onGo }: {
                   <div
                     id={`${listId}-${i}`}
                     role="option"
+                    data-type={o.type}
                     aria-selected={i === active}
                     onMouseMove={() => setActive(i)}
                     onClick={() => choose(o)}

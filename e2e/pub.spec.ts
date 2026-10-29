@@ -87,7 +87,7 @@ as("clientA")("cliente aprova exatamente a versão e o destino", async ({ page, 
   await dlg.getByRole("button", { name: "Aprovar", exact: true }).click();
   await expect(page.getByText(/^Aprovada\./)).toBeVisible();
   expect(sql(`select status || '/' || approved_revision from pub_publications where id = '${id}'`)[0]).toBe("aprovada/1");
-  expect(sql(`select side || '/' || snapshot->>'caption' from pub_approvals where publication_id = '${id}' and invalidated_at is null`)[0]).toBe(`cliente/${tag}`);
+  expect(sql(`select side || '/' || (snapshot->>'caption') from pub_approvals where publication_id = '${id}' and invalidated_at is null`)[0]).toBe(`cliente/${tag}`);
   expect(errors).toEqual([]);
 });
 

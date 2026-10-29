@@ -19,6 +19,8 @@ Fonte: PRD v2.1 §3 (papéis), §5A (TEAM-01…16), CAP-03/05/08. **PROPOSTA de 
 | `biz.read` (vista de negócio, só operacional dos clientes atribuídos) | ✓ (todos) | ✓ | ✓ | ✓ |
 | `biz.finance` (contratos, receita, custos, margem) | ✓ | — | — | — |
 | `contracts.manage` | ✓ | — | — | — |
+| `publishing.limits.manage` (W7) | ✓ | — | — | — |
+| `privacy.manage` (W7) | ✓ | — | — | — |
 
 Um `agency_member` sem atribuição a um workspace **não vê nada** desse workspace (R-03, TEAM-03).
 
@@ -37,6 +39,11 @@ Um `agency_member` sem atribuição a um workspace **não vê nada** desse works
 | `analytics.manage` (W6, centro de desempenho) | ✓ | ✓ | ✓ | — | — | — |
 | `tasks.delegate` (W6) | ✓ | ✓ | ✓ | ✓ (as suas) | ✓ (as suas) | — |
 | `ops.presence` (W6) | ✓ | ✓ | ✓ | ✓ | ✓ | — |
+| `publishing.schedule` (W7) | ✓ | ✓ | ✓ | — | — | — |
+| `publishing.approve` (W7) | ✓ | ✓ | ✓ | — | — | — |
+| `publishing.republish.approve` / `publishing.policy.manage` / `social_accounts.manage` (W7) | ✓ | ✓ | — | — | — | — |
+| `learn.read` (W7) | ✓ | ✓ | ✓ | — | ✓ | — |
+| `learn.manage` (W7) | ✓ | ✓ | ✓ | — | — | — |
 | `calendar.read` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `calendar.schedule` | ✓ | ✓ | ✓ | — | — | — |
 | `production.update` | ✓ | ✓ | ✓ | ✓ (own) | — | — |
@@ -89,3 +96,5 @@ Teto de autoridade: ninguém concede mais do que tem (R-12); um admin do cliente
 Tempos de gravação (W5-01): escrever com `recording.use`, ler com `recording.use` ou `scripts.read`; a tabela `recording_marks` não tem leitura direta.
 
 O código de equipa `studio_tokens(role='creator')` do Numeiro corresponde a um `contributor` com `scripts.approve`, `scripts.reject` e `recording.confirm` por grant (W2: também `scripts.submit`, para poder reaprovar depois de editar, e `requests.create`, para pedir temas, e `references.read`; W3: `tasks.read` e `calendar.read`, só leitura, porque o código não tem identidade para ser responsável; não tem `scripts.create`, `scripts.delete`, `sources.create` nem `sources.triage`). Na migração W1 cada pessoa que usa o código recebe uma conta individual com esse papel. O código só é desligado depois de a migração estar validada (AGENTS §5).
+
+Pesquisa global (W7): o dono da agência pesquisa todos os clientes da organização; staff só os atribuídos; equipa do cliente só o seu; código de equipa só o cliente do código e nunca pessoas. Cada grupo exige a leitura da entidade nesse cliente e a negação explícita retira o grupo.

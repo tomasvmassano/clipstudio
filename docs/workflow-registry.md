@@ -187,3 +187,16 @@ Leitura do scraper → `perf_capture` (de hora a hora, idempotente) → fotograf
 ## Caixa e presença (W6, OPS-02/03/04/10, FR-17-01)
 
 Item da fila (um por objeto, notificações juntas): novo → visto (não aprova) → adiado (1 min a 30 dias) → volta a mostrar (hora, "mostrar já" ou notificação nova). Versão nova do guião ou tarefa que volta torna-o novo. Tarefa passada: `task.delegated` com antes/depois, "em curso" volta a "por fazer", notificação `task_delegated` uma vez. Presença: online (sinal ≤ 120 s), ativo (≤ 5 min, só com consentimento), a trabalhar (tarefa iniciada pela pessoa), estado manual com fim opcional. Sem horas nem histórico.
+
+
+## Operações em lote nos guiões (W7, FR-17-07)
+
+Escolher guiões, ação, pré-visualização (o servidor corre e desfaz; mostra por guião o que muda e o que não pode), confirmar com chave de idempotência, resultado por item. Cada guião passa pelas funções de sempre (`content_meta_set`, `content_transition`, `content_reschedule`). Auditoria do lote `script.bulk`; exportação `script.exported`.
+
+## Publicação planeada (W7, PUB-02/04/06, TEAM-10, FR-21, VAR-01)
+
+`planeada` → `aprovada` (só por `pub_approve`, com a política do cliente cumprida para a revisão atual e a versão aprovada do guião) → (PUB-01: a publicar, publicada, falhou); `cancelada` com motivo. Mudar versão, variante, conta, hora, legenda, hashtags ou origem cria revisão nova, volta a `planeada` e invalida as aprovações. Limites das APIs recusam o planeamento acima do limite. Variante nova muda pelo menos 2 de 5 elementos; irmã na mesma plataforma com menos de 2 diferenças é bloqueada. Nada publica.
+
+## Aprendizagem (W7, FR-17-10/11/12)
+
+Rejeitar ou pedir alterações com categoria (`content_transition_reasoned` chama `content_transition` e liga a categoria; texto obrigatório). Experiência: rascunho → a decorrer (regras fechadas) → concluída (confirmada só com critério cumprido, fotografia guardada) ou cancelada. Repetir vencedor: guião em rascunho ligado à publicação, aprovação editorial normal. Convite com cargo: ao aceitar aplica cargo e exceções em nome de quem convidou, se ainda as puder dar. Pedido de eliminação: pendente → tratado ou recusado pelo dono da agência; nada se apaga sozinho.

@@ -45,7 +45,7 @@ as("clientA")("QA-12: A pesquisa um termo exclusivo de B e não vê nada", async
   await openPalette(page);
   await palette(page).getByRole("combobox", { name: "Pesquisar" }).fill(B_TERM);
   await expect(palette(page).getByText(`Nada encontrado para «${B_TERM}».`)).toBeVisible();
-  await expect(palette(page).getByRole("option")).toHaveCount(0);
+  await expect(palette(page).locator('[role="option"][data-type="item"]')).toHaveCount(0);   // só as ações de criar
   expect(errors).toEqual([]);
 });
 
