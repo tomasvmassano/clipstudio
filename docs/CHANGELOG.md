@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-29 (W1 Correção)
+
+- **W1-12 erro ao abrir um cliente** (ADR-0019, PRD R-07; CHG-002).
+  - Corrigido: abrir o Início de um cliente com conta caía no ecrã de erro do browser. Dois widgets abriam o mesmo canal de tempo real dos guiões.
+  - Os canais de tempo real passam a ser partilhados por um gestor único; nada abre canais fora dele.
+  - Se uma página ou um widget falhar, aparece uma mensagem em português com "Tentar de novo" e o resto da app fica de pé.
+  - CI novo em cada PR: guardas de execução, lint, tipos, testes unitários e build.
+  - Testes: `realtime-hub` 9/9, `safeNext` 10/10; E2E da estrutura 15/15.
+
 ## 2026-10-29 (PRD)
 
 - **CHG-001** espaço da agência e espaço do cliente (R-13), isolamento dos convites e cliente único (R-14), cliente no endereço, menu da agência e peças previstas. PRD §2, M01, §22, §33, §36. Implementado no W1-11 (#18).

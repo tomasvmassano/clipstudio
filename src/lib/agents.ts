@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { realtime } from "@/lib/realtime";
 import { friendlyError, type Access } from "@/lib/access";
 import type { Guiao } from "@/lib/types";
 
@@ -44,16 +45,14 @@ export async function fetchRun(access: Access, runId: string): Promise<AgentEven
  */
 export function subscribeAgents(access: Access, onEvent: (e: AgentEvent) => void): (() => void) | null {
   if (access.token) return null;
-  const sb = supabase();
-  let ch: ReturnType<typeof sb.channel> | null = null;
-  let closed = false;
-  sb.realtime.setAuth().then(() => {
-    if (closed) return;
-    ch = sb.channel("agents:" + access.ws, { config: { private: true } })
-      .on("broadcast", { event: "agent_event" }, (m) => onEvent(m.payload as AgentEvent))
+  // canal partilhado com o nome exato (é pelo nome que chegam as mensagens e que a RLS decide)
+  return realtime.listen("agents:" + access.ws, async (name, emit) => {
+    const sb = supabase();
+    await sb.realtime.setAuth();
+    return sb.channel(name, { config: { private: true } })
+      .on("broadcast", { event: "agent_event" }, (m) => emit(m.payload))
       .subscribe();
-  });
-  return () => { closed = true; if (ch) sb.removeChannel(ch); };
+  }, (p) => onEvent(p as AgentEvent));
 }
 
 type Sim = { agent: string; to?: string; status: AgentStatus; message: string; slot?: number; ms?: number };

@@ -12,6 +12,7 @@ import { ConversationVolumeChart } from "@/components/conversation-volume-chart"
 import { CsatResponsesChart } from "@/components/csat-responses-chart";
 import { FirstReplyTimeChart } from "@/components/first-reply-time-chart";
 import { KpiCard } from "@/components/kpi-card";
+import { WidgetBoundary } from "@/components/widget-boundary";
 import { LayoutDialog } from "@/components/dashboard-layout-dialog";
 import { RecentConversations } from "@/components/recent-conversations";
 import { SupportActivity } from "@/components/support-activity";
@@ -108,12 +109,12 @@ function Inicio({ access }: { access: Access }) {
         <>
           {kpis.length > 0 && (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {kpis.map((w) => <KpiCard key={w.key} w={w} k={asKpi(dash.kpis[w.key])} period={dash.period} extra={extraFor(w.key, dash)} />)}
+              {kpis.map((w) => <WidgetBoundary key={w.key} label={w.label}><KpiCard w={w} k={asKpi(dash.kpis[w.key])} period={dash.period} extra={extraFor(w.key, dash)} /></WidgetBoundary>)}
             </div>
           )}
           {others.length > 0 && (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {others.map((w) => <OtherWidget key={w.key} w={w} hoje={hoje} des={des} access={access} tz={tz} />)}
+              {others.map((w) => <WidgetBoundary key={w.key} label={w.label} className="md:col-span-2"><OtherWidget w={w} hoje={hoje} des={des} access={access} tz={tz} /></WidgetBoundary>)}
             </div>
           )}
           {dash.customized && <p className="text-muted-foreground text-xs">Layout personalizado para a tua função neste cliente.</p>}
