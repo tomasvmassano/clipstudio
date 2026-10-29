@@ -1,7 +1,7 @@
 "use client";
 
 import { WsLink } from "@/components/ws-link";
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { DownloadIcon, Loader2Icon, MonitorPlayIcon, PlusIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -38,6 +38,17 @@ function GuioesInner({ access }: { access: Access }) {
   const { all, loading, error, actions, create, caps, canWrite } = useGuioes(access, date);
   const { day, carry } = useMemo(() => splitDay(all, date), [all, date]);
   const isToday = date === todayDubai();
+  // ?open=<id> (vindo da caixa ou da minha fila): leva ao guião e destaca-o
+  const openId = params.get("open");
+  useEffect(() => {
+    if (loading || !openId) return;
+    const el = document.querySelector<HTMLElement>(`[data-guiao="${CSS.escape(openId)}"]`);
+    if (!el) return;
+    el.scrollIntoView({ block: "center" });
+    el.classList.add("ring-2", "ring-primary");
+    const t = setTimeout(() => el.classList.remove("ring-2", "ring-primary"), 4000);
+    return () => clearTimeout(t);
+  }, [loading, openId]);
 
   const ok = day.filter(recordable);
   const toReview = (s: string) => s === "in_review" || s === "draft" || s === "changes_requested";
