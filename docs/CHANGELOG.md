@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-29 (W4 IA e jobs)
+
+- **W4-01 agentes: catálogo, configuração versionada e execuções duráveis** (PRD M06, FR-06 parcial, NFR durabilidade de jobs; ADR-0010; migração `20261029084441_w4_agents_config_jobs`).
+  - `/agentes/configuracao`: catálogo dos 13 agentes do motor (etapa, modelo, o que lê e escreve), versão ativa, corrida diária, estado do worker e lista de execuções.
+  - Configuração por cliente (voz, léxico, regras, formatos com proporções, produção, modelo por agente, agenda, limite de custo, áreas de notícias, leituras). Cada gravação é uma versão nova validada no servidor; ativar uma antiga volta atrás. O preset Numeiro é só a versão 1 deste cliente.
+  - Execuções duráveis: Correr agora (uma por tipo e dia), cancelar, repetir, tentativas com espera crescente, lease com heartbeat, falha definitiva com notificação, limite de custo diário. As execuções ficam em fila até o worker do motor ser ligado (W4-02): nada aparece como corrido sem ter corrido.
+  - Custos só para quem tem `costs.read`. As funções do worker só existem para o servidor.
+  - Testes: `w4_agents` 44/44.
+
 ## 2026-10-29 (W3 Operações)
 
 - **W3-01 tarefas, handoffs e caixa de entrada** (PRD TEAM-06, TEAM-12, FR-11-02 parcial, FR-17-01, FR-17-05, TEAM-15 parcial; ADR-0007; migração `20261029071504_w3_tasks_handoffs_inbox`).

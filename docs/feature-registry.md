@@ -49,12 +49,12 @@ Estado: **ativo** (existe e é verificado no servidor por `authorize()`; também
 | `publishing.publish` | Publicação | A | ws, conta | W6 | — |
 | `social_accounts.manage` | Publicação | A | ws | W6 | — |
 | `analytics.read` | Desempenho (M09) | B | ws, conta | ativo | `/desempenho`, `/` |
-| `costs.read` | Custos (M10) | M | ws | W4 | — |
+| `costs.read` | Custos (M10) | M | ws | ativo (parcial) | custo e tokens por execução e gasto do dia em `/agentes/configuracao`, limite diário na configuração; módulo Custos completo mais tarde |
 | `costs.read_agency` | Custos | A | org | W4 | — |
-| `agents.read` | Agentes (M06) | B | ws | ativo | `/agentes` |
+| `agents.read` | Agentes (M06) | B | ws | ativo | `/agentes`, `/agentes/configuracao` (catálogo, versão ativa, estado do worker, execuções sem custo) |
 | `agents.rehearse` | Agentes | M | ws | ativo | Ensaiar a sala |
-| `agents.run` | Agentes | A | ws | W4 | — |
-| `agents.configure` | Agentes | A | ws | W4 | — |
+| `agents.run` | Agentes | A | ws | ativo | `agent_job_enqueue` (Correr agora, idempotente por tipo e dia), `agent_job_cancel`, `agent_job_retry` |
+| `agents.configure` | Agentes | A | ws | ativo | `agent_config_save` (versão nova validada), `agent_config_activate` (ativar ou voltar atrás), `agent_config_get` |
 | `integrations.manage` | Settings (M15) | A | ws | W6 | — |
 | `settings.manage` | Settings | A | ws | W1 | — |
 

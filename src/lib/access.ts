@@ -57,6 +57,10 @@ export function friendlyError(msg: string): string {
   if (msg.includes("texto_longo")) return "O pedido é demasiado longo (máximo 2000 caracteres).";
   if (msg.includes("duracao_s")) return "A duração tem de estar entre 1 e 3600 segundos.";
   if (msg.includes("corpo_vazio")) return "O corpo não pode ficar vazio.";
+  if (msg.includes("sem_configuracao_ativa")) return "Este cliente ainda não tem configuração dos agentes ativa.";
+  if (msg.includes("orcamento_esgotado")) return "O limite de custo diário dos agentes já foi atingido hoje.";
+  if (msg.includes("configuracao_invalida")) return "Esta versão tem erros: corrige-os e guarda uma versão nova antes de ativar.";
+  if (msg.includes("execucao_nao_encontrada")) return "Esta execução já não existe.";
   if (msg.includes("dependencia_invalida")) return "Cada tarefa do template só pode depender de tarefas acima dela.";
   if (msg.includes("template_nao_encontrado")) return "Este template já não existe ou está desligado.";
   if (msg.includes("nome_obrigatorio")) return "Dá um nome ao template.";
