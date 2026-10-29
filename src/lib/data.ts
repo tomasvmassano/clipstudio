@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { realtime } from "@/lib/realtime";
 import { friendlyError, type Access } from "@/lib/access";
 import type { ContentHistory, ContentPatch, EditorialTarget, Guiao, Idea, Session } from "@/lib/types";
 
@@ -85,13 +86,11 @@ export function subscribeGuioes(access: Access, onChange: () => void): () => voi
     const t = setInterval(onChange, 20000);
     return () => clearInterval(t);
   }
-  const ch = supabase()
-    .channel("guioes-" + access.ws)
-    .on("postgres_changes", { event: "*", schema: "public", table: "guioes", filter: `client_id=eq.${access.ws}` }, onChange)
-    .subscribe();
-  return () => {
-    supabase().removeChannel(ch);
-  };
+  // canal partilhado: vários widgets da mesma página podem ouvir os guiões do mesmo cliente
+  return realtime.listen("guioes-" + access.ws, (name, emit) => supabase()
+    .channel(name)
+    .on("postgres_changes", { event: "*", schema: "public", table: "guioes", filter: `client_id=eq.${access.ws}` }, emit)
+    .subscribe(), () => onChange());
 }
 
 // ---------- ideias ----------
