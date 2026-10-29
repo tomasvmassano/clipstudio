@@ -56,6 +56,7 @@ Um `agency_member` sem atribuição a um workspace **não vê nada** desse works
 | `team.invite` (client_staff, mesmo workspace) | ✓ | ✓ | — | — | — | — |
 | `team.manage` / `permissions.manage` (ws) | ✓ | dentro do teto | — | — | — | — |
 | regras de `grant_set` / `grant_revoke` | só com `permissions.manage`; nunca a si próprio; só a quem está ao seu nível ou abaixo; staff da agência só pelo dono da agência; permitir só o que o próprio tem (negar é sempre possível dentro do teto); motivo obrigatório; prazo até um ano; uma exceção ativa por pessoa e capacidade; nada se apaga (fica `revoked_at`) |||||
+| `audit_list` (`/historico`) | com `audit.read` no cliente: dono e admin do cliente, dono da agência; só o histórico desse cliente |||||
 | `access_explain` ("porque tem acesso?") | cada pessoa sobre si; sobre outros só com `permissions.manage` no mesmo cliente |||||
 | regras de `member_update` / `member_remove` | nunca a si próprio; só quem está ao seu nível ou abaixo; staff da agência só pelo dono da agência; o último dono do cliente não perde o papel nem é removido (exceto pelo dono da agência) |||||
 | `settings.manage` / `integrations.manage` | ✓ | ✓ | — | — | — | — |

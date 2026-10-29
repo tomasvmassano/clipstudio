@@ -2,6 +2,11 @@
 
 ## 2026-10-29 (W1 Fundação, fecho)
 
+- **W1-09 histórico de ações** (PRD R-05, CAP-07 parcial, FR-15-06 parcial; ADR-0015; migração `20261029110013_w1_audit_list`).
+  - `/historico` (Administração): quem fez o quê no cliente, do mais recente para o mais antigo, com o que mudou (antes e depois), filtros por ação, pessoa e período (no fuso do cliente) e "Carregar mais".
+  - Só para quem tem `audit.read` no cliente; nunca mostra outros clientes; a tabela continua fechada à API e o registo não se altera.
+  - Testes: `w1_audit` 16/16.
+
 - **W1-08 consola de permissões** (PRD CAP-02, CAP-03, CAP-05, CAP-07 parcial; ADR-0014; migrações `20261029105036_w1_permissions_console`, `20261029105538_w1_capability_labels`).
   - `/permissoes` (Administração): por pessoa, cada capacidade com o estado (pelo papel, exceção, negado, sem acesso), o porquê e as ações permitir, negar e retirar exceção, com motivo obrigatório e prazo opcional; por papel, a matriz papéis × capacidades; e a lista das exceções ativas.
   - Quem não gere permissões vê "As tuas permissões" com o porquê de cada uma.
