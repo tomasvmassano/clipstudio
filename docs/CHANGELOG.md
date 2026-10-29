@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-29 (Alojamento)
+
+- **Um só projeto Vercel:** produção passa a ser `https://clipstudio-jchs.vercel.app`; apagados os duplicados `clipstudio` e `clipstudio-c8h1`, que triplicavam cada deploy e esgotaram o limite diário do plano gratuito. Supabase Auth: Site URL e Redirect URLs têm de apontar para `https://clipstudio-jchs.vercel.app` (e `/**`), mais `http://localhost:3000/**` para desenvolvimento.
+
 ## 2026-10-29 (PRD)
 
 - **CHG-002** R-15 (falhas contidas, gestor único de canais, sessões que não caem por falhas de rede, gate de release com CI e E2E com conta real) e QA-16. Origem: incidente de `/c/numeiro`; correção no W1-12 (#20).
