@@ -2,7 +2,7 @@
 
 ## 2026-10-29 (revisão de guiões)
 
-- **W2-06** revisão (FR-05-01, FR-05-02, FR-02-02; ADR-0025). Nova página **Revisão** no menu do cliente: guiões à espera de decisão com filtros por estado, responsável, prioridade, prazo e pesquisa, com o responsável, a prioridade e o prazo da tarefa de revisão. Cada guião tem **Comentários**: carregar numa frase para a comentar, responder, resolver e reabrir; cada comentário fica com a versão em que foi feito. O código de equipa do Numeiro também comenta. Migração `w2_review_comments`. Testes: SQL 33/33, E2E 3/3.
+- **W2-06** revisão (FR-05-01, FR-05-02, FR-02-02; ADR-0025). Nova página **Revisão** no menu do cliente: guiões à espera de decisão com filtros por estado, responsável, prioridade, prazo e pesquisa, com o responsável, a prioridade e o prazo da tarefa de revisão. Cada guião tem **Comentários**: carregar numa frase para a comentar, responder, resolver e reabrir; cada comentário fica com a versão em que foi feito. O código de equipa do Numeiro também comenta. Migração `20261029162938_w2_review_comments`. Testes: SQL 33/33, E2E 3/3.
 
 ## 2026-10-29 (perfil)
 
