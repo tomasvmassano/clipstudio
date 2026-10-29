@@ -106,6 +106,8 @@ Uma execução por cliente, tipo e chave de idempotência (por defeito o dia no 
 
 Worker (W4-02): cada guião aprovado pelo Crítico entra em `guioes` como `in_review` (versão 1, `created_kind = engine`, evento `script.created`) no dia alvo da execução; repetir o mesmo slot devolve o mesmo guião. Cancelar pára entre guiões; reinício do alojamento devolve a execução à fila; limite de custo atingido fecha como concluída parcial (`result.parcial`, `result.motivo`). A corrida diária é enfileirada pelo `pg_cron` a cada 5 min (`agent_schedule_tick`).
 
+Dados de pesquisa (W4-03): cada execução lê e escreve só os reels, temas, citações, análises, hooks usados e relatórios do seu cliente (ADR-0016). Dois clientes podem acompanhar o mesmo criador, cada um com a sua cópia, depois da migração contract.
+
 ## Configuração dos agentes (`agent_config_versions`, W4-01)
 
 `draft → active → retired`. Versões nunca mudam nem se apagam; guardar cria sempre uma versão nova validada no servidor. Só uma ativa por cliente; ativar uma antiga é o rollback. Versões com erros não se ativam. Evento `agent.config_activated`.

@@ -53,7 +53,7 @@ Estado: **ativo** (existe e é verificado no servidor por `authorize()`; também
 | `costs.read_agency` | Custos | A | org | W4 | — |
 | `agents.read` | Agentes (M06) | B | ws | ativo | `/agentes`, `/agentes/configuracao` (catálogo, versão ativa, estado do worker, execuções sem custo) |
 | `agents.rehearse` | Agentes | M | ws | ativo | Ensaiar a sala |
-| `agents.run` | Agentes | A | ws | ativo | `agent_job_enqueue` (Correr agora, idempotente por tipo e dia), `agent_job_cancel`, `agent_job_retry`; executado pelo worker do motor (W4-02), que grava guiões em revisão |
+| `agents.run` | Agentes | A | ws | ativo | `agent_job_enqueue` (Correr agora, idempotente por tipo e dia), `agent_job_cancel`, `agent_job_retry`; executado pelo worker do motor (W4-02), que grava guiões em revisão; dados de pesquisa do motor por cliente (W4-03, ADR-0016) |
 | `agents.configure` | Agentes | A | ws | ativo | `agent_config_save` (versão nova validada), `agent_config_activate` (ativar ou voltar atrás), `agent_config_get` |
 | `integrations.manage` | Settings (M15) | A | ws | W6 | — |
 | `settings.manage` | Settings | A | ws | ativo (parcial) | `/definicoes`: nome, @, fuso, moeda, logótipo (bucket privado `branding`), cor da marca, só gravar aprovados (`workspace_update`, `workspace_settings`); limite de tarefas por pessoa com `tasks.manage`; integrações, notificações, segurança e dados do M15 por fazer |
