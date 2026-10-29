@@ -5,7 +5,7 @@ import { CalendarClockIcon, CheckIcon, ClockIcon, EyeIcon, Loader2Icon, PlayIcon
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Textarea } from "@/components/ui/textarea";
 import { actOnItem, CATEGORY_LABEL, delegateTask, fetchMyQueue, fmtWhen, REASON_LABEL, snoozeOptions, type Queue, type QueueItem } from "@/lib/ops";
 import { fetchAssignees, updateTask, PRIORITY_LABEL, type Assignee } from "@/lib/tasks";
@@ -90,10 +90,12 @@ export function QueueRow({ item, tz, showWorkspace, compact, onOpen, onChanged, 
                 {busy === "snooze" ? <Loader2Icon className="animate-spin" /> : <ClockIcon />} Adiar
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuLabel>Voltar a mostrar</DropdownMenuLabel>
-                {snoozeOptions(tz).map((o) => (
-                  <DropdownMenuItem key={o.label} onClick={() => run("snooze", () => actOnItem(item.key, "snooze", o.until))}>{o.label}</DropdownMenuItem>
-                ))}
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel>Voltar a mostrar</DropdownMenuLabel>
+                  {snoozeOptions(tz).map((o) => (
+                    <DropdownMenuItem key={o.label} onClick={() => run("snooze", () => actOnItem(item.key, "snooze", o.until))}>{o.label}</DropdownMenuItem>
+                  ))}
+                </DropdownMenuGroup>
               </DropdownMenuContent>
             </DropdownMenu>
           ))}

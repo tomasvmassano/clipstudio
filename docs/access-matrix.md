@@ -16,6 +16,9 @@ Fonte: PRD v2.1 §3 (papéis), §5A (TEAM-01…16), CAP-03/05/08. **PROPOSTA de 
 | `costs.read_agency` | ✓ | se delegado | — | — |
 | `audit.read` (org) | ✓ | ✓ | — | — |
 | `flags.manage` (funcionalidades em teste, `/funcionalidades`) | ✓ | — | — | — |
+| `biz.read` (vista de negócio, só operacional dos clientes atribuídos) | ✓ (todos) | ✓ | ✓ | ✓ |
+| `biz.finance` (contratos, receita, custos, margem) | ✓ | — | — | — |
+| `contracts.manage` | ✓ | — | — | — |
 
 Um `agency_member` sem atribuição a um workspace **não vê nada** desse workspace (R-03, TEAM-03).
 
@@ -31,6 +34,9 @@ Um `agency_member` sem atribuição a um workspace **não vê nada** desse works
 | `recording.use` / `confirm` | ✓ | ✓ | ✓ | ✓ (own) | — | — |
 | `styles.manage` (W5-02) | ✓ | ✓ | ✓ | — | — | — |
 | `projects.manage` (W2-07) | ✓ | ✓ | ✓ | — | — | — |
+| `analytics.manage` (W6, centro de desempenho) | ✓ | ✓ | ✓ | — | — | — |
+| `tasks.delegate` (W6) | ✓ | ✓ | ✓ | ✓ (as suas) | ✓ (as suas) | — |
+| `ops.presence` (W6) | ✓ | ✓ | ✓ | ✓ | ✓ | — |
 | `calendar.read` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `calendar.schedule` | ✓ | ✓ | ✓ | — | — | — |
 | `production.update` | ✓ | ✓ | ✓ | ✓ (own) | — | — |

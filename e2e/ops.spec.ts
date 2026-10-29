@@ -67,7 +67,7 @@ as("staff")("staff da agência passa a sua tarefa a alguém do cliente; notifica
   await page.goto("/caixa");
   await expect(page.getByRole("heading", { name: "Minha área de trabalho" })).toBeVisible();
   const row = page.locator(`[data-queue-item="task:${id}"]`);
-  await row.getByRole("button", { name: "Passar" }).click();
+  await row.getByRole("button", { name: "Passar", exact: true }).click();
   const dlg = page.getByRole("dialog");
   await dlg.getByLabel("Para quem").selectOption({ label: users.clientA });
   await dlg.getByRole("button", { name: "Confirmar" }).click();
@@ -85,7 +85,7 @@ as("clientA")("quem trabalha em quê: estou online e escolho o meu estado", asyn
   const me = page.locator(`[data-member="${users.clientA}"]`);
   await expect(me.getByText("Ocupado")).toBeVisible();
   await page.getByRole("button", { name: "Atualizar" }).click();
-  await expect(me.getByText(/^Online/)).toBeVisible();
+  await expect(me.locator("[data-slot=badge]", { hasText: /^Online/ })).toBeVisible();
   await page.getByLabel("Estado").selectOption("");
   expect(errors).toEqual([]);
 });

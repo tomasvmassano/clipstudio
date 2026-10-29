@@ -11,8 +11,8 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | Estado | Requisitos |
 |---|---|
 | feito | 23 |
-| parcial | 145 |
-| por começar | 89 |
+| parcial | 163 |
+| por começar | 71 |
 | bloqueado | 3 |
 | adiado | 3 |
 | **total** | **263** |
@@ -44,7 +44,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | TEAM-05 | P0 | parcial | âmbitos projeto e assigned_only não aplicados; sem modelos por profissão | Matriz de permissões configurável |
 | TEAM-06 | P0 | parcial | tarefa sem projeto (não existem projetos) | Tarefas e responsáveis |
 | TEAM-16 | P0 | parcial | faltam exportação, storage de media, pesquisa e realtime com contas reais | Segurança e testes de autorização |
-| FR-17-01 | P0 | parcial | sem decisões pendentes além de aprovações; deduplicação por evento não demonstrada na inbox | Inbox unificada por utilizador com tarefas, aprovações, menções, erros de automa |
+| FR-17-01 | P0 | parcial | filtros guardados no browser; verificação com conta real (R-15) | Inbox unificada por utilizador com tarefas, aprovações, menções, erros de automa |
 | FR-17-04 | P0 | parcial | sem variantes, assets e publicações por conta ligadas | Relação um-para-muitos: conteúdo → hooks → takes → variantes → assets → publicaç |
 | FR-17-05 | P0 | parcial | sem pré-requisitos nas transições | Transições configuráveis de workflow geram tarefas e notificações idempotentes,  |
 | FR-17-13 | P0 | parcial | sem recuperação de rascunhos após falha | Auto-save com indicador persistido, proteção contra alterações concorrentes e re |
@@ -57,13 +57,24 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | CAP-05 | P0 | parcial | sem simulador "Ver como utilizador"; authorize() só por workspace, sem recurso | Avaliação centralizada e explicável |
 | CAP-06 | P0 | parcial | sem revisões periódicas de acessos nem revogação de sessões | Gestão de ciclo de vida |
 | OPS-01 | P0 | parcial | sem contadores online, disponíveis, em tarefa, ausentes; sem equipa e projeto | Diretório e contadores |
-| OPS-03 | P0 | parcial | sem acknowledge, snooze e delegar | Minha área de trabalho |
+| OPS-02 | P0 | parcial | estado a partir de calendário autorizado; verificação com conta real (R-15) | Estados distintos |
+| OPS-03 | P0 | parcial | verificação com conta real (R-15) | Minha área de trabalho |
+| BIZ-01 | P0 | parcial | filtro de origem (R-16) no cálculo; prazo por vídeo é pressuposto; verificação com conta real (R-15) | Métrica norte: atingimento de entrega |
+| BIZ-02 | P0 | parcial | 3 regras sem dados (saúde a cair, renovação com saúde, posts perto de zero); verificação com conta real (R-15) | Faixa "Precisa da tua atenção" |
+| BIZ-03 | P0 | parcial | AGI distinto do MRR (decisão); índice com fotografias por idade (PERF-03); verificação com conta real (R-15) | KPIs e tabela por cliente |
+| BIZ-04 | P0 | parcial | verificação com conta real (R-15) | Dois níveis de acesso na mesma vista |
 | ING-03 | P0 | parcial | sem ingestão do ficheiro da câmara, transcrição com tempos por palavra e sincronização pelo áudio | Um ficheiro longo por câmara por sessão |
 | EDL-01 | P0 | parcial | job do pacote de edição (precisa de ingestão ING-01..03, render e worker alojado) | Pacote de edição automático |
 | EDL-03 | P0 | parcial | ligar ao job do pacote e guardar o relatório por variante na app (EDL-02); calibrar limites no piloto | QC técnico em código antes de qualquer revisão por IA |
+| PERF-01 | P0 | parcial | criador/marca é só um campo por conta; verificação com conta real (R-15) | Hierarquia |
+| PERF-02 | P0 | parcial | o publicador (PUB) tem de chamar perf_record_lineage | Etiquetas obrigatórias à publicação (R-18) |
+| PERF-03 | P0 | parcial | histórico só desde a primeira captura; 1 h quase nunca existe com scraping diário | Fotografias por idade |
+| PERF-04 | P0 | parcial | engagedViews do YouTube (API oficial) | Índice normalizado |
+| PERF-05 | P0 | parcial | alcance, retenção, skip rate, seguidores, For You (API oficial); custo por vídeo (BIZ-06) | Métricas por família |
+| PERF-06 | P0 | parcial | persona e estilo só com linhagem gravada; canibalização básica | Vistas |
 | PERF-09 | P0 | parcial | só uma leitura por publicação; ligação ao conteúdo por inferência | Correções de dados imediatas |
 | VAR-02 | P0 | parcial | layouts de S01 a S12 (equipa criativa); render real dos estilos | Catálogo de estilos por workspace |
-| FR-01-03 | P1 | parcial | sem "Minha fila" no Início; gravações e alertas fora da fila | Minha fila: tarefas, aprovações, gravações, prazos e alertas; clique abre objeto |
+| FR-01-03 | P1 | parcial | verificação com conta real (R-15) | Minha fila: tarefas, aprovações, gravações, prazos e alertas; clique abre objeto |
 | FR-01-04 | P1 | parcial | sem calendário compacto no Início | Calendário editorial compacto e atividade recente com ator e timestamp. |
 | FR-02-03 | P1 | parcial | título próprio (usa o tema); verificação com conta real (R-15) | Campos: título, cliente/workspace, campanha, tema, formato, plataforma, responsá |
 | FR-02-05 | P1 | parcial | sem ações em lote | Enviar para revisão, aprovar/rejeitar/pedir alterações com comentário obrigatóri |
@@ -111,11 +122,16 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-21-03 | P1 | parcial | importação só por scraping (não API autorizada) | importação manual e sync via API autorizada. |
 | CAP-07 | P1 | parcial | sem preview de impacto, segunda aprovação nem alertas de grants excessivos | Controlo de mudanças sensíveis |
 | CAP-08 | P1 | parcial | convidados com acesso a uma peça por fazer | Interface multi-cliente |
+| OPS-04 | P1 | parcial | verificação com conta real (R-15) | Quem trabalha em quê |
 | OPS-05 | P1 | parcial | sem disponibilidade, férias, capacidade semanal e previsão | Capacidade e workload |
 | OPS-06 | P1 | parcial | sem SLA, escalonamento e substitutos | Planeamento e handoffs |
 | OPS-07 | P1 | parcial | sem timestamps, comparação de versões e acesso externo | Colaboração e revisão |
 | OPS-08 | P1 | parcial | sem relatórios de throughput, lead/cycle time e retrabalho | Auditoria de operações |
+| OPS-10 | P1 | parcial | Realtime Presence track e Broadcast para colaboração (decisão); verificação com conta real (R-15) | Presença segura |
 | SCALE-05 | P1 | parcial | sem guidelines de marca, verificação factual, áudio, direitos | Quality gates: |
+| BIZ-05 | P1 | parcial | verificação com conta real (R-15) | Contratos por cliente |
+| BIZ-06 | P1 | parcial | custo de IA só em EUR; verificação com conta real (R-15) | Custos e margem por cliente |
+| PERF-07 | P1 | parcial | o motor (Aprendiz/Estratega) ainda não lê as alavancas | Alavancas "o que replicar" |
 | FR-01-06 | P2 | parcial | filtros persistentes por utilizador por fazer | Estados vazios explicativos, loading, erro/retry, filtros persistentes por utili |
 | FR-02-06 | P2 | parcial | sem diff visual entre versões | Histórico de versões com diff e restauro, conflitos de edição e autoria. |
 | FR-02-07 | P2 | parcial | sem pesquisa, ordenação, vistas guardadas nem impressão | Filtros, pesquisa, ordenação, vistas guardadas, exportação e impressão. |
@@ -169,6 +185,8 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | QA-14 | — | parcial | sem auditoria de acessibilidade nem teclado nos fluxos principais | Utilização mobile/tablet e teclado |
 | QA-16 | — | parcial | falta o mesmo com cada papel de cliente (viewer, reviewer) e telemóvel | Abrir cada rota com conta de agência, conta de cliente e código de equipa, com t |
 | R-15 | — | parcial | E2E com conta real no CI por fazer (ADR-0019 pendente) | Nenhuma página pode cair no erro genérico do browser ou do Next ("This page coul |
+| R-16 | — | parcial | correspondência por impressão digital com os nossos renders | Origem de cada publicação. |
+| R-18 | — | parcial | publicador por fazer (nada chama perf_record_lineage) | Linhagem gravada no momento. |
 
 <!-- resumo:fim -->
 
@@ -198,7 +216,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 |---|---|---|---|---|
 | FR-01-01 | feito |  | W1-10 _dashboard_kpis; w1_dashboard 38/38; E2E 16/16; sessão real em /c/numeiro | 2026-10-29 |
 | FR-01-02 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | dashboard_widgets/dashboard_layouts, Personalizar, ⓘ; w1_dashboard 38/38; W1-10 | — |
-| FR-01-03 | parcial | sem "Minha fila" no Início; gravações e alertas fora da fila | /caixa (inbox) W3-01 com tarefas e aprovações; w3_tasks 53/53 | — |
+| FR-01-03 | parcial | verificação com conta real (R-15) | A minha fila no Início (my_queue, W6, ADR-0034); w6_ops 77/77; e2e/ops.spec.ts | — |
 | FR-01-04 | parcial | sem calendário compacto no Início | panel.activity no Início (W1-10); calendário só em /calendario | — |
 | FR-01-05 | por começar | sem ações rápidas no Início | não encontrado em src/app/c/[ws]/page.tsx | — |
 | FR-01-06 | parcial | filtros persistentes por utilizador por fazer | W1-10 indica FR-01-06 parcial; route-error, widget-boundary, dashboard-skeleton | — |
@@ -448,7 +466,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
-| FR-17-01 | parcial | sem decisões pendentes além de aprovações; deduplicação por evento não demonstrada na inbox | inbox, notifications; w3_tasks 53/53; W3-01 | — |
+| FR-17-01 | parcial | filtros guardados no browser; verificação com conta real (R-15) | my_queue: um item por objeto, decisões além de aprovações (W6, ADR-0034); w6_ops | — |
 | FR-17-02 | parcial | sem feedback do cliente nem material entregue | /fontes Por triar e Pedidos do talento (W2-03) | — |
 
 ## 19.2 Brief único e conteúdo canónico
@@ -524,15 +542,15 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
 | OPS-01 | parcial | sem contadores online, disponíveis, em tarefa, ausentes; sem equipa e projeto | /equipa-agencia com estado, último acesso, tarefas abertas (W1-13) | — |
-| OPS-02 | por começar | sem presença nem estados manuais | nada no código | — |
-| OPS-03 | parcial | sem acknowledge, snooze e delegar | /caixa com filtros por cliente; W3-01 | — |
-| OPS-04 | por começar | sem cartões de quem trabalha em quê | nada no código | — |
+| OPS-02 | parcial | estado a partir de calendário autorizado; verificação com conta real (R-15) | online, ativo com consentimento, a trabalhar, disponível separados (W6, ADR-0034); w6_ops | — |
+| OPS-03 | parcial | verificação com conta real (R-15) | ver, adiar, mostrar já, passar, começar, concluir, idempotentes e auditados (W6, ADR-0034); w6_ops; e2e/ops.spec.ts | — |
+| OPS-04 | parcial | verificação com conta real (R-15) | /c/[ws]/quem-trabalha, só do cliente aberto (W6, ADR-0034); w6_ops | — |
 | OPS-05 | parcial | sem disponibilidade, férias, capacidade semanal e previsão | workload e WIP (W3-03) | — |
 | OPS-06 | parcial | sem SLA, escalonamento e substitutos | templates, checklists, dependências (W3-03) | — |
 | OPS-07 | parcial | sem timestamps, comparação de versões e acesso externo | comentários com menções nas tarefas (W3-01) | — |
 | OPS-08 | parcial | sem relatórios de throughput, lead/cycle time e retrabalho | /historico (W1-09) | — |
 | OPS-09 | por começar | sem automação inteligente | nada no código | — |
-| OPS-10 | por começar | sem Presence | nada no código | — |
+| OPS-10 | parcial | Realtime Presence track e Broadcast para colaboração (decisão); verificação com conta real (R-15) | heartbeat no servidor, canal presence:<cliente> só de leitura, isolamento testado (W6, ADR-0034); w6_ops | — |
 
 ## 32. Mecanismos adicionais para escalar clipping e conteúdo
 
@@ -551,21 +569,21 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
-| R-16 | por começar | origem sistema/externo inexistente | capacidade performance.origin.override só planeada (feature-registry) | — |
+| R-16 | parcial | correspondência por impressão digital com os nossos renders | origem externo nas importadas, perf_origin_set com motivo e auditoria (W6, ADR-0033); w6_perf | — |
 | R-17 | por começar | lista de frases-persona versionada inexistente | persona.manage só planeada; AGENTS §7 | — |
-| R-18 | por começar | linhagem no momento da publicação inexistente (sem publicador) | nada no código | — |
+| R-18 | parcial | publicador por fazer (nada chama perf_record_lineage) | linhagem gravada imutável e idempotente; importadas inferidas e marcadas (W6, ADR-0033); w6_perf | — |
 | R-19 | adiado | decisão do Tomás 29/10: métricas passam a vir da API oficial no futuro; por agora continua o Apify (engine/scrape.py). Fecha com PERF-08/PLAT-02 | engine/scrape.py ApifyClient; ADR-0005 | — |
 
 ## 38. Vista de negócio da agência (BIZ)
 
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
-| BIZ-01 | por começar | sem contratos nem atingimento de entrega | dashboard.business.read planeada | — |
-| BIZ-02 | por começar | sem faixa de atenção | nada no código | — |
-| BIZ-03 | por começar | sem KPIs de negócio nem tabela por cliente (Painel da agência só operacional) | agency_dashboard (W1-10) não cobre | — |
-| BIZ-04 | por começar | sem vista de negócio | finance.read planeada | — |
-| BIZ-05 | por começar | sem contratos | finance.manage planeada | — |
-| BIZ-06 | por começar | sem custo humano, ferramentas e margem | só custo de IA por execução (W4) | — |
+| BIZ-01 | parcial | filtro de origem (R-16) no cálculo; prazo por vídeo é pressuposto; verificação com conta real (R-15) | biz_overview, atingimento por cliente e total (W6, ADR-0032); w6_biz 62/62; e2e/biz.spec.ts | — |
+| BIZ-02 | parcial | 3 regras sem dados (saúde a cair, renovação com saúde, posts perto de zero); verificação com conta real (R-15) | faixa com até 5 cartões por gravidade e ação direta, também no Painel (W6, ADR-0032); w6_biz | — |
+| BIZ-03 | parcial | AGI distinto do MRR (decisão); índice com fotografias por idade (PERF-03); verificação com conta real (R-15) | KPIs operacionais e financeiros e tabela por cliente (W6, ADR-0032); w6_biz | — |
+| BIZ-04 | parcial | verificação com conta real (R-15) | resposta construída por pessoa; sem biz.finance não sai nenhum campo financeiro (W6, ADR-0032); w6_biz; e2e/biz.spec.ts | — |
+| BIZ-05 | parcial | verificação com conta real (R-15) | client_contracts versionados, EUR/AED, câmbio com data (W6, ADR-0032); w6_biz | — |
+| BIZ-06 | parcial | custo de IA só em EUR; verificação com conta real (R-15) | agency_costs com repartição e anulação, margem, custo por vídeo e por 1.000 views (W6, ADR-0032); w6_biz | — |
 | BIZ-07 | por começar | sem pré-visualização como papel | access.preview planeada | — |
 | BIZ-08 | por começar | sem cargos como modelos (job_title existe mas não pré-preenche grants) | workspace_access.job_title | — |
 | BIZ-09 | por começar | sem score de saúde | nada no código | — |
@@ -589,13 +607,13 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
-| PERF-01 | por começar | sem hierarquia criador/conta/camada | accounts sem camada | — |
-| PERF-02 | por começar | sem etiquetas à publicação | nada no código | — |
-| PERF-03 | por começar | sem fotografias por idade (publicacoes guarda só a última leitura) | publicacoes | — |
-| PERF-04 | por começar | sem índice normalizado (só mediana e outliers por scraping) | desempenho RPC bandas | — |
-| PERF-05 | por começar | sem métricas por família | nada no código | — |
-| PERF-06 | por começar | só vista por conta Instagram | /desempenho por conta | — |
-| PERF-07 | por começar | sem alavancas nem relatório semanal | nada no código | — |
+| PERF-01 | parcial | criador/marca é só um campo por conta; verificação com conta real (R-15) | perf_accounts (camada A-D, criador, estado) (W6, ADR-0033); w6_perf 63/63 | — |
+| PERF-02 | parcial | o publicador (PUB) tem de chamar perf_record_lineage | publication_lineage com as etiquetas de §40 (W6, ADR-0033); w6_perf | — |
+| PERF-03 | parcial | histórico só desde a primeira captura; 1 h quase nunca existe com scraping diário | perf_readings e perf-tick de hora a hora, fotografia ±25% (W6, ADR-0033); w6_perf | — |
+| PERF-04 | parcial | engagedViews do YouTube (API oficial) | _perf_index pela mediana da mesma conta na mesma idade, base ≥5 (W6, ADR-0033); w6_perf | — |
+| PERF-05 | parcial | alcance, retenção, skip rate, seguidores, For You (API oficial); custo por vídeo (BIZ-06) | _perf_families com as métricas da recolha e indisponíveis marcadas (W6, ADR-0033); w6_perf | — |
+| PERF-06 | parcial | persona e estilo só com linhagem gravada; canibalização básica | perf_breakdown com 12 dimensões (W6, ADR-0033); w6_perf | — |
+| PERF-07 | parcial | o motor (Aprendiz/Estratega) ainda não lê as alavancas | perf_levers com amostra mínima 15 e relatório semanal (W6, ADR-0033); w6_perf | — |
 | PERF-08 | por começar | sem ligar contas por OAuth | nada no código | — |
 | PERF-09 | parcial | só uma leitura por publicação; ligação ao conteúdo por inferência | publicacoes.shares, guiao_id | — |
 

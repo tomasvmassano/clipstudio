@@ -174,3 +174,16 @@ Campanha (`projects`): `ativa ↔ arquivada`. Arquivar não tira os guiões; só
 | --- | --- | --- | --- |
 | criar / mudar campanha | `projects.manage` | nome único no cliente; fim ≥ início | auditoria `project.created` / `project.updated` |
 | campanha, responsável, plataformas, etiquetas do guião | `scripts.edit` | campanha ativa do mesmo cliente; responsável com `scripts.edit`; não cria versão | `script.meta_changed`; notificação `script_assigned` |
+
+
+## Contrato do cliente e custos (W6, BIZ-05/06)
+
+Cada gravação de um contrato cria uma versão nova (v1, v2, …) com "em vigor desde"; as versões não se alteram nem apagam. Estado ativo ou terminado; pagamento em dia, pendente ou vencido. Gravar sobre uma versão antiga: 40001, recarregar. Câmbio EUR→AED escrito à mão, com data e fonte visíveis. Custos: lançado, depois anulado com motivo (uma vez, sem apagar). Auditoria `biz.contract_saved`, `biz.fx_saved`, `biz.cost_saved`, `biz.cost_voided`.
+
+## Desempenho (W6, PERF-03, R-16, R-18)
+
+Leitura do scraper → `perf_capture` (de hora a hora, idempotente) → fotografia por idade (1 h, 24 h, 72 h, 7 d, 30 d; leitura dentro de ±25% da idade, nunca interpolada) → índice pela mediana da mesma conta na mesma idade nos 30 dias anteriores. Publicação importada: origem `externo`, linhagem inferida e marcada; correção manual de origem com motivo e auditoria. Publicador: `perf_record_lineage` (gravada no momento, imutável, idempotente por conta e id externo).
+
+## Caixa e presença (W6, OPS-02/03/04/10, FR-17-01)
+
+Item da fila (um por objeto, notificações juntas): novo → visto (não aprova) → adiado (1 min a 30 dias) → volta a mostrar (hora, "mostrar já" ou notificação nova). Versão nova do guião ou tarefa que volta torna-o novo. Tarefa passada: `task.delegated` com antes/depois, "em curso" volta a "por fazer", notificação `task_delegated` uma vez. Presença: online (sinal ≤ 120 s), ativo (≤ 5 min, só com consentimento), a trabalhar (tarefa iniciada pela pessoa), estado manual com fim opcional. Sem horas nem histórico.

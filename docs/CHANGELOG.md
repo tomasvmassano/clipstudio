@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-30 (vaga 1: negócio, desempenho e área de trabalho)
+
+Tudo atrás de funcionalidades em teste: só o dono da agência vê até as ligar em **Funcionalidades em teste**.
+
+- **W6 Vista de negócio** (BIZ-01 a 06, parciais; ADR-0032). Página **Negócio** com atingimento de entrega (meta 95%, alerta abaixo de 90% no ritmo do mês, atrasos do cliente à parte), faixa **Precisa da tua atenção** com até 5 alertas por gravidade e ação direta (também no Painel) e KPIs e tabela por cliente, da causa para o resultado. O staff da agência vê só o operacional dos clientes atribuídos; contratos, receita, custos e margem só o dono, decidido no servidor. Contratos por cliente versionados em EUR ou AED, câmbio com taxa e data visíveis, custos humanos e de ferramentas com repartição e margem. Saúde do cliente (BIZ-09) indicada como ainda sem dados.
+- **W6 Centro de desempenho** (PERF-01 a 07, R-16, R-18, parciais; ADR-0033). Fotografias às 1 h, 24 h, 72 h, 7 d e 30 d guardadas de hora a hora; índice pela mediana da própria conta, sem comparar views entre contas; vistas por conta, plataforma, criador, camada, conteúdo, hook, estilo, tema, formato, geração e origem; saúde da conta; "o que replicar" com amostra mínima e relatório semanal. Cada publicação tem origem sistema ou externo, com correção auditada, e linhagem gravada ou inferida e marcada. Métricas que o scraping não dá aparecem como indisponíveis até ligar a conta pela API oficial. O Desempenho de sempre continua igual.
+- **W6 Minha área de trabalho** (FR-01-03, FR-17-01, OPS-02, 03, 04, 10, parciais; ADR-0034). **A minha fila** no Início do cliente e caixa de entrada única: um item por objeto, decisões além de aprovações, gravações de hoje; ver, adiar, passar, começar e concluir, com auditoria. **Quem trabalha em quê**: cartões por pessoa só do cliente aberto, estados distintos (online, ativo com consentimento, a trabalhar, disponível), canal privado de avisos.
+- Migrações `BIZMIG`, `PERFMIG`, `OPSMIG` (aditivas). Testes: SQL 1092/1092 (novos: w6_biz 62, w6_perf 63, w6_ops 77); E2E 80/80 (novos: biz, perf, ops); unitários perf-format 11/11.
+
 ## 2026-10-29 (funcionalidades em teste)
 
 - **W0 MIG-09** interruptores de funcionalidades por cliente (CAP-09, ADR-0031). Cada módulo novo entra só para o dono da agência e liga-se em **Funcionalidades em teste** (menu da agência): para a equipa da agência ou para todos, na agência inteira ou cliente a cliente. O menu e as páginas escondem o que está desligado, também por endereço; as permissões continuam a ser verificadas no servidor. Nova capacidade `flags.manage` (dono da agência). Migração `20261029193316_w0_feature_flags` (aditiva). Testes: SQL 20/20.
