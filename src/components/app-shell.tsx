@@ -9,7 +9,7 @@ import { TeamCodeDialog } from "@/components/team-code";
 export function AppShell({ children }: { children: React.ReactNode }) {
 	const path = usePathname();
 	// Entrar e voltar do email: sem menu lateral (ainda não há workspace).
-	if (path.startsWith("/login") || path.startsWith("/auth")) {
+	if (path.startsWith("/login") || path.startsWith("/auth") || path.startsWith("/convite")) {
 		return <>{children}</>;
 	}
 	return (

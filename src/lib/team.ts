@@ -6,7 +6,11 @@ export type Member = {
   job_title: string | null; status: "active" | "suspended"; expires_at: string | null; since: string;
   open_tasks?: number; can_manage?: boolean;
 };
-export type Invitation = { id: string; email: string; affiliation: "agency_staff" | "client_staff"; role: string; expires_at: string; created_at: string };
+export type InviteStatus = "pending" | "expired" | "declined";
+export type Invitation = {
+  id: string; email: string; affiliation: "agency_staff" | "client_staff"; role: string; expires_at: string; created_at: string;
+  status?: InviteStatus; sent_count?: number; last_sent_at?: string | null;
+};
 export type Team = {
   members: Member[]; invitations: Invitation[]; can_invite: boolean; can_invite_agency: boolean;
   can_manage?: boolean; my_rank?: number; agency_staff?: { user_id: string; email: string; role: string }[] | null;
@@ -42,7 +46,7 @@ export type AgencyStaff = {
 export type AgencyTeam = {
   me: string; can: { invite: boolean; manage: boolean }; staff: AgencyStaff[];
   clients: { id: string; name: string }[];
-  invites: { id: string; email: string; agency_role: string; expires_at: string; created_at: string }[];
+  invites: { id: string; email: string; agency_role: string; expires_at: string; created_at: string; status?: InviteStatus; sent_count?: number; last_sent_at?: string | null }[];
 };
 export const AGENCY_ROLES = ["agency_member", "agency_manager", "agency_admin"] as const;
 export const AGENCY_ROLE_LABEL: Record<string, string> = {
@@ -53,3 +57,20 @@ export const inviteAgency = (email: string, role: string) => call<string>("agenc
 export const revokeAgencyInvite = (id: string) => call<void>("agency_invite_revoke", { p_id: id });
 export const updateAgencyMember = (user: string, patch: Partial<{ agency_role: string; status: "active" | "suspended" }>) =>
   call<{ agency_role: string; status: string }>("agency_member_update", { p_user: user, p_patch: patch });
+
+/* ---------- Envio do convite (W1-14, ADR-0023) ---------- */
+
+export type InviteSend = { sent: boolean; email: string; expires_at: string; link?: string; error?: string };
+/** Envia ou reenvia o email do convite. Sem email configurado, devolve o link para copiar. */
+export async function sendInvite(id: string): Promise<InviteSend> {
+  let r: Response;
+  try {
+    r = await fetch(`/api/invites/${id}/send`, { method: "POST", cache: "no-store" });
+  } catch {
+    throw new Error("Sem ligação. O convite está criado: tenta reenviar daqui a pouco.");
+  }
+  const body = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(body.error ?? "Não foi possível enviar o convite.");
+  return body as InviteSend;
+}
+export const INVITE_STATUS_LABEL: Record<InviteStatus, string> = { pending: "Pendente", expired: "Expirado", declined: "Recusado" };

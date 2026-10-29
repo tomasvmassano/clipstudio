@@ -13,8 +13,8 @@ import { useSession } from "@/components/session-provider";
 import { ROLE_LABEL } from "@/lib/access";
 import {
   AGENCY_ROLES, AGENCY_ROLE_LABEL, INVITE_ROLES, assignAgencyStaff, fetchAgencyTeam, inviteAgency, removeMember, revokeAgencyInvite,
-  updateAgencyMember, type AgencyStaff, type AgencyTeam,
-} from "@/lib/team";
+  updateAgencyMember, type AgencyStaff, type AgencyTeam, INVITE_STATUS_LABEL, sendInvite, type InviteSend } from "@/lib/team";
+import { InviteDeliveryNote, ResendInvite } from "@/components/invite-delivery";
 
 /*
  * Equipa da agência (espaço da agência, W1-13; ADR-0020). Quem é staff, com que papel, em que clientes trabalha e com quanta carga.
@@ -74,14 +74,20 @@ function InviteCard({ onDone }: { onDone: () => void }) {
   const [role, setRole] = useState<string>("agency_member");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [sent, setSent] = useState<InviteSend | null>(null);
   return (
     <Card className="shadow-none dark:ring-0">
       <CardHeader><CardTitle>Convidar para a agência</CardTitle>
-        <CardDescription>A pessoa cria conta com este email e entra na agência sem acesso a clientes; depois atribuis-lhe os clientes em que trabalha. Ainda não enviamos o email: avisa a pessoa e manda-lhe o link da app.</CardDescription></CardHeader>
+        <CardDescription>A pessoa cria conta com este email e entra na agência sem acesso a clientes; depois atribuis-lhe os clientes em que trabalha. A pessoa recebe um email com o link para aceitar ou recusar.</CardDescription></CardHeader>
       <CardContent>
         <form className="flex flex-wrap items-end gap-2" onSubmit={async (e) => {
-          e.preventDefault(); setBusy(true); setMsg(null);
-          try { await inviteAgency(email, role); setMsg({ ok: true, text: `Convite criado para ${email.trim().toLowerCase()}. Válido 14 dias.` }); setEmail(""); onDone(); }
+          e.preventDefault(); setBusy(true); setMsg(null); setSent(null);
+          try {
+            const id = await inviteAgency(email, role); setEmail("");
+            try { setSent(await sendInvite(id)); }
+            catch (e3) { setMsg({ ok: false, text: `Convite criado, mas o envio falhou: ${(e3 as Error).message} Usa Reenviar na lista.` }); }
+            onDone();
+          }
           catch (e2) { setMsg({ ok: false, text: (e2 as Error).message }); }
           finally { setBusy(false); }
         }}>
@@ -94,6 +100,7 @@ function InviteCard({ onDone }: { onDone: () => void }) {
           <Button type="submit" disabled={busy || !email.trim()}>{busy ? <Loader2Icon className="animate-spin" /> : <MailPlusIcon />} Convidar</Button>
         </form>
         {msg && <p className={`mt-2 text-sm ${msg.ok ? "text-emerald-600 dark:text-emerald-400" : "text-destructive"}`} role={msg.ok ? "status" : "alert"}>{msg.text}</p>}
+        {sent && <div className="mt-2"><InviteDeliveryNote result={sent} /></div>}
       </CardContent>
     </Card>
   );
@@ -190,19 +197,29 @@ function StaffRow({ s, team, onDone }: { s: AgencyStaff; team: AgencyTeam; onDon
 function Invites({ team, onDone }: { team: AgencyTeam; onDone: () => void }) {
   const [busy, setBusy] = useState<string | null>(null);
   const [err, setErr] = useState("");
+  const [sent, setSent] = useState<InviteSend | null>(null);
   return (
     <Card className="shadow-none dark:ring-0">
-      <CardHeader><CardTitle>Convites pendentes</CardTitle><CardDescription>Ficam pendentes até a pessoa criar conta com o email e o confirmar.</CardDescription></CardHeader>
+      <CardHeader><CardTitle>Convites</CardTitle><CardDescription>Pendentes até a pessoa aceitar pelo link. Expirados e recusados ficam 30 dias para reenviares ou convidares de novo.</CardDescription></CardHeader>
       <CardContent className="flex flex-col gap-2 text-sm">
-        {team.invites.map((i) => (
-          <div key={i.id} className="flex flex-wrap items-center gap-2">
-            <b>{i.email}</b><span className="text-muted-foreground">{AGENCY_ROLE_LABEL[i.agency_role]} · expira {fmt(i.expires_at)}</span>
-            <Button size="sm" variant="ghost" className="ml-auto" disabled={busy === i.id} aria-label={`Cancelar convite de ${i.email}`}
-              onClick={async () => { setBusy(i.id); setErr(""); try { await revokeAgencyInvite(i.id); onDone(); } catch (e) { setErr((e as Error).message); } finally { setBusy(null); } }}>
-              Cancelar convite
-            </Button>
-          </div>
-        ))}
+        {sent && <InviteDeliveryNote result={sent} />}
+        {team.invites.map((i) => {
+          const st = i.status ?? "pending";
+          return (
+            <div key={i.id} className="flex flex-wrap items-center gap-2">
+              <b>{i.email}</b>
+              <Badge variant={st === "pending" ? "secondary" : "outline"}>{INVITE_STATUS_LABEL[st]}</Badge>
+              <span className="text-muted-foreground">{AGENCY_ROLE_LABEL[i.agency_role]} · expira {fmt(i.expires_at)}{i.last_sent_at ? ` · enviado ${fmt(i.last_sent_at)}` : ""}</span>
+              <span className="ml-auto inline-flex items-start gap-1">
+                {st !== "declined" && <ResendInvite id={i.id} email={i.email} onDone={(r) => { setSent(r); onDone(); }} />}
+                <Button size="sm" variant="ghost" disabled={busy === i.id} aria-label={`Cancelar convite de ${i.email}`}
+                  onClick={async () => { setBusy(i.id); setErr(""); try { await revokeAgencyInvite(i.id); onDone(); } catch (e) { setErr((e as Error).message); } finally { setBusy(null); } }}>
+                  {st === "declined" ? "Tirar da lista" : "Cancelar convite"}
+                </Button>
+              </span>
+            </div>
+          );
+        })}
         {err && <p className="text-destructive" role="alert">{err}</p>}
       </CardContent>
     </Card>

@@ -14,7 +14,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { WorkspaceGate } from "@/components/workspace-gate";
 import { useSession } from "@/components/session-provider";
 import { ROLE_LABEL, type Access } from "@/lib/access";
-import { assignAgencyStaff, fetchTeam, INVITE_ROLES, inviteMember, removeMember, revokeInvitation, updateMember, type Member, type Team } from "@/lib/team";
+import { assignAgencyStaff, fetchTeam, INVITE_ROLES, INVITE_STATUS_LABEL, inviteMember, removeMember, revokeInvitation, sendInvite, updateMember, type InviteSend, type Member, type Team } from "@/lib/team";
+import { InviteDeliveryNote, ResendInvite } from "@/components/invite-delivery";
 
 const AFF_LABEL = { agency_staff: "Agência", client_staff: "Cliente" } as const;
 const fmtDate = (iso: string | null) =>
@@ -77,6 +78,7 @@ function InviteCard({ ws, myRole, canAgency, onDone }: { ws: string; myRole: str
 	const [aff, setAff] = useState<"client_staff" | "agency_staff">("client_staff");
 	const [busy, setBusy] = useState(false);
 	const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
+	const [sent, setSent] = useState<InviteSend | null>(null);
 
 	// A UI só sugere papéis até ao teu; o servidor recusa o resto (acima_do_teto).
 	const myRank = INVITE_ROLES.indexOf(myRole as (typeof INVITE_ROLES)[number]);
@@ -88,8 +90,7 @@ function InviteCard({ ws, myRole, canAgency, onDone }: { ws: string; myRole: str
 			<CardHeader>
 				<CardTitle>Convidar</CardTitle>
 				<CardDescription>
-					O convite fica associado ao email. A pessoa cria conta com esse email, confirma-o e ganha acesso só a este cliente.
-					Ainda não enviamos o email automaticamente: avisa a pessoa e manda-lhe o link da app.
+					A pessoa recebe um email com o link do convite, pode aceitar ou recusar, e entra com esse email. Ganha acesso só a este cliente.
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
@@ -97,11 +98,12 @@ function InviteCard({ ws, myRole, canAgency, onDone }: { ws: string; myRole: str
 					className="flex flex-col gap-3 sm:flex-row sm:items-end"
 					onSubmit={async (e) => {
 						e.preventDefault();
-						setBusy(true); setMsg(null);
+						setBusy(true); setMsg(null); setSent(null);
 						try {
-							await inviteMember(ws, email, role, aff);
-							setMsg({ ok: true, text: `Convite criado para ${email.trim().toLowerCase()}. Válido 14 dias.` });
+							const id = await inviteMember(ws, email, role, aff);
 							setEmail("");
+							try { setSent(await sendInvite(id)); }
+							catch (err2) { setMsg({ ok: false, text: `Convite criado, mas o envio falhou: ${(err2 as Error).message} Usa Reenviar na lista.` }); }
 							onDone();
 						} catch (err) {
 							setMsg({ ok: false, text: (err as Error).message });
@@ -142,6 +144,7 @@ function InviteCard({ ws, myRole, canAgency, onDone }: { ws: string; myRole: str
 					</Button>
 				</form>
 				{msg && <p className={`mt-3 text-sm ${msg.ok ? "text-emerald-500" : "text-destructive"}`} role="status">{msg.text}</p>}
+				{sent && <div className="mt-3"><InviteDeliveryNote result={sent} /></div>}
 			</CardContent>
 		</Card>
 	);
@@ -288,43 +291,53 @@ function AssignCard({ ws, staff, onDone }: { ws: string; staff: { user_id: strin
 function InvitesCard({ team, onChange }: { team: Team; onChange: () => void }) {
 	const [busy, setBusy] = useState<string | null>(null);
 	const [err, setErr] = useState("");
+	const [sent, setSent] = useState<InviteSend | null>(null);
 	if (team.invitations.length === 0) return null;
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>Convites pendentes</CardTitle>
-				<CardDescription>Ficam pendentes até a pessoa confirmar o email.</CardDescription>
+				<CardTitle>Convites</CardTitle>
+				<CardDescription>Pendentes até a pessoa aceitar pelo link. Os expirados e recusados ficam aqui 30 dias para reenviares ou convidares de novo.</CardDescription>
 			</CardHeader>
-			<CardContent>
-				{err && <p className="mb-3 text-sm text-destructive">{err}</p>}
+			<CardContent className="flex flex-col gap-3">
+				{err && <p className="text-sm text-destructive" role="alert">{err}</p>}
+				{sent && <InviteDeliveryNote result={sent} />}
 				<Table>
 					<TableHeader>
-						<TableRow><TableHead>Email</TableHead><TableHead>Lado</TableHead><TableHead>Papel</TableHead><TableHead>Expira</TableHead>{team.can_invite && <TableHead className="w-0" />}</TableRow>
+						<TableRow><TableHead>Email</TableHead><TableHead>Lado</TableHead><TableHead>Papel</TableHead><TableHead>Estado</TableHead><TableHead>Expira</TableHead>{team.can_invite && <TableHead className="w-0" />}</TableRow>
 					</TableHeader>
 					<TableBody>
-						{team.invitations.map((i) => (
-							<TableRow key={i.id}>
-								<TableCell className="font-medium">{i.email}</TableCell>
-								<TableCell>{AFF_LABEL[i.affiliation]}</TableCell>
-								<TableCell>{ROLE_LABEL[i.role] ?? i.role}</TableCell>
-								<TableCell className="text-muted-foreground">{fmtDate(i.expires_at)}</TableCell>
-								{team.can_invite && (
+						{team.invitations.map((i) => {
+							const st = i.status ?? "pending";
+							return (
+								<TableRow key={i.id}>
+									<TableCell className="font-medium">{i.email}</TableCell>
+									<TableCell>{AFF_LABEL[i.affiliation]}</TableCell>
+									<TableCell>{ROLE_LABEL[i.role] ?? i.role}</TableCell>
 									<TableCell>
-										<Button
-											size="sm" variant="ghost" disabled={busy === i.id} aria-label={`Cancelar convite de ${i.email}`}
-											onClick={async () => {
-												setBusy(i.id); setErr("");
-												try { await revokeInvitation(i.id); onChange(); }
-												catch (e) { setErr((e as Error).message); }
-												finally { setBusy(null); }
-											}}
-										>
-											{busy === i.id ? <Loader2Icon className="animate-spin" /> : <XIcon />} Cancelar
-										</Button>
+										<Badge variant={st === "pending" ? "secondary" : "outline"}>{INVITE_STATUS_LABEL[st]}</Badge>
+										{i.last_sent_at && <span className="ml-2 text-xs text-muted-foreground">enviado {fmtDate(i.last_sent_at)}</span>}
 									</TableCell>
-								)}
-							</TableRow>
-						))}
+									<TableCell className="text-muted-foreground">{fmtDate(i.expires_at)}</TableCell>
+									{team.can_invite && (
+										<TableCell className="whitespace-nowrap">
+											{st !== "declined" && <ResendInvite id={i.id} email={i.email} onDone={(r) => { setSent(r); onChange(); }} />}
+											<Button
+												size="sm" variant="ghost" disabled={busy === i.id} aria-label={`Cancelar convite de ${i.email}`}
+												onClick={async () => {
+													setBusy(i.id); setErr("");
+													try { await revokeInvitation(i.id); onChange(); }
+													catch (e) { setErr((e as Error).message); }
+													finally { setBusy(null); }
+												}}
+											>
+												{busy === i.id ? <Loader2Icon className="animate-spin" /> : <XIcon />} {st === "declined" ? "Tirar da lista" : "Cancelar"}
+											</Button>
+										</TableCell>
+									)}
+								</TableRow>
+							);
+						})}
 					</TableBody>
 				</Table>
 			</CardContent>

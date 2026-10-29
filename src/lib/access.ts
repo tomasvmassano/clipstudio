@@ -68,6 +68,10 @@ export function friendlyError(msg: string): string {
   if (msg.includes("configuracao_invalida")) return "Esta versão tem erros: corrige-os e guarda uma versão nova antes de ativar.";
   if (msg.includes("execucao_nao_encontrada")) return "Esta execução já não existe.";
   if (msg.includes("filtro_invalido")) return "Filtro inválido. Limpa os filtros e tenta de novo.";
+  if (msg.includes("aguarda_para_reenviar")) return "Acabaste de enviar este convite. Espera um minuto antes de reenviar.";
+  if (msg.includes("limite_envios")) return "Este convite já foi enviado 5 vezes. Cancela-o e cria um novo se for preciso.";
+  if (msg.includes("convite_fechado")) return "Este convite já foi aceite, recusado ou cancelado.";
+  if (msg.includes("link_invalido")) return "Este link de convite não é válido.";
   if (msg.includes("ja_e_staff")) return "Essa pessoa já faz parte da equipa da agência.";
   if (msg.includes("convite_pendente")) return "Já há um convite pendente para esse email.";
   if (msg.includes("pessoa_e_equipa_de_cliente")) return "Essa pessoa faz parte da equipa de um cliente e não pode entrar na agência.";

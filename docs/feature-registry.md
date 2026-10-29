@@ -12,7 +12,7 @@ Estado: **ativo** (existe e é verificado no servidor por `authorize()`; também
 | `workspaces.create` | Agência | A | org | ativo | Novo cliente (`workspace_create`), opcionalmente com a estrutura de outro cliente sem dados privados |
 | `workspaces.archive` | Agência | A | org | ativo | Arquivar com motivo e confirmação, recuperar (`workspace_archive`, `workspace_restore`) |
 | `team.read` | Equipa (M13) | B | org, ws | ativo | `/equipa` (`workspace_team`), `/permissoes` (só as suas, com o porquê), `/definicoes` |
-| `team.invite` | Equipa | A | org, ws | ativo | Convidar / Cancelar convite (`invite_member`, `revoke_invitation`) |
+| `team.invite` | Equipa | A | org, ws | ativo | Convidar / Cancelar convite (`invite_member`, `revoke_invitation`); Enviar e Reenviar (`POST /api/invites/:id/send` → `invitation_issue_link`, W1-14). Página pública `/convite?t=` (`invitation_preview`, `invitation_decline`): sem capacidade, só com o token do email |
 | `team.manage` | Equipa | A | org, ws | ativo | `/equipa`: mudar papel, suspender, reativar, remover com reatribuição de tarefas (`member_update`, `member_remove`); dono da agência atribui staff (`agency_staff_assign`) |
 | `permissions.manage` | CAP | A | org, ws | ativo | `/permissoes`: por pessoa (o que tem, porquê, permitir/negar com motivo e prazo), por papel, exceções ativas (`permissions_matrix`, `grant_set`, `grant_revoke`, `access_explain`); papéis personalizados por fazer |
 | `audit.read` | CAP | M | org, ws | ativo | `/historico` (`audit_list`): quem fez o quê, com antes e depois, filtros por ação, pessoa e período; vista de agência (todos os clientes) por fazer |
