@@ -4,6 +4,7 @@ import { wsPath } from "@/lib/ws-path";
 import { WsLink } from "@/components/ws-link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   CheckIcon, ExternalLinkIcon, FilePlus2Icon, InboxIcon, Loader2Icon, MegaphoneIcon, PlusIcon, RotateCwIcon, SearchIcon, UndoIcon, XIcon,
 } from "lucide-react";
@@ -28,7 +29,8 @@ const ORIGEM: Record<string, string> = { reporter: "Repórter", curious: "Curios
 const TIPOS = ["noticia", "artigo", "livro", "reel", "video", "podcast", "comentario", "outro"];
 
 export default function FontesPage() {
-  return <WorkspaceGate need="sources.read">{(access) => <Fontes access={access} />}</WorkspaceGate>;
+  const q = useSearchParams().get("q") ?? "";
+  return <WorkspaceGate need="sources.read">{(access) => <Fontes key={q} access={access} />}</WorkspaceGate>;
 }
 
 function Fontes({ access }: { access: Access }) {
@@ -37,9 +39,10 @@ function Fontes({ access }: { access: Access }) {
   const [all, setAll] = useState<Source[] | null>(null);
   const [err, setErr] = useState("");
   const [msg, setMsg] = useState("");
-  const [tab, setTab] = useState<Tab>("entrada");
-  const [q, setQ] = useState("");
-  const [query, setQuery] = useState("");
+  // ?q= vem da pesquisa global (FR-16-01): abre a lista já filtrada
+  const initialQ = (useSearchParams().get("q") ?? "").slice(0, 100);
+  const [q, setQ] = useState(initialQ); const [query, setQuery] = useState(initialQ);
+  const [tab, setTab] = useState<Tab>(initialQ ? "todas" : "entrada");
   const [rev, setRev] = useState(0);
   const [adding, setAdding] = useState(false);
   const [asking, setAsking] = useState(false);

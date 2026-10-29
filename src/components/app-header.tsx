@@ -11,6 +11,7 @@ import { CustomSidebarTrigger } from "@/components/custom-sidebar-trigger";
 import { activeFor, agencyNavGroups, clientNavGroups } from "@/components/app-shared";
 import { stripWs, wsIdFromPath } from "@/lib/ws-path";
 import { NavUser } from "@/components/nav-user";
+import { CommandPalette } from "@/components/command-palette";
 import { Link2Icon, CheckIcon, SunMoonIcon } from "lucide-react";
 
 export function AppHeader() {
@@ -46,6 +47,7 @@ export function AppHeader() {
 				<AppBreadcrumbs page={activeItem} />
 			</div>
 			<div className="flex items-center gap-3">
+				<CommandPalette />
 				<Button aria-label="Copiar link desta página" title="Copiar link desta página" size="icon-sm" variant="outline" onClick={copyLink}>
 					{copied ? <CheckIcon /> : <Link2Icon />}
 				</Button>

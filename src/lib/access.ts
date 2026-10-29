@@ -54,6 +54,8 @@ export function friendlyError(msg: string): string {
   if (msg.includes("email_invalido")) return "Email inválido.";
   if (msg.includes("papel_invalido")) return "Papel inválido.";
   if (msg.includes("nada_a_alterar")) return "Nada para guardar.";
+  if (msg.includes("guiao_nao_encontrado")) return "Este guião já não existe neste cliente ou não tens acesso.";
+  if (msg.includes("funcionalidade_desligada")) return "Esta funcionalidade ainda está em teste e não está ligada para ti.";
   if (msg.includes("conflito_edicao")) return "Alguém mudou este guião entretanto. Recarreguei a versão mais recente: revê e volta a guardar.";
   if (msg.includes("motivo_obrigatorio")) return "Escreve o motivo.";
   if (msg.includes("transicao_invalida")) return "Esta ação já não se aplica ao estado atual do guião. Recarrega.";

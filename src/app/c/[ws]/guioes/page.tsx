@@ -3,7 +3,7 @@
 import { WsLink } from "@/components/ws-link";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { DownloadIcon, Loader2Icon, MonitorPlayIcon, PlusIcon } from "lucide-react";
+import { DownloadIcon, ListChecksIcon, Loader2Icon, MonitorPlayIcon, PlusIcon, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -13,9 +13,13 @@ import { GuiaoCard } from "@/components/guiao-card";
 import { TeamCode } from "@/components/team-code";
 import { useGuioes } from "@/components/use-guioes";
 import { WorkspaceGate } from "@/components/workspace-gate";
+import { GuioesBulkBar } from "@/components/guioes-bulk";
+import { useSession } from "@/components/session-provider";
+import { useFlags } from "@/lib/flags";
+import { fetchProjects } from "@/lib/projects";
 import type { Access } from "@/lib/access";
 import { recordable, splitDay, teleprompterText, todayDubai, tpQueue, words } from "@/lib/data";
-import { WPS } from "@/lib/types";
+import { WPS, type Guiao } from "@/lib/types";
 
 type Filter = "todos" | "rever" | "aprovados" | "gravados" | "rejeitados" | "arquivados";
 
@@ -35,7 +39,24 @@ function GuioesInner({ access }: { access: Access }) {
   const [msg, setMsg] = useState("");
   const [creating, setCreating] = useState(false);
   const [fresh, setFresh] = useState<string | null>(null);
-  const { all, loading, error, actions, create, caps, canWrite } = useGuioes(access, date);
+  const { all, loading, error, actions, create, caps, canWrite, reload } = useGuioes(access, date);
+  const { can } = useSession();
+  // operações em lote (FR-17-07): só com a flag guioes.bulk ligada; o servidor volta a verificar cada ação
+  const flags = useFlags(access.ws, access.token);
+  const bulkOn = !!flags?.has("guioes.bulk");
+  const [selecting, setSelecting] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(() => new Set());
+  // ?campanha=<id> (vindo da pesquisa global): mostra só os guiões dessa campanha
+  const campanha = params.get("campanha");
+  const [campanhaOn, setCampanhaOn] = useState(true);
+  const [campanhaName, setCampanhaName] = useState<string | null>(null);
+  useEffect(() => {
+    if (!campanha) return;
+    let alive = true;
+    fetchProjects(access).then((l) => { if (alive) setCampanhaName(l.projects.find((p) => p.id === campanha)?.name ?? "campanha desconhecida"); }).catch(() => {});
+    return () => { alive = false; };
+  }, [access, campanha]);
+  const byCampanha = campanha && campanhaOn ? campanha : null;
   const { day, carry } = useMemo(() => splitDay(all, date), [all, date]);
   const isToday = date === todayDubai();
   // ?open=<id> (vindo da caixa ou da minha fila): leva ao guião e destaca-o
@@ -61,7 +82,7 @@ function GuioesInner({ access }: { access: Access }) {
     min: Math.round(ok.reduce((t, g) => t + (words(g.corpo) + words(g.hooks[0]?.text)) / WPS, 0) / 60),
   };
 
-  const shown = day.filter((g) => {
+  const shown = day.filter((g) => !byCampanha || g.project_id === byCampanha).filter((g) => {
     if (filter === "rever") return toReview(g.editorial_status);
     if (filter === "aprovados") return g.editorial_status === "approved";
     if (filter === "rejeitados") return g.editorial_status === "rejected";
@@ -69,6 +90,18 @@ function GuioesInner({ access }: { access: Access }) {
     if (filter === "gravados") return ["recorded", "editing", "ready", "published"].includes(g.production_status);
     return g.editorial_status !== "archived";
   });
+
+  const visibleIds = [...(isToday && filter === "todos" && !byCampanha ? carry : []), ...shown].map((g) => g.id);
+  const selectedIds = visibleIds.filter((id) => selected.has(id));
+  const toggle = (id: string) => setSelected((prev) => { const n = new Set(prev); if (n.has(id)) n.delete(id); else n.add(id); return n; });
+  const stopSelecting = () => { setSelecting(false); setSelected(new Set()); };
+  const pick = (g: Guiao, card: React.ReactNode) => !selecting ? card : (
+    <div key={g.id} className="flex items-start gap-2">
+      <input type="checkbox" className="mt-4 size-5 shrink-0 accent-primary" checked={selected.has(g.id)} onChange={() => toggle(g.id)}
+             aria-label={`Selecionar guião ${g.n}${g.tema ? `: ${g.tema}` : ""}`} />
+      <div className="min-w-0 flex-1">{card}</div>
+    </div>
+  );
 
   const newScript = async () => {
     setCreating(true); setMsg("");
@@ -100,6 +133,7 @@ function GuioesInner({ access }: { access: Access }) {
             </Button>
           )}
           {caps.export && <Button size="sm" variant="outline" onClick={exportTxt}><DownloadIcon /> Exportar .txt</Button>}
+          {bulkOn && !selecting && <Button size="sm" variant="outline" onClick={() => setSelecting(true)}><ListChecksIcon /> Selecionar</Button>}
           <Button size="sm" render={<WsLink href={`/teleprompter?date=${date}`} />} nativeButton={false}><MonitorPlayIcon /> Teleprompter</Button>
         </div>
       </div>
@@ -134,6 +168,30 @@ function GuioesInner({ access }: { access: Access }) {
         </Alert>
       )}
 
+      {campanha && (
+        <div className="flex flex-wrap items-center gap-2 text-sm">
+          {campanhaOn ? (
+            <span className="flex items-center gap-1 rounded-full border px-3 py-1">
+              Campanha: <b>{campanhaName ?? "…"}</b> (neste dia)
+              <Button size="icon-xs" variant="ghost" aria-label="Mostrar todas as campanhas" onClick={() => setCampanhaOn(false)}><XIcon /></Button>
+            </span>
+          ) : <Button size="sm" variant="ghost" onClick={() => setCampanhaOn(true)}>Mostrar só a campanha {campanhaName ?? ""}</Button>}
+        </div>
+      )}
+
+      {bulkOn && selecting && (
+        <GuioesBulkBar
+          access={access}
+          selected={selectedIds}
+          rows={all}
+          caps={{ edit: caps.edit, approve: caps.approve, schedule: can("calendar.schedule"), export: caps.export }}
+          allSelected={visibleIds.length > 0 && selectedIds.length === visibleIds.length}
+          onSelectAll={() => setSelected(new Set(visibleIds))}
+          onClear={stopSelecting}
+          onDone={async () => { setSelected(new Set()); await reload(); }}
+        />
+      )}
+
       <ToggleGroup value={[filter]} onValueChange={(v) => setFilter(((v as string[])[0] as Filter) ?? "todos")} variant="outline" size="sm">
         <ToggleGroupItem value="todos">Todos</ToggleGroupItem>
         <ToggleGroupItem value="rever">Por rever</ToggleGroupItem>
@@ -153,8 +211,11 @@ function GuioesInner({ access }: { access: Access }) {
         </Alert>
       ) : (
         <div className="flex flex-col gap-3">
-          {isToday && filter === "todos" && carry.map((g) => <GuiaoCard key={g.id} g={g} carried caps={caps} actions={actions} onError={setMsg} />)}
-          {shown.map((g) => <GuiaoCard key={g.id} g={g} caps={caps} actions={actions} onError={setMsg} startInEdit={g.id === fresh} />)}
+          {isToday && filter === "todos" && !byCampanha && carry.map((g) => pick(g, <GuiaoCard key={g.id} g={g} carried caps={caps} actions={actions} onError={setMsg} />))}
+          {shown.map((g) => pick(g, <GuiaoCard key={g.id} g={g} caps={caps} actions={actions} onError={setMsg} startInEdit={g.id === fresh} />))}
+          {byCampanha && shown.length === 0 && (
+            <Alert><AlertDescription>Nenhum guião desta campanha neste dia{filter !== "todos" ? " com este filtro" : ""}. Muda de dia ou tira o filtro da campanha.</AlertDescription></Alert>
+          )}
         </div>
       )}
     </div>
