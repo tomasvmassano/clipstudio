@@ -29,6 +29,8 @@ type Ctx = {
   agencyName: string | null;
   /** Último cliente aberto neste browser que ainda está na lista (para os redirecionamentos). */
   lastWs: () => string | null;
+  /** Motivo, se aceitar os convites deste login falhou. */
+  inviteError: string | null;
   access: Access | null;
   can: (cap: string) => boolean;
   /** Capacidades de âmbito agência (criar clientes, etc.). O servidor volta a verificar. */
@@ -44,7 +46,7 @@ type Ctx = {
 };
 
 const SessionCtx = createContext<Ctx>({
-  mode: "loading", email: null, label: null, workspaces: [], ws: null, wsRequested: null, agencyName: null, lastWs: () => null,
+  mode: "loading", email: null, label: null, workspaces: [], ws: null, wsRequested: null, agencyName: null, lastWs: () => null, inviteError: null,
   access: null, can: () => false, canOrg: () => false,
   setWorkspace: () => {}, signInCode: async () => false, signOut: async () => {}, refresh: async () => {}, error: "",
   dialogOpen: false, setDialogOpen: () => {},
@@ -140,6 +142,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     wsRequested: wsId,
     agencyName: mode === "user" ? ctx?.agency?.find((a) => a.status === "active")?.name ?? null : null,
     lastWs,
+    inviteError: ctx?.invite_error ?? null,
     access,
     can: (cap) => !!ws?.capabilities.includes(cap),
     canOrg: (cap) => mode === "user" && !!ctx?.agency?.some((a) => a.status === "active" && a.capabilities?.includes(cap)),

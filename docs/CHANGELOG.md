@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-10-29 (W1 Equipa da agência)
+
+- **W1-13 Equipa da agência** (PRD §2, §3, R-12, R-14, M13 parcial; ADR-0020; migração `20261029130512_w1_agency_team`).
+  - Nova página no menu da agência: quem é staff, papel na agência, estado, último acesso, clientes onde trabalha (com o papel) e tarefas abertas.
+  - O dono convida para a agência, muda papéis, suspende e reativa, e atribui ou tira pessoas dos clientes. Os admins da agência só veem.
+  - Quem vê só fica a conhecer os clientes a que também tem acesso.
+  - Quem é da equipa de um cliente não pode ser convidado para a agência.
+  - Se aceitar um convite falhar, a pessoa vê o motivo em vez de "sem acesso".
+  - Testes: `w1_agency_team` 24/24.
+
 ## 2026-10-29 (Alojamento)
 
 - **Um só projeto Vercel:** produção passa a ser `https://clipstudio-jchs.vercel.app`; apagados os duplicados `clipstudio` e `clipstudio-c8h1`, que triplicavam cada deploy e esgotaram o limite diário do plano gratuito. Supabase Auth: Site URL e Redirect URLs têm de apontar para `https://clipstudio-jchs.vercel.app` (e `/**`), mais `http://localhost:3000/**` para desenvolvimento.

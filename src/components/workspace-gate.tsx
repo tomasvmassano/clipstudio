@@ -14,7 +14,7 @@ import { clientPath } from "@/lib/ws-path";
  * `need` esconde a página a quem não tem a capacidade (o servidor recusaria de qualquer forma).
  */
 export function WorkspaceGate({ need, children }: { need?: string; children: (access: Access) => ReactNode }) {
-  const { mode, access, workspaces, email, can, canOrg, error, refresh, signOut, wsRequested, lastWs } = useSession();
+  const { mode, access, workspaces, email, can, canOrg, error, refresh, signOut, wsRequested, lastWs, inviteError } = useSession();
 
   if (mode === "loading") {
     return (
@@ -50,6 +50,7 @@ export function WorkspaceGate({ need, children }: { need?: string; children: (ac
       <Alert>
         <AlertDescription className="flex flex-col gap-3">
           <span>
+            {inviteError && <><b>Não consegui aceitar o teu convite: {inviteError}</b><br /></>}
             Entraste como <b>{email}</b>, mas ainda não tens acesso a nenhum cliente. Pede a quem gere a equipa um convite para este email. Quando o convite existir, carrega em Verificar.
           </span>
           <span className="flex gap-2">

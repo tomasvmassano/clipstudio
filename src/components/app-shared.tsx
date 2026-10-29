@@ -32,12 +32,12 @@ export const agencyNavGroups: SidebarNavGroup[] = [
 			{ title: "Painel", path: "/", icon: <GaugeIcon />, orgCap: "dashboard.agency" },
 			{ title: "Clientes", path: "/clientes", icon: <Building2Icon />, orgCap: "workspaces.read" },
 			{ title: "Caixa de entrada", path: "/caixa", icon: <InboxIcon />, orgCap: "dashboard.agency" },
+			{ title: "Equipa da agência", path: "/equipa-agencia", icon: <UsersRoundIcon />, orgCap: "team.read" },
 		],
 	},
 	{
 		label: "Em breve",
 		items: [
-			{ title: "Equipa da agência", icon: <UsersRoundIcon />, soon: true },
 			{ title: "Calendário de todos", icon: <CalendarDaysIcon />, soon: true },
 			{ title: "Custos", icon: <WalletIcon />, soon: true },
 			{ title: "Histórico da agência", icon: <ScrollIcon />, soon: true },

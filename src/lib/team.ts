@@ -32,3 +32,24 @@ export const removeMember = (ws: string, user: string, reassignTo: string | null
   call<{ tasks_reassigned: number }>("member_remove", { p_ws: ws, p_user: user, p_reassign_to: reassignTo });
 export const assignAgencyStaff = (ws: string, user: string, role: string) =>
   call<{ role: string }>("agency_staff_assign", { p_ws: ws, p_user: user, p_role: role });
+
+/* ---------- Equipa da agência (espaço da agência, W1-13; ADR-0020) ---------- */
+
+export type AgencyStaff = {
+  user_id: string; email: string; agency_role: string; status: "active" | "suspended"; since: string; last_sign_in: string | null;
+  clients: { id: string; name: string; role: string; status: string; open_tasks: number }[]; open_tasks: number;
+};
+export type AgencyTeam = {
+  me: string; can: { invite: boolean; manage: boolean }; staff: AgencyStaff[];
+  clients: { id: string; name: string }[];
+  invites: { id: string; email: string; agency_role: string; expires_at: string; created_at: string }[];
+};
+export const AGENCY_ROLES = ["agency_member", "agency_manager", "agency_admin"] as const;
+export const AGENCY_ROLE_LABEL: Record<string, string> = {
+  agency_owner: "Dono da agência", agency_admin: "Admin da agência", agency_manager: "Gestor da agência", agency_member: "Membro da agência",
+};
+export const fetchAgencyTeam = () => call<AgencyTeam>("agency_team", {});
+export const inviteAgency = (email: string, role: string) => call<string>("agency_invite", { p_email: email.trim(), p_role: role });
+export const revokeAgencyInvite = (id: string) => call<void>("agency_invite_revoke", { p_id: id });
+export const updateAgencyMember = (user: string, patch: Partial<{ agency_role: string; status: "active" | "suspended" }>) =>
+  call<{ agency_role: string; status: string }>("agency_member_update", { p_user: user, p_patch: patch });
