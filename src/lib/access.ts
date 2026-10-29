@@ -23,7 +23,7 @@ export type AppContext = {
 /** Capacidades do código de equipa (espelha legacy_can no SQL; o servidor é quem decide). */
 export const LEGACY_CAPS = [
   "scripts.read", "scripts.edit", "scripts.submit", "scripts.approve", "scripts.reject", "scripts.export",
-  "recording.use", "recording.confirm", "sources.read", "requests.create", "references.read", "analytics.read", "agents.read", "agents.rehearse",
+  "recording.use", "recording.confirm", "sources.read", "requests.create", "references.read", "tasks.read", "analytics.read", "agents.read", "agents.rehearse",
 ];
 
 /** Aceita convites pendentes para o email confirmado e devolve o contexto do utilizador. */
@@ -57,6 +57,14 @@ export function friendlyError(msg: string): string {
   if (msg.includes("texto_longo")) return "O pedido é demasiado longo (máximo 2000 caracteres).";
   if (msg.includes("duracao_s")) return "A duração tem de estar entre 1 e 3600 segundos.";
   if (msg.includes("corpo_vazio")) return "O corpo não pode ficar vazio.";
+  if (msg.includes("responsavel_sem_acesso")) return "Essa pessoa não tem acesso a tarefas neste cliente.";
+  if (msg.includes("dependencias_abertas")) return "Ainda há tarefas de que esta depende por fechar.";
+  if (msg.includes("dependencia_circular")) return "Isso criava um ciclo: uma tarefa ficaria à espera de si própria.";
+  if (msg.includes("mencao_sem_acesso")) return "Só podes mencionar quem tem acesso a este cliente.";
+  if (msg.includes("comentario_vazio")) return "Escreve o comentário.";
+  if (msg.includes("comentario_longo")) return "O comentário é demasiado longo (máximo 4000 caracteres).";
+  if (msg.includes("tarefa_nao_encontrada")) return "Esta tarefa já não existe ou não tens acesso.";
+  if (msg.includes("evento_invalido")) return "Esse evento não pode ser usado numa automação.";
   if (msg.includes("sessao_fechada")) return "Esta sessão de gravação já foi fechada. Abre o teleprompter outra vez.";
   if (msg.includes("sessao_nao_encontrada")) return "A sessão de gravação já não existe. Abre o teleprompter outra vez.";
   if (msg.includes("item_desconhecido")) return "Este guião já não está na fila desta sessão. Recarrega a fila.";

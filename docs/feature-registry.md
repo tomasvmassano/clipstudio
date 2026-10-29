@@ -39,8 +39,9 @@ Estado: **ativo** (existe e é verificado no servidor por `authorize()`; também
 | `media.share` | Biblioteca | A | ws, proj | W5 | — |
 | `clipping.create` | Clipping | M | ws, proj | W5 | — |
 | `clipping.export` | Clipping | M | ws, proj | W5 | — |
-| `tasks.read` | Calendário (M11) | B | ws, proj, own | W3 | — |
-| `tasks.manage` | Calendário | M | ws, proj | W3 | — |
+| `tasks.read` | Tarefas (M11, TEAM-06) | B | ws, proj, own | ativo | `/tarefas` (lista, detalhe, comentários, histórico); também o código de equipa |
+| `tasks.work` | Tarefas | B | ws, own | ativo | mudar estado/bloquear as tarefas de que é responsável, comentar e mencionar; caixa de entrada `/caixa` |
+| `tasks.manage` | Tarefas | M | ws, proj | ativo | criar, atribuir, prazos, prioridades, dependências, cancelar; automações de handoff (`task_rule_save`) |
 | `publishing.schedule` | Publicação (M12) | A | ws, conta | W6 | — |
 | `publishing.publish` | Publicação | A | ws, conta | W6 | — |
 | `social_accounts.manage` | Publicação | A | ws | W6 | — |
