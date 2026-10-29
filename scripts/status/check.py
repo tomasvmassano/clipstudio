@@ -5,6 +5,7 @@
   check.py --fix           reescreve o resumo e a lista de pendentes a partir das linhas
   check.py --seed A.tsv    cria/atualiza linhas a partir de um TSV (id, estado, falta, evidencia), mantendo as que já existem
   check.py --pr BASE HEAD  falha se o PR mexe na app (src/, supabase/migrations/) sem mexer no registo
+  check.py --set ID campo=valor ...  muda uma linha (campos: estado, falta, evid, +evid acrescenta, verif) e regenera o resumo
 
 Regras: cada ID do PRD aparece uma vez; estados válidos; "parcial" e "bloqueado" dizem o que falta;
 "adiado" diz a decisão; IDs que saíram do PRD são assinalados. O resumo do topo é gerado (não se edita à mão).
@@ -132,6 +133,27 @@ def main(argv):
         open(STATUS, "w", encoding="utf-8").write(render(ids, rows))
         print(f"Registo semeado: {len(rows)} linhas.")
         return 0
+    if argv[:1] == ["--set"] and len(argv) >= 3:
+        rows = read_rows(open(STATUS, encoding="utf-8").read())
+        i = argv[1]
+        if i not in ids:
+            print(f"::error::{i} não está no PRD"); return 1
+        r = rows.get(i, [{"estado": "por começar", "falta": "", "evid": "", "verif": "—"}])[0]
+        for kv in argv[2:]:
+            k, _, v = kv.partition("=")
+            if k == "+evid":
+                r["evid"] = f"{r['evid']}; {v}" if r["evid"] else v
+            elif k in ("estado", "falta", "evid", "verif"):
+                r[k] = v
+            else:
+                print(f"::error::campo desconhecido: {k}"); return 1
+        rows[i] = [r]
+        open(STATUS, "w", encoding="utf-8").write(render(ids, rows))
+        errs = validate(ids, open(STATUS, encoding="utf-8").read())
+        for e in errs:
+            print(f"::error::{e}")
+        print(f"{i}: {r['estado']} · {r['falta'] or '-'}")
+        return 1 if errs else 0
     if argv[:1] == ["--fix"]:
         rows = read_rows(open(STATUS, encoding="utf-8").read()) if os.path.exists(STATUS) else OrderedDict()
         open(STATUS, "w", encoding="utf-8").write(render(ids, rows))

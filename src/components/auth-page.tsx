@@ -37,7 +37,7 @@ export function AuthPage() {
 	const { mode, signInCode } = useSession();
 	const next = useMemo(() => safeNext(params.get("next")), [params]);
 	const [step, setStep] = useState<Step>("email");
-	const [email, setEmail] = useState("");
+	const [email, setEmail] = useState(() => params.get("email") ?? "");
 	const [password, setPassword] = useState("");
 	const [code, setCode] = useState("");
 	const [busy, setBusy] = useState(false);

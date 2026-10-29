@@ -9,9 +9,10 @@ Fonte: PRD v2.1 §4 (estados), §20 (teleprompter), §23 (eventos), AGENTS §6. 
 Cliente: `active → archived → active`. Arquivar exige motivo, corta logo o acesso de toda a equipa (`authorize` só aceita clientes ativos), cancela execuções em fila e pede cancelamento das que estão a correr; recuperar devolve tudo como estava. Nada é apagado.
 Membro (`workspace_access.status`): `active ⇄ suspended`, `active|suspended → removed`. Removido perde o acesso já, fica no histórico e as tarefas abertas passam para quem for escolhido (ou ficam sem responsável), com evento `reassigned` e notificação. Um convite novo aceite reativa o acesso com o papel do convite. Tudo com antes e depois em `audit_events`.
 
-## Convites (aceitação, W1-11)
+## Convites (aceitação, W1-11; envio, W1-14)
 
-`pendente → aceite` (email confirmado igual ao do convite) ou `pendente → cancelado` (revogado por quem convidou, expirado, ou bloqueado por cliente único: a pessoa já está ativa na equipa de outro cliente; fica `invitation.blocked` no histórico do cliente que convidou).
+`pendente → aceite` (email confirmado igual ao do convite) ou `pendente → cancelado` (revogado por quem convidou, ou bloqueado por cliente único: a pessoa já está ativa na equipa de outro cliente; fica `invitation.blocked` no histórico do cliente que convidou).
+Envio (W1-14, ADR-0023): `invitation_issue_link` gera um token novo (só o hash fica na base; o link anterior deixa de valer), renova a validade para 14 dias e conta o envio (máximo 5, um por minuto). `pendente → recusado` pelo link (`invitation_decline`, sem conta). `pendente → expirado` com o tempo; `expirado → pendente` ao reenviar. Recusado não se reenvia: convida-se de novo. Eventos: `invitation.sent`, `invitation.declined`.
 
 ## Staff da agência (`agency_memberships`, W1-13)
 

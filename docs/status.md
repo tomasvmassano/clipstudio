@@ -40,7 +40,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-10-01 | P0 | parcial | sem módulo Custos; worker por alojar | Consumo de IA por agente, modelo, execução e workspace. |
 | FR-11-01 | P0 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | Calendário editorial por dia, semana e mês; drag and drop com validação. |
 | FR-11-02 | P0 | parcial | sem revisões nem publicações no calendário | Tarefas, gravações, revisões, publicações, responsáveis, deadlines e dependência |
-| FR-13-01 | P0 | parcial | sem envio de email, recusar e reenviar | Convidar por email com expiração, aceitar/recusar, reenviar e revogar convite. |
+| FR-13-01 | P0 | parcial | envio real por email: falta o Tomás criar a conta Resend, verificar o domínio e pôr RESEND_API_KEY, INVITE_FROM e APP_URL no Vercel; até lá o link é copiado à mão | Convidar por email com expiração, aceitar/recusar, reenviar e revogar convite. |
 | FR-14-02 | P0 | parcial | sem perfil: idioma, fuso e notificações pessoais em falta | Idioma, timezone, tema, notificações e preferências do teleprompter. |
 | FR-15-01 | P0 | parcial | sem idioma configurável (só PT-PT) | Geral: nome, logótipo, idioma, timezone, moeda e branding. |
 | FR-15-02 | P0 | parcial | sem categorias, estados e regras de aprovação configuráveis | Conteúdo: categorias, formatos, estados, templates, regras de aprovação e checkl |
@@ -158,15 +158,15 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | MIG-07 | — | parcial | faltam /perfil e /publicacoes | Criar rotas reais para módulos existentes no menu e novas páginas /fontes, /equi |
 | MIG-08 | — | parcial | sem pesquisa real | Implementar pesquisa real em app-search.tsx, corrigir links #, perfil demo, load |
 | MIG-10 | — | parcial | RPCs e token legado (studio_whoami, legacy_can, studio_tokens) ainda ativos | Remover RPCs e credenciais legadas só depois de validação e reconciliação de dad |
-| QA-01 | — | parcial | E2E de rotas só com código de equipa e não versionado no repo | Abrir cada rota por menu, URL direta e refresh |
-| QA-02 | — | parcial | realtime, storage de media e URL/API com contas reais não testados | User A tentar ler/alterar workspace B por URL/API/RPC/realtime/storage |
+| QA-01 | — | parcial | E2E versionados cobrem rotas por URL direta e refresh; falta abrir cada rota pelo menu | Abrir cada rota por menu, URL direta e refresh |
+| QA-02 | — | parcial | storage de media e realtime por cliente sem E2E dedicado | User A tentar ler/alterar workspace B por URL/API/RPC/realtime/storage |
 | QA-03 | — | parcial | sessão revogada não testada | Convite expirado, sessão revogada, membro removido |
 | QA-04 | — | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | Criar/editar/submeter/aprovar guião e editar após aprovação |
 | QA-06 | — | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | Teleprompter: troca de data, espelho, atalhos, sessão interrompida |
 | QA-11 | — | parcial | testado só em Postgres local e mock; worker por alojar | Agente IA falha ou excede orçamento |
 | QA-13 | — | parcial | sem teste com sessão ativa real | Mudança de role durante sessão ativa |
 | QA-14 | — | parcial | sem auditoria de acessibilidade nem teclado nos fluxos principais | Utilização mobile/tablet e teclado |
-| QA-16 | — | parcial | só /c/numeiro e equipa da agência verificados com conta real; sem E2E automático com conta | Abrir cada rota com conta de agência, conta de cliente e código de equipa, com t |
+| QA-16 | — | parcial | falta o mesmo com cada papel de cliente (viewer, reviewer) e telemóvel | Abrir cada rota com conta de agência, conta de cliente e código de equipa, com t |
 | R-15 | — | parcial | E2E com conta real no CI por fazer (ADR-0019 pendente) | Nenhuma página pode cair no erro genérico do browser ou do Next ("This page coul |
 
 <!-- resumo:fim -->
@@ -333,11 +333,11 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
-| FR-13-01 | parcial | sem envio de email, recusar e reenviar | invite_member, revoke_invitation, accept_invitations, expiração 14 dias; w1_team 21/21 | — |
+| FR-13-01 | parcial | envio real por email: falta o Tomás criar a conta Resend, verificar o domínio e pôr RESEND_API_KEY, INVITE_FROM e APP_URL no Vercel; até lá o link é copiado à mão | invite_member, revoke_invitation, accept_invitations, expiração 14 dias; w1_team 21/21; W1-14 link com token, reenviar, recusar, expirados e recusados na lista; w1_invite_delivery 25/25; e2e/invites.spec.ts 5/5; ADR-0023 | 2026-10-29 (E2E) |
 | FR-13-02 | feito |  | papéis workspace_owner..viewer + role_capabilities; w1_isolation 38/38, w1_permissions 35/35 | — |
 | FR-13-03 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | workspace_access por pessoa, workspace-switcher; W1-03, W1-11 | — |
 | FR-13-04 | parcial | sem transferência de propriedade | member_update suspender, último dono protegido (_last_client_owner); w1_clients 55/55 | — |
-| FR-13-05 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | audit_events em convites e papéis; /historico; w1_audit 16/16 | — |
+| FR-13-05 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | audit_events em convites e papéis; /historico; w1_audit 16/16; invitation.sent e invitation.declined (W1-14) | — |
 | FR-13-06 | parcial | sem grupos/equipas | atribuição de tarefas com _task_valid_assignee; W3-01 | — |
 
 ## M14 — Perfil
@@ -426,9 +426,9 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
-| QA-01 | parcial | E2E de rotas só com código de equipa e não versionado no repo | E2E estrutura 15/15 (CHANGELOG W1-11) | — |
-| QA-02 | parcial | realtime, storage de media e URL/API com contas reais não testados | w1_isolation 38/38, w4_engine_isolation 23/23, w1_settings (bucket) | — |
-| QA-03 | parcial | sessão revogada não testada | convite expirado e membro removido em w1_team, w1_clients | — |
+| QA-01 | parcial | E2E versionados cobrem rotas por URL direta e refresh; falta abrir cada rota pelo menu | E2E estrutura 15/15 (CHANGELOG W1-11); e2e/routes.spec.ts no CI (ADR-0022) | 2026-10-29 (E2E) |
+| QA-02 | parcial | storage de media e realtime por cliente sem E2E dedicado | w1_isolation 38/38, w4_engine_isolation 23/23, w1_settings (bucket); e2e/isolation.spec.ts: UI, REST e RPC de A contra B; corre no CI em cada PR (job db, base descartável) | 2026-10-29 (E2E) |
+| QA-03 | parcial | sessão revogada não testada | convite expirado e membro removido em w1_team, w1_clients; corre no CI em cada PR (job db, base descartável) | — |
 | QA-04 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | w2_content 47/47; E2E de escrita 23/23 (W2) | — |
 | QA-05 | feito |  | dedup por url_normalized e URL inválido em w2_sources 41/41; corre no CI em cada PR (job db, base descartável) | — |
 | QA-06 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | w2_teleprompter 52/52; E2E 28/28 (offline, dois dispositivos, iPad) | — |
@@ -436,12 +436,12 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | QA-08 | por começar | sem upload de media | nada no código | — |
 | QA-09 | por começar | sem publicação | nada no código | — |
 | QA-10 | por começar | sem OAuth | nada no código | — |
-| QA-11 | parcial | testado só em Postgres local e mock; worker por alojar | w4_worker 30/30, test_worker 19/19 (limite de custo, falha definitiva) | — |
+| QA-11 | parcial | testado só em Postgres local e mock; worker por alojar | w4_worker 30/30, test_worker 19/19 (limite de custo, falha definitiva); corre no CI em cada PR (job db, base descartável) | — |
 | QA-12 | por começar | sem pesquisa | nada no código | — |
-| QA-13 | parcial | sem teste com sessão ativa real | authorize() por pedido; w1_permissions 35/35 | — |
+| QA-13 | parcial | sem teste com sessão ativa real | authorize() por pedido; w1_permissions 35/35; corre no CI em cada PR (job db, base descartável) | — |
 | QA-14 | parcial | sem auditoria de acessibilidade nem teclado nos fluxos principais | E2E telemóvel/iPad no Início e teleprompter (W1-10, W2-05) | — |
 | QA-15 | por começar | sem teste de backup e restauro | nada no repo | — |
-| QA-16 | parcial | só /c/numeiro e equipa da agência verificados com conta real; sem E2E automático com conta | quality.yml (guardas); W1-12; ADR-0019 | — |
+| QA-16 | parcial | falta o mesmo com cada papel de cliente (viewer, reviewer) e telemóvel | quality.yml (guardas); W1-12; ADR-0019; e2e/routes.spec.ts: 19 rotas, dono e cliente, zero erros na consola (CI) | 2026-10-29 (E2E) |
 
 ## 19.1 Inbox universal e triagem
 

@@ -60,6 +60,8 @@ Um `agency_member` sem atribuição a um workspace **não vê nada** desse works
 | Convites (W1-11) | equipa de cliente só convida para o seu cliente, nunca staff da agência nem acima do seu papel; uma pessoa da equipa de um cliente só pertence a um cliente (convite para outro é cancelado e registado) |||||
 | Equipa da agência (W1-13) | ver: dono e admin da agência; convidar, mudar papel, suspender, atribuir: só o dono; ninguém se altera a si próprio; dono protegido; cada pessoa mostra só os clientes que quem vê pode ver; equipa de cliente e membros da agência sem `team.read` recusados (42501) |||||
 | `team.invite` (client_staff, mesmo workspace) | ✓ | ✓ | — | — | — | — |
+| Enviar/reenviar convite (W1-14) | quem tem `team.invite` no espaço do convite (cliente) ou na agência (convites da agência); dono da agência em todos; outro cliente 42501/403; anónimo 42501 |||||
+| Abrir ou recusar pelo link (W1-14) | qualquer pessoa com o token do email, sem conta; aceitar exige entrar com o email do convite (confirmado); token errado não revela nada |||||
 | `team.manage` / `permissions.manage` (ws) | ✓ | dentro do teto | — | — | — | — |
 | regras de `grant_set` / `grant_revoke` | só com `permissions.manage`; nunca a si próprio; só a quem está ao seu nível ou abaixo; staff da agência só pelo dono da agência; permitir só o que o próprio tem (negar é sempre possível dentro do teto); motivo obrigatório; prazo até um ano; uma exceção ativa por pessoa e capacidade; nada se apaga (fica `revoked_at`) |||||
 | `audit_list` (`/historico`) | com `audit.read` no cliente: dono e admin do cliente, dono da agência; só o histórico desse cliente |||||

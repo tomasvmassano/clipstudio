@@ -7,7 +7,7 @@ import { SUPABASE_KEY, SUPABASE_URL } from "@/lib/supabase";
  * Não é a barreira de segurança: RLS e authorize() decidem cada leitura e escrita no servidor.
  * Também renova os cookies da sessão Supabase.
  */
-const PUBLIC = [/^\/login/, /^\/auth\//, /^\/legacy\//];
+const PUBLIC = [/^\/login/, /^\/auth\//, /^\/legacy\//, /^\/convite/];
 
 export async function proxy(req: NextRequest) {
   let res = NextResponse.next({ request: req });

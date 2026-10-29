@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-29 (convites por email)
+
+- **W1-14** convites com link (FR-13-01, ADR-0023). Convidar envia o convite logo; cada convite tem Reenviar (token novo, validade renovada para 14 dias, máximo 5 envios, um por minuto) e Cancelar. A pessoa abre `/convite`, vê quem convidou, para onde e com que papel, e aceita (entrando com esse email) ou recusa sem precisar de conta. Expirados e recusados ficam na lista 30 dias. Email pelo Resend quando `RESEND_API_KEY` e `INVITE_FROM` estiverem no Vercel; sem isso a app mostra o link para copiar. Migração `20261029151140_w1_invite_delivery` (aditiva). Testes: SQL 25/25, E2E 5/5, unitários 6/6.
+- Registo de estado: `check.py --set` para editar uma linha. Correção: notas de QA-01, 02, 03, 11, 13 e 16 dos PRs #29 e #30 tinham sido apagadas pelo `--fix` (a edição apanhava a tabela gerada); repostas.
+
 ## 2026-10-29 (E2E no CI)
 
 - **W0-QA-02** E2E com contas reais no repositório e no CI (ADR-0022). Playwright contra uma stack Supabase local (migrações e dados sintéticos), com quatro contas criadas só ali: dono da agência, staff só com o A, equipa do A e equipa do B. 41 testes: isolamento A/B pela UI, pela REST e por RPC; espaço certo por papel; 19 rotas por URL e refresh sem erros na consola; código de equipa. `npm run test:e2e` corre localmente (precisa de Docker). Fixture com hooks no formato real (`{text, mecanismo}`).

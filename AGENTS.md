@@ -119,7 +119,7 @@ A feature is DONE only when: implemented in backend and UI; authorized and tenan
 
 At the end of every implementation task report:
 
-Before reporting, update the rows in `docs/status.md` for every requirement ID the task touched (state, what is missing, evidence, date of real-session verification) and run `python3 scripts/status/check.py --fix`. The report below must match those rows. A requirement is `feito` only with evidence; when the product owner decides to skip or postpone something, record it as `adiado` with the decision and date, never leave it silently undone. PRD changes that add or remove IDs must run `--fix` in the same docs PR (new IDs enter as `por começar`).
+Before reporting, update the rows in `docs/status.md` for every requirement ID the task touched (state, what is missing, evidence, date of real-session verification) and run `python3 scripts/status/check.py --fix` (edit rows with `check.py --set ID campo=valor`, never by regex over the file: the generated *Pendentes* table has the same shape). The report below must match those rows. A requirement is `feito` only with evidence; when the product owner decides to skip or postpone something, record it as `adiado` with the decision and date, never leave it silently undone. PRD changes that add or remove IDs must run `--fix` in the same docs PR (new IDs enter as `por começar`).
 
 - **Requirement IDs:** ...
 - **Implemented:** ...
