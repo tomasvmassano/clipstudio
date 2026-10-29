@@ -11,8 +11,8 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | Estado | Requisitos |
 |---|---|
 | feito | 22 |
-| parcial | 142 |
-| por começar | 93 |
+| parcial | 144 |
+| por começar | 91 |
 | bloqueado | 3 |
 | adiado | 3 |
 | **total** | **263** |
@@ -59,7 +59,9 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | OPS-01 | P0 | parcial | sem contadores online, disponíveis, em tarefa, ausentes; sem equipa e projeto | Diretório e contadores |
 | OPS-03 | P0 | parcial | sem acknowledge, snooze e delegar | Minha área de trabalho |
 | ING-03 | P0 | parcial | sem ingestão do ficheiro da câmara, transcrição com tempos por palavra e sincronização pelo áudio | Um ficheiro longo por câmara por sessão |
+| EDL-01 | P0 | parcial | job do pacote de edição (precisa de ingestão ING-01..03, render e worker alojado) | Pacote de edição automático |
 | PERF-09 | P0 | parcial | só uma leitura por publicação; ligação ao conteúdo por inferência | Correções de dados imediatas |
+| VAR-02 | P0 | parcial | layouts de S01 a S12 (equipa criativa); render real dos estilos | Catálogo de estilos por workspace |
 | FR-01-03 | P1 | parcial | sem "Minha fila" no Início; gravações e alertas fora da fila | Minha fila: tarefas, aprovações, gravações, prazos e alertas; clique abre objeto |
 | FR-01-04 | P1 | parcial | sem calendário compacto no Início | Calendário editorial compacto e atividade recente com ator e timestamp. |
 | FR-02-03 | P1 | parcial | faltam campanha, plataforma, responsável e tags no guião | Campos: título, cliente/workspace, campanha, tema, formato, plataforma, responsá |
@@ -575,7 +577,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | ING-02 | por começar | sem ingestão da câmara | media.ingest planeada | — |
 | ING-03 | parcial | sem ingestão do ficheiro da câmara, transcrição com tempos por palavra e sincronização pelo áudio | recording_marks, recording_marks_add, recording_timeline (W5-01, ADR-0026); w5_recording_marks 17/17; e2e/recording-marks.spec.ts 2/2 | — |
 | ING-04 | por começar | sem upload pelo telemóvel | nada no código | — |
-| EDL-01 | por começar | sem pacote de edição | edit.package.run planeada | — |
+| EDL-01 | parcial | job do pacote de edição (precisa de ingestão ING-01..03, render e worker alojado) | preset de edição versionado por cliente com o defeito do PRD (edit_presets, edit_preset_save; W5-02, ADR-0027) | — |
 | EDL-02 | por começar | sem revisão em lote de variantes | nada no código | — |
 | EDL-03 | por começar | sem QC técnico | nada no código | — |
 | EDL-04 | por começar | sem biblioteca de vídeos de atenção | nada no código | — |
@@ -601,7 +603,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
 | VAR-01 | por começar | sem variantes | nada no código | — |
-| VAR-02 | por começar | sem catálogo de estilos | styles.manage planeada | — |
+| VAR-02 | parcial | layouts de S01 a S12 (equipa criativa); render real dos estilos | edit_styles, edit_style_versions, edit_style_save/set_status (W5-02, ADR-0027); w5_edit_styles 34/34; e2e/edit-styles.spec.ts 3/3 | — |
 | VAR-03 | por começar | sem motor frase-imagem | nada no código nem no motor | — |
 | VAR-04 | por começar | sem verificador de títulos | nada no código | — |
 | VAR-05 | por começar | sem republicação | publishing.republish.approve planeada | — |
