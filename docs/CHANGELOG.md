@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-29 (funcionalidades em teste)
+
+- **W0 MIG-09** interruptores de funcionalidades por cliente (CAP-09, ADR-0031). Cada módulo novo entra só para o dono da agência e liga-se em **Funcionalidades em teste** (menu da agência): para a equipa da agência ou para todos, na agência inteira ou cliente a cliente. O menu e as páginas escondem o que está desligado, também por endereço; as permissões continuam a ser verificadas no servidor. Nova capacidade `flags.manage` (dono da agência). Migração `20261029193316_w0_feature_flags` (aditiva). Testes: SQL 20/20.
+
 ## 2026-10-29 (campanhas e filtros do teleprompter)
 
 - **W2-07** campanha, responsável, plataformas e etiquetas no guião (FR-02-03) e fila do teleprompter filtrável (FR-03-01), ADR-0029. Cada guião tem **Detalhes**: escolher ou criar uma campanha ou série, o responsável, as plataformas e etiquetas. Aparecem no cartão. Mudar isto não cria versão nem tira a aprovação; quem fica responsável recebe notificação. No teleprompter a fila filtra por campanha e por responsável ("só os meus"), por dispositivo. Nova capacidade `projects.manage` (dono, admin, gestor). Migração `20261029185412_w2_content_meta` (aditiva). Testes: SQL 30/30, E2E 2/2.

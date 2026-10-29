@@ -10,9 +10,9 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | Estado | Requisitos |
 |---|---|
-| feito | 22 |
+| feito | 23 |
 | parcial | 145 |
-| por começar | 90 |
+| por começar | 89 |
 | bloqueado | 3 |
 | adiado | 3 |
 | **total** | **263** |
@@ -111,7 +111,6 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-21-03 | P1 | parcial | importação só por scraping (não API autorizada) | importação manual e sync via API autorizada. |
 | CAP-07 | P1 | parcial | sem preview de impacto, segunda aprovação nem alertas de grants excessivos | Controlo de mudanças sensíveis |
 | CAP-08 | P1 | parcial | convidados com acesso a uma peça por fazer | Interface multi-cliente |
-| CAP-09 | P1 | parcial | não existem feature flags; regra só documentada | Disponibilidade ≠ autorização |
 | OPS-05 | P1 | parcial | sem disponibilidade, férias, capacidade semanal e previsão | Capacidade e workload |
 | OPS-06 | P1 | parcial | sem SLA, escalonamento e substitutos | Planeamento e handoffs |
 | OPS-07 | P1 | parcial | sem timestamps, comparação de versões e acesso externo | Colaboração e revisão |
@@ -158,6 +157,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | MIG-06 | — | parcial | ideas não migrada para sources; take_numeiro mantido, sem editorial_angle | Migrar Idea para sources, removendo take_numeiro em favor de editorial_angle gen |
 | MIG-07 | — | parcial | faltam /perfil e /publicacoes | Criar rotas reais para módulos existentes no menu e novas páginas /fontes, /equi |
 | MIG-08 | — | parcial | sem pesquisa real | Implementar pesquisa real em app-search.tsx, corrigir links #, perfil demo, load |
+| MIG-09 | — | parcial | dual-read e plano de rollback testado por módulo; verificação com conta real (R-15) | Introduzir feature flags por workspace para migração progressiva, dual-read limi |
 | MIG-10 | — | parcial | RPCs e token legado (studio_whoami, legacy_can, studio_tokens) ainda ativos | Remover RPCs e credenciais legadas só depois de validação e reconciliação de dad |
 | QA-01 | — | parcial | E2E versionados cobrem rotas por URL direta e refresh; falta abrir cada rota pelo menu | Abrir cada rota por menu, URL direta e refresh |
 | QA-02 | — | parcial | storage de media e realtime por cliente sem E2E dedicado | User A tentar ler/alterar workspace B por URL/API/RPC/realtime/storage |
@@ -420,7 +420,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | MIG-06 | parcial | ideas não migrada para sources; take_numeiro mantido, sem editorial_angle | ideas + workspace e RLS; w2_sources 41/41 | — |
 | MIG-07 | parcial | faltam /perfil e /publicacoes | /fontes, /equipa, /definicoes, /calendario; /ideias → /fontes (next.config.ts) | — |
 | MIG-08 | parcial | sem pesquisa real | links # removidos, perfil demo removido, erros do teleprompter (W0, W2-02) | — |
-| MIG-09 | por começar | sem feature flags por workspace | nada no código | — |
+| MIG-09 | parcial | dual-read e plano de rollback testado por módulo; verificação com conta real (R-15) | feature_flag_defs, feature_flags, my_flags, flag_set, /funcionalidades (W0, ADR-0031); w0_feature_flags 20/20 | — |
 | MIG-10 | parcial | RPCs e token legado (studio_whoami, legacy_can, studio_tokens) ainda ativos | tmp_import removida (20261029101111_w1_drop_tmp_import) | — |
 
 ## 11. Matriz de testes e aceitação de release
@@ -517,7 +517,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | CAP-06 | parcial | sem revisões periódicas de acessos nem revogação de sessões | convites com validade, suspender, remover com reatribuição; w1_clients 55/55 | — |
 | CAP-07 | parcial | sem preview de impacto, segunda aprovação nem alertas de grants excessivos | motivo obrigatório, antes/depois no audit (W1-08, W1-09) | — |
 | CAP-08 | parcial | convidados com acesso a uma peça por fazer | /clientes e grants por cliente; admin do cliente só o seu; w1_clients 55/55 | — |
-| CAP-09 | parcial | não existem feature flags; regra só documentada | feature-registry.md (regras) | — |
+| CAP-09 | feito | — | feature-registry.md (regras); flags separadas das capacidades: my_flags não concede acesso, RPCs verificam capacidades (ADR-0031); w0_feature_flags 20/20 | — |
 
 ## 31. Equipa, presença e centro operacional
 

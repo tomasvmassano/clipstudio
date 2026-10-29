@@ -66,6 +66,7 @@ Estado: **ativo** (existe e é verificado no servidor por `authorize()`; também
 | `media.ingest` | Ingestão FX3/telemóvel (ING-02..04) | M | ws | W5 (CHG-003) | — |
 | `edit.package.run` | Pacote de edição (EDL-01) | M | ws | W5 (CHG-003) | — |
 | `styles.manage` | Catálogo de estilos (VAR-02) e preset de edição (EDL-01) | M | ws | ativo (W5-02) | `/c/[ws]/edicao`: criar e gravar estilos (versão nova a cada gravação, `edit_style_save`), ativar, passar a rascunho e arquivar (`edit_style_set_status`), gravar o preset (`edit_preset_save`), começar pelo ponto de partida (`edit_catalog_init`). Ler com `scripts.read` (`edit_catalog`, `edit_style_history`) |
+| `flags.manage` | Funcionalidades em teste (MIG-09, CAP-09) | A | org | ativo (W0) | `/funcionalidades`: fase de cada módulo novo para a agência e por cliente (`flags_admin`, `flag_set`). `my_flags` diz o que está ligado para cada pessoa; não dá acesso a nada |
 | `projects.manage` | Campanhas e séries (FR-02-03) | M | ws | ativo (W2-07) | Criar, renomear e arquivar campanhas e séries (`project_save`); ler com `scripts.read` (`projects_list`). Campanha, responsável, plataformas e etiquetas do guião com `scripts.edit` (`content_meta_set`, `content_owners`); filtros da fila do teleprompter |
 | `performance.read` | Centro de desempenho (PERF) | B | ws, org | W6 (CHG-003) | — |
 | `performance.origin.override` | Corrigir origem sistema/externo (R-16) | M | ws | W6 (CHG-003) | — |

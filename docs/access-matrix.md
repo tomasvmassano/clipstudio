@@ -15,6 +15,7 @@ Fonte: PRD v2.1 §3 (papéis), §5A (TEAM-01…16), CAP-03/05/08. **PROPOSTA de 
 | `permissions.manage` (org) | ✓ | limitado | — | — |
 | `costs.read_agency` | ✓ | se delegado | — | — |
 | `audit.read` (org) | ✓ | ✓ | — | — |
+| `flags.manage` (funcionalidades em teste, `/funcionalidades`) | ✓ | — | — | — |
 
 Um `agency_member` sem atribuição a um workspace **não vê nada** desse workspace (R-03, TEAM-03).
 
