@@ -15,6 +15,7 @@ import {
   AGENCY_ROLES, AGENCY_ROLE_LABEL, INVITE_ROLES, assignAgencyStaff, fetchAgencyTeam, inviteAgency, removeMember, revokeAgencyInvite,
   updateAgencyMember, type AgencyStaff, type AgencyTeam, INVITE_STATUS_LABEL, sendInvite, type InviteSend } from "@/lib/team";
 import { InviteDeliveryNote, ResendInvite } from "@/components/invite-delivery";
+import { PrivacyRequestsCard } from "@/components/privacy-requests-card";
 
 /*
  * Equipa da agência (espaço da agência, W1-13; ADR-0020). Quem é staff, com que papel, em que clientes trabalha e com quanta carga.
@@ -28,7 +29,7 @@ export default function EquipaAgenciaPage() {
   const { mode, canOrg } = useSession();
   if (mode === "loading") return <Skeleton className="h-64" />;
   if (!canOrg("team.read")) return <Alert><AlertDescription>A equipa da agência só é visível ao dono e aos admins da agência.</AlertDescription></Alert>;
-  return <EquipaAgencia />;
+  return <><EquipaAgencia />{canOrg("privacy.manage") && <div className="mt-4"><PrivacyRequestsCard /></div>}</>;
 }
 
 function EquipaAgencia() {

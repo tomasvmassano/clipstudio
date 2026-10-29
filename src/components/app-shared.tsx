@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import {
 	Building2Icon, GaugeIcon, KeyRoundIcon, ScrollIcon, SettingsIcon, SlidersHorizontalIcon,
 	LayoutGridIcon, ScrollTextIcon, MonitorPlayIcon, LightbulbIcon, BarChart3Icon, BotIcon,
-	BriefcaseBusinessIcon, ClapperboardIcon, FilmIcon, ReceiptIcon, FlaskConicalIcon, LibraryIcon, ShieldCheckIcon, UsersIcon, UsersRoundIcon, WalletIcon, FileTextIcon, HistoryIcon, InboxIcon, ListTodoIcon, CalendarDaysIcon,
+	BriefcaseBusinessIcon, ClapperboardIcon, FlaskRoundIcon, RotateCcwIcon, FilmIcon, ReceiptIcon, FlaskConicalIcon, LibraryIcon, ShieldCheckIcon, UsersIcon, UsersRoundIcon, WalletIcon, FileTextIcon, HistoryIcon, InboxIcon, ListTodoIcon, CalendarDaysIcon,
 } from "lucide-react";
 
 export type SidebarNavItem = {
@@ -19,6 +19,8 @@ export type SidebarNavItem = {
 	orgCap?: string;
 	/** Funcionalidade em teste (MIG-09): só aparece com a flag ligada para esta pessoa. */
 	flag?: string;
+	/** Some quando esta flag está ligada (ex.: o "Em breve" de um módulo que já está em teste para esta pessoa). */
+	unlessFlag?: string;
 	subItems?: SidebarNavItem[];
 };
 
@@ -80,6 +82,9 @@ export const clientNavGroups: SidebarNavGroup[] = [
 			{ title: "Centro de desempenho", path: "/desempenho/centro", icon: <GaugeIcon />, cap: "analytics.read", flag: "perf.center" },
 			{ title: "Sala dos agentes", path: "/agentes", icon: <BotIcon />, cap: "agents.read" },
 			{ title: "Agentes e execuções", path: "/agentes/configuracao", icon: <SlidersHorizontalIcon />, cap: "agents.read" },
+			{ title: "Retrabalho", path: "/aprendizagem/retrabalho", icon: <RotateCcwIcon />, cap: "learn.read", flag: "learn.rework" },
+			{ title: "Experiências e vencedores", path: "/aprendizagem/experiencias", icon: <FlaskRoundIcon />, cap: "learn.read", flag: "learn.experiments" },
+			{ title: "Custos", path: "/custos", icon: <WalletIcon />, cap: "costs.read", flag: "costs.content" },
 		],
 	},
 	{
@@ -95,7 +100,7 @@ export const clientNavGroups: SidebarNavGroup[] = [
 		label: "Em breve",
 		items: [
 			{ title: "Biblioteca", icon: <LibraryIcon />, soon: true },
-			{ title: "Custos", icon: <WalletIcon />, soon: true },
+			{ title: "Custos", icon: <WalletIcon />, soon: true, unlessFlag: "costs.content" },
 		],
 	},
 ];

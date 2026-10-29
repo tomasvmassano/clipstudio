@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSession } from "@/components/session-provider";
+import { MyDataCard } from "@/components/my-data-card";
 import { supabase } from "@/lib/supabase";
 import { avatarUrl, AVATAR_MAX, AVATAR_TYPES, SECURITY_LABEL, securityEvent, securityLog, updateProfile, uploadAvatar } from "@/lib/profile";
 
@@ -45,6 +46,7 @@ export function ProfilePage() {
       <Mfa />
       <Preferences workspaces={workspaces.map((w) => ({ id: w.id, name: w.name }))} />
       <Security />
+      <MyDataCard />
     </div>
   );
 }

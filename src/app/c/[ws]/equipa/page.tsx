@@ -16,6 +16,9 @@ import { useSession } from "@/components/session-provider";
 import { ROLE_LABEL, type Access } from "@/lib/access";
 import { assignAgencyStaff, fetchTeam, INVITE_ROLES, INVITE_STATUS_LABEL, inviteMember, removeMember, revokeInvitation, sendInvite, updateMember, type InviteSend, type Member, type Team } from "@/lib/team";
 import { InviteDeliveryNote, ResendInvite } from "@/components/invite-delivery";
+import { JobTitlePicker, type JobPick } from "@/components/invite-job-title";
+import { inviteWithTitle } from "@/lib/learn";
+import { useFlags } from "@/lib/flags";
 
 const AFF_LABEL = { agency_staff: "Agência", client_staff: "Cliente" } as const;
 const fmtDate = (iso: string | null) =>
@@ -79,6 +82,10 @@ function InviteCard({ ws, myRole, canAgency, onDone }: { ws: string; myRole: str
 	const [busy, setBusy] = useState(false);
 	const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
 	const [sent, setSent] = useState<InviteSend | null>(null);
+	const [job, setJob] = useState<JobPick>(null);
+	// BIZ-08: cargo no convite só com a flag team.job_titles; sem ela o convite fica igual
+	const flags = useFlags(ws);
+	const jobTitles = !!flags?.has("team.job_titles");
 
 	// A UI só sugere papéis até ao teu; o servidor recusa o resto (acima_do_teto).
 	const myRank = INVITE_ROLES.indexOf(myRole as (typeof INVITE_ROLES)[number]);
@@ -93,15 +100,17 @@ function InviteCard({ ws, myRole, canAgency, onDone }: { ws: string; myRole: str
 					A pessoa recebe um email com o link do convite, pode aceitar ou recusar, e entra com esse email. Ganha acesso só a este cliente.
 				</CardDescription>
 			</CardHeader>
-			<CardContent>
+			<CardContent className="flex flex-col gap-3">
+				{jobTitles && <JobTitlePicker ws={ws} roles={roles} value={job} onChange={setJob} onRole={setRole} />}
 				<form
 					className="flex flex-col gap-3 sm:flex-row sm:items-end"
 					onSubmit={async (e) => {
 						e.preventDefault();
 						setBusy(true); setMsg(null); setSent(null);
 						try {
-							const id = await inviteMember(ws, email, role, aff);
+							const id = jobTitles && job ? await inviteWithTitle(ws, email, role, aff, job.key, job.grants) : await inviteMember(ws, email, role, aff);
 							setEmail("");
+							setJob(null);
 							try { setSent(await sendInvite(id)); }
 							catch (err2) { setMsg({ ok: false, text: `Convite criado, mas o envio falhou: ${(err2 as Error).message} Usa Reenviar na lista.` }); }
 							onDone();

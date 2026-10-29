@@ -23,6 +23,7 @@ import { CommentsSheet } from "@/components/guiao-comments";
 import { BriefSheet } from "@/components/guiao-brief";
 import { DetailsSheet, metaNames, useMetaLists } from "@/components/guiao-details";
 import { KIND_LABEL, PLATFORMS } from "@/lib/projects";
+import { ReasonForm } from "@/components/guiao-reason-form";
 
 const MECH = ["pergunta", "contra", "numero", "ego", "confissao", "segredo"];
 
@@ -59,7 +60,6 @@ export function GuiaoCard({ g, carried, caps, actions, onError, startInEdit, ope
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<"view" | "edit" | "changes_requested" | "rejected">(startInEdit ? "edit" : "view");
   const [busy, setBusy] = useState(false);
-  const [reason, setReason] = useState("");
   const [historyOpen, setHistoryOpen] = useState(false);
   const [briefOpen, setBriefOpen] = useState(false);
   const [commentsOpen, setCommentsOpen] = useState(false);
@@ -79,7 +79,6 @@ export function GuiaoCard({ g, carried, caps, actions, onError, startInEdit, ope
     try {
       await fn();
       setMode("view");
-      setReason("");
     } catch (e) {
       onError((e as Error).message);
     } finally {
@@ -152,20 +151,7 @@ export function GuiaoCard({ g, carried, caps, actions, onError, startInEdit, ope
           )}
 
           {(mode === "changes_requested" || mode === "rejected") && (
-            <form
-              className="flex flex-wrap gap-2"
-              onSubmit={(e) => { e.preventDefault(); run(() => actions.transition(g.id, mode, reason, g.lock_version)); }}
-            >
-              <Input
-                id={`${g.id}-reason`} className="min-w-[14rem] flex-1" value={reason} onChange={(e) => setReason(e.target.value)} autoFocus required
-                aria-label={mode === "rejected" ? "Motivo da rejeição" : "O que tem de mudar"}
-                placeholder={mode === "rejected" ? "Porque não dirias isto?" : "O que tem de mudar?"}
-              />
-              <Button size="sm" type="submit" variant={mode === "rejected" ? "destructive" : "default"} disabled={busy || !reason.trim()}>
-                {busy && <Loader2Icon className="animate-spin" />} {mode === "rejected" ? "Rejeitar" : "Pedir alterações"}
-              </Button>
-              <Button size="sm" type="button" variant="ghost" onClick={() => setMode("view")}>Cancelar</Button>
-            </form>
+            <ReasonForm g={g} mode={mode} actions={actions} busy={busy} run={run} onCancel={() => setMode("view")} />
           )}
 
           {mode === "view" && (

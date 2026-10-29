@@ -10,6 +10,7 @@ import { fetchContext, fetchSources, linkSource, saveBrief } from "@/lib/sources
 import { fetchReferences, linkReference } from "@/lib/references";
 import { useSession } from "@/components/session-provider";
 import { fetchOwners, fetchProjects, saveProject, setContentMeta, type MetaPatch, type Owner, type Project, type ProjectList } from "@/lib/projects";
+import { fetchReworkReasons, transitionReasoned, type ReworkReasonList } from "@/lib/learn";
 
 /** O que o utilizador pode fazer aos guiões neste workspace (o servidor volta a verificar cada ação). */
 export type ScriptCaps = {
@@ -23,6 +24,10 @@ export type ScriptCaps = {
 export type ScriptActions = {
   save: (id: string, p: ContentPatch, lock?: number) => Promise<Guiao>;
   transition: (id: string, to: EditorialTarget, reason?: string, lock?: number) => Promise<Guiao>;
+  /** Rejeitar ou pedir alterações com categoria (FR-17-10, flag learn.rework). O texto continua obrigatório. */
+  transitionReasoned: (id: string, to: "changes_requested" | "rejected", reason: string, code: string, lock?: number) => Promise<Guiao>;
+  /** Motivos de rejeição do cliente e se a categoria está ligada. */
+  reworkReasons: () => Promise<ReworkReasonList>;
   record: (id: string, recorded: boolean) => Promise<Guiao>;
   duplicate: (id: string) => Promise<Guiao>;
   restore: (id: string, versionId: string, lock?: number) => Promise<Guiao>;
@@ -112,6 +117,11 @@ export function useScriptActions(access: Access, put: (g: Guiao) => Guiao, reloa
       try { return put(await transitionContent(access, id, to, reason, lock)); }
       catch (e) { if ((e as { code?: string }).code === "PT409") await reload(); throw e; }
     },
+    transitionReasoned: async (id, to, reason, code, lock) => {
+      try { return put(await transitionReasoned(access, id, to, reason, code, lock)); }
+      catch (e) { if ((e as { code?: string }).code === "PT409") await reload(); throw e; }
+    },
+    reworkReasons: () => fetchReworkReasons(access),
     record: async (id, recorded) => put(await setProduction(access, id, recorded ? "recorded" : "not_started")),
     meta: async (id, patch) => put(await setContentMeta(access, id, patch)),
     projects: (fresh) => fetchProjects(access, fresh),
