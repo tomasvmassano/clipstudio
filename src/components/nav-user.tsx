@@ -25,8 +25,10 @@ export function NavUser() {
 	const sub = signed ? (ws ? `${ws.name} · ${ROLE_LABEL[ws.role] ?? ws.role}` : "Sem workspace") : "Entra para continuar";
 	return (
 		<DropdownMenu>
-			<DropdownMenuTrigger render={<Avatar className="size-8 cursor-pointer" aria-label="Menu da conta" />}>
-				<AvatarFallback className="text-xs">{signed ? initials(name) : "?"}</AvatarFallback>
+			<DropdownMenuTrigger render={<button type="button" className="rounded-full focus-visible:outline-2 focus-visible:outline-ring" aria-label="Menu da conta" />}>
+				<Avatar className="size-8 cursor-pointer">
+					<AvatarFallback className="text-xs">{signed ? initials(name) : "?"}</AvatarFallback>
+				</Avatar>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="end" className="w-60">
 				<DropdownMenuGroup>

@@ -132,7 +132,9 @@ function StaffRow({ s, team, onDone }: { s: AgencyStaff; team: AgencyTeam; onDon
         )}
       </div>
       <div className="flex flex-wrap items-center gap-1.5">
-        {s.clients.length === 0 && <span className="text-xs text-muted-foreground">Ainda não trabalha em nenhum cliente que possas ver.</span>}
+        {s.agency_role === "agency_owner"
+          ? <span className="text-xs text-muted-foreground">Dono da agência: tem acesso a todos os clientes.</span>
+          : s.clients.length === 0 && <span className="text-xs text-muted-foreground">Ainda não trabalha em nenhum cliente que possas ver.</span>}
         {s.clients.map((c) => (
           <span key={c.id} className="inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs">
             {c.name} · {ROLE_LABEL[c.role] ?? c.role}{c.open_tasks ? ` · ${c.open_tasks} abertas` : ""}
