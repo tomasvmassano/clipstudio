@@ -15,7 +15,7 @@ Estado: **ativo** (existe e é verificado no servidor por `authorize()`; também
 | `team.invite` | Equipa | A | org, ws | ativo | Convidar / Cancelar convite (`invite_member`, `revoke_invitation`) |
 | `team.manage` | Equipa | A | org, ws | ativo | `/equipa`: mudar papel, suspender, reativar, remover com reatribuição de tarefas (`member_update`, `member_remove`); dono da agência atribui staff (`agency_staff_assign`) |
 | `permissions.manage` | CAP | A | org, ws | ativo | `/permissoes`: por pessoa (o que tem, porquê, permitir/negar com motivo e prazo), por papel, exceções ativas (`permissions_matrix`, `grant_set`, `grant_revoke`, `access_explain`); papéis personalizados por fazer |
-| `audit.read` | CAP | M | org, ws | W1 | — |
+| `audit.read` | CAP | M | org, ws | ativo | `/historico` (`audit_list`): quem fez o quê, com antes e depois, filtros por ação, pessoa e período; vista de agência (todos os clientes) por fazer |
 | `scripts.read` | Guiões (M02) | B | ws, proj, own | ativo | `/guioes`, `/`, teleprompter |
 | `scripts.create` | Guiões | M | ws, proj | ativo | Novo guião, Duplicar (`content_create`, `content_duplicate`); o motor insere direto |
 | `scripts.edit` | Guiões | M | ws, proj, own | ativo | Editor por blocos com autosave, restaurar versão (`content_save`, `content_restore_version`) |
