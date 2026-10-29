@@ -58,6 +58,18 @@ Estado: **ativo** (existe e é verificado no servidor por `authorize()`; também
 | `agents.rehearse` | Agentes | M | ws | ativo | Ensaiar a sala |
 | `agents.run` | Agentes | A | ws | ativo | `agent_job_enqueue` (Correr agora, idempotente por tipo e dia), `agent_job_cancel`, `agent_job_retry`; executado pelo worker do motor (W4-02), que grava guiões em revisão; dados de pesquisa do motor por cliente (W4-03, ADR-0016) |
 | `agents.configure` | Agentes | A | ws | ativo | `agent_config_save` (versão nova validada), `agent_config_activate` (ativar ou voltar atrás), `agent_config_get` |
+| `dashboard.business.read` | Agência: vista de negócio (BIZ-01..04) | B | org, ws | W1 (CHG-003) | — |
+| `finance.read` | Agência: contratos, margem, custos (BIZ-04..06) | A | org, ws | W6 (CHG-003) | — |
+| `finance.manage` | Agência: contratos por cliente (BIZ-05) | A | org, ws | W6 (CHG-003) | — |
+| `access.preview` | Administração: pré-visualizar como papel (BIZ-07) | M | org, ws | W1 (CHG-003) | — |
+| `persona.manage` | Agentes: lista de frases-persona (R-17) | A | ws | W5 (CHG-003) | — |
+| `media.ingest` | Ingestão FX3/telemóvel (ING-02..04) | M | ws | W5 (CHG-003) | — |
+| `edit.package.run` | Pacote de edição (EDL-01) | M | ws | W5 (CHG-003) | — |
+| `styles.manage` | Catálogo de estilos (VAR-02) | M | ws | W5 (CHG-003) | — |
+| `performance.read` | Centro de desempenho (PERF) | B | ws, org | W6 (CHG-003) | — |
+| `performance.origin.override` | Corrigir origem sistema/externo (R-16) | M | ws | W6 (CHG-003) | — |
+| `publishing.approve` | Aprovar publicação de originais (PUB-06) | A | ws, conta | W6 (CHG-003) | — |
+| `publishing.republish.approve` | Aprovar republicações (PUB-05/06) | A | ws, conta | W6 (CHG-003) | — |
 | `integrations.manage` | Settings (M15) | A | ws | W6 | — |
 | `settings.manage` | Settings | A | ws | ativo (parcial) | `/definicoes`: nome, @, fuso, moeda, logótipo (bucket privado `branding`), cor da marca, só gravar aprovados (`workspace_update`, `workspace_settings`); limite de tarefas por pessoa com `tasks.manage`; integrações, notificações, segurança e dados do M15 por fazer |
 

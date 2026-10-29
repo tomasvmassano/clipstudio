@@ -64,6 +64,7 @@ No dead links, `href="#"` placeholders, fake metrics, decorative buttons, swallo
 
 - Model, prompt, agent and rubric versions must be explicit and auditable. Store run/step state, input/output references, token use, cost, duration, retries, and errors.
 - Never present generated claims as verified facts; keep source provenance and verification state. Block unverified quotations from factual scripts where required.
+- Persona hyperbole about the creator (PRD R-17, CHG-003) is not a factual claim: allow it only from the workspace's approved, versioned persona-phrase list. Keep blocking false claims about identified third parties, invented news about real events, numbers presented as verified data and promises of financial gain.
 - Execute long pipelines in durable workers, not short request handlers. Use concurrency controls, exponential backoff, idempotency keys, budget caps, and dead-letter handling.
 - Treat the original Viral Engine's 30 scripts, 3 hooks, 90 videos, 18:00 Dubai schedule as **Numeiro defaults only**.
 - AI recommendations do not automatically modify strategy, permissions, or publication settings without authorized approval.
