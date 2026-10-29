@@ -7,7 +7,7 @@ export type Validation = { ok: boolean; errors: string[]; warnings: string[] };
 export type Format = { share: number; min: number; max: number; maquina?: string; palavras: [number, number]; descricao?: string };
 export type AgentConfig = {
   language: string; voice: string; lexicon?: string[]; guardrails: string[]; formats: Record<string, Format>;
-  pipeline: { scripts_per_day: number; hooks_per_slot: number; max_revisions?: number; critic_threshold: number; hook_threshold?: number; hook_min?: number; concurrency: number; idea_share?: number };
+  pipeline: { scripts_per_day: number; hooks_per_slot: number; max_revisions?: number; critic_threshold: number; hook_threshold?: number; hook_min?: number; concurrency: number; idea_share?: number; target_day_offset?: 0 | 1 };
   models?: Record<string, string>; schedule?: { enabled: boolean; time: string }; budget_eur_day?: number | null;
   enabled_agents?: string[]; news_beats?: string[]; reading_list?: string[];
 };
