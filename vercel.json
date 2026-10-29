@@ -1,1 +1,4 @@
-{ "framework": "nextjs" }
+{
+  "framework": "nextjs",
+  "ignoreCommand": "bash scripts/vercel-ignore.sh"
+}
