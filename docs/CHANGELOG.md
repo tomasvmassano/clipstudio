@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-29 (testes no CI)
+
+- **W0-QA-01** testes SQL no CI (ADR-0021): job `db` aplica as 57 migrações numa base limpa e corre os 21 ficheiros de `supabase/tests` (707 casos) sobre dados sintéticos. Quatro testes desatualizados corrigidos: `w1_review_fixes` (a versão aprovada vive em `content_versions` desde W2-01), `w4_worker` (o worker fixa `engine.client_id` desde W4-03), `w4_engine_isolation` e os de datas (`w1_data_access`, `w2_teleprompter`, `w3_calendar`), que dependiam de dados e dias de produção. R-19 registado como `adiado` por decisão do Tomás (API oficial no futuro, Apify por agora).
+
 ## 2026-10-29 (PRD)
 
 - **CHG-004** registo de estado por requisito (`docs/status.md`) validado no CI, início e fim de tarefa pelo registo, adiamentos registados e revisão automática diária. PRD §33, §36.
