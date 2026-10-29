@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import {
 	Building2Icon, GaugeIcon, KeyRoundIcon, ScrollIcon, SettingsIcon, SlidersHorizontalIcon,
 	LayoutGridIcon, ScrollTextIcon, MonitorPlayIcon, LightbulbIcon, BarChart3Icon, BotIcon,
-	ClapperboardIcon, FilmIcon, LibraryIcon, ShieldCheckIcon, UsersIcon, UsersRoundIcon, WalletIcon, FileTextIcon, HistoryIcon, InboxIcon, ListTodoIcon, CalendarDaysIcon,
+	ClapperboardIcon, FilmIcon, FlaskConicalIcon, LibraryIcon, ShieldCheckIcon, UsersIcon, UsersRoundIcon, WalletIcon, FileTextIcon, HistoryIcon, InboxIcon, ListTodoIcon, CalendarDaysIcon,
 } from "lucide-react";
 
 export type SidebarNavItem = {
@@ -17,6 +17,8 @@ export type SidebarNavItem = {
 	cap?: string;
 	/** Capacidade de âmbito agência (não depende do cliente aberto). */
 	orgCap?: string;
+	/** Funcionalidade em teste (MIG-09): só aparece com a flag ligada para esta pessoa. */
+	flag?: string;
 	subItems?: SidebarNavItem[];
 };
 
@@ -33,6 +35,7 @@ export const agencyNavGroups: SidebarNavGroup[] = [
 			{ title: "Clientes", path: "/clientes", icon: <Building2Icon />, orgCap: "workspaces.read" },
 			{ title: "Caixa de entrada", path: "/caixa", icon: <InboxIcon />, orgCap: "dashboard.agency" },
 			{ title: "Equipa da agência", path: "/equipa-agencia", icon: <UsersRoundIcon />, orgCap: "team.read" },
+			{ title: "Funcionalidades em teste", path: "/funcionalidades", icon: <FlaskConicalIcon />, orgCap: "flags.manage" },
 		],
 	},
 	{
