@@ -13,6 +13,7 @@ import { useSession } from "@/components/session-provider";
 /** O que o utilizador pode fazer aos guiões neste workspace (o servidor volta a verificar cada ação). */
 export type ScriptCaps = {
   create: boolean; edit: boolean; submit: boolean; approve: boolean; reject: boolean; archive: boolean; record: boolean; export: boolean; refs: boolean;
+  comment: boolean;
 };
 
 /** Ações sobre um guião; cada uma devolve a linha atualizada e já a põe na lista. */
@@ -37,7 +38,6 @@ export function useGuioes(access: Access, date: string) {
   const [all, setAll] = useState<Guiao[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const { can } = useSession();
 
   const reload = useCallback(async () => {
     try {
@@ -65,7 +65,36 @@ export function useGuioes(access: Access, date: string) {
     return g;
   }, []);
 
-  const actions = useMemo<ScriptActions>(() => ({
+  const actions = useScriptActions(access, put, reload);
+
+  const create = useCallback(async (d: string) => put(await createContent(access, { date: d, corpo: "Escreve aqui o corpo do guião.", hooks: [{ text: "", mecanismo: "" }] })), [access, put]);
+
+  const caps = useScriptCaps();
+  const canWrite = caps.approve || caps.reject || caps.edit || caps.record;
+
+  return { all, loading, error, reload, actions, create, caps, canWrite };
+}
+
+/** Capacidades sobre guiões no cliente aberto (a UI só esconde; o servidor decide). */
+export function useScriptCaps(): ScriptCaps {
+  const { can } = useSession();
+  return {
+    create: can("scripts.create"),
+    edit: can("scripts.edit"),
+    submit: can("scripts.submit"),
+    approve: can("scripts.approve"),
+    reject: can("scripts.reject"),
+    archive: can("scripts.delete"),
+    record: can("recording.confirm"),
+    export: can("scripts.export"),
+    refs: can("references.read"),
+    comment: can("review.comment"),
+  };
+}
+
+/** Ações sobre guiões; put recebe cada linha atualizada, reload recarrega a lista de quem as usa. */
+export function useScriptActions(access: Access, put: (g: Guiao) => Guiao, reload: () => Promise<void>): ScriptActions {
+  return useMemo<ScriptActions>(() => ({
     save: async (id, p, lock) => {
       try { return put(await saveContent(access, id, p, lock)); }
       catch (e) { if ((e as { code?: string }).code === "PT409") await reload(); throw e; }
@@ -86,21 +115,4 @@ export function useGuioes(access: Access, date: string) {
     linkRef: async (id: string, refId: number, l: boolean) => { await linkReference(access, refId, { content: id }, l); return fetchContext(access, id); },
     reload,
   }), [access, put, reload]);
-
-  const create = useCallback(async (d: string) => put(await createContent(access, { date: d, corpo: "Escreve aqui o corpo do guião.", hooks: [{ text: "", mecanismo: "" }] })), [access, put]);
-
-  const caps: ScriptCaps = {
-    create: can("scripts.create"),
-    edit: can("scripts.edit"),
-    submit: can("scripts.submit"),
-    approve: can("scripts.approve"),
-    reject: can("scripts.reject"),
-    archive: can("scripts.delete"),
-    record: can("recording.confirm"),
-    export: can("scripts.export"),
-    refs: can("references.read"),
-  };
-  const canWrite = caps.approve || caps.reject || caps.edit || caps.record;
-
-  return { all, loading, error, reload, actions, create, caps, canWrite };
 }

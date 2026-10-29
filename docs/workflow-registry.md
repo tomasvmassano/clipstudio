@@ -14,6 +14,10 @@ Membro (`workspace_access.status`): `active ⇄ suspended`, `active|suspended �
 `pendente → aceite` (email confirmado igual ao do convite) ou `pendente → cancelado` (revogado por quem convidou, ou bloqueado por cliente único: a pessoa já está ativa na equipa de outro cliente; fica `invitation.blocked` no histórico do cliente que convidou).
 Envio (W1-14, ADR-0023): `invitation_issue_link` gera um token novo (só o hash fica na base; o link anterior deixa de valer), renova a validade para 14 dias e conta o envio (máximo 5, um por minuto). `pendente → recusado` pelo link (`invitation_decline`, sem conta). `pendente → expirado` com o tempo; `expirado → pendente` ao reenviar. Recusado não se reenvia: convida-se de novo. Eventos: `invitation.sent`, `invitation.declined`.
 
+## Comentários de revisão (W2-06)
+
+`aberto → resolvido → aberto` (resolver/reabrir, `content_comment_resolve`). Cada comentário guarda a versão do guião em que foi feito; depois de uma versão nova aparece como "numa versão anterior". Respostas num nível, herdam o bloco. Eventos: `script.commented`, `script.comment_resolved`, `script.comment_reopened`; notificações `script_mention` e `script_comment`.
+
 ## Segurança da conta (W1-15)
 
 Verificação em dois passos: `desligada → a configurar` (`mfa.enroll`, fator por verificar, não bloqueia nada) `→ ligada` (código certo; evento `security.mfa_enabled`) `→ desligada` (`mfa.unenroll` numa sessão aal2; `security.mfa_disabled`). Com ela ligada, cada entrada é `aal1 → aal2` depois do código; em aal1 o servidor recusa tudo. Palavra-passe: mudar (com a atual) ou recuperar pelo link (`security.password_changed`). `security.signed_out_everywhere` antes de terminar todas as sessões.

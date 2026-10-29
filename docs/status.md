@@ -10,8 +10,8 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | Estado | Requisitos |
 |---|---|
-| feito | 19 |
-| parcial | 144 |
+| feito | 22 |
+| parcial | 141 |
 | por começar | 95 |
 | bloqueado | 3 |
 | adiado | 2 |
@@ -26,13 +26,10 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | PLAT-03 | P0 | bloqueado | depende de PLAT-01 e do publicador (PUB-01) | Fase B, publicação |
 | FR-01-02 | P0 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | Widgets configuráveis por função e por workspace; comparação temporal e explicaç |
 | FR-02-01 | P0 | parcial | sem eliminação definitiva com confirmação (só arquivo) | CRUD de guiões, duplicação, arquivo, recuperação e eliminação com confirmação. |
-| FR-02-02 | P0 | parcial | sem comentários no guião | Editor por blocos ordenados: Hook 1..N, Body, CTA, notas e comentários; autosave |
 | FR-03-01 | P0 | parcial | sem filtros por campanha e responsável | Fila de gravação por data, campanha e responsável, apenas conteúdos elegíveis; r |
 | FR-03-02 | P0 | parcial | sem blocos personalizados | Blocos identificados Hook 1, Hook 2, Body, CTA e personalizados; seleção e repet |
 | FR-04-01 | P0 | parcial | sem anexo; edição dos campos da fonte não confirmada | CRUD de fontes com URL, título, origem, data, idioma, autor, tags, categoria, re |
 | FR-04-02 | P0 | parcial | sem RSS nem integrações | Adicionar manualmente, por URL, RSS e integrações autorizadas; rastreio de data  |
-| FR-05-01 | P0 | parcial | sem inbox de revisão com filtros por tipo, responsável, prioridade e prazo | Inbox de revisão com filtros por tipo, responsável, estado, prioridade e deadlin |
-| FR-05-02 | P0 | parcial | sem comentários contextuais no guião | Revisão de guião com comentários contextuais e decisões versionadas. |
 | FR-06-01 | P0 | parcial | prompt, versão por agente, permissões e limites não constam do catálogo | Catálogo de agentes com função, versão, modelo, prompt, ferramentas, permissões  |
 | FR-07-01 | P0 | parcial | sem upload nem captura | Guardar referências por URL, upload ou captura autorizada; metadados e autoria. |
 | FR-07-02 | P0 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | Classificação por formato, estilo, narrativa, hook, duração, idioma e tags. |
@@ -207,7 +204,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
 | FR-02-01 | parcial | sem eliminação definitiva com confirmação (só arquivo) | content_create/duplicate, arquivar/recuperar; w2_content 47/47; W2-02 | — |
-| FR-02-02 | parcial | sem comentários no guião | editor por blocos com autosave e indicador W2-02; content_save | — |
+| FR-02-02 | feito |  | editor por blocos com autosave e indicador W2-02; content_save; comentários no cartão do guião (W2-06 content_comments (bloco, frase citada, versão, respostas, resolver), /c/[ws]/revisao; w2_review_comments 33/33; e2e/review.spec.ts 3/3; ADR-0025) | 2026-10-29 (E2E) |
 | FR-02-03 | parcial | faltam campanha, plataforma, responsável e tags no guião | guioes: título, cliente, tema, formato, data; fontes ligadas (content_sources) | — |
 | FR-02-04 | feito |  | editorial_status e production_status independentes; w2_content 47/47, w3_calendar 39/39 | — |
 | FR-02-05 | parcial | sem ações em lote | content_transition com motivo obrigatório na rejeição; W2-02; w2_content | — |
@@ -243,8 +240,8 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
-| FR-05-01 | parcial | sem inbox de revisão com filtros por tipo, responsável, prioridade e prazo | /caixa mostra guiões à espera da minha aprovação; W3-01 | — |
-| FR-05-02 | parcial | sem comentários contextuais no guião | decisões versionadas em content_transitions; w2_content 47/47 | — |
+| FR-05-01 | feito |  | review_inbox: filtros por estado, responsável, prioridade, prazo e texto (o tipo é só guião até haver media, FR-05-03); W2-06 content_comments (bloco, frase citada, versão, respostas, resolver), /c/[ws]/revisao; w2_review_comments 33/33; e2e/review.spec.ts 3/3; ADR-0025 | 2026-10-29 (E2E) |
+| FR-05-02 | feito |  | decisões versionadas em content_transitions; w2_content 47/47; W2-06 content_comments (bloco, frase citada, versão, respostas, resolver), /c/[ws]/revisao; w2_review_comments 33/33; e2e/review.spec.ts 3/3; ADR-0025 | 2026-10-29 (E2E) |
 | FR-05-03 | por começar | sem revisão de vídeo | review.comment/approve só planeadas (W5) | — |
 | FR-05-04 | parcial | só guiões; notificações dependem de automação configurada | content_transition com motivo; task_rules W3-01 | — |
 | FR-05-05 | parcial | sem fluxos de aprovação configuráveis (só regras de tarefas por evento) | task_rule_save W3-01 | — |

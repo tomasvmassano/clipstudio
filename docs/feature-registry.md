@@ -32,7 +32,7 @@ Estado: **ativo** (existe e é verificado no servidor por `authorize()`; também
 | `requests.create` | Fontes | B | ws | ativo | Pedir um tema (`talent_request_create`); também no código de equipa |
 | `references.read` | Referências (M07) | B | ws | ativo | `/referencias` Biblioteca e Descobrir (`references_list`, `references_discover`); referências no painel do guião; também no código de equipa |
 | `references.manage` | Referências | M | ws | ativo | Guardar reel, adicionar por link, classificar, favorito, coleções, arquivar, ligar a fontes (`reference_create`, `reference_update`, `reference_link`) |
-| `review.comment` | Revisão (M05) | M | ws, proj | W5 | — |
+| `review.comment` | Revisão (M05) | M | ws, proj | ativo (guiões, W2-06) | Comentar e responder em guiões (`content_comment_add`); ler com `scripts.read` (`content_comments`, `review_inbox` em `/c/[ws]/revisao`); resolver: autor, `scripts.edit` ou `scripts.approve` (`content_comment_resolve`). Revisão de vídeo em W5 |
 | `review.approve` | Revisão | A | ws, proj | W5 | — |
 | `media.upload` | Biblioteca (M08) | M | ws, proj | W5 | — |
 | `media.download` | Biblioteca | M | ws, proj | W5 | — |

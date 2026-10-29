@@ -58,6 +58,7 @@ export const clientNavGroups: SidebarNavGroup[] = [
 		label: "Dia a dia",
 		items: [
 			{ title: "Guiões", path: "/guioes", icon: <ScrollTextIcon />, cap: "scripts.read" },
+			{ title: "Revisão", path: "/revisao", icon: <ClapperboardIcon />, cap: "scripts.read" },
 			{ title: "Tarefas", path: "/tarefas", icon: <ListTodoIcon />, cap: "tasks.read" },
 			{ title: "Calendário", path: "/calendario", icon: <CalendarDaysIcon />, cap: "calendar.read" },
 			{ title: "Teleprompter", path: "/teleprompter", icon: <MonitorPlayIcon />, cap: "recording.use" },
@@ -85,7 +86,6 @@ export const clientNavGroups: SidebarNavGroup[] = [
 	{
 		label: "Em breve",
 		items: [
-			{ title: "Revisão", icon: <ClapperboardIcon />, soon: true },
 			{ title: "Biblioteca", icon: <LibraryIcon />, soon: true },
 			{ title: "Custos", icon: <WalletIcon />, soon: true },
 		],
