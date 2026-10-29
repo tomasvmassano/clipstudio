@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ArchiveIcon, CheckIcon, ChevronDownIcon, ChevronUpIcon, CopyIcon, ExternalLinkIcon, HistoryIcon, Loader2Icon, MessageSquareWarningIcon,
-  MoreHorizontalIcon, NotebookTextIcon, PencilIcon, PlusIcon, SendIcon, Trash2Icon, UndoIcon, VideoIcon, XIcon,
+  MessagesSquareIcon, MoreHorizontalIcon, NotebookTextIcon, PencilIcon, PlusIcon, SendIcon, Trash2Icon, UndoIcon, VideoIcon, XIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +19,7 @@ import { recordable, words } from "@/lib/data";
 import { EDITORIAL_LABEL, FORMATO_LABEL, WPS, type EditorialStatus, type Guiao, type Hook } from "@/lib/types";
 import type { ScriptActions, ScriptCaps } from "@/components/use-guioes";
 import { HistorySheet } from "@/components/guiao-history";
+import { CommentsSheet } from "@/components/guiao-comments";
 import { BriefSheet } from "@/components/guiao-brief";
 
 const MECH = ["pergunta", "contra", "numero", "ego", "confissao", "segredo"];
@@ -39,6 +40,8 @@ type Props = {
   actions: ScriptActions;
   onError: (msg: string) => void;
   startInEdit?: boolean;
+  /** Comentários por resolver, quando quem mostra o cartão já os sabe (caixa de revisão). */
+  openComments?: number;
 };
 
 type Draft = { hooks: Hook[]; corpo: string; cta: string; notas: string };
@@ -50,13 +53,15 @@ const clean = (d: Draft) => ({
   notas: d.notas.trim(),
 });
 
-export function GuiaoCard({ g, carried, caps, actions, onError, startInEdit }: Props) {
+export function GuiaoCard({ g, carried, caps, actions, onError, startInEdit, openComments }: Props) {
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<"view" | "edit" | "changes_requested" | "rejected">(startInEdit ? "edit" : "view");
   const [busy, setBusy] = useState(false);
   const [reason, setReason] = useState("");
   const [historyOpen, setHistoryOpen] = useState(false);
   const [briefOpen, setBriefOpen] = useState(false);
+  const [commentsOpen, setCommentsOpen] = useState(false);
+  const [nComments, setNComments] = useState<number | undefined>(openComments);
 
   const st = g.editorial_status;
   const dead = st === "rejected" || st === "archived";
@@ -205,6 +210,9 @@ export function GuiaoCard({ g, carried, caps, actions, onError, startInEdit }: P
                   <VideoIcon /> {recorded ? "Desmarcar gravado" : "Marcar gravado"}
                 </Button>
               )}
+              <Button size="sm" variant="ghost" onClick={() => setCommentsOpen(true)}>
+                <MessagesSquareIcon /> Comentários{nComments ? ` (${nComments})` : ""}
+              </Button>
               <Button size="sm" variant="ghost" onClick={() => setBriefOpen(true)}>
                 <NotebookTextIcon /> Brief e fontes
               </Button>
@@ -233,6 +241,7 @@ export function GuiaoCard({ g, carried, caps, actions, onError, startInEdit }: P
         </div>
       </CardContent>
       <BriefSheet g={g} open={briefOpen} onOpenChange={setBriefOpen} actions={actions} canEdit={caps.edit && st !== "archived"} canRefs={caps.refs} />
+      <CommentsSheet g={g} open={commentsOpen} onOpenChange={setCommentsOpen} onCount={setNComments} />
       <HistorySheet g={g} open={historyOpen} onOpenChange={setHistoryOpen} actions={actions} canRestore={caps.edit && st !== "archived"} onError={onError} />
     </Card>
   );

@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-29 (revisão de guiões)
+
+- **W2-06** revisão (FR-05-01, FR-05-02, FR-02-02; ADR-0025). Nova página **Revisão** no menu do cliente: guiões à espera de decisão com filtros por estado, responsável, prioridade, prazo e pesquisa, com o responsável, a prioridade e o prazo da tarefa de revisão. Cada guião tem **Comentários**: carregar numa frase para a comentar, responder, resolver e reabrir; cada comentário fica com a versão em que foi feito. O código de equipa do Numeiro também comenta. Migração `20261029162938_w2_review_comments`. Testes: SQL 33/33, E2E 3/3.
+
 ## 2026-10-29 (perfil)
 
 - **W1-15** perfil (FR-14-01, ADR-0024) em `/perfil` e `/c/[ws]/perfil`, com entrada no menu da conta: nome, fotografia (bucket privado `avatars`), email verificado, mudar a palavra-passe (com a atual), "Esqueci-me da palavra-passe" no login, verificação em dois passos (TOTP) com o passo do código no login e aplicada no servidor (sessão sem código não acede a nada), fuso, tema, cliente ao entrar, terminar sessão em todos os dispositivos e histórico de segurança. Migração `20261029153629_w1_profile_mfa`. Testes: SQL 24/24, E2E 3/3 (incluindo REST e RPC recusados em aal1).

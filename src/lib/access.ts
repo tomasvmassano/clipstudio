@@ -32,7 +32,7 @@ export type AppContext = {
 /** Capacidades do código de equipa (espelha legacy_can no SQL; o servidor é quem decide). */
 export const LEGACY_CAPS = [
   "scripts.read", "scripts.edit", "scripts.submit", "scripts.approve", "scripts.reject", "scripts.export",
-  "recording.use", "recording.confirm", "sources.read", "requests.create", "references.read", "tasks.read", "calendar.read", "analytics.read", "agents.read", "agents.rehearse",
+  "recording.use", "recording.confirm", "sources.read", "requests.create", "references.read", "tasks.read", "calendar.read", "analytics.read", "agents.read", "agents.rehearse", "review.comment",
 ];
 
 /** Aceita convites pendentes para o email confirmado e devolve o contexto do utilizador. */
@@ -79,6 +79,9 @@ export function friendlyError(msg: string): string {
   if (msg.includes("nome_longo")) return "O nome tem de ter até 80 caracteres.";
   if (msg.includes("caminho_invalido")) return "Imagem inválida. Escolhe outra.";
   if (msg.includes("demasiados_eventos")) return "Demasiadas alterações de segurança seguidas. Espera um pouco.";
+  if (msg.includes("bloco_invalido")) return "Esse bloco já não existe neste guião. Recarrega.";
+  if (msg.includes("resposta_invalida")) return "Só se responde a comentários (não a respostas).";
+  if (msg.includes("comentario_nao_encontrado")) return "Esse comentário já não existe.";
   if (msg.includes("aguarda_para_reenviar")) return "Acabaste de enviar este convite. Espera um minuto antes de reenviar.";
   if (msg.includes("limite_envios")) return "Este convite já foi enviado 5 vezes. Cancela-o e cria um novo se for preciso.";
   if (msg.includes("convite_fechado")) return "Este convite já foi aceite, recusado ou cancelado.";
