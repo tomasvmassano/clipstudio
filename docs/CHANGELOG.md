@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-29 (QC técnico dos vídeos)
+
+- **EDL-03** QC técnico em código no motor (numeiro-engine #7, ADR-0028): formato 1080×1920, fps, duração, áudio, loudness e pico, troços pretos e congelados, retângulo seguro do layout e distinção por pHash face à fonte e às irmãs. `python run.py qc video.mp4`. Limites por cliente, pressupostos até ao piloto. O motor passa a ter CI com os testes do worker e do QC (vídeos gerados por ffmpeg). Também no motor: alojamento no Hetzner por cloud-init (numeiro-engine #6).
+
 ## 2026-10-29 (estilos de edição)
 
 - **W5-02** catálogo de estilos e preset de edição (VAR-02 e EDL-01 parciais, ADR-0027). Nova página **Estilos de edição** no menu do cliente. Cada estilo é um template versionado: layout em 1080×1920 com pré-visualização, nível de transformação, plataformas e notas; gravar cria sempre uma versão nova e o histórico fica. O texto tem de ficar no retângulo seguro (x 60-960, y 210-1600), validado no servidor. O **preset** diz o que a edição automática gera por guião e fixa a versão de cada estilo; quando um estilo muda, o preset avisa. Numeiro começa com S01 a S13 (S13 "Faixa de estatuto" ativo com o layout do PRD, os outros em rascunho à espera do layout) e o preset por defeito do EDL-01: masters por hook, os dois split screens e S13. Outros clientes podem partir do mesmo ponto. Nova capacidade `styles.manage` (dono, admin e gestor). Migração `20261029180804_w5_edit_styles` (aditiva). Testes: SQL 34/34, E2E 3/3.
