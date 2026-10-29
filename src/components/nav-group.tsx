@@ -31,11 +31,12 @@ export function NavGroup({ label, items, base = "", all }: SidebarNavGroup & { b
 	const active = activeFor(base ? stripWs(pathname) : pathname, all);
 	const href = (p?: string) => (base ? `${base}${p === "/" ? "" : p ?? ""}` || "/" : p ?? "/");
 	const { can, canOrg, mode, access } = useSession();
-	const needsFlags = items.some((i) => i.flag);
+	const needsFlags = items.some((i) => i.flag || i.unlessFlag);
 	const flags = useFlags(base ? wsIdFromPath(pathname) : null, access?.token ?? null, needsFlags && mode !== "loading");
 	// Antes de saber a sessão mostra tudo (evita saltos); depois só o que a capacidade permite.
 	const visible = items.filter((i) => {
 		if (i.flag && !flags?.has(i.flag)) return false;
+		if (i.unlessFlag && flags?.has(i.unlessFlag)) return false;
 		if (i.orgCap) return mode !== "loading" && canOrg(i.orgCap);
 		return !i.cap || mode === "loading" || can(i.cap);
 	});
