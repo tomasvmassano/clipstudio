@@ -57,6 +57,11 @@ export function friendlyError(msg: string): string {
   if (msg.includes("texto_longo")) return "O pedido é demasiado longo (máximo 2000 caracteres).";
   if (msg.includes("duracao_s")) return "A duração tem de estar entre 1 e 3600 segundos.";
   if (msg.includes("corpo_vazio")) return "O corpo não pode ficar vazio.";
+  if (msg.includes("dependencia_invalida")) return "Cada tarefa do template só pode depender de tarefas acima dela.";
+  if (msg.includes("template_nao_encontrado")) return "Este template já não existe ou está desligado.";
+  if (msg.includes("nome_obrigatorio")) return "Dá um nome ao template.";
+  if (msg.includes("limite_invalido")) return "O limite tem de estar entre 1 e 100.";
+  if (msg.includes("prazo_invalido")) return "Prazo inválido: dias entre -60 e 60, hora entre 0 e 23.";
   if (msg.includes("data_passada")) return "Não se agenda para um dia que já passou.";
   if (msg.includes("data_longe")) return "Essa data está longe demais (máximo um ano e um mês).";
   if (msg.includes("nao_reagendavel")) return "Guiões cancelados ou publicados não mudam de dia. Reativa primeiro.";

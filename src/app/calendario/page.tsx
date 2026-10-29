@@ -12,6 +12,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "
 import { Skeleton } from "@/components/ui/skeleton";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { WorkspaceGate } from "@/components/workspace-gate";
+import { ContentChecklist } from "@/components/tasks/content-checklist";
 import { useSession } from "@/components/session-provider";
 import type { Access } from "@/lib/access";
 import {
@@ -206,7 +207,7 @@ function Calendario({ access }: { access: Access }) {
       )}
 
       {opened && data && (
-        <ContentSheet c={opened} today={today} data={data} busy={busy} onClose={() => setOpen(null)}
+        <ContentSheet access={access} onRefresh={() => setRev((n) => n + 1)} c={opened} today={today} data={data} busy={busy} onClose={() => setOpen(null)}
           onMove={(d) => moveContent(opened, d)}
           onProduction={(to) => act(() => setProductionStatus(access, opened.id, to), `Guião ${opened.n}: ${PRODUCTION_LABEL[to].toLowerCase()}.`)} />
       )}
@@ -214,8 +215,8 @@ function Calendario({ access }: { access: Access }) {
   );
 }
 
-function ContentSheet({ c, today, data, busy, onClose, onMove, onProduction }: {
-  c: CalContent; today: string; data: CalendarData; busy: boolean; onClose: () => void;
+function ContentSheet({ access, onRefresh, c, today, data, busy, onClose, onMove, onProduction }: {
+  access: Access; onRefresh: () => void; c: CalContent; today: string; data: CalendarData; busy: boolean; onClose: () => void;
   onMove: (d: string) => void; onProduction: (to: CalContent["production_status"]) => void;
 }) {
   const [d, setD] = useState(c.date >= today ? c.date : today);
@@ -250,6 +251,7 @@ function ContentSheet({ c, today, data, busy, onClose, onMove, onProduction }: {
               </div>
             </form>
           )}
+          <ContentChecklist access={access} contentId={c.id} onApplied={onRefresh} />
           <div className="flex flex-wrap gap-3">
             <Link className="underline underline-offset-2" href={`/guioes?date=${c.date}`}>Abrir no dia dos guiões</Link>
             <Link className="underline underline-offset-2" href={`/teleprompter?date=${c.date}`}>Teleprompter deste dia</Link>

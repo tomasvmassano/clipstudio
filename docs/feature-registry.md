@@ -43,8 +43,8 @@ Estado: **ativo** (existe e é verificado no servidor por `authorize()`; também
 | `tasks.work` | Tarefas | B | ws, own | ativo | mudar estado/bloquear as tarefas de que é responsável, comentar e mencionar; caixa de entrada `/caixa` |
 | `calendar.read` | Calendário (M11) | B | ws | ativo | `/calendario` (dia, semana, mês; guiões, tarefas e sessões); também o código de equipa |
 | `calendar.schedule` | Calendário | M | ws, proj | ativo | reagendar guiões (arrastar ou "Mover para"), agendar, tirar da agenda, cancelar, reativar |
-| `production.update` | Calendário | M | ws, own | ativo | gravado → em edição → pronto (e voltar) |
-| `tasks.manage` | Tarefas | M | ws, proj | ativo | criar, atribuir, prazos, prioridades, dependências, cancelar; automações de handoff (`task_rule_save`) |
+| `production.update` | Calendário | M | ws, own | ativo | gravado → em edição → pronto (e voltar); marcar e acrescentar itens da checklist do guião |
+| `tasks.manage` | Tarefas | M | ws, proj | ativo | criar, atribuir, prazos, prioridades, dependências, cancelar; automações de handoff (`task_rule_save`); templates (`template_save`, `template_apply`, `template_clone` exige gerir os dois clientes); carga e limite de WIP (`workload`) |
 | `publishing.schedule` | Publicação (M12) | A | ws, conta | W6 | — |
 | `publishing.publish` | Publicação | A | ws, conta | W6 | — |
 | `social_accounts.manage` | Publicação | A | ws | W6 | — |

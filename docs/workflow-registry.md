@@ -69,6 +69,12 @@ Handoffs (`task_rules`, por cliente): `on_event` cria uma tarefa com `dedup_key 
 
 Caixa de entrada: notificações, tarefas minhas, guiões `in_review` onde posso aprovar e tarefas sem dono; tudo filtrado pelo acesso atual (quem perde acesso deixa de ver). Marcar lido não altera nada.
 
+## Templates e checklist (W3-03)
+
+Template (`task_templates`, por cliente) = até 30 tarefas (título com `{n}`/`{tema}`, tipo, prioridade, dia relativo ao guião, hora no fuso do cliente, responsável opcional, dependências só de itens anteriores) + até 50 itens de checklist. Aplicar a um guião (`tasks.manage`) cria as tarefas com `dedup_key = tpl:template:guião:índice` e a checklist (sem repetidos por guião): repetir não duplica. Responsável que perdeu acesso fica vazio. Clonar para outro cliente exige gerir os dois e nunca leva responsáveis.
+
+Checklist do guião (`content_checklist`): marcar/acrescentar com `production.update`, ler com `scripts.read`; itens não se apagam; fica quem marcou e quando. Carga (`workload`, `tasks.manage`): abertas, em curso, bloqueadas, atrasadas, próximos 7 dias e feitas em 7 dias por pessoa; o limite de WIP (`clients.wip_limit`) só avisa.
+
 ## Fontes e pedidos do talento (`ideas`, W2-03)
 
 `nova → triagem → selecionada → usada`, ou `descartada` (motivo obrigatório). `kind = source | talent_request`.
