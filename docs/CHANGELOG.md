@@ -27,6 +27,10 @@
 
 - **Um só projeto Vercel:** produção passa a ser `https://clipstudio-jchs.vercel.app`; apagados os duplicados `clipstudio` e `clipstudio-c8h1`, que triplicavam cada deploy e esgotaram o limite diário do plano gratuito. Supabase Auth: Site URL e Redirect URLs têm de apontar para `https://clipstudio-jchs.vercel.app` (e `/**`), mais `http://localhost:3000/**` para desenvolvimento.
 
+## 2026-10-29 (registo de estado)
+
+- **CHG-004 implementação.** `docs/status.md` com os 263 IDs do PRD, semeado por uma auditoria independente (17 feito, 145 parcial, 98 por começar, 3 bloqueado). `scripts/status/check.py` valida o registo contra o PRD e o CI `Qualidade` recusa PRs que mexem em `src/` ou `supabase/migrations/` sem o atualizar. AGENTS §3/§13 e CLAUDE.md: tarefas começam e acabam no registo. Revisão automática diária às 07:23 (Dubai). Linhas com UI sem verificação com conta real ficaram `parcial`.
+
 ## 2026-10-29 (PRD)
 
 - **CHG-002** R-15 (falhas contidas, gestor único de canais, sessões que não caem por falhas de rede, gate de release com CI e E2E com conta real) e QA-16. Origem: incidente de `/c/numeiro`; correção no W1-12 (#20).
