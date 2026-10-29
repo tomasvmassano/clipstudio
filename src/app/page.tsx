@@ -1,93 +1,189 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { Building2Icon, RotateCwIcon, SlidersHorizontalIcon } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Dashboard, type DashboardData } from "@/components/dashboard";
-import { DashboardSkeleton } from "@/components/dashboard-skeleton";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { ChannelBreakdownChart } from "@/components/channel-breakdown-chart";
+import { ConversationVolumeChart } from "@/components/conversation-volume-chart";
+import { CsatResponsesChart } from "@/components/csat-responses-chart";
+import { FirstReplyTimeChart } from "@/components/first-reply-time-chart";
+import { KpiCard } from "@/components/kpi-card";
+import { LayoutDialog } from "@/components/dashboard-layout-dialog";
+import { RecentConversations } from "@/components/recent-conversations";
+import { SupportActivity } from "@/components/support-activity";
 import { TeamCode } from "@/components/team-code";
+import { TeamOnDuty } from "@/components/team-on-duty";
 import { useGuioes } from "@/components/use-guioes";
+import { useSession } from "@/components/session-provider";
 import { WorkspaceGate } from "@/components/workspace-gate";
 import type { Access } from "@/lib/access";
-import { niceDate, splitDay, todayDubai } from "@/lib/data";
-import { fetchDesempenho, fmtCompact, fmtDay, type Desempenho } from "@/lib/desempenho";
-import { fetchHoje, pctDelta, type Hoje } from "@/lib/hoje";
+import { splitDay } from "@/lib/data";
+import {
+  PERIODS, asKpi, fetchDashboard, fmtKpi, fmtRange, loadPeriod, rangeFor, savePeriod, todayIn,
+  type DashboardResp, type PeriodKey, type Widget,
+} from "@/lib/dashboard";
+import { fetchDesempenho, fmtDay, type Desempenho } from "@/lib/desempenho";
+import { fetchHoje, type Hoje } from "@/lib/hoje";
 import { FORMATO_LABEL } from "@/lib/types";
 
-// Preset do workspace Numeiro (PRD §20): 30 guiões/dia. Outros clientes terão o seu.
-const TARGET = 30;
-
-export default function HojePage() {
-	return <WorkspaceGate need="analytics.read">{(access) => <HojeView access={access} />}</WorkspaceGate>;
+/** Início do cliente (PRD M01): KPIs do período com comparação, widgets por função (configuráveis) e o dia de hoje. */
+export default function InicioPage() {
+  return <WorkspaceGate>{(access) => <Inicio access={access} />}</WorkspaceGate>;
 }
 
-function HojeView({ access }: { access: Access }) {
-	const date = todayDubai();
-	const { all, loading, error: gErr } = useGuioes(access, date);
-	const [hoje, setHoje] = useState<Hoje | null>(null);
-	const [des, setDes] = useState<Desempenho | null>(null);
-	const [err, setErr] = useState("");
-	const [attempt, setAttempt] = useState(0);
+const NEEDS_HOJE = new Set(["chart.views_daily", "panel.agents", "panel.activity"]);
+const NEEDS_DES = new Set(["chart.production", "chart.weekly_avg"]);
+const NEEDS_TODAY = new Set(["chart.format_mix", "panel.scripts_today"]);
 
-	useEffect(() => {
-		Promise.all([fetchHoje(access), fetchDesempenho(access)])
-			.then(([h, d]) => { setHoje(h); setDes(d); })
-			.catch((e: Error) => setErr(e.message));
-	}, [attempt, access]);
+function Inicio({ access }: { access: Access }) {
+  const { ws, canOrg } = useSession();
+  const tz = ws?.timezone ?? "Asia/Dubai";
+  const [p, setP] = useState(loadPeriod);
+  const range = useMemo(() => rangeFor(p.key, tz, { from: p.from, to: p.to }), [p, tz]);
+  const [dash, setDash] = useState<DashboardResp | null>(null);
+  const [hoje, setHoje] = useState<Hoje | null>(null);
+  const [des, setDes] = useState<Desempenho | null>(null);
+  const [err, setErr] = useState("");
+  const [rev, setRev] = useState(0);
+  const [editing, setEditing] = useState(false);
 
-	const data = useMemo<DashboardData | null>(() => {
-		if (!hoje || !des || loading) return null;
-		const { day, carry } = splitDay(all, date);
-		const ok = day.filter((g) => g.status !== "rejeitado");
-		const val = ok.filter((g) => g.validado).length;
-		const grav = ok.filter((g) => g.gravado).length;
-		const rej = day.length - ok.length;
+  const setPeriod = (next: typeof p) => { setP(next); savePeriod(next); };
 
-		const count = new Map<string, number>();
-		ok.forEach((g) => count.set(g.formato ?? "outros", (count.get(g.formato ?? "outros") ?? 0) + 1));
-		const sorted = [...count.entries()].sort((a, b) => b[1] - a[1]);
-		const top = sorted.slice(0, 4);
-		const rest = sorted.slice(4).reduce((t, [, n]) => t + n, 0);
-		const mix = [...top, ...(rest ? [["outros", rest] as [string, number]] : [])].map(([k, n]) => ({
-			key: k.replace(/[^a-z0-9]/gi, "_"),
-			label: FORMATO_LABEL[k] ?? k,
-			share: Math.round((n / Math.max(1, ok.length)) * 100),
-		}));
+  useEffect(() => {
+    let alive = true;
+    fetchDashboard(access, range.from, range.to)
+      .then(async (d) => {
+        if (!alive) return;
+        setDash(d); setErr("");
+        const keys = new Set(d.widgets.map((w) => w.key));
+        const [h, s] = await Promise.all([
+          [...keys].some((k) => NEEDS_HOJE.has(k)) ? fetchHoje(access) : Promise.resolve(null),
+          [...keys].some((k) => NEEDS_DES.has(k)) ? fetchDesempenho(access) : Promise.resolve(null),
+        ]);
+        if (alive) { setHoje(h); setDes(s); }
+      })
+      .catch((e: Error) => { if (alive) setErr(e.message); });
+    return () => { alive = false; };
+  }, [access, range.from, range.to, rev]);
 
-		return {
-			today: date,
-			hoje,
-			guioesHoje: day,
-			mix,
-			stats: [
-				{ label: "Guiões para gravar", value: `${ok.length} / ${TARGET}`, footnote: rej ? `${rej} rejeitados hoje` : "meta do dia" },
-				{ label: "Validados pelo Creator", value: `${val} / ${ok.length}`, footnote: val < ok.length ? `faltam ${ok.length - val}` : "tudo validado" },
-				{ label: "Gravados", value: `${grav} / ${ok.length}`, footnote: carry.length ? `${carry.length} por gravar de dias anteriores` : "hoje" },
-				{ label: "Views (30 dias)", value: fmtCompact(hoje.views_30d), delta: hoje.views_prev_30d ? pctDelta(hoje.views_30d, hoje.views_prev_30d) : undefined, footnote: "vs 30 dias anteriores" },
-			],
-			prod: des.dias.slice(-10).map((d) => ({ day: fmtDay(d.date), validados: d.validados, gravados: d.gravados, rejeitados: d.rejeitados })),
-			semanas: des.semanas.slice(-7).map((s) => ({ day: fmtDay(s.semana), media: s.media })),
-		};
-	}, [hoje, des, loading, all, date]);
+  const badRange = p.key === "custom" && (!p.from || !p.to || p.to < p.from);
+  const kpis = dash?.widgets.filter((w) => w.kind === "kpi") ?? [];
+  const others = dash?.widgets.filter((w) => w.kind !== "kpi") ?? [];
 
-	return (
-		<div className="flex flex-col gap-4">
-			<div className="flex flex-wrap items-end justify-between gap-3">
-				<div>
-					<h1 className="text-2xl font-semibold tracking-tight">Hoje</h1>
-					<p className="text-sm text-muted-foreground">{niceDate(date)} · hora de Dubai</p>
-				</div>
-				<TeamCode />
-			</div>
-			{(err || gErr) && (
-				<Alert variant="destructive">
-					<AlertDescription className="flex flex-wrap items-center justify-between gap-2">
-						<span>Não consegui carregar os dados: {err || gErr}</span>
-						<Button size="sm" variant="outline" onClick={() => { setErr(""); setAttempt((n) => n + 1); }}>Tentar de novo</Button>
-					</AlertDescription>
-				</Alert>
-			)}
-			{data ? <Dashboard data={data} /> : !err && <DashboardSkeleton />}
-		</div>
-	);
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Início</h1>
+          <p className="text-sm text-muted-foreground">
+            {ws?.name} · {fmtRange(range.from, range.to)} · fuso {tz}
+            {dash?.target_per_day ? ` · meta ${dash.target_per_day} guiões/dia` : ""}
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          {canOrg("dashboard.agency") && (
+            <Button size="sm" variant="outline" render={<Link href="/agencia" />} nativeButton={false}><Building2Icon /> Agência</Button>
+          )}
+          {dash?.can_configure && <Button size="sm" variant="outline" onClick={() => setEditing(true)}><SlidersHorizontalIcon /> Personalizar</Button>}
+          <TeamCode />
+        </div>
+      </div>
+
+      <PeriodPicker value={p} onChange={setPeriod} />
+      {badRange && <Alert><AlertDescription>Escolhe uma data de início e uma de fim (o fim não pode ser antes do início). Até lá, mostro os últimos 30 dias.</AlertDescription></Alert>}
+
+      {err ? (
+        <Alert variant="destructive">
+          <AlertDescription className="flex flex-wrap items-center justify-between gap-2">
+            <span>Não consegui carregar o Início: {err}</span>
+            <Button size="sm" variant="outline" onClick={() => { setErr(""); setRev((n) => n + 1); }}><RotateCwIcon /> Tentar de novo</Button>
+          </AlertDescription>
+        </Alert>
+      ) : !dash ? (
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">{Array.from({ length: 8 }, (_, i) => <Skeleton key={i} className="h-32" />)}</div>
+      ) : dash.widgets.length === 0 ? (
+        <Alert><AlertDescription>Não há widgets que possas ver neste cliente. Pede a quem gere o cliente para rever as tuas permissões ou o layout da tua função.</AlertDescription></Alert>
+      ) : (
+        <>
+          {kpis.length > 0 && (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {kpis.map((w) => <KpiCard key={w.key} w={w} k={asKpi(dash.kpis[w.key])} period={dash.period} extra={extraFor(w.key, dash)} />)}
+            </div>
+          )}
+          {others.length > 0 && (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {others.map((w) => <OtherWidget key={w.key} w={w} hoje={hoje} des={des} access={access} tz={tz} />)}
+            </div>
+          )}
+          {dash.customized && <p className="text-muted-foreground text-xs">Layout personalizado para a tua função neste cliente.</p>}
+        </>
+      )}
+
+      {editing && dash && (
+        <LayoutDialog ws={access.ws} myRole={dash.role} onClose={(changed) => { setEditing(false); if (changed) setRev((n) => n + 1); }} />
+      )}
+    </div>
+  );
+}
+
+function extraFor(key: string, d: DashboardResp): string | undefined {
+  if (key === "kpi.costs" && Number(d.kpis.costs_unknown ?? 0) > 0) return `${d.kpis.costs_unknown} execuções sem custo conhecido`;
+  if (key === "kpi.views" && d.kpis.reels != null) return `${fmtKpi("kpi.tasks_done", Number(d.kpis.reels))} reels no período`;
+  return undefined;
+}
+
+function PeriodPicker({ value, onChange }: { value: { key: PeriodKey; from: string; to: string }; onChange: (v: { key: PeriodKey; from: string; to: string }) => void }) {
+  return (
+    <div className="flex flex-wrap items-end gap-2">
+      <ToggleGroup value={[value.key]} variant="outline" size="sm" aria-label="Período"
+        onValueChange={(v) => { const k = (v as string[])[0] as PeriodKey | undefined; if (k) onChange({ ...value, key: k }); }}>
+        {PERIODS.map((x) => <ToggleGroupItem key={x.key} value={x.key}>{x.label}</ToggleGroupItem>)}
+        <ToggleGroupItem value="custom">Outro</ToggleGroupItem>
+      </ToggleGroup>
+      {value.key === "custom" && (
+        <>
+          <label className="flex flex-col gap-1 text-xs">De<Input type="date" value={value.from} onChange={(e) => onChange({ ...value, from: e.target.value })} /></label>
+          <label className="flex flex-col gap-1 text-xs">Até<Input type="date" value={value.to} onChange={(e) => onChange({ ...value, to: e.target.value })} /></label>
+        </>
+      )}
+    </div>
+  );
+}
+
+function OtherWidget({ w, hoje, des, access, tz }: { w: Widget; hoje: Hoje | null; des: Desempenho | null; access: Access; tz: string }) {
+  if (NEEDS_TODAY.has(w.key)) return <TodayWidget w={w} access={access} tz={tz} />;
+  if (NEEDS_HOJE.has(w.key) && !hoje) return <Skeleton className="h-64 md:col-span-2" />;
+  if (NEEDS_DES.has(w.key) && !des) return <Skeleton className="h-64 md:col-span-2" />;
+  switch (w.key) {
+    case "chart.views_daily": return <ConversationVolumeChart rows={hoje!.diario} today={todayIn(tz)} />;
+    case "chart.production": return <CsatResponsesChart rows={des!.dias.slice(-10).map((d) => ({ day: fmtDay(d.date), validados: d.validados, gravados: d.gravados, rejeitados: d.rejeitados }))} />;
+    case "chart.weekly_avg": return <FirstReplyTimeChart rows={des!.semanas.slice(-7).map((s) => ({ day: fmtDay(s.semana), media: s.media }))} />;
+    case "panel.agents": return <TeamOnDuty agentes={hoje!.agentes} />;
+    case "panel.activity": return <SupportActivity items={hoje!.atividade} />;
+    default: return null;
+  }
+}
+
+/** Widgets do dia de hoje: só carregam os guiões quando estão no layout. */
+function TodayWidget({ w, access, tz }: { w: Widget; access: Access; tz: string }) {
+  const date = todayIn(tz);
+  const { all, loading, error } = useGuioes(access, date);
+  if (error) return <Alert variant="destructive" className="md:col-span-2"><AlertDescription>{w.label}: {error}</AlertDescription></Alert>;
+  if (loading) return <Skeleton className="h-64 md:col-span-2" />;
+  const { day } = splitDay(all, date);
+  const ok = day.filter((g) => g.status !== "rejeitado");
+  if (w.key === "panel.scripts_today") return <RecentConversations guioes={day} />;
+  const count = new Map<string, number>();
+  ok.forEach((g) => count.set(g.formato ?? "outros", (count.get(g.formato ?? "outros") ?? 0) + 1));
+  const sorted = [...count.entries()].sort((a, b) => b[1] - a[1]);
+  const rest = sorted.slice(4).reduce((t, [, n]) => t + n, 0);
+  const mix = [...sorted.slice(0, 4), ...(rest ? [["outros", rest] as [string, number]] : [])].map(([k, n]) => ({
+    key: k.replace(/[^a-z0-9]/gi, "_"), label: FORMATO_LABEL[k] ?? k, share: Math.round((n / Math.max(1, ok.length)) * 100),
+  }));
+  return <ChannelBreakdownChart data={mix} total={ok.length} />;
 }
