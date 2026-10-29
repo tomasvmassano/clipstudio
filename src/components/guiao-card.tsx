@@ -48,6 +48,17 @@ type Props = {
 
 type Draft = { hooks: Hook[]; corpo: string; cta: string; notas: string };
 const toDraft = (g: Guiao): Draft => ({ hooks: g.hooks.length ? g.hooks : [{ text: "", mecanismo: "" }], corpo: g.corpo, cta: g.cta ?? "", notas: g.notas ?? "" });
+// Rascunho local (FR-17-13): o que ainda não chegou ao servidor fica neste dispositivo e pode ser recuperado.
+type LocalDraft = { d: Draft; lock: number; at: number };
+const draftKey = (g: Guiao) => `draft.${g.client_id}.${g.id}`;
+export function readLocalDraft(g: Guiao): LocalDraft | null {
+  try { const v = JSON.parse(localStorage.getItem(draftKey(g)) ?? "null") as LocalDraft | null; return v && v.d ? v : null; } catch { return null; }
+}
+const writeLocalDraft = (g: Guiao, v: Omit<LocalDraft, "at"> | null) => {
+  try { if (v) localStorage.setItem(draftKey(g), JSON.stringify({ ...v, at: Date.now() })); else localStorage.removeItem(draftKey(g)); } catch {}
+};
+const sameDraft = (a: Draft, b: Draft) => JSON.stringify(clean(a)) === JSON.stringify(clean(b));
+
 const clean = (d: Draft) => ({
   hooks: d.hooks.filter((h) => h.text.trim()).map((h) => ({ text: h.text.trim(), mecanismo: h.mecanismo })),
   corpo: d.corpo.split("\n").map((l) => l.trim()).filter(Boolean).join("\n"),
@@ -65,6 +76,12 @@ export function GuiaoCard({ g, carried, caps, actions, onError, startInEdit, ope
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [nComments, setNComments] = useState<number | undefined>(openComments);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [hasLocal, setHasLocal] = useState(false);
+  useEffect(() => {
+    const v = readLocalDraft(g);
+    const t = setTimeout(() => setHasLocal(!!v && !sameDraft(v.d, toDraft(g))), 0);
+    return () => clearTimeout(t);
+  }, [g, mode]);
   const lists = useMetaLists(actions);
   const names = metaNames(g, lists.projects, lists.owners);
 
@@ -101,6 +118,11 @@ export function GuiaoCard({ g, carried, caps, actions, onError, startInEdit, ope
       {(g.tags ?? []).map((t) => <span key={t} className="text-muted-foreground">#{t}</span>)}
       {carried && <Badge variant="outline" className="border-amber-500/50 text-amber-600 dark:text-amber-400">por gravar de {g.date}</Badge>}
       {st === "draft" && g.approved_version_id && <span className="text-muted-foreground">tem uma versão anterior aprovada</span>}
+      {hasLocal && mode === "view" && caps.edit && st !== "archived" && (
+        <button type="button" onClick={() => setMode("edit")} className="rounded-md border border-amber-500/50 px-1.5 py-0.5 text-amber-600 dark:text-amber-400">
+          alterações por guardar neste dispositivo
+        </button>
+      )}
       <span className="text-muted-foreground tabular-nums">~{dur}s</span>
       {g.critic_score != null && <span className="ml-auto font-medium tabular-nums text-muted-foreground">{Number(g.critic_score).toFixed(1)}</span>}
     </div>
@@ -264,6 +286,10 @@ export function GuiaoCard({ g, carried, caps, actions, onError, startInEdit, ope
 function BlockEditor({ g, actions, onError, onClose }: { g: Guiao; actions: ScriptActions; onError: (m: string) => void; onClose: () => void }) {
   const [d, setD] = useState<Draft>(() => toDraft(g));
   const [state, setState] = useState<"idle" | "dirty" | "saving" | "saved" | "error">("idle");
+  const [recover, setRecover] = useState<LocalDraft | null>(() => {
+    const v = typeof window === "undefined" ? null : readLocalDraft(g);
+    return v && !sameDraft(v.d, toDraft(g)) ? v : null;
+  });
   const [savedAt, setSavedAt] = useState<string>("");
   const lock = useRef(g.lock_version);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -281,6 +307,7 @@ function BlockEditor({ g, actions, onError, onClose }: { g: Guiao; actions: Scri
     try {
       const saved = await actions.save(g.id, c, lock.current);
       lock.current = saved.lock_version;
+      if (!pending.current) writeLocalDraft(g, null);   // chegou ao servidor: já não é preciso
       setSavedAt(new Date().toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit" }));
       setState(pending.current ? "dirty" : "saved");
       return true;
@@ -290,13 +317,21 @@ function BlockEditor({ g, actions, onError, onClose }: { g: Guiao; actions: Scri
       if ((e as { code?: string }).code === "PT409") onClose();
       return false;
     }
-  }, [actions, g.id, onClose, onError]);
+  }, [actions, g, onClose, onError]);
 
   useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
+  // sair da página com alterações por guardar: o browser avisa (o rascunho fica no dispositivo de qualquer forma)
+  useEffect(() => {
+    if (state !== "dirty" && state !== "saving" && state !== "error") return;
+    const warn = (e: BeforeUnloadEvent) => { e.preventDefault(); };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [state]);
 
   const change = (next: Draft) => {
     setD(next);
     pending.current = next;
+    writeLocalDraft(g, { d: next, lock: lock.current });
     setState("dirty");
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(() => { void flush(); }, 1200);
@@ -309,6 +344,13 @@ function BlockEditor({ g, actions, onError, onClose }: { g: Guiao; actions: Scri
 
   return (
     <div className="flex flex-col gap-3">
+      {recover && (
+        <div role="alert" className="flex flex-wrap items-center gap-2 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs">
+          <span className="flex-1">Há alterações a este guião que não chegaram ao servidor (deste dispositivo, {new Date(recover.at).toLocaleString("pt-PT", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}).</span>
+          <Button size="sm" onClick={() => { const v = recover; setRecover(null); change(v.d); }}>Recuperar</Button>
+          <Button size="sm" variant="ghost" onClick={() => { writeLocalDraft(g, null); setRecover(null); }}>Descartar</Button>
+        </div>
+      )}
       {wasApproved && (
         <p className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs">
           Este guião está aprovado. Ao mudares o texto volta a rascunho e a aprovação fica guardada na versão anterior.
