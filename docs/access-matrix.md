@@ -28,6 +28,7 @@ Um `agency_member` sem atribuição a um workspace **não vê nada** desse works
 | `scripts.delete` | ✓ | ✓ | — | — | — | — |
 | `scripts.export` | ✓ | ✓ | ✓ | ✓ | ✓ | — |
 | `recording.use` / `confirm` | ✓ | ✓ | ✓ | ✓ (own) | — | — |
+| `styles.manage` (W5-02) | ✓ | ✓ | ✓ | — | — | — |
 | `calendar.read` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `calendar.schedule` | ✓ | ✓ | ✓ | — | — | — |
 | `production.update` | ✓ | ✓ | ✓ | ✓ (own) | — | — |

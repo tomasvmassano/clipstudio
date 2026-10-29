@@ -47,3 +47,6 @@ where not exists (select 1 from agent_config_versions where workspace_id = 'nume
 insert into themes (client_id, tema, categoria, active)
 select 'numeiro', 'Tema de teste ' || g, 'geral', true from generate_series(1, 5) g
 on conflict do nothing;
+
+-- W5-02: ponto de partida do catálogo de estilos e do preset de edição do numeiro (a migração só semeia se o cliente já existir)
+select public._edit_seed('numeiro', 'system', 'fixture');

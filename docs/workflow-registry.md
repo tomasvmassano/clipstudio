@@ -152,3 +152,15 @@ Publicação (por destino/conta): `draft → scheduled → processing → publis
 | `status='rejeitado'` + `motivo_rejeicao` | editorial `rejected` |
 | `gravado=true` | produção `recorded` |
 | `history` (10 versões de hooks/corpo) | precursor de `content_versions` |
+
+
+## Estilos de edição e preset (W5-02, VAR-02, EDL-01)
+
+Estilo (`edit_styles`): `rascunho → ativo → rascunho`, qualquer um `→ arquivado → rascunho`. Cada gravação cria uma versão nova em `edit_style_versions` (imutáveis).
+
+| Transição | Capacidade | Regra | Evento |
+| --- | --- | --- | --- |
+| gravar estilo | `styles.manage` | versão esperada tem de ser a atual (40001); layout 1080×1920, texto no retângulo seguro x 60-960, y 210-1600; arquivado não se edita | auditoria `edit.style_saved` (antes/depois) |
+| ativar | `styles.manage` | layout com pelo menos uma camada e sem problemas | `edit.style_status` |
+| rascunho / arquivar | `styles.manage` | recusado se o preset atual usa o estilo | `edit.style_status` |
+| gravar preset | `styles.manage` | 1 a 12 saídas (`master`, `split_image_persona`, `split_attention`, `style`); estilos têm de estar ativos; fixa a versão de cada estilo; versão esperada (40001) | `edit.preset_saved` |
