@@ -96,7 +96,10 @@ Minimum required suites:
 - Negative security: 403/404 for unauthorized workspace/API/media/search; removed membership revokes new requests.
 - Non-functional: accessibility, responsive iPad, performance, backup restore, log redaction, error alerts.
 
-**Release blocked if:** cross-tenant leak; critical authorization bypass; missing migration rollback/backup for destructive change; publishing without approval; secrets exposed; failed critical E2E; broken primary route; silent data loss; unbounded retry/duplicated job; critical error without recovery.
+- Runtime guards (PRD R-15, CHG-002): error boundaries at app, space (`app/c/[ws]/error.tsx`), global and per widget; realtime channels and any browser resource returned by name only through `src/lib/realtime.ts` (`realtime.listen`); network errors never end a session. CI `Qualidade` (guards, lint, types, unit tests, build) must pass.
+- Verify with a **real logged-in session** (agency and client) before calling a navigation or live-data change done; team-code E2E alone is not enough (it skips realtime and agency paths). Zero console errors on main routes.
+
+**Release blocked if:** a route falls into the browser/Next generic error page; cross-tenant leak; critical authorization bypass; missing migration rollback/backup for destructive change; publishing without approval; secrets exposed; failed critical E2E; broken primary route; silent data loss; unbounded retry/duplicated job; critical error without recovery.
 
 ## 11. Change control
 

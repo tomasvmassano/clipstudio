@@ -822,6 +822,7 @@ Os requisitos seguintes complementam e, em caso de conflito, prevalecem sobre os
 | QA-13 | Mudança de role durante sessão ativa | Nova autorização efetiva |
 | QA-14 | Utilização mobile/tablet e teclado | Fluxos principais acessíveis |
 | QA-15 | Backup e restauro de amostra | Integridade e RPO/RTO medidos |
+| QA-16 (CHG-002) | Abrir cada rota com conta de agência, conta de cliente e código de equipa, com tempo real ligado, e forçar a falha de um widget e de um pedido | Sem ecrã de erro do browser; widget com erro isolado e "Tentar de novo"; zero erros na consola nas rotas principais |
 
 ## 12. Backlog por dependências e entregáveis
 
@@ -1051,6 +1052,13 @@ Acrescentar às entidades da Parte I: `creators`, `social_accounts`, `content_br
 
 **Metas propostas para validar em staging:** p95 de navegação principal ≤ 2,5s em dispositivos-alvo; ações interativas com feedback ≤ 1s; atualização de progresso ≤ 10s quando online; teleprompter fluido no iPad de referência; WCAG 2.2 AA; zero vulnerabilidades críticas abertas; zero testes de isolamento falhados; backups e restore ensaiados; alertas de job e integração ativos; E2E críticos 100% verdes. 99,5% de disponibilidade é **objetivo de serviço**, não garantia automática do fornecedor. Definir SLO e janela de medição. Nenhuma rota morta, botão decorativo ou placeholder enganador em produção. Funcionalidade ainda indisponível deve estar escondida ou explicitamente marcada como não disponível.
 
+**R-15 (CHG-002) — Falhas contidas, nunca o ecrã de erro do browser.** Nenhuma página pode cair no erro genérico do browser ou do Next ("This page couldn't load"). Obrigatório:
+- Limites de erro em três níveis: a app (`app/error`), cada espaço (agência e cliente, `app/c/[ws]/error`) e o global (`app/global-error`). Cada widget de um painel tem o seu limite: um widget que falha mostra "não carregou" com "Tentar de novo" e não leva a página consigo.
+- Mensagens de falha em PT-PT, com "Tentar de novo" e caminho de volta, sem detalhes técnicos para o utilizador; o erro vai para os registos com referência.
+- Infraestrutura partilhada no browser passa por um único gestor: canais de tempo real (um canal por nome, partilhado e com contagem de ouvintes), e o mesmo padrão para qualquer recurso que o cliente Supabase ou o browser devolva por nome. Abrir canais fora do gestor é bloqueado pelo CI.
+- Falhas de rede ou pedidos interrompidos nunca terminam a sessão nem apagam estado; só uma resposta explícita do servidor (código revogado, sessão inválida) o faz.
+- **Gate de release:** CI em cada PR com guardas de execução, lint, tipos, testes unitários e build; E2E com **sessão de conta real** (agência e cliente), não só com o código de equipa, porque os caminhos com conta (tempo real, painel da agência, permissões) são diferentes; verificação no browser com sessão antes de dar como feito qualquer mudança de navegação ou de dados ao vivo; zero erros na consola nas rotas principais.
+
 ## 26. Plano de entrega por dependências (escopo completo, sem cortes funcionais)
 
 **W0 — Inventário e contratos:** validar SQL/RLS/RPC, motor Python, contas sociais, formatos de media, serviços externos, custos e capacidades; congelar taxonomias e eventos.
@@ -1228,5 +1236,6 @@ Referências externas consultadas em 2026-10-28: ClickUp (custom roles, workload
 
 ## 36. Registo de alterações
 
+- **CHG-002 — 2026-10-29:** R-15 (falhas contidas, gestor único de canais, sessões que não caem por falhas de rede, gate de release com CI e E2E com conta real) em §25; QA-16 em §11. Origem: incidente de `/c/numeiro` a cair no erro do browser.
 - **CHG-001 — 2026-10-29:** espaço da agência e espaço do cliente (R-13), isolamento dos convites e cliente único (R-14), cliente no endereço, menu da agência e peças previstas; M01 com Painel da agência; §22 e §33 atualizados.
 - **v2.1 — 2026-10-28:** adicionados Centro de Acessos e Permissões, catálogo central de capacidades, grants individuais, simulador de acesso, equipa/presença/workload, protocolos de mudança, operação em escala e testes de isolamento.

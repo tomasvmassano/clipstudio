@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-29 (PRD)
+
+- **CHG-002** R-15 (falhas contidas, gestor único de canais, sessões que não caem por falhas de rede, gate de release com CI e E2E com conta real) e QA-16. Origem: incidente de `/c/numeiro`; correção no W1-12 (#20).
+
 ## 2026-10-29 (W1 Correção)
 
 - **W1-12 erro ao abrir um cliente** (ADR-0019, PRD R-07; CHG-002).
