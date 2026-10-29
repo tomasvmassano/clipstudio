@@ -17,6 +17,7 @@
   - Automações de tarefas reagem a "em edição" e "pronto" (ex.: gravado → passa a edição → tarefa para o editor, fecha quando fica pronto).
   - Guiões e teleprompter passam a tratar em edição e pronto como já gravados.
   - Testes: `w3_calendar` 39/39, `w2_content` 47/47 (regressão do `content_production`). E2E em workspace de teste isolado 18/18 (modo código).
+- **Calendário: detalhe do guião completo**: hooks com mecanismo, corpo, CTA, notas, estado editorial, formato e tarefas ligadas (com estado, responsável e prazo) no painel que abre ao tocar num guião. E2E 6/6.
 - **W3-03 templates de produção, checklists e carga** (PRD FR-11-04, FR-17-08, FR-17-09, TEAM-08 parcial; ADR-0009; migração `20261029081024_w3_templates_checklists_workload`).
   - Tarefas → Templates: lista de tarefas com dia relativo ao guião, hora, responsável e "depois da anterior", mais uma checklist. Copiar para outro cliente (só quem gere os dois; sem responsáveis).
   - No calendário, o detalhe do guião tem a checklist (quem marcou e quando) e "Aplicar template": cria as tarefas com prazos e dependências e a checklist. Aplicar de novo não duplica.
