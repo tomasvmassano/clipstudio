@@ -8,6 +8,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -15,6 +17,11 @@ jobs:
       - run: npm ci
       - name: Guardas de execução
         run: bash scripts/ci/check-runtime-guards.sh
+      - name: Registo de estado (docs/status.md contra o PRD)
+        run: python3 scripts/status/check.py
+      - name: Registo atualizado neste PR
+        if: github.event_name == 'pull_request'
+        run: python3 scripts/status/check.py --pr ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }}
       - name: Lint
         run: npm run lint
       - name: Tipos

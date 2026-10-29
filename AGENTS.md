@@ -23,6 +23,7 @@ Build ClipStudio as a reliable multi-client content operations platform: one glo
 
 ## 3. Before starting a task
 
+- **Status register first (CHG-004).** Open `docs/status.md` → *Pendentes abertos* before anything else. Say what happens to every `parcial`/`bloqueado` row left by the previous task: close it now, or keep it with owner and reason. Never start new scope while that is unstated. The repository (`docs/status.md`, `docs/CHANGELOG.md`, `docs/adr/`) is the memory of the project; never rely on conversation history to know what is pending.
 - Read the relevant PRD requirement IDs and acceptance criteria. Read related code, existing migrations, tests, and integration contracts.
 - Verify actual installed package versions. For Next.js, consult the installed version docs under `node_modules/next/dist/docs/` before changing routing/auth/data APIs, as required by the repository's generated agent instructions.
 - Identify affected workspaces, permissions, database entities, events, background jobs, UI, and integrations.
@@ -117,6 +118,8 @@ A feature is DONE only when: implemented in backend and UI; authorized and tenan
 ## 13. Task reporting template
 
 At the end of every implementation task report:
+
+Before reporting, update the rows in `docs/status.md` for every requirement ID the task touched (state, what is missing, evidence, date of real-session verification) and run `python3 scripts/status/check.py --fix`. The report below must match those rows. A requirement is `feito` only with evidence; when the product owner decides to skip or postpone something, record it as `adiado` with the decision and date, never leave it silently undone. PRD changes that add or remove IDs must run `--fix` in the same docs PR (new IDs enter as `por começar`).
 
 - **Requirement IDs:** ...
 - **Implemented:** ...
