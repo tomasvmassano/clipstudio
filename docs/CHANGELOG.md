@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-29 (CI)
+
+- **Vercel salta builds sem mudanças na app** (`vercel.json` → `scripts/vercel-ignore.sh`): commits só de documentação, migrações e testes SQL, testes unitários ou CI deixam de gastar deploys do limite diário. Na dúvida, constrói.
+- Testar sem deploy: `npm install` e `npm run dev` no próprio computador, em `http://localhost:3000` (já nas Redirect URLs do Supabase). Usa a base de dados de produção.
+
 ## 2026-10-29 (W1 Equipa da agência)
 
 - **W1-13 Equipa da agência** (PRD §2, §3, R-12, R-14, M13 parcial; ADR-0020; migração `20261029130512_w1_agency_team`).
