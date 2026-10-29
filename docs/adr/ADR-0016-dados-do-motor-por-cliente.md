@@ -1,6 +1,6 @@
 # ADR-0016 — Dados de pesquisa do motor por cliente (W4-03)
 
-**Data:** 2026-10-29 · **Estado:** aceite (fase expand) · **Requisitos:** PRD R-02, AGENTS §2.2 e §5, SCALE-07 (parcial).
+**Data:** 2026-10-29 · **Estado:** aceite (expand e contract aplicados) · **Requisitos:** PRD R-02, AGENTS §2.2 e §5, SCALE-07 (parcial).
 
 ## Contexto
 
@@ -16,9 +16,9 @@ Decisão de produto (Tomás, 29/10): **tudo por cliente**. Cada cliente tem a su
 4. **Funções da app.** `_reference_row`, `reference_create`, `references_discover` e o trigger das referências passam a exigir que o reel e a análise sejam do mesmo cliente, além da conta.
 5. **Até ao contract**, as chaves globais continuam: o mesmo reel, tema, citação ou chave de meta em dois clientes dá erro (23505) em vez de misturar dados.
 
-## Contract (PR seguinte, depois do motor novo no main)
+## Contract (aplicado: `20261029113539_w4_engine_client_contract`)
 
-Chaves passam a `(client_id, …)`, `client_id` obrigatório sem valor por omissão, saem `reels_pkey`, `themes_tema_key`, `quotes_texto_pt_key`, `meta_pkey` e as chaves por `reel_id`; FKs para reels passam a compostas; sai o fallback `numeiro` do trigger; política do `engine_worker` passa de `true` a `client_id = current_setting('engine.client_id')`; saem os grants de leitura antigos de anon/authenticated nestas tabelas (hoje sem efeito: RLS sem política dá 0 linhas). O teste `test_contract_mesmos_ids_em_dois_clientes` do motor já corre o código contra essa forma.
+Chaves passam a `(client_id, …)`, `client_id` obrigatório sem valor por omissão, saem `reels_pkey`, `themes_tema_key`, `quotes_texto_pt_key`, `meta_pkey` e as chaves por `reel_id`; FKs para reels passam a compostas; sai o fallback `numeiro` do trigger; política do `engine_worker` passa de `true` a `client_id = current_setting('engine.client_id')`; saem os grants de leitura antigos de anon/authenticated nestas tabelas (hoje sem efeito: RLS sem política dá 0 linhas). FKs das análises, temas, citações, guiões e referências passam a compostas (`on delete set null (coluna)` onde antes era set null, para nunca apagar o cliente). Desempenho, Hoje e as vistas `v_*` filtram também pelo cliente do reel. Ensaio numa transação desfeita (11/11) antes de aplicar; `w4_engine_isolation` 23/23 e `w2_references` 36/36 depois.
 
 ## Alternativas rejeitadas
 

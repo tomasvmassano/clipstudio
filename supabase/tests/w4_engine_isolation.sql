@@ -5,6 +5,7 @@ declare
   u_a uuid := gen_random_uuid(); u_b uuid := gen_random_uuid();
   reelA text := (select r.id from reels r join accounts a on a.id = r.account_id where a.client_id='numeiro' and a.role='reference' order by r.outlier desc nulls last limit 1);
   temaA text := (select tema from themes where client_id = 'numeiro' limit 1);
+  n_a int := (select count(distinct x.id) from reels x join accounts y on y.id = x.account_id where y.client_id = 'numeiro' and x.client_id = 'numeiro' and y.role = 'client');
   j jsonb; st text; n int; c text; acc text; ok int := 0; bad int := 0; res text := ''; r record;
 begin
   insert into clients (id, name, handle, organization_id) values ('ws_eng_b', 'Motor B (teste)', 'motorb', org);
@@ -71,7 +72,7 @@ begin
   insert into t values ('A guarda o seu reel com as suas métricas', true, j->'metrics'->>'source' = 'scraper' and (j->'metrics'->>'views')::bigint <> 1);
   begin perform 1 from reels limit 1; st := 'none'; exception when others then st := sqlstate; end;
   insert into t values ('tabelas do motor fechadas à API (42501)', true, st = '42501');
-  insert into t values ('Desempenho de A não conta reels de B', true, (desempenho('numeiro')->'kpi'->>'reels')::int = (select count(*) from (select distinct r.id from reels r join accounts a on a.id = r.account_id where a.client_id = 'numeiro' and r.client_id = 'numeiro' and a.role = 'client') x));
+  insert into t values ('Desempenho de A não conta reels de B', true, (desempenho('numeiro')->'kpi'->>'reels')::int = n_a);
   perform set_config('request.jwt.claims', json_build_object('sub', u_b, 'role','authenticated')::text, true);
   j := references_discover('ws_eng_b', null, 200);
   insert into t values ('B descobre o seu reel e a sua análise', true, exists (select 1 from jsonb_array_elements(j->'reels') z where z->>'id' = 'ENGB1' and z->'analysis'->>'tese' = 'tese de B'));
