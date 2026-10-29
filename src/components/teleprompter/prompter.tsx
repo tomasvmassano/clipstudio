@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { blockLabel, blocksOf, type BlockKey, type SessionItem, type TakeRow, type TpAction, type TpPrefs } from "@/lib/recording";
+import { blockLabel, blocksOf, isRecorded, type BlockKey, type SessionItem, type TakeRow, type TpAction, type TpPrefs } from "@/lib/recording";
 import { keyMap } from "@/components/teleprompter/use-prefs";
 import { cn } from "@/lib/utils";
 
@@ -72,7 +72,8 @@ export function Prompter(p: Props) {
   const cur = items[idx];
   const blocks = useMemo(() => (cur ? blocksOf(cur.content).filter((b) => !cur.skipped_blocks.includes(b.key)) : []), [cur]);
   const takes = useMemo(() => (cur ? takesFor(cur.content_id) : []), [cur, takesFor]);
-  const recorded = cur?.content.production_status === "recorded";
+  const recorded = !!cur && isRecorded(cur.content.production_status);
+  const toggleable = !!cur && ["not_started", "scheduled", "recorded"].includes(cur.content.production_status);
 
   const flash = useCallback((text: string, error = false) => {
     setToast({ text, error });
@@ -347,7 +348,7 @@ export function Prompter(p: Props) {
         <Btn label="↕" aria="Espelho vertical" on={prefs.mirror_v} onClick={() => update((x) => ({ mirror_v: !x.mirror_v }))} />
         {canTake && cur && <Btn label={`Take${block ? ` ${blockLabel(block)}` : ""}`} aria="Marcar take do bloco atual" onClick={markTake} />}
         {cur && <Btn label={`Takes (${takes.filter((t) => t.status === "ok").length})`} aria="Ver takes" on={showTakes} onClick={() => setShowTakes((x) => !x)} />}
-        {canTake && cur && <Btn label="Gravado" on={recorded} onClick={() => p.onRecorded(cur.content_id, !recorded).catch((e: Error) => flash(`Não ficou marcado: ${e.message}`, true))} />}
+        {canTake && cur && toggleable && <Btn label="Gravado" on={recorded} onClick={() => p.onRecorded(cur.content_id, !recorded).catch((e: Error) => flash(`Não ficou marcado: ${e.message}`, true))} />}
         <Btn label={isFs ? "Sair do ecrã inteiro" : "Ecrã inteiro"} onClick={toggleFs} />
         <Btn label="Definições" onClick={() => { setPlaying(false); p.onSettings(); }} />
         <Btn label="Fila" aria="Voltar à fila" onClick={exit} />

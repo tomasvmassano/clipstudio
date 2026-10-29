@@ -10,7 +10,7 @@ import { useTpPrefs } from "@/components/teleprompter/use-prefs";
 import type { Access } from "@/lib/access";
 import { addDays, dayLabel, setProduction, subscribeGuioes, todayDubai } from "@/lib/data";
 import {
-  blockLabel, blocksOf, closeSession, createTake, openSession, permanentError, readOutbox, saveProgress, setQueue, updateTake, writeOutbox,
+  blockLabel, blocksOf, closeSession, isRecorded, createTake, openSession, permanentError, readOutbox, saveProgress, setQueue, updateTake, writeOutbox,
   type BlockKey, type PendingTake, type RecordingSession, type SessionItem, type TakeRow,
 } from "@/lib/recording";
 import { cn } from "@/lib/utils";
@@ -184,12 +184,12 @@ function TeleprompterInner({ access }: { access: Access }) {
     const r = local && (!server || local.at > server.at) ? local : server;
     if (!r) return null;
     const index = playable.findIndex((i) => i.content_id === r.content);
-    if (index < 0 || playable[index].content.production_status === "recorded") return null;
+    if (index < 0 || isRecorded(playable[index].content.production_status)) return null;
     return { ...r, index, n: playable[index].content.n };
   }, [session, playable, access.ws, date]);
 
   const start = (index: number, extra?: { pct?: number; block?: BlockKey | null }) => { setView({ kind: "prompter", index, ...extra }); };
-  const firstOpen = Math.max(0, playable.findIndex((i) => i.content.production_status !== "recorded"));
+  const firstOpen = Math.max(0, playable.findIndex((i) => !isRecorded(i.content.production_status)));
 
   const endSession = async () => {
     if (!session) return;
@@ -261,13 +261,13 @@ function TeleprompterInner({ access }: { access: Access }) {
             <div className="flex flex-wrap items-center gap-2">
               {resume && <Btn on label={`Retomar no guião ${resume.n}${resume.block ? ` · ${blockLabel(resume.block)}` : ""} (${Math.round(resume.pct * 100)}%)`} onClick={() => start(resume.index, { pct: resume.pct, block: resume.block })} />}
               <Btn on={!resume} label={playable.length ? `Começar no guião ${playable[firstOpen]?.content.n ?? ""}` : "Nada para ler"} disabled={!playable.length} onClick={() => start(firstOpen)} />
-              <span className="text-sm text-neutral-400">{playable.length} na fila · {items.filter((i) => i.content.production_status === "recorded").length} gravados{busy ? " · a guardar…" : ""}</span>
+              <span className="text-sm text-neutral-400">{playable.length} na fila · {items.filter((i) => isRecorded(i.content.production_status)).length} gravados{busy ? " · a guardar…" : ""}</span>
             </div>
             <ol className="flex flex-col gap-2" aria-label="Fila de gravação">
               {items.map((it, i) => {
                 const bl = blocksOf(it.content);
                 const ok = it.takes.filter((t) => t.status === "ok").length;
-                const rec = it.content.production_status === "recorded";
+                const rec = isRecorded(it.content.production_status);
                 const open = expanded === it.content_id;
                 return (
                   <li key={it.content_id} data-item={it.content_id} className={cn("rounded-xl border border-neutral-800 bg-neutral-950 p-3", it.skipped && "opacity-50")}>
@@ -311,7 +311,7 @@ function TeleprompterInner({ access }: { access: Access }) {
                             }).join(" · ")}
                           </p>
                         )}
-                        {canTake && rec && (
+                        {canTake && it.content.production_status === "recorded" && (
                           <div><Btn label="Desfazer gravado" onClick={() => onRecorded(it.content_id, false).catch((e: Error) => setError(e.message))} /></div>
                         )}
                       </div>

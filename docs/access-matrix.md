@@ -28,6 +28,9 @@ Um `agency_member` sem atribuição a um workspace **não vê nada** desse works
 | `scripts.delete` | ✓ | ✓ | — | — | — | — |
 | `scripts.export` | ✓ | ✓ | ✓ | ✓ | ✓ | — |
 | `recording.use` / `confirm` | ✓ | ✓ | ✓ | ✓ (own) | — | — |
+| `calendar.read` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `calendar.schedule` | ✓ | ✓ | ✓ | — | — | — |
+| `production.update` | ✓ | ✓ | ✓ | ✓ (own) | — | — |
 | `tasks.read` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `tasks.work` (só as suas tarefas; comentar) | ✓ | ✓ | ✓ | ✓ (own) | ✓ (own) | — |
 | `tasks.manage` (criar, atribuir, automações) | ✓ | ✓ | ✓ | — | — | — |
@@ -55,4 +58,4 @@ Teto de autoridade: ninguém concede mais do que tem (R-12); um admin do cliente
 
 ## Mapeamento de hoje
 
-O código de equipa `studio_tokens(role='creator')` do Numeiro corresponde a um `contributor` com `scripts.approve`, `scripts.reject` e `recording.confirm` por grant (W2: também `scripts.submit`, para poder reaprovar depois de editar, e `requests.create`, para pedir temas, e `references.read`; W3: `tasks.read`, só leitura, porque o código não tem identidade para ser responsável; não tem `scripts.create`, `scripts.delete`, `sources.create` nem `sources.triage`). Na migração W1 cada pessoa que usa o código recebe uma conta individual com esse papel. O código só é desligado depois de a migração estar validada (AGENTS §5).
+O código de equipa `studio_tokens(role='creator')` do Numeiro corresponde a um `contributor` com `scripts.approve`, `scripts.reject` e `recording.confirm` por grant (W2: também `scripts.submit`, para poder reaprovar depois de editar, e `requests.create`, para pedir temas, e `references.read`; W3: `tasks.read` e `calendar.read`, só leitura, porque o código não tem identidade para ser responsável; não tem `scripts.create`, `scripts.delete`, `sources.create` nem `sources.triage`). Na migração W1 cada pessoa que usa o código recebe uma conta individual com esse papel. O código só é desligado depois de a migração estar validada (AGENTS §5).

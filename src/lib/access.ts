@@ -23,7 +23,7 @@ export type AppContext = {
 /** Capacidades do código de equipa (espelha legacy_can no SQL; o servidor é quem decide). */
 export const LEGACY_CAPS = [
   "scripts.read", "scripts.edit", "scripts.submit", "scripts.approve", "scripts.reject", "scripts.export",
-  "recording.use", "recording.confirm", "sources.read", "requests.create", "references.read", "tasks.read", "analytics.read", "agents.read", "agents.rehearse",
+  "recording.use", "recording.confirm", "sources.read", "requests.create", "references.read", "tasks.read", "calendar.read", "analytics.read", "agents.read", "agents.rehearse",
 ];
 
 /** Aceita convites pendentes para o email confirmado e devolve o contexto do utilizador. */
@@ -57,6 +57,10 @@ export function friendlyError(msg: string): string {
   if (msg.includes("texto_longo")) return "O pedido é demasiado longo (máximo 2000 caracteres).";
   if (msg.includes("duracao_s")) return "A duração tem de estar entre 1 e 3600 segundos.";
   if (msg.includes("corpo_vazio")) return "O corpo não pode ficar vazio.";
+  if (msg.includes("data_passada")) return "Não se agenda para um dia que já passou.";
+  if (msg.includes("data_longe")) return "Essa data está longe demais (máximo um ano e um mês).";
+  if (msg.includes("nao_reagendavel")) return "Guiões cancelados ou publicados não mudam de dia. Reativa primeiro.";
+  if (msg.includes("intervalo_invalido")) return "Intervalo de datas inválido.";
   if (msg.includes("responsavel_sem_acesso")) return "Essa pessoa não tem acesso a tarefas neste cliente.";
   if (msg.includes("dependencias_abertas")) return "Ainda há tarefas de que esta depende por fechar.";
   if (msg.includes("dependencia_circular")) return "Isso criava um ciclo: uma tarefa ficaria à espera de si própria.";

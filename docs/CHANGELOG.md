@@ -10,6 +10,15 @@
   - Capacidade nova `tasks.work`; `tasks.read` e `tasks.manage` ativas. O código de equipa só lê tarefas.
   - Testes: `w3_tasks` 53/53, `w2_content` 47/47 (regressão com o consumidor de eventos). E2E em workspace de teste isolado 20/20 (modo código, só leitura).
 
+- **W3-02 calendário e estados de produção** (PRD M11 FR-11-01, FR-11-02 parcial, FR-11-03 parcial, FR-11-05 parcial; ADR-0008; migração `20261029074048_w3_calendar_production`).
+  - `/calendario` por dia, semana e mês, com guiões (cor pelo estado de produção, atrasados a vermelho), tarefas pelo prazo à hora local e sessões de gravação com o número de takes.
+  - Arrastar um guião para outro dia reagenda-o (ou "Mover para" no detalhe, para teclado e iPad); arrastar uma tarefa muda o dia do prazo e mantém a hora. Nada vai para o passado e edições em simultâneo são recusadas.
+  - Estados de produção novos na app: agendado, em edição, pronto, cancelado; cada passo com a sua capacidade (`calendar.schedule`, `production.update`; gravar continua em `recording.confirm`).
+  - Automações de tarefas reagem a "em edição" e "pronto" (ex.: gravado → passa a edição → tarefa para o editor, fecha quando fica pronto).
+  - Guiões e teleprompter passam a tratar em edição e pronto como já gravados.
+  - Testes: `w3_calendar` 39/39, `w2_content` 47/47 (regressão do `content_production`). E2E em workspace de teste isolado 18/18 (modo código).
+- Limitações W3-02: sem vista por equipa/plataforma/campanha nem deteção de sobrecarga (FR-11-03), sem publicações no calendário (W6), sem templates e checklists (FR-11-04). O motor cria guiões numerados 1..30 por dia: um guião movido para um dia futuro antes da corrida do motor pode partilhar o número com um novo (contrato do motor a fechar no W4; **UNVERIFIED**).
+
 ### Limitações conhecidas W3-01 (PARTIAL)
 
 - Sem lembretes de prazo agendados (o atraso aparece na lista e na caixa, mas não gera notificação sozinho) nem escalonamento por SLA (FR-17-06).
