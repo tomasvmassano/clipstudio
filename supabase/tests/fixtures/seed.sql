@@ -22,7 +22,7 @@ from generate_series(1, 14) g, lateral (select (array['noticia','livro','reel'])
 insert into guioes (id, client_id, date, n, formato, tema, hooks, corpo, cta, origem, status, validado, editorial_status)
 select 'numeiro-2026-10-28-' || lpad(g::text, 2, '0'), 'numeiro', (now() at time zone 'Asia/Dubai')::date, g,
        (array['mecanismo','paradoxo','tabu','hipocrisia','noticia','lista'])[1 + g % 6], 'Tema de teste ' || g,
-       jsonb_build_array('Hook A ' || g, 'Hook B ' || g, 'Hook C ' || g), 'Corpo de teste do guião ' || g || '.', null,
+       (select jsonb_agg(jsonb_build_object('text', 'Hook ' || h || ' do guião ' || g, 'mecanismo', '')) from unnest(array['A','B','C']) h), 'Corpo de teste do guião ' || g || '.', null,
        'fixture', 'aprovado', g = 1, case when g = 1 then 'approved' else 'in_review' end
 from generate_series(1, 30) g
 on conflict do nothing;

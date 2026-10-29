@@ -10,8 +10,8 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | Estado | Requisitos |
 |---|---|
-| feito | 17 |
-| parcial | 145 |
+| feito | 18 |
+| parcial | 144 |
 | por começar | 97 |
 | bloqueado | 3 |
 | adiado | 1 |
@@ -144,7 +144,6 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | R-09 | — | parcial | soft-delete só em guiões, referências e clientes; sem política de eliminação | Timestamps UTC e timezone por workspace; soft-delete com recuperação controlada. |
 | R-10 | — | parcial | internacionalização não preparada (strings fixas em PT-PT); tratamento de conteúdo de IA como não confiável não testado | Conteúdo externo e de IA é dado não confiável; PT-PT inicial com internacionaliz |
 | R-11 | — | parcial | sessões não são revogadas; pesquisa e media protegida inexistentes | Desativar uma conta, retirar atribuição ou reduzir permissões revoga imediatamen |
-| R-13 | — | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | A app tem dois espaços: o espaço da agência (casa da equipa da agência) e o espa |
 | FL-01 | — | parcial | convites sem email; fluxo completo com contas reais não testado | criar conta → verificar email → criar workspace → escolher timezone/moeda → conv |
 | FL-02 | — | parcial | sem comentários no guião | adicionar fonte → classificar → associar referência → criar guião → editar hooks |
 | FL-03 | — | parcial | sem associar media nem revisão de vídeo | guião aprovado → calendarizar → abrir fila → teleprompter → gravar múltiplos tak |
@@ -189,8 +188,8 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | R-10 | parcial | internacionalização não preparada (strings fixas em PT-PT); tratamento de conteúdo de IA como não confiável não testado | UI PT-PT; definicoes diz "único idioma por agora"; guiões do motor entram em revisão | — |
 | R-11 | parcial | sessões não são revogadas; pesquisa e media protegida inexistentes | authorize() a cada pedido; member_update/member_remove; w1_team 21/21, w3_tasks (perde acesso) | — |
 | R-12 | feito |  | grant_set sem auto-elevação e teto; invite_member com teto; w1_permissions 35/35, w1_team, w1_agency_team 24/24 | — |
-| R-13 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | W1-11 espaços agência/cliente, ADR-0018; w1_invite_isolation 23/23; E2E estrutura 15/15 (não versionado) | — |
-| R-14 | feito |  | w1_invite_isolation 23/23; W1-13 staff de cliente não entra na agência; w1_agency_team 24/24 | — |
+| R-13 | feito |  | W1-11 espaços agência/cliente, ADR-0018; w1_invite_isolation 23/23; e2e/isolation.spec.ts e routes.spec.ts no CI | 2026-10-29 (E2E) |
+| R-14 | feito |  | w1_invite_isolation 23/23; W1-13 staff de cliente não entra na agência; w1_agency_team 24/24; e2e/isolation.spec.ts no CI | 2026-10-29 (E2E) |
 
 ## M01 — Início / Dashboard
 
@@ -381,7 +380,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | TEAM-01 | feito |  | Supabase Auth individual, auth.users; W1-01/W1-03 (código de equipa ainda coexiste) | — |
 | TEAM-02 | feito |  | /equipa-agencia e /c/[ws]/equipa com afiliação; w1_agency_team 24/24; sessão real na equipa da agência | 2026-10-29 |
 | TEAM-03 | feito |  | agency_staff_assign com papel por cliente + grants; w1_clients 55/55, w1_agency_team 24/24 | — |
-| TEAM-04 | feito |  | convite preso ao workspace emissor; w1_invite_isolation 23/23 | — |
+| TEAM-04 | feito |  | convite preso ao workspace emissor; w1_invite_isolation 23/23; e2e/isolation.spec.ts no CI | 2026-10-29 (E2E) |
 | TEAM-05 | parcial | âmbitos projeto e assigned_only não aplicados; sem modelos por profissão | capabilities module.action; authorize(cap, ws); w1_permissions 35/35 | — |
 | TEAM-06 | parcial | tarefa sem projeto (não existem projetos) | tasks com responsável, criador, prioridade, prazo, dependências, comentários; w3_tasks 53/53 | — |
 | TEAM-07 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | Painel da agência (W1-10/W1-11), /caixa as minhas tarefas; cliente entra direto; w1_dashboard | — |

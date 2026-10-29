@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-29 (E2E no CI)
+
+- **W0-QA-02** E2E com contas reais no repositório e no CI (ADR-0022). Playwright contra uma stack Supabase local (migrações e dados sintéticos), com quatro contas criadas só ali: dono da agência, staff só com o A, equipa do A e equipa do B. 41 testes: isolamento A/B pela UI, pela REST e por RPC; espaço certo por papel; 19 rotas por URL e refresh sem erros na consola; código de equipa. `npm run test:e2e` corre localmente (precisa de Docker). Fixture com hooks no formato real (`{text, mecanismo}`).
+
 ## 2026-10-29 (testes no CI)
 
 - **W0-QA-01** testes SQL no CI (ADR-0021): job `db` aplica as 57 migrações numa base limpa e corre os 21 ficheiros de `supabase/tests` (707 casos) sobre dados sintéticos. Quatro testes desatualizados corrigidos: `w1_review_fixes` (a versão aprovada vive em `content_versions` desde W2-01), `w4_worker` (o worker fixa `engine.client_id` desde W4-03), `w4_engine_isolation` e os de datas (`w1_data_access`, `w2_teleprompter`, `w3_calendar`), que dependiam de dados e dias de produção. R-19 registado como `adiado` por decisão do Tomás (API oficial no futuro, Apify por agora).
