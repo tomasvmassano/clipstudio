@@ -82,6 +82,18 @@ R-11. Desativar uma conta, retirar atribuição ou reduzir permissões revoga im
 
 R-12. Uma pessoa não pode elevar os próprios privilégios; convites, mudanças de função e delegações obedecem a um teto de autoridade e segregação de funções.
 
+R-13 (CHG-001). A app tem dois espaços: o **espaço da agência** (casa da equipa da agência) e o **espaço do cliente** (onde se entra a partir da agência). Cada funcionalidade nova declara a que espaço pertence (agência, cliente ou ambos) e o âmbito dos dados que mostra. Nada do espaço da agência é visível a `client_staff` nem ao código de equipa.
+
+R-14 (CHG-001). Isolamento entre clientes nos convites: um convite feito pela agência para um cliente, ou feito pela equipa de um cliente para a sua equipa, dá acesso **só** a esse cliente. A equipa de um cliente nunca vê o painel da agência, a lista de clientes, nem dashboards, métricas, conteúdos, tarefas ou presença de outro cliente. A equipa de um cliente só convida para o seu cliente, nunca staff da agência e nunca acima do seu papel. Uma pessoa da equipa de um cliente pertence a um só cliente (R-03): um convite de cliente para quem já está ativo noutro cliente é cancelado na aceitação, sem erro para quem convidou (para não revelar que o email pertence a outro cliente), e fica no histórico.
+
+### Espaços da agência e do cliente (CHG-001, vinculativo)
+
+**Espaço da agência.** Endereços sem cliente (`/`, `/clientes`, `/caixa`, …). A equipa da agência entra sempre no **Painel da agência** (`/`). Menu: Painel (todos os clientes a que a pessoa tem acesso, lado a lado, com totais e comparação), Clientes (criar, editar, arquivar, atribuir staff), Caixa de entrada de todos os clientes, Equipa da agência (staff, papéis, em que clientes trabalha), Calendário de todos os clientes, Custos da agência, Histórico da agência e Definições da agência. Peças previstas: Alertas dos clientes (agentes falhados, guiões parados, limite de custo, contas sociais expiradas), Carga da equipa da agência por cliente, Pedidos dos clientes numa fila, Modelos da agência (agentes, produção, automações) para novos clientes e Relatórios para enviar a cada cliente.
+
+**Espaço do cliente.** O cliente aberto vive no endereço: `/c/<cliente>/<página>`. Menu operacional (Início, Caixa do cliente, Guiões, Tarefas, Calendário, Teleprompter, Fontes, Referências, Desempenho, Agentes) e **Administração do cliente** (equipa, permissões, histórico e definições desse cliente), que fica sempre dentro do cliente e não no espaço da agência. A equipa da agência vê "← Agência" e um seletor para saltar para outro cliente autorizado.
+
+**Regras.** O endereço nunca é prova de autorização (R-01): cada leitura e escrita volta a verificar identidade, cliente e capacidade no servidor. Um cliente no endereço a que a pessoa não tem acesso, ou que não existe, mostra a mesma mensagem. A equipa de um cliente e o código de equipa entram direto no seu cliente. Links antigos sem cliente redirecionam para o último cliente aberto, mantendo os parâmetros.
+
 ## 3. Papéis, equipas e permissões
 
 **Afiliação não é role.** `agency_owner`, `agency_admin`, `agency_manager`, `agency_member` são papéis da organização; `workspace_owner`, `workspace_admin`, `manager`, `contributor`, `reviewer`, `viewer` são papéis do workspace. O mesmo colaborador interno pode ser `manager` no Cliente A e `contributor` no Cliente B. O cliente só gere membros da própria equipa e nunca cria privilégios da agência.
@@ -130,7 +142,7 @@ Cada requisito abaixo tem ID único, prioridade de entrega (P0 crítico, P1 esse
 
 ### M01 — Início / Dashboard
 
-**Rota proposta:** `/`. **Objetivo:** Visão executiva e operacional por workspace.
+**Rota:** `/c/<cliente>` (Início do cliente) e `/` (Painel da agência, R-04, R-13). **Objetivo:** Visão executiva e operacional por workspace; na agência, a mesma visão para todos os clientes autorizados.
 
 **FR-01-01 [P0]** KPIs com período configurável: fontes recebidas, guiões criados, pendentes de aprovação, aprovados, gravados, publicados, views, engagement, custos e produtividade.
 
@@ -1002,6 +1014,7 @@ Um workspace pode gerir N criadores e cada criador N contas em Instagram, TikTok
 ## 22. Segurança, isolamento e governança reforçados
 
 - `agency_staff` e `client_staff` são afiliações; especialidade não concede acesso. Cliente só acede ao seu workspace; equipa da agência vê apenas workspaces atribuídos, salvo owner com privilégio global auditado.
+- Espaços (R-13, R-14): o espaço da agência e o espaço do cliente são separados; o cliente no endereço (`/c/<cliente>`) não autoriza nada; testes obrigatórios por funcionalidade: convite da agência ao cliente, convite do cliente à sua equipa, cliente A contra cliente B, equipa do cliente contra o painel da agência, cliente inexistente igual a cliente sem acesso.
 - RLS e autorização no servidor em cada operação, incluindo RPCs, jobs, webhooks, exports, search, storage, signed URLs e canais realtime. Testar `deny` por defeito e troca de IDs.
 - Contas sociais OAuth com tokens cifrados e rotação; segredos em secret manager, nunca no browser ou logs. Revogação e expiração de sessão; convite com validade e prevenção de self-escalation.
 - Aprovação em duas fases configurável (editorial e publicação); ações irreversíveis exigem confirmação e auditoria. Controlo de versões e imutabilidade de versões aprovadas.
@@ -1186,7 +1199,7 @@ Qualquer pedido, incluindo um botão ou novo separador, recebe `change_id`, owne
 ## 33. Protocolo obrigatório de mudança (Feature Change Protocol)
 
 1. **Intake:** descrever problema e resultado esperado; atribuir ID e owner.
-2. **Impact analysis:** inventariar módulos, workspaces, funções, grants, dados, UI, API, RLS, storage, realtime, jobs, eventos, analytics, custos, privacidade e rollback.
+2. **Impact analysis:** inventariar espaço (agência, cliente ou ambos, R-13), módulos, workspaces, funções, grants, dados, UI, API, RLS, storage, realtime, jobs, eventos, analytics, custos, privacidade e rollback.
 3. **Design:** atualizar PRD, registo de capacidades, matriz de acesso, state machine, esquema e ADR quando houver decisão arquitetural.
 4. **Ready gate:** exemplos positivos e negativos (incluindo client A vs B, agência vs cliente, role vs grant individual, sessão revogada, múltiplos separadores, retry).
 5. **Build:** implementar vertical slice completo, sem placeholders, atrás de flag quando apropriado.
@@ -1215,4 +1228,5 @@ Referências externas consultadas em 2026-10-28: ClickUp (custom roles, workload
 
 ## 36. Registo de alterações
 
+- **CHG-001 — 2026-10-29:** espaço da agência e espaço do cliente (R-13), isolamento dos convites e cliente único (R-14), cliente no endereço, menu da agência e peças previstas; M01 com Painel da agência; §22 e §33 atualizados.
 - **v2.1 — 2026-10-28:** adicionados Centro de Acessos e Permissões, catálogo central de capacidades, grants individuais, simulador de acesso, equipa/presença/workload, protocolos de mudança, operação em escala e testes de isolamento.

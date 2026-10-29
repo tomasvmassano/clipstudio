@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-29 (PRD)
+
+- **CHG-001** espaço da agência e espaço do cliente (R-13), isolamento dos convites e cliente único (R-14), cliente no endereço, menu da agência e peças previstas. PRD §2, M01, §22, §33, §36. Implementado no W1-11 (#18).
+
 ## 2026-10-29 (W1 Espaços da agência e do cliente)
 
 - **W1-11 espaço da agência e espaço do cliente** (PRD §2, R-01, R-03, R-04; ADR-0018; migração `20261029121252_w1_single_client_staff`).
