@@ -12,10 +12,10 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 |---|---|
 | feito | 22 |
 | parcial | 145 |
-| por começar | 90 |
+| por começar | 100 |
 | bloqueado | 3 |
 | adiado | 3 |
-| **total** | **263** |
+| **total** | **273** |
 
 ## Pendentes abertos (bloqueados primeiro, depois por prioridade)
 
@@ -630,3 +630,18 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | PLAT-02 | bloqueado | depende de PLAT-01 e de ligar contas + métricas em produção (PERF-08) | nada submetido | — |
 | PLAT-03 | bloqueado | depende de PLAT-01 e do publicador (PUB-01) | nada submetido | — |
 | PLAT-04 | por começar | sem apps aprovadas a manter | nada submetido | — |
+
+## 45. Referências por link: dissecar, adaptar e copiar o estil
+
+| ID | Estado | O que falta | Evidência | Verificado |
+|---|---|---|---|---|
+| R-20 | por começar |  |  | — |
+| REF-01 | por começar |  |  | — |
+| REF-02 | por começar |  |  | — |
+| REF-03 | por começar |  |  | — |
+| REF-04 | por começar |  |  | — |
+| REF-05 | por começar |  |  | — |
+| REF-06 | por começar |  |  | — |
+| REF-07 | por começar |  |  | — |
+| REF-08 | por começar |  |  | — |
+| REF-09 | por começar |  |  | — |
