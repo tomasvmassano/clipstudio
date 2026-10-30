@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-31 (pré-visualização dos estilos)
+
+- **W8-08** cartões de estilo como o vídeo vai sair (VAR-02 parcial). No catálogo e no editor, cada estilo mostra-se em 1080×1920 com o tipo de letra real (Instrument Serif, Inter), o tamanho, a caixa, as cores e o destaque de cada camada, com texto de exemplo e marcadores para o vídeo e as imagens. No editor, "Mostrar caixas e zona segura" volta a mostrar os retângulos. Tipos opcionais novos na camada (letra, tamanho, alinhamento, linhas, destaque, fundo, raio, sombra). Sem migração nem mudança de permissões. Também em produção (dados, auditado): S14 e S15 v3 com as regras de edição medidas nos reels do lucasanswers e título a 76 px; S16 "Imagem por frase (telemóvel)" novo, v3.
+
 ## 2026-10-30 (CHG-005 referências por link)
 
 - **CHG-005 referências por link** (só documentação; PRD §45, REF-01..09, R-20). Colar um link de Reel ou TikTok para dissecar o vídeo, gerar 3 guiões adaptados ao cliente (3 hooks cada) com verificação de originalidade e via rápida para o teleprompter, extrair o estilo de edição para uma ficha de parâmetros, guardar na biblioteca de estilos da agência e importar para clientes numa versão fixa. Recolha de referências pelo mecanismo do Scout (decisão). 3 capacidades planeadas. Sem alteração funcional.
