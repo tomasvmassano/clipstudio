@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import {
 	Building2Icon, GaugeIcon, KeyRoundIcon, ScrollIcon, SettingsIcon, SlidersHorizontalIcon,
 	LayoutGridIcon, ScrollTextIcon, MonitorPlayIcon, LightbulbIcon, BarChart3Icon, BotIcon,
-	BriefcaseBusinessIcon, ClapperboardIcon, FlaskRoundIcon, RotateCcwIcon, FilmIcon, ReceiptIcon, FlaskConicalIcon, LibraryIcon, ShieldCheckIcon, UsersIcon, UsersRoundIcon, WalletIcon, FileTextIcon, HistoryIcon, InboxIcon, ListTodoIcon, CalendarDaysIcon,
+	BriefcaseBusinessIcon, ClapperboardIcon, FlaskRoundIcon, RotateCcwIcon, FilmIcon, ReceiptIcon, FlaskConicalIcon, LibraryIcon, ShieldCheckIcon, UsersIcon, UsersRoundIcon, WalletIcon, FileTextIcon, HistoryIcon, PlugIcon, InboxIcon, ListTodoIcon, CalendarDaysIcon,
 } from "lucide-react";
 
 export type SidebarNavItem = {
@@ -39,6 +39,7 @@ export const agencyNavGroups: SidebarNavGroup[] = [
 			{ title: "Contratos e custos", path: "/negocio/contratos", icon: <ReceiptIcon />, orgCap: "biz.finance", flag: "biz.view" },
 			{ title: "Caixa de entrada", path: "/caixa", icon: <InboxIcon />, orgCap: "dashboard.agency" },
 			{ title: "Equipa da agência", path: "/equipa-agencia", icon: <UsersRoundIcon />, orgCap: "team.read" },
+			{ title: "Integrações", path: "/integracoes", icon: <PlugIcon />, orgCap: "integrations.agency.read" },
 			{ title: "Funcionalidades em teste", path: "/funcionalidades", icon: <FlaskConicalIcon />, orgCap: "flags.manage" },
 		],
 	},
@@ -94,6 +95,7 @@ export const clientNavGroups: SidebarNavGroup[] = [
 			{ title: "Permissões", path: "/permissoes", icon: <KeyRoundIcon />, cap: "team.read" },
 			{ title: "Histórico", path: "/historico", icon: <ScrollIcon />, cap: "audit.read" },
 			{ title: "Definições", path: "/definicoes", icon: <SettingsIcon />, cap: "team.read" },
+			{ title: "Integrações", path: "/definicoes/integracoes", icon: <PlugIcon />, cap: "integrations.read", flag: "integrations.center" },
 		],
 	},
 	{

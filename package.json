@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --experimental-strip-types --no-warnings tests/safe-next.test.mts && node --experimental-strip-types --no-warnings tests/realtime-hub.test.mts && node --experimental-strip-types --no-warnings tests/invite-email.test.mts && node --experimental-strip-types --no-warnings tests/perf-format.test.mts && node --experimental-strip-types --no-warnings tests/search-format.test.mts && node --experimental-strip-types --no-warnings tests/pub-rules.test.mts && node --experimental-strip-types --no-warnings tests/learn-format.test.mts",
+    "test": "node --experimental-strip-types --no-warnings tests/safe-next.test.mts && node --experimental-strip-types --no-warnings tests/realtime-hub.test.mts && node --experimental-strip-types --no-warnings tests/invite-email.test.mts && node --experimental-strip-types --no-warnings tests/perf-format.test.mts && node --experimental-strip-types --no-warnings tests/search-format.test.mts && node --experimental-strip-types --no-warnings tests/pub-rules.test.mts && node --experimental-strip-types --no-warnings tests/learn-format.test.mts && node --experimental-strip-types --no-warnings tests/integ-format.test.mts",
     "test:e2e": "bash scripts/e2e/run.sh",
     "test:db": "bash scripts/db/test.sh"
   },
