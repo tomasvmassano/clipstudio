@@ -200,3 +200,23 @@ Escolher guiões, ação, pré-visualização (o servidor corre e desfaz; mostra
 ## Aprendizagem (W7, FR-17-10/11/12)
 
 Rejeitar ou pedir alterações com categoria (`content_transition_reasoned` chama `content_transition` e liga a categoria; texto obrigatório). Experiência: rascunho → a decorrer (regras fechadas) → concluída (confirmada só com critério cumprido, fotografia guardada) ou cancelada. Repetir vencedor: guião em rascunho ligado à publicação, aprovação editorial normal. Convite com cargo: ao aceitar aplica cargo e exceções em nome de quem convidou, se ainda as puder dar. Pedido de eliminação: pendente → tratado ou recusado pelo dono da agência; nada se apaga sozinho.
+
+## Biblioteca de media (W8, FR-08)
+
+Versão: `pendente` (registada, 24 h) → `pronta` (objeto com o tamanho e o MIME declarados; SHA-256 conferido no servidor ou declarado) | `falhou` (diferença ou desistência). `pendente` expirada e `falhou` são órfãs → `apagada` (objeto removido pela API, com `APAGAR`). Ativo: `ativo` ↔ `no_lixo` (prazo da política do cliente) → `eliminado` (lápide; só com `media.manage` e `APAGAR`, quando já não há objetos). Eventos: `asset.uploaded`, `asset.linked`, `asset.trashed`, `asset.restored`, `asset.purged`.
+
+## Integrações (W8, FR-17-16)
+
+Conta social: `por_ligar` → (serviço de OAuth futuro) `ligada` → `expirada` (derivado da validade) → `revogada` (`integrations_social_revoke`, motivo obrigatório, auditoria `integrations.social_revoked`, evento `integration.social_revoked`, pedido de purga do segredo). `revogada` só volta a `ligada` com nova ligação OAuth. Teste: pedido → `integration_checks` (ok, aviso, falhou, sem dados), auditoria `integrations.tested`, repetição em 30 s devolve o mesmo.
+
+## Notificações (W8, FR-15-05)
+
+Evento → `_notify` → sem acesso, quem age ou já existe: nada → obrigatória: cria → desligada no cliente, cliente silenciado ou desligada pela pessoa: não cria e soma ao contador diário (`notification_suppressions`) → senão cria. As preferências só valem com a flag `notifications.prefs` ligada para quem recebe. Email e resumo diário: preferência guardada, sem envio.
+
+## Portal do cliente (W8, SCALE-08)
+
+Sem estados novos. O portal dispara as transições existentes: editorial `in_review` → `approved` | `changes_requested` | `rejected` (`content_transition`, `content_transition_reasoned`), publicação `planeada` → `aprovada` (`pub_approve`) e cria pedidos `ideas(kind=talent_request, status=nova)` (`talent_request_create`, evento `request.created`).
+
+## Restauro de backup (W8, QA-15)
+
+Parar a escrita → restaurar → verificar (checksums, catálogo, RPCs e isolamento) → Storage → segredos → religar. Passo a passo em `docs/runbooks/restauro.md`; ensaio em `scripts/backup/drill.sh`.

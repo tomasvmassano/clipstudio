@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-10-30 (vaga 3: biblioteca, integrações, notificações, portal e backup)
+
+Tudo atrás de funcionalidades em teste (só o dono da agência até as ligar).
+
+- **W8 Biblioteca de media** (FR-08-01..06, ING-01 parcial; ADR-0038). Página Biblioteca por cliente: carregar vídeo, áudio, imagens, miniaturas, legendas e documentos com progresso e retentativa automática, caminho gerado no servidor e SHA-256 conferido; versões imutáveis com histórico e substituição; ligação a guião, take, publicação e campanha; filtros e pesquisa; pré-visualização e descarga por links curtos; links de partilha com validade, revogação e auditoria; lixo recuperável, órfãos e eliminação definitiva com confirmação; tipos, tamanho e quota por cliente (dono da agência). Bruto do Drive como link externo. Supabase Storage (bucket privado `media`, 50 MiB por ficheiro) atrás de um adaptador para R2. Sem antivírus (indicado na página).
+- **W8 Centro de integrações** (FR-17-16, FR-15-03; ADR-0039). Por cliente: contas sociais por ligar com âmbitos e validade, revogar real com motivo e purga do segredo, recolha de métricas e motor de agentes lidos da base com "testar". Vista da agência para o dono: Drive, R2 e Resend por ligar, limites das APIs, workers e estado por cliente. Ligar e renovar indisponíveis até haver OAuth.
+- **W8 Notificações por evento** (FR-15-05, FR-14-02; ADR-0040). Catálogo dos 11 tipos com canais (na app; email e resumo diário guardados como preferência mas indisponíveis até haver envio), definições por cliente em Definições → Notificações (ligar, desligar, marcar obrigatórias) e preferências pessoais no perfil com silêncio por cliente. Aplicado no servidor em `_notify`, com supressões contadas por dia; sem a flag nada muda.
+- **W8 Portal do cliente** (SCALE-08; ADR-0041). `/c/<cliente>/portal`: guiões e publicações à espera do cliente (aprovação pelas RPCs existentes), entregas do mês contra o contratado sem valores, resumo de desempenho e pedidos de conteúdo; cada bloco verifica a sua capacidade e vem indisponível com o motivo; staff da agência vê "como o cliente vê".
+- **QA-15 Backup e restauro** (parcial; ADR-0042). Ensaio reprodutível (`scripts/backup/drill.sh`, job `backup` no CI) com checksums por tabela, impressão digital do catálogo, isolamento A/B depois do restauro e restauro de um só cliente; runbook de restauro em produção (`docs/runbooks/restauro.md`). O ensaio apanhou que um restauro direto deixava tabelas e funções abertas à API e que o dump de `public` não leva extensões, políticas de storage nem a publicação do realtime; ambos tratados. RPO de produção por confirmar no painel do Supabase.
+- Correção: na biblioteca, o link de partilha criado desaparecia ao recarregar a ficha (agora fica visível até fechar).
+- Testes: SQL 1648/1648 (novos w8_media 117, w8_integ 58, w8_notif 72, w8_portal 46); unitários media-format, integ-format, notif-format, portal-format.
+
 ## 2026-10-30 (vaga 2: pesquisa, publicações planeadas e aprendizagem)
 
 Tudo atrás de funcionalidades em teste (só o dono da agência até as ligar).

@@ -23,6 +23,8 @@ export function MediaAssetSheet({ access, lib, id, onClose, onChanged, onReplace
 }) {
   const r = useLoad(() => fetchAsset(access, id), `${access.ws}:${id}`);
   const [n, setN] = useState(0);
+  // o link criado só se mostra uma vez: fica aqui para sobreviver ao recarregar da ficha (que desmonta as secções)
+  const [createdShare, setCreatedShare] = useState<CreatedShare | null>(null);
   const reload = () => { r.reload(); onChanged(); setN((x) => x + 1); };
   const a = r.data;
   return (
@@ -46,7 +48,7 @@ export function MediaAssetSheet({ access, lib, id, onClose, onChanged, onReplace
               <Actions access={access} lib={lib} a={a} onChanged={reload} onReplace={onReplace} onClose={onClose} />
               {a.lifecycle === "ativo" && <MetaForm key={a.lock_version} access={access} lib={lib} a={a} onSaved={reload} />}
               <History access={access} lib={lib} a={a} />
-              {a.shares && a.lifecycle === "ativo" && <Shares access={access} lib={lib} a={a} onChanged={reload} />}
+              {a.shares && a.lifecycle === "ativo" && <Shares access={access} lib={lib} a={a} onChanged={reload} created={createdShare} setCreated={setCreatedShare} />}
             </>
           )}
         </div>
@@ -290,10 +292,14 @@ function History({ access, lib, a }: { access: Access; lib: MediaLibrary; a: Med
   );
 }
 
-function Shares({ access, lib, a, onChanged }: { access: Access; lib: MediaLibrary; a: MediaAssetDetail; onChanged: () => void }) {
+type CreatedShare = { url: string; expires_at: string };
+
+function Shares({ access, lib, a, onChanged, created, setCreated }: {
+  access: Access; lib: MediaLibrary; a: MediaAssetDetail; onChanged: () => void;
+  created: CreatedShare | null; setCreated: (s: CreatedShare | null) => void;
+}) {
   const [hours, setHours] = useState(24);
   const [note, setNote] = useState("");
-  const [created, setCreated] = useState<{ url: string; expires_at: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const [copied, setCopied] = useState(false);

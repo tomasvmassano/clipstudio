@@ -95,6 +95,8 @@ test("storage: sem autorização da RPC ninguém assina nem escreve, e B não ch
   const [vid, path] = version(a);
   const hA = await token(users.clientA);
   const hB = await token(users.clientB);
+  // o teste anterior pré-visualizou este ficheiro (autorização legítima de 60 s): expira-a para testar sem autorização
+  sql(`update media_access_grants set expires_at = now() - interval '1 second' where object_path = '${path}'`);
   // A tem media.read mas não passou por media_access: o storage recusa assinar
   const signA = await fetch(`${API_URL}/storage/v1/object/sign/media/${path}`, { method: "POST", headers: hA, body: JSON.stringify({ expiresIn: 60 }) });
   expect(signA.ok).toBe(false);
@@ -129,7 +131,7 @@ as("staff")("staff cria um link de partilha; abre sem sessão; revogar corta", a
   await page.getByLabel("Pesquisar por título ou etiqueta").fill(tag);
   await page.locator(`[data-asset="${a}"] button`).first().click();
   const sheet = page.getByRole("dialog");
-  await sheet.getByLabel("Validade", { exact: true }).selectOption("1");
+  await sheet.getByRole("combobox", { name: "Validade", exact: true }).selectOption("1");
   await sheet.getByRole("button", { name: "Criar link" }).click();
   const link = await sheet.getByLabel("Link de partilha", { exact: true }).inputValue();
   expect(link).toMatch(/\/api\/media\/share\/[0-9a-f]{48}$/);
