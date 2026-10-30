@@ -62,7 +62,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | EDL-01 | P0 | parcial | job do pacote de edição (precisa de ingestão ING-01..03, render e worker alojado) | Pacote de edição automático |
 | EDL-03 | P0 | parcial | ligar ao job do pacote e guardar o relatório por variante na app (EDL-02); calibrar limites no piloto | QC técnico em código antes de qualquer revisão por IA |
 | PERF-09 | P0 | parcial | só uma leitura por publicação; ligação ao conteúdo por inferência | Correções de dados imediatas |
-| VAR-02 | P0 | parcial | layouts de S01 a S12 (equipa criativa); render real dos estilos | Catálogo de estilos por workspace |
+| VAR-02 | P0 | parcial | layouts de S01 a S12 (equipa criativa); render real dos estilos no motor (hoje só no protótipo local); verificação com sessão real | Catálogo de estilos por workspace |
 | FR-01-03 | P1 | parcial | sem "Minha fila" no Início; gravações e alertas fora da fila | Minha fila: tarefas, aprovações, gravações, prazos e alertas; clique abre objeto |
 | FR-01-04 | P1 | parcial | sem calendário compacto no Início | Calendário editorial compacto e atividade recente com ator e timestamp. |
 | FR-02-03 | P1 | parcial | título próprio (usa o tema); verificação com conta real (R-15) | Campos: título, cliente/workspace, campanha, tema, formato, plataforma, responsá |
@@ -604,7 +604,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
 | VAR-01 | por começar | sem variantes | nada no código | — |
-| VAR-02 | parcial | layouts de S01 a S12 (equipa criativa); render real dos estilos | edit_styles, edit_style_versions, edit_style_save/set_status (W5-02, ADR-0027); w5_edit_styles 34/34; e2e/edit-styles.spec.ts 3/3 | — |
+| VAR-02 | parcial | layouts de S01 a S12 (equipa criativa); render real dos estilos no motor (hoje só no protótipo local); verificação com sessão real | edit_styles, edit_style_versions, edit_style_save/set_status (W5-02, ADR-0027); w5_edit_styles 34/34; e2e/edit-styles.spec.ts 3/3; pré-visualização fiel ao spec: letra, tamanho, caixas e destaque (W8-08, StylePreview) | — |
 | VAR-03 | por começar | sem motor frase-imagem | nada no código nem no motor | — |
 | VAR-04 | por começar | sem verificador de títulos | nada no código | — |
 | VAR-05 | por começar | sem republicação | publishing.republish.approve planeada | — |
