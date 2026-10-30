@@ -21,4 +21,4 @@ AGENTS §9: cada pessoa vê primeiro o seu trabalho. A caixa de entrada (W3-01, 
 - **Inferir "a trabalhar" da presença:** proibido pelo PRD (OPS-02, OPS-05).
 
 ## Consequências
-FR-17-01 e OPS-03 ficam cobertos no servidor e na UI; OPS-02 e OPS-04 por cliente. Falta: contadores globais da agência (OPS-01), presença ao segundo via Realtime Presence e Broadcast para colaboração intensiva (OPS-10), filtros persistidos no servidor (hoje no browser), estado por calendário autorizado. Rollback no fim da migração `20261030020100_w6_ops.sql`.
+FR-17-01 e OPS-03 ficam cobertos no servidor e na UI; OPS-02 e OPS-04 por cliente. Falta: contadores globais da agência (OPS-01), presença ao segundo via Realtime Presence e Broadcast para colaboração intensiva (OPS-10), filtros persistidos no servidor (hoje no browser), estado por calendário autorizado. Rollback no fim de `20261030075411_w6_ops_p2.sql` (a migração foi aplicada em 2 partes).
