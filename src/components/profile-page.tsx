@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSession } from "@/components/session-provider";
 import { MyDataCard } from "@/components/my-data-card";
+import { MyNotifCard } from "@/components/notif/my-notif-card";
 import { supabase } from "@/lib/supabase";
 import { avatarUrl, AVATAR_MAX, AVATAR_TYPES, SECURITY_LABEL, securityEvent, securityLog, updateProfile, uploadAvatar } from "@/lib/profile";
 
@@ -45,6 +46,7 @@ export function ProfilePage() {
       <Password />
       <Mfa />
       <Preferences workspaces={workspaces.map((w) => ({ id: w.id, name: w.name }))} />
+      <MyNotifCard />
       <Security />
       <MyDataCard />
     </div>
