@@ -67,7 +67,7 @@ as("clientA")("cliente A carrega uma imagem: progresso, retentativa depois de fa
   const [, path, state, verified] = version(a);
   expect(path).toBe(`${WS_A}/${a}/1/${fileName}`);
   expect(state).toBe("pronta");
-  expect(verified).toBe("t");
+  expect(verified).toBe("true"); // boolean concatenado em texto (||) sai como "true"
   expect(sql(`select (metadata->>'size')::int from storage.objects where bucket_id = 'media' and name = '${path}'`)[0]).toBe(String(PNG.length));
   // console: o envio abortado de propósito aparece como erro de rede; tudo o resto tem de estar limpo
   expect(errors.filter((e) => !/ERR_CONNECTION_RESET|net::|Failed to load resource/.test(e))).toEqual([]);
