@@ -71,6 +71,7 @@ export const clientNavGroups: SidebarNavGroup[] = [
 			{ title: "Calendário", path: "/calendario", icon: <CalendarDaysIcon />, cap: "calendar.read" },
 			{ title: "Teleprompter", path: "/teleprompter", icon: <MonitorPlayIcon />, cap: "recording.use" },
 			{ title: "Estilos de edição", path: "/edicao", icon: <FilmIcon />, cap: "scripts.read" },
+			{ title: "Biblioteca", path: "/biblioteca", icon: <LibraryIcon />, cap: "media.read", flag: "media.library" },
 			{ title: "Fontes", path: "/fontes", icon: <LightbulbIcon />, cap: "sources.read" },
 			{ title: "Referências", path: "/referencias", icon: <UsersIcon />, cap: "references.read" },
 		],
@@ -99,7 +100,7 @@ export const clientNavGroups: SidebarNavGroup[] = [
 	{
 		label: "Em breve",
 		items: [
-			{ title: "Biblioteca", icon: <LibraryIcon />, soon: true },
+			{ title: "Biblioteca", icon: <LibraryIcon />, soon: true, unlessFlag: "media.library" },
 			{ title: "Custos", icon: <WalletIcon />, soon: true, unlessFlag: "costs.content" },
 		],
 	},
