@@ -23,7 +23,8 @@ export function useLoad<T>(load: () => Promise<T>, key: string) {
   }, [key, attempt]);
   const reload = useCallback(() => { setState((s) => ({ ...s, key: "" })); setAttempt((n) => n + 1); }, []);
   const fresh = state.key === key;
-  return { data: fresh ? state.data : null, error: fresh ? state.error : null, loading: !fresh, reload, setData: (d: T) => setState({ key, data: d, error: null }) };
+  // last: os últimos dados carregados, mesmo a recarregar (para não desmontar o que está aberto por cima)
+  return { data: fresh ? state.data : null, last: state.data, error: fresh ? state.error : null, loading: !fresh, reload, setData: (d: T) => setState({ key, data: d, error: null }) };
 }
 
 export function LoadState({ loading, error, reload, label, children }: {

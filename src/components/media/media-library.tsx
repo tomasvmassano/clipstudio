@@ -136,8 +136,8 @@ export function MediaLibraryView({ access }: { access: Access }) {
       {d && upOpen && <UploadDialog d={d} onClose={() => setUpOpen(false)} onStart={(files, fields) => { setUpOpen(false); enqueue(files, { fields }); }} />}
       {d && linkOpen && <LinkDialog access={access} d={d} onClose={() => setLinkOpen(false)} onDone={() => { setLinkOpen(false); lib.reload(); }} />}
       {d && policyOpen && <MediaPolicySheet access={access} d={d} onClose={() => setPolicyOpen(false)} onChanged={lib.reload} />}
-      {d && opened && (
-        <MediaAssetSheet access={access} lib={d} id={opened} onClose={() => setOpened(null)} onChanged={lib.reload}
+      {(d ?? lib.last) && opened && (
+        <MediaAssetSheet access={access} lib={(d ?? lib.last)!} id={opened} onClose={() => setOpened(null)} onChanged={lib.reload}
           onReplace={(assetId, file) => enqueue([file], { assetId })} />
       )}
     </div>
