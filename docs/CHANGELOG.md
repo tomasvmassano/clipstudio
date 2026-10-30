@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-30 (CHG-005 referências por link)
+
+- **CHG-005 referências por link** (só documentação; PRD §45, REF-01..09, R-20). Colar um link de Reel ou TikTok para dissecar o vídeo, gerar 3 guiões adaptados ao cliente (3 hooks cada) com verificação de originalidade e via rápida para o teleprompter, extrair o estilo de edição para uma ficha de parâmetros, guardar na biblioteca de estilos da agência e importar para clientes numa versão fixa. Recolha de referências pelo mecanismo do Scout (decisão). 3 capacidades planeadas. Sem alteração funcional.
+
 ## 2026-10-29 (campanhas e filtros do teleprompter)
 
 - **W2-07** campanha, responsável, plataformas e etiquetas no guião (FR-02-03) e fila do teleprompter filtrável (FR-03-01), ADR-0029. Cada guião tem **Detalhes**: escolher ou criar uma campanha ou série, o responsável, as plataformas e etiquetas. Aparecem no cartão. Mudar isto não cria versão nem tira a aprovação; quem fica responsável recebe notificação. No teleprompter a fila filtra por campanha e por responsável ("só os meus"), por dispositivo. Nova capacidade `projects.manage` (dono, admin, gestor). Migração `20261029185412_w2_content_meta` (aditiva). Testes: SQL 30/30, E2E 2/2.
