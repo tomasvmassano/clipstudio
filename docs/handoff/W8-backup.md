@@ -38,7 +38,7 @@ Evidência para `docs/status.md` (QA-15): `scripts/backup/drill.sh`, `docs/qa/ba
 - Ensaio com volume (relatório committed): 200 guiões/cliente + 1 000 000 linhas de auditoria, base de 413 MB,
   90 tabelas / 1 006 237 linhas iguais, 1424 objetos de catálogo sem diferenças, RPCs `ok=18 fail=0`;
   RTO do ensaio 33,8 s (dump 8,1 + restauro 13,3 + verificação 12,4); parcial `bk_a` 89 tabelas / 502 830 linhas iguais,
-  sem fugas, RPCs parciais `ok=17 fail=0`.
+  sem fugas, RPCs parciais `ok=18 fail=0`.
 - Ensaio por omissão (o do CI, 40 guiões/cliente): 2157 linhas, tudo igual, RTO 2,3–4,4 s; 18–36 s no total local.
 - `DRILL_SABOTAGE=1` (apaga uma linha, abre uma tabela a anon, põe marca de B no export de A): sai com 1 e acusa as três.
 - URL `*.supabase.co`: recusado (exit 2).
