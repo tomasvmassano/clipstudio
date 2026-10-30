@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import {
 	Building2Icon, GaugeIcon, KeyRoundIcon, ScrollIcon, SettingsIcon, SlidersHorizontalIcon,
 	LayoutGridIcon, ScrollTextIcon, MonitorPlayIcon, LightbulbIcon, BarChart3Icon, BotIcon,
-	BriefcaseBusinessIcon, ClapperboardIcon, FlaskRoundIcon, RotateCcwIcon, FilmIcon, ReceiptIcon, FlaskConicalIcon, LibraryIcon, ShieldCheckIcon, UsersIcon, UsersRoundIcon, WalletIcon, FileTextIcon, HistoryIcon, InboxIcon, ListTodoIcon, CalendarDaysIcon,
+	BriefcaseBusinessIcon, ClapperboardIcon, FlaskRoundIcon, RotateCcwIcon, FilmIcon, ReceiptIcon, FlaskConicalIcon, LibraryIcon, ShieldCheckIcon, UsersIcon, UsersRoundIcon, WalletIcon, FileTextIcon, DoorOpenIcon, HistoryIcon, InboxIcon, ListTodoIcon, CalendarDaysIcon,
 } from "lucide-react";
 
 export type SidebarNavItem = {
@@ -59,6 +59,7 @@ export const clientNavGroups: SidebarNavGroup[] = [
 		items: [
 			{ title: "Início", path: "/", icon: <LayoutGridIcon /> },
 			{ title: "Caixa de entrada", path: "/caixa", icon: <InboxIcon />, cap: "tasks.work" },
+			{ title: "Portal", path: "/portal", icon: <DoorOpenIcon />, cap: "scripts.read", flag: "client.portal" },
 		],
 	},
 	{

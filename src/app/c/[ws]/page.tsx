@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { RotateCwIcon, SlidersHorizontalIcon } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -32,6 +33,7 @@ import {
 import { fetchDesempenho, fmtDay, type Desempenho } from "@/lib/desempenho";
 import { fetchHoje, type Hoje } from "@/lib/hoje";
 import { FORMATO_LABEL } from "@/lib/types";
+import { clientPath } from "@/lib/ws-path";
 
 /** Início do cliente (PRD M01): KPIs do período com comparação, widgets por função (configuráveis) e o dia de hoje. */
 export default function InicioPage() {
@@ -47,6 +49,8 @@ function Inicio({ access }: { access: Access }) {
   const flags = useFlags(access.ws, access.token, mode !== "loading");
   // A minha fila (FR-01-03) só com conta pessoal e a flag ops.workspace; sem ela o Início fica como estava
   const showQueue = mode === "user" && !!flags?.has("ops.workspace");
+  // Portal do cliente (SCALE-08): sugerido à equipa do cliente e ao código de equipa quando a flag está ligada
+  const showPortal = !!flags?.has("client.portal") && (mode !== "user" || ws?.affiliation === "client_staff");
   const tz = ws?.timezone ?? "Asia/Dubai";
   const [p, setP] = useState(loadPeriod);
   const range = useMemo(() => rangeFor(p.key, tz, { from: p.from, to: p.to }), [p, tz]);
@@ -96,6 +100,14 @@ function Inicio({ access }: { access: Access }) {
         </div>
       </div>
 
+      {showPortal && (
+        <Alert data-portal-hint>
+          <AlertDescription className="flex flex-wrap items-center justify-between gap-2">
+            <span>O que espera pela tua aprovação, as entregas do mês e os teus pedidos estão juntos no portal.</span>
+            <Link className="text-sm font-medium underline underline-offset-4" href={clientPath(access.ws, "/portal")}>Abrir o portal</Link>
+          </AlertDescription>
+        </Alert>
+      )}
       {showQueue && <WidgetBoundary label="A minha fila"><MyQueue ws={access.ws} tz={tz} /></WidgetBoundary>}
 
       <PeriodPicker value={p} onChange={setPeriod} />
