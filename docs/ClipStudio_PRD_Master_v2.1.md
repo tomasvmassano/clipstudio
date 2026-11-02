@@ -1247,6 +1247,7 @@ Referências externas consultadas em 2026-10-28: ClickUp (custom roles, workload
 
 ## 36. Registo de alterações
 
+- **CHG-005 — 2026-10-30:** §45 Referências por link (REF-01..09): colar link, dissecção, 3 guiões adaptados por link com 3 hooks, via rápida, extração do estilo de edição, biblioteca de estilos da agência e importação para clientes; R-20 recolha de vídeos de referência pelo mecanismo do Scout (decisão, risco de termos de serviço aceite); estilo S14 proposto. Origem: IDEA-008 e IDEA-009.
 - **CHG-004 — 2026-10-29:** registo de estado por requisito (`docs/status.md`) validado no CI, regra de início e fim de tarefa, adiamentos registados e revisão automática diária, em §33.
 - **CHG-003 — 2026-10-29:** Parte IV (§37-§44): R-16 origem sistema/externo, R-17 hipérbole de persona (decisão de produto, fora do âmbito factual do AGENTS §7), R-18 linhagem gravada no momento, R-19 só APIs oficiais; vista de negócio da agência (BIZ-01..09); ingestão, armazenamento (decide §14) e linha de edição (ING-01..04, EDL-01..06); centro de desempenho (PERF-01..09); variantes, estilos e republicação (VAR-01..07); publicação automática e calendário (PUB-01..06); aprovações das plataformas (PLAT-01..04); sequência de entrega revista (§44, medição antes de media). §26, §27, §14 e §33 com remissões. Origem: inbox de ideias IDEA-001..007.
 - **CHG-002 — 2026-10-29:** R-15 (falhas contidas, gestor único de canais, sessões que não caem por falhas de rede, gate de release com CI e E2E com conta real) em §25; QA-16 em §11. Origem: incidente de `/c/numeiro` a cair no erro do browser.
@@ -1381,6 +1382,34 @@ Complementa M11, M12, FR-12-01..04, SCALE-04, R-08.
 
 ## 44. Sequência de entrega (altera §26 na ordem, não no âmbito)
 
-A medição passa para antes da media. Ordem: (0) PLAT-01 em paralelo, fora do código; (1) BIZ operacional, BIZ-07, BIZ-08 e páginas públicas; (2) PERF base (ligar contas, importação, fotografias, origem, etiquetas) e submissão da fase A; (3) ING-01..04; (4) EDL-01..04 e piloto EDL-06 com os estilos base; (5) PUB-01..04 e submissão da fase B; (6) PERF completo e BIZ financeiro; (7) EDL-05, VAR-03..07 e PUB-05. Cada passo é aditivo (expandir/contrair), com módulos novos atrás de flag e testes de isolamento de §22.
+A medição passa para antes da media. Ordem: (0) PLAT-01 em paralelo, fora do código; (1) BIZ operacional, BIZ-07, BIZ-08 e páginas públicas; (2) PERF base (ligar contas, importação, fotografias, origem, etiquetas) e submissão da fase A; (3) ING-01..04; (4) EDL-01..04 e piloto EDL-06 com os estilos base; (5) PUB-01..04 e submissão da fase B; (6) PERF completo e BIZ financeiro; (7) EDL-05, VAR-03..07 e PUB-05. **REF (CHG-005):** REF-01..04 (dissecar e adaptar) podem entrar logo que o motor aceite pedidos sob procura, porque assentam em M04, M07 e no motor já existentes; REF-05..08 (estilos) depois do render real dos estilos (VAR-02, EDL-01). Cada passo é aditivo (expandir/contrair), com módulos novos atrás de flag e testes de isolamento de §22.
 
 **Decisões de §14 e §27 resolvidas por esta parte:** armazenamento (ING-01); integrações (R-19, só APIs oficiais); quem aprova publicação (PUB-06); política de gravação continua com confirmação explícita. Em aberto: entidade legal para a Business Verification e domínio definitivo; plano/espaço Google Workspace para o arquivo de bruto; formato de gravação atual da FX3; lista de contas sociais por plataforma e tipo.
+
+## 45. Referências por link: dissecar, adaptar e copiar o estilo de edição (REF, CHG-005)
+
+Origem: IDEA-008 e IDEA-009 (Tomás, 29/10/2026). Um só "colar link" com dois resultados possíveis: guiões adaptados ao cliente e/ou estilo de edição. Complementa M04 (fonte por link), M07 (Referências), o motor (Analista, Curioso, Hook Smith, Guionista, Crítico), VAR-02 e EDL-01.
+
+R-20 (CHG-005, decisão de produto). **Recolha de vídeos de referência de terceiros.** As APIs oficiais (R-19) não dão acesso a vídeos de contas que não estão ligadas. Para referências, o vídeo, a legenda e as métricas públicas de um link de Instagram ou TikTok são obtidos pelo mesmo mecanismo de recolha que o motor já usa para reels de referência (Scout), com o risco de termos de serviço que esse mecanismo já tem e que fica aceite por decisão do Tomás. O upload do ficheiro é sempre uma alternativa. Os ficheiros de referência ficam em storage da agência, por workspace ou da agência, nunca são publicados e servem só para análise. R-19 continua a valer para métricas e publicação das contas ligadas.
+
+**REF-01 [P1] Colar link.** Campo para colar um link de Reel ou TikTok, no espaço da agência (Estilos, Referências) e no espaço do cliente (Fontes, Referências). Entra como referência/fonte com deteção de repetidos (M04, M07). Qualquer criador, não só referências seguidas.
+
+**REF-02 [P1] Dissecção visível.** Transcrição; hook e mecanismo; máquina (lei absurda, redefinição, mecanismo, isco e revelação, ataque com recibos); tese, inimigo, estrutura com tempos, duração e ritmo; métricas públicas e índice face à mediana do autor quando disponíveis; afirmações sobre terceiros identificados assinaladas.
+
+**REF-03 [P1] Adaptação ao cliente: 3 guiões por link (decisão), cada um com 3 hooks.** O motor escreve na voz do cliente com a configuração ativa (voz, léxico, regras, frases-persona R-17), a bíblia de estilo, os guiões aprovados e os vídeos do cliente que mais renderam. Adapta a ideia e o mecanismo, nunca o texto: verificação de semelhança com a transcrição original abaixo de um limiar [pressuposto] e frases copiadas bloqueadas. Afirmações factuais com fonte (AGENTS §7, VAR-04); temas de notícias com validade.
+
+**REF-04 [P1] Via rápida.** Os guiões entram em revisão marcados "via rápida"; aprovados, vão para o topo da fila do teleprompter da próxima sessão ou para o modo rápido pelo telemóvel (ING-04); o pacote de edição pode usar o estilo extraído (REF-05). Meta [pressuposto]: guiões prontos para revisão menos de 10 minutos depois de colar o link.
+
+**REF-05 [P1] Extração do estilo de edição para uma ficha de parâmetros.** Legendas (posição, tamanho, cor, contorno, sombra, palavras por linha, destaque, animação, maiúsculas, emojis); ritmo de cortes; zooms e punch-ins (frequência, intensidade, palavras); transições; sobreposições e cartões de imagem; layout; look de cor aproximado; música e efeitos sonoros (presença e ritmo). Letra: a mais próxima disponível com licença. Não se copiam música, logótipos, marcas d'água, imagens nem vídeo do autor original; copia-se o estilo, aplicado ao nosso conteúdo (VAR-01). Resultado: parâmetros muito próximos e ajustáveis, não uma cópia pixel a pixel.
+
+**REF-06 [P1] Pré-visualizar e afinar antes de gravar.** A ficha é aplicada a um clip do cliente; ajusta-se com controlos simples (tamanho da legenda, frequência de zoom, posição) e grava-se como versão.
+
+**REF-07 [P1] Biblioteca de estilos da agência.** Os estilos extraídos pertencem à agência (espaço da agência, R-13), versionados. A equipa de um cliente nunca vê a biblioteca da agência.
+
+**REF-08 [P1] Importar para um cliente.** Copia uma versão fixa da ficha para o catálogo de estilos do cliente (VAR-02) e, se pedido, para o preset do pacote de edição (EDL-01); a partir daí o render aplica-a automaticamente. Quando o estilo da agência muda, os clientes ficam na versão importada até alguém escolher atualizar [pressuposto: recomendação, a confirmar].
+
+**REF-09 [P2] Medição.** Cada guião e cada estilo guardam a ligação ao vídeo de origem (R-18); o centro de desempenho compara via rápida com guiões do motor diário e estilos importados com os restantes.
+
+**Exemplo de referência (29/10):** reel @marcotrunzo (15,9 s, ~2,68 M reproduções): um só take em selfie, sem cortes nem zooms, legenda branca em negrito com sombra em blocos de 3 a 6 palavras no terço superior e um cartão de imagem por frase acima da legenda (a "prova" de cada afirmação). Proposto como estilo **S14 "Recibo por frase"** no catálogo de VAR-02. A reviravolta do original acusa pessoas identificadas de crimes; na adaptação aplica-se R-17.
+
+**Em aberto:** o tratamento de acusações falsas a terceiros identificados mantém-se como em R-17 até decisão do Tomás sobre a proposta registada na inbox de ideias (o motor não as gera; se uma pessoa da equipa as escrever, ficam marcadas com aviso jurídico e só avançam com aprovação explícita e auditada). Política de atualização de estilos importados (REF-08) a confirmar.
