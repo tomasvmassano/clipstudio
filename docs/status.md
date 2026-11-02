@@ -27,7 +27,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-01-02 | P0 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | Widgets configuráveis por função e por workspace; comparação temporal e explicaç |
 | FR-02-01 | P0 | parcial | sem eliminação definitiva com confirmação (só arquivo) | CRUD de guiões, duplicação, arquivo, recuperação e eliminação com confirmação. |
 | FR-03-01 | P0 | parcial | verificação com conta real (R-15) | Fila de gravação por data, campanha e responsável, apenas conteúdos elegíveis; r |
-| FR-03-02 | P0 | parcial | sem blocos personalizados | Blocos identificados Hook 1, Hook 2, Body, CTA e personalizados; seleção e repet |
+| FR-03-02 | P0 | parcial | verificação com conta real (R-15) | Blocos identificados Hook 1, Hook 2, Body, CTA e personalizados; seleção e repet |
 | FR-04-01 | P0 | parcial | sem anexo; edição dos campos da fonte não confirmada | CRUD de fontes com URL, título, origem, data, idioma, autor, tags, categoria, re |
 | FR-04-02 | P0 | parcial | sem RSS nem integrações | Adicionar manualmente, por URL, RSS e integrações autorizadas; rastreio de data  |
 | FR-06-01 | P0 | parcial | prompt, versão por agente, permissões e limites não constam do catálogo | Catálogo de agentes com função, versão, modelo, prompt, ferramentas, permissões  |
@@ -221,7 +221,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
 | FR-03-01 | parcial | verificação com conta real (R-15) | recording_session_open, recording_queue_set; w2_teleprompter 52/52; W2-05; filtros por campanha e responsável na fila (W2-07, ADR-0029); e2e/content-meta.spec.ts | — |
-| FR-03-02 | parcial | sem blocos personalizados | blocos Hook/Body/CTA e takes (take_create/update); w2_teleprompter 52/52 | — |
+| FR-03-02 | parcial | verificação com conta real (R-15) | blocos Hook/Body/CTA e takes (take_create/update); w2_teleprompter 52/52; blocos personalizados ## no corpo (W2-08, ADR-0030); w2_custom_blocks 12/12; e2e/custom-blocks.spec.ts | — |
 | FR-03-03 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | espelho H/V, velocidade, letra, entrelinha, margens, contraste; W2-05; E2E 28/28 (não versionado) | — |
 | FR-03-04 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | play/pause, scroll, ecrã inteiro por duplo toque, atalhos BT; teleprompter/prompter.tsx; W2-05 | — |
 | FR-03-05 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | teleprompter_prefs por utilizador e dispositivo, wakeLock; tp_prefs_get/set; w2_teleprompter | — |
