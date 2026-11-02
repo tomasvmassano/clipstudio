@@ -4,7 +4,11 @@ import { friendlyError, type Access } from "@/lib/access";
 /* Catálogo de estilos (VAR-02) e preset de edição do cliente (EDL-01). W5-02, ADR-0027. */
 
 export type LayerKind = "video" | "image" | "attention_video" | "title" | "captions" | "band";
-export type Layer = { kind: LayerKind; box: [number, number, number, number]; role?: string; color?: string; stroke?: string; weight?: string; max_words?: number; brush?: boolean; text?: string };
+export type Layer = {
+  kind: LayerKind; box: [number, number, number, number]; role?: string; color?: string; stroke?: string; weight?: string; max_words?: number; brush?: boolean; text?: string;
+  // tipografia e aspeto usados pelo motor de render e pela pré-visualização (opcionais; o servidor ignora o que não valida)
+  font?: string; size?: number; align?: "left" | "center"; lines?: number; highlight?: string; background?: string; radius?: number; shadow?: string;
+};
 export type StyleSpec = { canvas: { w: number; h: number }; layers: Layer[] };
 export type StyleStatus = "rascunho" | "ativo" | "arquivado";
 export type Platform = "instagram" | "tiktok" | "youtube";

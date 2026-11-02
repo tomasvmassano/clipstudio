@@ -13,42 +13,18 @@ import { WorkspaceGate } from "@/components/workspace-gate";
 import type { Access } from "@/lib/access";
 import {
   fetchCatalog, initCatalog, savePreset, saveStyle, setStyleStatus, specProblems, styleHistory,
-  LAYER_LABEL, OUTPUT_LABEL, PLATFORM_LABEL, SAFE, STATUS_LABEL, TRANSFORMATION_LABEL,
+  LAYER_LABEL, OUTPUT_LABEL, PLATFORM_LABEL, STATUS_LABEL, TRANSFORMATION_LABEL,
   type EditCatalog, type EditStyle, type Platform, type PresetOutput, type StyleSpec, type StyleVersion, type Transformation,
 } from "@/lib/edit-styles";
 import { cn } from "@/lib/utils";
+import { StylePreview } from "@/components/edit/style-preview";
 
 /*
  * Estilos de edição (VAR-02) e preset do cliente (EDL-01). O preset diz o que o pacote automático gera por guião;
  * cada estilo é um template versionado. Gravar cria sempre uma versão nova; o preset fixa a versão que usa.
  */
 
-const LAYER_FILL: Record<string, string> = {
-  video: "#3b82f6", image: "#8b5cf6", attention_video: "#14b8a6", title: "#facc15", captions: "#f97316", band: "#ef4444",
-};
 const when = (iso: string) => new Date(iso).toLocaleString("pt-PT", { timeZone: "Asia/Dubai", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
-
-/** Pré-visualização do layout em 1080×1920 com o retângulo seguro a tracejado. */
-function Preview({ spec, className }: { spec: StyleSpec | null; className?: string }) {
-  const layers = Array.isArray(spec?.layers) ? spec!.layers : [];
-  return (
-    <svg viewBox="0 0 1080 1920" role="img" aria-label={layers.length ? `Layout com ${layers.length} camadas` : "Layout ainda por desenhar"}
-      className={cn("h-auto w-full rounded-md border bg-neutral-950", className)}>
-      {layers.map((l, i) => Array.isArray(l?.box) && l.box.length === 4 ? (
-        <g key={i}>
-          <rect x={l.box[0]} y={l.box[1]} width={Math.max(0, l.box[2])} height={Math.max(0, l.box[3])}
-            fill={l.color ?? LAYER_FILL[l.kind] ?? "#64748b"} fillOpacity={l.kind === "title" || l.kind === "captions" ? 0.85 : 0.45}
-            stroke={l.stroke ?? "none"} strokeWidth={l.stroke ? 8 : 0} />
-          <text x={l.box[0] + 24} y={l.box[1] + 70} fontSize={56} fill={l.kind === "title" ? "#000" : "#fff"} fontWeight={700}>
-            {LAYER_LABEL[l.kind] ?? l.kind}{l.role ? ` · ${l.role}` : ""}
-          </text>
-        </g>
-      ) : null)}
-      <rect x={SAFE.x0} y={SAFE.y0} width={SAFE.x1 - SAFE.x0} height={SAFE.y1 - SAFE.y0} fill="none" stroke="#e5e7eb" strokeWidth={6} strokeDasharray="30 20" />
-      {!layers.length && <text x={540} y={980} textAnchor="middle" fontSize={64} fill="#9ca3af">Layout por desenhar</text>}
-    </svg>
-  );
-}
 
 function statusVariant(s: EditStyle["status"]) {
   return s === "ativo" ? "default" : s === "arquivado" ? "outline" : "secondary";
@@ -58,6 +34,7 @@ function StyleEditor({ access, style, canManage, onSaved, onClose }: {
   access: Access; style: EditStyle; canManage: boolean; onSaved: (c: EditCatalog) => void; onClose: () => void;
 }) {
   const [name, setName] = useState(style.name);
+  const [showBoxes, setShowBoxes] = useState(false);
   const [transformation, setTransformation] = useState<Transformation | "">(style.transformation ?? "");
   const [platforms, setPlatforms] = useState<Platform[]>(style.platforms);
   const [notes, setNotes] = useState(style.notes ?? "");
@@ -97,7 +74,10 @@ function StyleEditor({ access, style, canManage, onSaved, onClose }: {
         <span className="text-muted-foreground">versão {style.version} · {when(style.updated_at)}{style.updated_label ? ` · ${style.updated_label}` : ""}</span>
       </div>
       <div className="grid gap-4 sm:grid-cols-[minmax(0,180px)_1fr]">
-        <Preview spec={parsed.spec} />
+        <div className="flex flex-col gap-1.5">
+          <StylePreview spec={parsed.spec} boxes={showBoxes} />
+          <label className="flex items-center gap-1.5 text-xs text-muted-foreground"><input type="checkbox" checked={showBoxes} onChange={(e) => setShowBoxes(e.target.checked)} />Mostrar caixas e zona segura</label>
+        </div>
         <div className="flex flex-col gap-3 text-sm">
           <label className="flex flex-col gap-1">Nome
             <Input value={name} maxLength={60} disabled={ro} onChange={(e) => setName(e.target.value)} />
@@ -329,7 +309,7 @@ function EdicaoInner({ access }: { access: Access }) {
                   <li key={s.key}>
                     <button type="button" data-style={s.key} onClick={() => setOpen(s.key)}
                       className={cn("flex w-full flex-col gap-2 rounded-lg border p-2 text-left transition-colors hover:bg-muted/60", s.status === "arquivado" && "opacity-60")}>
-                      <Preview spec={s.spec} />
+                      <StylePreview spec={s.spec} />
                       <span className="flex items-center justify-between gap-1">
                         <span className="truncate text-sm font-medium">{s.key} · {s.name}</span>
                       </span>
