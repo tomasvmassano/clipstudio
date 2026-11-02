@@ -12,6 +12,10 @@
 
 - **W2-08** blocos personalizados no teleprompter (FR-03-02, ADR-0030). No editor do guião, uma linha começada por `## Nome` divide o corpo num bloco com nome (ex.: `## Prova`). Cada bloco tem os seus takes, salta-se na fila e aparece com o nome no teleprompter e no cartão. Como faz parte do texto, mudar blocos cria versão nova. Migração `20261029190902_w2_custom_blocks` (só alarga o que é aceite). Testes: SQL 12/12, E2E 1/1.
 
+## 2026-10-29 (rascunhos recuperáveis)
+
+- **W2-09** recuperação de rascunhos (FR-17-13). Ao editar um guião, cada alteração fica também guardada no dispositivo até o servidor a aceitar. Se a rede falhar ou a página fechar, o cartão mostra "alterações por guardar neste dispositivo" e o editor oferece **Recuperar** ou **Descartar**. Sair da página com alterações por guardar faz o browser avisar. Sem migração. Testes: E2E 1/1 (gravação sem rede, recarregar, recuperar).
+
 ## 2026-10-30 (vaga 3: biblioteca, integrações, notificações, portal e backup)
 
 Tudo atrás de funcionalidades em teste (só o dono da agência até as ligar).
