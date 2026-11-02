@@ -47,7 +47,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-17-01 | P0 | parcial | sem decisões pendentes além de aprovações; deduplicação por evento não demonstrada na inbox | Inbox unificada por utilizador com tarefas, aprovações, menções, erros de automa |
 | FR-17-04 | P0 | parcial | sem variantes, assets e publicações por conta ligadas | Relação um-para-muitos: conteúdo → hooks → takes → variantes → assets → publicaç |
 | FR-17-05 | P0 | parcial | sem pré-requisitos nas transições | Transições configuráveis de workflow geram tarefas e notificações idempotentes,  |
-| FR-17-13 | P0 | parcial | sem recuperação de rascunhos após falha | Auto-save com indicador persistido, proteção contra alterações concorrentes e re |
+| FR-17-13 | P0 | parcial | verificação com conta real (R-15) | Auto-save com indicador persistido, proteção contra alterações concorrentes e re |
 | FR-17-14 | P0 | parcial | worker por alojar | Jobs duráveis com idempotency key, retries exponenciais, timeout, dead-letter, c |
 | FR-17-15 | P0 | parcial | sem alertas nem dashboard de saúde | Observabilidade com logs estruturados, correlação por workspace/run/content, ale |
 | CAP-01 | P0 | parcial | registo sem descrição, dono, versão, ações e flag de disponibilidade | Registo central de capacidades |
@@ -485,7 +485,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
-| FR-17-13 | parcial | sem recuperação de rascunhos após falha | autosave com indicador e lock_version (W2-02) | — |
+| FR-17-13 | parcial | verificação com conta real (R-15) | autosave com indicador e lock_version (W2-02); rascunho local com recuperação e aviso ao sair (W2-09); e2e/drafts.spec.ts | — |
 | FR-17-14 | parcial | worker por alojar | agent_jobs: idempotência, backoff, lease, dead-letter, cancelar; w4_agents 44/44, w4_worker 30/30 | — |
 | FR-17-15 | parcial | sem alertas nem dashboard de saúde | correlation_id em audit/transições; agent_job_attempts; estado do worker na UI | — |
 | FR-17-16 | por começar | sem centro de integrações | nada no código | — |
