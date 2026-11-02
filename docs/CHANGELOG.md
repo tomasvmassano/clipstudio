@@ -16,6 +16,10 @@
 
 - **W2-09** recuperação de rascunhos (FR-17-13). Ao editar um guião, cada alteração fica também guardada no dispositivo até o servidor a aceitar. Se a rede falhar ou a página fechar, o cartão mostra "alterações por guardar neste dispositivo" e o editor oferece **Recuperar** ou **Descartar**. Sair da página com alterações por guardar faz o browser avisar. Sem migração. Testes: E2E 1/1 (gravação sem rede, recarregar, recuperar).
 
+## 2026-10-29 (ver como)
+
+- **W1-16** "Ver como" nas permissões (CAP-05, BIZ-07). Novo separador **Ver como**: escolhe uma pessoa ou um papel e vê o que aparece no menu e o que pode fazer neste cliente, com o motivo de cada sim e não. É só leitura, avaliado no servidor com a mesma regra do "Porquê?", e fica no histórico com quem perguntou. Não há entrar como outra pessoa. Migração `20261029195301_w1_access_simulate`. Testes: SQL 11/11, E2E 1/1.
+
 ## 2026-10-29 (campanhas e filtros do teleprompter)
 
 - **W2-07** campanha, responsável, plataformas e etiquetas no guião (FR-02-03) e fila do teleprompter filtrável (FR-03-01), ADR-0029. Cada guião tem **Detalhes**: escolher ou criar uma campanha ou série, o responsável, as plataformas e etiquetas. Aparecem no cartão. Mudar isto não cria versão nem tira a aprovação; quem fica responsável recebe notificação. No teleprompter a fila filtra por campanha e por responsável ("só os meus"), por dispositivo. Nova capacidade `projects.manage` (dono, admin, gestor). Migração `20261029185412_w2_content_meta` (aditiva). Testes: SQL 30/30, E2E 2/2.

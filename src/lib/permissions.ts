@@ -30,3 +30,11 @@ export async function setGrant(ws: string, user: string, cap: string, effect: "a
 }
 export const revokeGrant = (id: number, reason: string) => rpc<{ now: Explain }>("grant_revoke", { p_id: id, p_reason: reason });
 export const fetchCapabilityLabels = () => rpc<Record<string, { label: string; module: string }>>("capability_labels", {});
+
+/** "Ver como" (CAP-05, BIZ-07): só leitura, avaliado no servidor e auditado. */
+export type Simulation = {
+  target: { kind: "user" | "role"; label: string; role: string | null; status: string | null };
+  capabilities: (Explain & { key: string; label: string; module: string; status: string })[];
+};
+export const simulateAccess = (ws: string, target: { user?: string; role?: string }) =>
+  rpc<Simulation>("access_simulate", { p_ws: ws, p_user: target.user ?? null, p_role: target.role ?? null });

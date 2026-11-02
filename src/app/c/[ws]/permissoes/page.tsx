@@ -15,7 +15,8 @@ import { WorkspaceGate } from "@/components/workspace-gate";
 import { useSession } from "@/components/session-provider";
 import { ROLE_LABEL, type Access } from "@/lib/access";
 import { supabase } from "@/lib/supabase";
-import { explainAccess, fetchCapabilityLabels, fetchMatrix, isLive, revokeGrant, setGrant, type Capability, type Explain, type Grant, type Matrix, type PermMember } from "@/lib/permissions";
+import { explainAccess, fetchCapabilityLabels, fetchMatrix, isLive, revokeGrant, setGrant, simulateAccess, type Capability, type Explain, type Grant, type Matrix, type PermMember, type Simulation } from "@/lib/permissions";
+import { clientNavGroups } from "@/components/app-shared";
 import { INVITE_ROLES } from "@/lib/team";
 import { cn } from "@/lib/utils";
 
@@ -94,7 +95,7 @@ function Console({ access }: { access: Access }) {
   const [m, setM] = useState<Matrix | null>(null);
   const [err, setErr] = useState("");
   const [rev, setRev] = useState(0);
-  const [tab, setTab] = useState<"pessoa" | "papeis" | "excecoes">("pessoa");
+  const [tab, setTab] = useState<"pessoa" | "papeis" | "excecoes" | "ver">("pessoa");
   const [sel, setSel] = useState<string | null>(null);
   const [onlyLive, setOnlyLive] = useState(true);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
@@ -122,12 +123,14 @@ function Console({ access }: { access: Access }) {
           <ToggleGroupItem value="pessoa">Por pessoa</ToggleGroupItem>
           <ToggleGroupItem value="papeis">Por papel</ToggleGroupItem>
           <ToggleGroupItem value="excecoes">Exceções ({m.grants.length})</ToggleGroupItem>
+          <ToggleGroupItem value="ver">Ver como</ToggleGroupItem>
         </ToggleGroup>
       </div>
       <label className="inline-flex items-center gap-2 text-sm text-muted-foreground"><input type="checkbox" checked={onlyLive} onChange={(e) => setOnlyLive(e.target.checked)} /> Só o que já existe na app</label>
       {msg && <Alert variant={msg.ok ? "default" : "destructive"}><AlertDescription className="flex items-center justify-between gap-2" role="status">{msg.text}
         <Button size="sm" variant="ghost" onClick={() => setMsg(null)}>Fechar</Button></AlertDescription></Alert>}
 
+      {tab === "ver" && <SeeAs ws={access.ws} m={m} onlyLive={onlyLive} />}
       {tab === "pessoa" && (m.members.length === 0 ? (
         <Alert><AlertDescription>Ainda ninguém tem conta neste cliente. O dono da agência tem acesso a tudo sem aparecer aqui.</AlertDescription></Alert>
       ) : (
@@ -295,5 +298,68 @@ function GrantsList({ m, onDone, onErr }: { m: Matrix; onDone: (t: string) => vo
         </TableBody>
       </Table>
     </CardContent></Card>
+  );
+}
+
+/** "Ver como" (CAP-05, BIZ-07): o que uma pessoa ou um papel vê e pode fazer neste cliente. Só leitura; fica no histórico. */
+function SeeAs({ ws, m, onlyLive }: { ws: string; m: Matrix; onlyLive: boolean }) {
+  const [target, setTarget] = useState("");
+  const [sim, setSim] = useState<Simulation | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+  const run = async () => {
+    const [kind, id] = target.split(":");
+    setBusy(true); setErr("");
+    try { setSim(await simulateAccess(ws, kind === "u" ? { user: id } : { role: id })); }
+    catch (e) { setErr((e as Error).message); setSim(null); }
+    finally { setBusy(false); }
+  };
+  const allowed = new Set((sim?.capabilities ?? []).filter((c) => c.allowed).map((c) => c.key));
+  const menu = clientNavGroups.flatMap((g) => g.items).filter((i) => i.path && !i.soon && !i.orgCap && (!i.cap || allowed.has(i.cap)));
+  const caps = (sim?.capabilities ?? []).filter((c) => !onlyLive || isLive(c as unknown as Capability));
+  return (
+    <section aria-label="Ver como" className="flex flex-col gap-3">
+      <form className="flex flex-wrap items-center gap-2" onSubmit={(e) => { e.preventDefault(); if (target) void run(); }}>
+        <select aria-label="Ver como quem" className="h-9 rounded-md border bg-background px-2 text-sm" value={target} onChange={(e) => { setTarget(e.target.value); setSim(null); }}>
+          <option value="">Escolhe uma pessoa ou um papel</option>
+          <optgroup label="Pessoas">
+            {m.members.map((p) => <option key={p.user_id} value={`u:${p.user_id}`}>{p.email} ({ROLE_LABEL[p.role] ?? p.role})</option>)}
+          </optgroup>
+          <optgroup label="Papéis">
+            {Object.keys(m.roles).map((r) => <option key={r} value={`r:${r}`}>{ROLE_LABEL[r] ?? r}</option>)}
+          </optgroup>
+        </select>
+        <Button type="submit" size="sm" disabled={!target || busy}>{busy && <Loader2Icon className="animate-spin" />} Ver</Button>
+      </form>
+      {err && <Alert variant="destructive"><AlertDescription>{err}</AlertDescription></Alert>}
+      {sim && (
+        <>
+          <div role="status" className="rounded-md border border-amber-500/50 bg-amber-500/10 px-3 py-2 text-sm">
+            Pré-visualização como <b>{sim.target.kind === "role" ? `papel ${ROLE_LABEL[sim.target.label] ?? sim.target.label}` : sim.target.label}</b>
+            {sim.target.kind === "user" && sim.target.role ? ` (${ROLE_LABEL[sim.target.role] ?? sim.target.role})` : ""}. Só leitura: nada muda e fica registado no histórico.
+          </div>
+          <div className="grid gap-4 md:grid-cols-[minmax(0,14rem)_1fr]">
+            <div>
+              <h3 className="mb-1 text-sm font-medium">Vê no menu</h3>
+              {menu.length === 0 ? <p className="text-sm text-muted-foreground">Nada: não abre este cliente.</p> : (
+                <ul className="flex flex-col gap-1 text-sm" aria-label="Menu visto">{menu.map((i) => <li key={i.path}>{i.title}</li>)}</ul>
+              )}
+            </div>
+            <div>
+              <h3 className="mb-1 text-sm font-medium">Pode fazer</h3>
+              <ul className="flex flex-col gap-1 text-sm" aria-label="Capacidades simuladas">
+                {caps.map((c) => (
+                  <li key={c.key} data-cap={c.key} className="flex flex-wrap items-baseline gap-2">
+                    <span className={cn("w-4", c.allowed ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground")}>{c.allowed ? "✓" : "✗"}</span>
+                    <span className={cn(!c.allowed && "text-muted-foreground")}>{c.label}</span>
+                    <span className="text-xs text-muted-foreground">{c.module} · {c.reasons.join(" ")}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </>
+      )}
+    </section>
   );
 }
