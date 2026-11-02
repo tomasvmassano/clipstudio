@@ -16,6 +16,10 @@
 
 - **W2-09** recuperação de rascunhos (FR-17-13). Ao editar um guião, cada alteração fica também guardada no dispositivo até o servidor a aceitar. Se a rede falhar ou a página fechar, o cartão mostra "alterações por guardar neste dispositivo" e o editor oferece **Recuperar** ou **Descartar**. Sair da página com alterações por guardar faz o browser avisar. Sem migração. Testes: E2E 1/1 (gravação sem rede, recarregar, recuperar).
 
+## 2026-10-29 (ver como)
+
+- **W1-16** "Ver como" nas permissões (CAP-05, BIZ-07). Novo separador **Ver como**: escolhe uma pessoa ou um papel e vê o que aparece no menu e o que pode fazer neste cliente, com o motivo de cada sim e não. É só leitura, avaliado no servidor com a mesma regra do "Porquê?", e fica no histórico com quem perguntou. Não há entrar como outra pessoa. Migração `20261029195301_w1_access_simulate`. Testes: SQL 11/11, E2E 1/1.
+
 ## 2026-10-30 (vaga 3: biblioteca, integrações, notificações, portal e backup)
 
 Tudo atrás de funcionalidades em teste (só o dono da agência até as ligar).
