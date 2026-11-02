@@ -93,8 +93,11 @@ Estado: **ativo** (existe e é verificado no servidor por `authorize()`; também
 | `performance.origin.override` | Corrigir origem sistema/externo (R-16) | M | ws | W6 (CHG-003) | — |
 | `publishing.approve` | Aprovar publicação de originais (PUB-06) | A | ws, conta | W6 (CHG-003) | — |
 | `publishing.republish.approve` | Aprovar republicações (PUB-05/06) | A | ws, conta | W6 (CHG-003) | — |
-| `integrations.read` | Settings (M15) | B | ws | ativo (W8) | `/c/[ws]/definicoes/integracoes` (flag `integrations.center`, `integrations_overview`): contas sociais, recolha de métricas, motor de agentes; estados reais, sem tokens |
+| `references.dissect` | Referências por link: dissecar e adaptar (REF-01..04) | M | ws, org | W4 (CHG-005) | — |
+| `styles.library.manage` | Biblioteca de estilos da agência (REF-05..07) | M | org | W5 (CHG-005) | — |
+| `styles.import` | Importar estilo da agência para um cliente (REF-08) | M | org, ws | W5 (CHG-005) | — |
 | `integrations.manage` | Settings (M15) | A | ws | ativo (W8) | Testar recolha e motor (`integrations_test`), revogar conta social com motivo e purga do segredo (`integrations_social_revoke`); ligar/renovar indisponíveis sem OAuth |
+| `integrations.read` | Settings (M15) | B | ws | ativo (W8) | `/c/[ws]/definicoes/integracoes` (flag `integrations.center`, `integrations_overview`): contas sociais, recolha de métricas, motor de agentes; estados reais, sem tokens |
 | `integrations.agency.read` | Settings (M15) | B | org | ativo (W8) | `/integracoes` (`integrations_agency`): Drive, R2, Resend, limites das APIs, workers e estado por cliente |
 | — (própria pessoa) | Perfil (M14) | todos com conta | user | ativo (W1-15) | `/perfil` e `/c/[ws]/perfil`: nome, fotografia, palavra-passe, verificação em dois passos, fuso, tema, cliente preferido, terminar sessões, histórico de segurança (`profile_update`, `my_security_log`, `security_event`); sem capacidade: cada pessoa só mexe no que é seu |
 | `settings.manage` | Settings | A | ws | ativo (parcial) | `/definicoes`: nome, @, fuso, moeda, logótipo (bucket privado `branding`), cor da marca, só gravar aprovados (`workspace_update`, `workspace_settings`); limite de tarefas por pessoa com `tasks.manage`; integrações, notificações, segurança e dados do M15 por fazer; notificações por evento em `/definicoes/notificacoes` (flag `notifications.prefs`, `notif_settings`/`notif_settings_set`: ligar/desligar por tipo e canal, obrigatórias; W8, ADR-0040) |

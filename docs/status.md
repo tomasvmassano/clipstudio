@@ -12,10 +12,10 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 |---|---|
 | feito | 24 |
 | parcial | 194 |
-| por começar | 39 |
+| por começar | 49 |
 | bloqueado | 3 |
 | adiado | 3 |
-| **total** | **263** |
+| **total** | **273** |
 
 ## Pendentes abertos (bloqueados primeiro, depois por prioridade)
 
@@ -81,7 +81,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | PERF-06 | P0 | parcial | persona e estilo só com linhagem gravada; canibalização básica | Vistas |
 | PERF-09 | P0 | parcial | só uma leitura por publicação; ligação ao conteúdo por inferência | Correções de dados imediatas |
 | VAR-01 | P0 | parcial | render das variantes | Receita de variante |
-| VAR-02 | P0 | parcial | layouts de S01 a S12 (equipa criativa); render real dos estilos | Catálogo de estilos por workspace |
+| VAR-02 | P0 | parcial | layouts de S01 a S12 (equipa criativa); render real dos estilos no motor (hoje só no protótipo local); verificação com sessão real | Catálogo de estilos por workspace |
 | PUB-02 | P0 | parcial | leitura dos limites em tempo real chega com o publicador | Limites das APIs como restrições do agendador |
 | PUB-04 | P0 | parcial | quotas de republicação só como aviso; verificação com conta real (R-15) | Calendário de publicações |
 | PUB-06 | P0 | parcial | notificações a quem aprova; verificação com conta real (R-15) | Quem aprova |
@@ -653,7 +653,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
 | VAR-01 | parcial | render das variantes | pub_variants com os 5 elementos e regra das irmãs (W7, ADR-0036); w7_pub; pub-rules 14/14 | — |
-| VAR-02 | parcial | layouts de S01 a S12 (equipa criativa); render real dos estilos | edit_styles, edit_style_versions, edit_style_save/set_status (W5-02, ADR-0027); w5_edit_styles 34/34; e2e/edit-styles.spec.ts 3/3 | — |
+| VAR-02 | parcial | layouts de S01 a S12 (equipa criativa); render real dos estilos no motor (hoje só no protótipo local); verificação com sessão real | edit_styles, edit_style_versions, edit_style_save/set_status (W5-02, ADR-0027); w5_edit_styles 34/34; e2e/edit-styles.spec.ts 3/3; pré-visualização fiel ao spec: letra, tamanho, caixas e destaque (W8-08, StylePreview) | — |
 | VAR-03 | por começar | sem motor frase-imagem | nada no código nem no motor | — |
 | VAR-04 | por começar | sem verificador de títulos | nada no código | — |
 | VAR-05 | por começar | sem republicação | publishing.republish.approve planeada | — |
@@ -679,3 +679,18 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | PLAT-02 | bloqueado | depende de PLAT-01 e de ligar contas + métricas em produção (PERF-08) | nada submetido | — |
 | PLAT-03 | bloqueado | depende de PLAT-01 e do publicador (PUB-01) | nada submetido | — |
 | PLAT-04 | por começar | sem apps aprovadas a manter | nada submetido | — |
+
+## 45. Referências por link: dissecar, adaptar e copiar o estil
+
+| ID | Estado | O que falta | Evidência | Verificado |
+|---|---|---|---|---|
+| R-20 | por começar |  |  | — |
+| REF-01 | por começar |  |  | — |
+| REF-02 | por começar |  |  | — |
+| REF-03 | por começar |  |  | — |
+| REF-04 | por começar |  |  | — |
+| REF-05 | por começar |  |  | — |
+| REF-06 | por começar |  |  | — |
+| REF-07 | por começar |  |  | — |
+| REF-08 | por começar |  |  | — |
+| REF-09 | por começar |  |  | — |
