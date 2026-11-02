@@ -26,11 +26,12 @@ begin
     ('bzA4', 'ws_bz_a', current_date + 30, 4, '[]', 'c', 'in_review', 'not_started', false, null, now() - interval '6 hours'),
     ('bzA5', 'ws_bz_a', current_date + 30, 5, '[]', 'c', 'in_review', 'not_started', false, null, now() - interval '70 hours'),
     ('bzB1', 'ws_bz_b', m0 + 1, 1, '[]', 'segredo de B', 'approved', 'recorded', true, ts0 + interval '1 day', ts0);
+  -- histórico de 10 passagens antes do mês m0 (dentro dos 90 dias do p70): não pode cair em m0, senão conta na aprovação à primeira
   insert into guioes (id, client_id, date, n, hooks, corpo, editorial_status, production_status, created_at)
-    select 'bzH' || g, 'ws_bz_a', current_date + 40, 10 + g, '[]', 'c', 'approved', 'not_started', now() - interval '11 days' from generate_series(1, 10) g;
+    select 'bzH' || g, 'ws_bz_a', current_date + 40, 10 + g, '[]', 'c', 'approved', 'not_started', ts0 - interval '11 days' from generate_series(1, 10) g;
   insert into content_transitions (workspace_id, content_id, kind, from_status, to_status, actor_user_id, actor_kind, at)
-    select 'ws_bz_a', 'bzH' || g, 'editorial', 'draft', 'in_review', null, 'engine', now() - interval '10 days' from generate_series(1, 10) g
-    union all select 'ws_bz_a', 'bzH' || g, 'editorial', 'in_review', 'approved', u_mem, 'user', now() - interval '10 days' + interval '1 hour' from generate_series(1, 10) g
+    select 'ws_bz_a', 'bzH' || g, 'editorial', 'draft', 'in_review', null, 'engine', ts0 - interval '10 days' from generate_series(1, 10) g
+    union all select 'ws_bz_a', 'bzH' || g, 'editorial', 'in_review', 'approved', u_mem, 'user', ts0 - interval '10 days' + interval '1 hour' from generate_series(1, 10) g
     union all values ('ws_bz_a', 'bzA2', 'editorial', 'draft', 'in_review', null::uuid, 'engine', ts0),
                      ('ws_bz_a', 'bzA2', 'editorial', 'in_review', 'approved', u_ca, 'user', ts0 + interval '3 days'),
                      ('ws_bz_a', 'bzA4', 'editorial', 'draft', 'in_review', null, 'engine', now() - interval '5 hours'),
