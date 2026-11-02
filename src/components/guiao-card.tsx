@@ -24,7 +24,6 @@ import { BriefSheet } from "@/components/guiao-brief";
 import { DetailsSheet, metaNames, useMetaLists } from "@/components/guiao-details";
 import { KIND_LABEL, PLATFORMS } from "@/lib/projects";
 import { MARKER } from "@/lib/recording";
-
 import { ReasonForm } from "@/components/guiao-reason-form";
 
 const MECH = ["pergunta", "contra", "numero", "ego", "confissao", "segredo"];
