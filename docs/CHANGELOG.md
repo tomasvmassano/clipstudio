@@ -8,6 +8,10 @@
 
 - **CHG-005 referências por link** (só documentação; PRD §45, REF-01..09, R-20). Colar um link de Reel ou TikTok para dissecar o vídeo, gerar 3 guiões adaptados ao cliente (3 hooks cada) com verificação de originalidade e via rápida para o teleprompter, extrair o estilo de edição para uma ficha de parâmetros, guardar na biblioteca de estilos da agência e importar para clientes numa versão fixa. Recolha de referências pelo mecanismo do Scout (decisão). 3 capacidades planeadas. Sem alteração funcional.
 
+## 2026-10-29 (blocos personalizados)
+
+- **W2-08** blocos personalizados no teleprompter (FR-03-02, ADR-0030). No editor do guião, uma linha começada por `## Nome` divide o corpo num bloco com nome (ex.: `## Prova`). Cada bloco tem os seus takes, salta-se na fila e aparece com o nome no teleprompter e no cartão. Como faz parte do texto, mudar blocos cria versão nova. Migração `20261029190902_w2_custom_blocks` (só alarga o que é aceite). Testes: SQL 12/12, E2E 1/1.
+
 ## 2026-10-29 (ver como)
 
 - **W1-16** "Ver como" nas permissões (CAP-05, BIZ-07). Novo separador **Ver como**: escolhe uma pessoa ou um papel e vê o que aparece no menu e o que pode fazer neste cliente, com o motivo de cada sim e não. É só leitura, avaliado no servidor com a mesma regra do "Porquê?", e fica no histórico com quem perguntou. Não há entrar como outra pessoa. Migração `20261029195301_w1_access_simulate`. Testes: SQL 11/11, E2E 1/1.
