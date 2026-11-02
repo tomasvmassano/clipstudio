@@ -176,6 +176,10 @@ Campanha (`projects`): `ativa ↔ arquivada`. Arquivar não tira os guiões; só
 | campanha, responsável, plataformas, etiquetas do guião | `scripts.edit` | campanha ativa do mesmo cliente; responsável com `scripts.edit`; não cria versão | `script.meta_changed`; notificação `script_assigned` |
 
 
+## Blocos do teleprompter (W2-08, FR-03-02)
+
+Ordem: Hook 1..N, Body (texto antes da primeira marca), blocos personalizados (`## Nome` no corpo, chave `x_<nome>`), CTA. Takes, saltos de bloco, retoma e marcas de tempo usam estas chaves; um take num bloco do corpo exige o bloco no texto atual. Mudar marcas é editar o texto (versão nova).
+
 ## Contrato do cliente e custos (W6, BIZ-05/06)
 
 Cada gravação de um contrato cria uma versão nova (v1, v2, …) com "em vigor desde"; as versões não se alteram nem apagam. Estado ativo ou terminado; pagamento em dia, pendente ou vencido. Gravar sobre uma versão antiga: 40001, recarregar. Câmbio EUR→AED escrito à mão, com data e fonte visíveis. Custos: lançado, depois anulado com motivo (uma vez, sem apagar). Auditoria `biz.contract_saved`, `biz.fx_saved`, `biz.cost_saved`, `biz.cost_voided`.
