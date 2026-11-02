@@ -23,6 +23,7 @@ import { CommentsSheet } from "@/components/guiao-comments";
 import { BriefSheet } from "@/components/guiao-brief";
 import { DetailsSheet, metaNames, useMetaLists } from "@/components/guiao-details";
 import { KIND_LABEL, PLATFORMS } from "@/lib/projects";
+import { MARKER } from "@/lib/recording";
 
 const MECH = ["pergunta", "contra", "numero", "ego", "confissao", "segredo"];
 
@@ -72,7 +73,8 @@ export function GuiaoCard({ g, carried, caps, actions, onError, startInEdit, ope
   const dead = st === "rejected" || st === "archived";
   const recorded = ["recorded", "editing", "ready", "published"].includes(g.production_status);
   const toggleable = ["not_started", "scheduled", "recorded"].includes(g.production_status);
-  const dur = Math.round((words(g.corpo) + words(g.hooks[0]?.text) + words(g.cta)) / WPS);
+  const spoken = g.corpo.split("\n").filter((l) => !MARKER.test(l)).join("\n");   // as marcas "## Nome" não se dizem
+  const dur = Math.round((words(spoken) + words(g.hooks[0]?.text) + words(g.cta)) / WPS);
 
   const run = async (fn: () => Promise<unknown>) => {
     setBusy(true);
@@ -128,7 +130,12 @@ export function GuiaoCard({ g, carried, caps, actions, onError, startInEdit, ope
                   </li>
                 ))}
               </ol>
-              <div className={cn("whitespace-pre-line border-l-2 pl-3 text-sm leading-relaxed", !open && "line-clamp-3")}>{g.corpo}</div>
+              <div className={cn("whitespace-pre-line border-l-2 pl-3 text-sm leading-relaxed", !open && "line-clamp-3")}>
+                {g.corpo.split("\n").map((l, i) => {
+                  const m = l.match(MARKER);
+                  return m ? <span key={i} className="mt-1 block font-mono text-[11px] uppercase text-primary">{m[1]}</span> : <span key={i}>{l}{"\n"}</span>;
+                })}
+              </div>
               {g.cta && <p className="border-l-2 border-primary/60 pl-3 text-sm font-medium">CTA: {g.cta}</p>}
               {open && g.notas && <p className="rounded-md bg-muted/50 px-3 py-2 text-xs text-muted-foreground">Notas: {g.notas}</p>}
               {(st === "rejected" || st === "changes_requested") && g.motivo_rejeicao && (
@@ -344,6 +351,7 @@ function BlockEditor({ g, actions, onError, onClose }: { g: Guiao; actions: Scri
         Corpo
         <Textarea id={`${g.id}-corpo`} rows={10} className="text-sm font-normal text-foreground" value={d.corpo} onChange={(e) => change({ ...d, corpo: e.target.value })} />
       </label>
+      <p className="-mt-2 text-xs text-muted-foreground">Para dividir o corpo em blocos no teleprompter, escreve uma linha começada por ## e o nome do bloco (ex.: ## Prova). Cada bloco tem os seus takes.</p>
       <label className="flex flex-col gap-1 text-xs font-medium text-muted-foreground">
         CTA
         <Input id={`${g.id}-cta`} className="font-normal text-foreground" value={d.cta} placeholder="Opcional: o que pedes no fim" onChange={(e) => change({ ...d, cta: e.target.value })} />
