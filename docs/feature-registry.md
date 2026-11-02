@@ -71,6 +71,9 @@ Estado: **ativo** (existe e é verificado no servidor por `authorize()`; também
 | `performance.origin.override` | Corrigir origem sistema/externo (R-16) | M | ws | W6 (CHG-003) | — |
 | `publishing.approve` | Aprovar publicação de originais (PUB-06) | A | ws, conta | W6 (CHG-003) | — |
 | `publishing.republish.approve` | Aprovar republicações (PUB-05/06) | A | ws, conta | W6 (CHG-003) | — |
+| `references.dissect` | Referências por link: dissecar e adaptar (REF-01..04) | M | ws, org | W4 (CHG-005) | — |
+| `styles.library.manage` | Biblioteca de estilos da agência (REF-05..07) | M | org | W5 (CHG-005) | — |
+| `styles.import` | Importar estilo da agência para um cliente (REF-08) | M | org, ws | W5 (CHG-005) | — |
 | `integrations.manage` | Settings (M15) | A | ws | W6 | — |
 | — (própria pessoa) | Perfil (M14) | todos com conta | user | ativo (W1-15) | `/perfil` e `/c/[ws]/perfil`: nome, fotografia, palavra-passe, verificação em dois passos, fuso, tema, cliente preferido, terminar sessões, histórico de segurança (`profile_update`, `my_security_log`, `security_event`); sem capacidade: cada pessoa só mexe no que é seu |
 | `settings.manage` | Settings | A | ws | ativo (parcial) | `/definicoes`: nome, @, fuso, moeda, logótipo (bucket privado `branding`), cor da marca, só gravar aprovados (`workspace_update`, `workspace_settings`); limite de tarefas por pessoa com `tasks.manage`; integrações, notificações, segurança e dados do M15 por fazer |
