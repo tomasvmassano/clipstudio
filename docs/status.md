@@ -11,8 +11,8 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | Estado | Requisitos |
 |---|---|
 | feito | 22 |
-| parcial | 146 |
-| por começar | 99 |
+| parcial | 149 |
+| por começar | 96 |
 | bloqueado | 3 |
 | adiado | 3 |
 | **total** | **273** |
@@ -58,6 +58,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | CAP-06 | P0 | parcial | sem revisões periódicas de acessos nem revogação de sessões | Gestão de ciclo de vida |
 | OPS-01 | P0 | parcial | sem contadores online, disponíveis, em tarefa, ausentes; sem equipa e projeto | Diretório e contadores |
 | OPS-03 | P0 | parcial | sem acknowledge, snooze e delegar | Minha área de trabalho |
+| ING-01 | P0 | parcial | object storage (R2) para trabalho, proxies e finais; retenção | Armazenamento fora da app (decisão) |
 | ING-03 | P0 | parcial | sem ingestão do ficheiro da câmara, transcrição com tempos por palavra e sincronização pelo áudio | Um ficheiro longo por câmara por sessão |
 | EDL-01 | P0 | parcial | job do pacote de edição (precisa de ingestão ING-01..03, render e worker alojado) | Pacote de edição automático |
 | EDL-03 | P0 | parcial | ligar ao job do pacote e guardar o relatório por variante na app (EDL-02); calibrar limites no piloto | QC técnico em código antes de qualquer revisão por IA |
@@ -73,13 +74,15 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-04-03 | P1 | parcial | sem filtros por categoria, tema, idioma e data; pesquisa simples, não full-text | Filtros por categoria, tema, fonte, idioma, data, estado e pesquisa full-text. |
 | FR-04-04 | P1 | parcial | sem favoritos | Estados nova, triagem, selecionada, utilizada, descartada; favoritos, duplicados |
 | FR-04-05 | P1 | parcial | sem resumo, relevância e ângulos para fontes adicionadas na app; motor (Repórter) por alojar | Resumo por IA com referências à fonte, classificação de relevância e ângulos sug |
-| FR-05-04 | P1 | parcial | só guiões; notificações dependem de automação configurada | Aprovar, rejeitar ou pedir alterações com motivo e notificações. |
+| FR-05-03 | P1 | parcial | anotações desenhadas no vídeo; momento escrito à mão (o player da Drive não dá o tempo); verificação com conta real em produção | Revisão de vídeo com player, comentários por timestamp, anotações e histórico. |
+| FR-05-04 | P1 | parcial | sem notificações nas decisões de vídeo; notificações de guiões dependem de automação configurada | Aprovar, rejeitar ou pedir alterações com motivo e notificações. |
 | FR-05-05 | P1 | parcial | sem fluxos de aprovação configuráveis (só regras de tarefas por evento) | Fluxos configuráveis de aprovação por workspace/projeto; responsáveis e prazos. |
 | FR-06-03 | P1 | parcial | worker por alojar: nada corre em produção | Execução manual/agendada, progresso, logs, erros, retry e cancelamento. |
 | FR-06-04 | P1 | parcial | sem teste antes de ativar; prompts no código do motor, não versionados na app | Versionamento de prompts/configurações, testes antes de ativar, rollback e audit |
 | FR-06-05 | P1 | parcial | sem latência e qualidade por execução; worker por alojar | Custos, tokens, latência e qualidade por execução/agente. |
 | FR-07-03 | P1 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | Filtros, favoritos, coleções e pesquisa. |
 | FR-07-04 | P1 | parcial | só para reels recolhidos pelo motor; referências por link sem transcrição | Transcrição e análise de estrutura quando tecnicamente e legalmente permitido. |
+| FR-08-04 | P1 | parcial | sem substituição por upload nem associação a take/publicação; só vídeo por link da Drive | Versionamento, substituição, histórico e associação a guião/take/publicação. |
 | FR-09-03 | P1 | parcial | sem definições por plataforma nem indisponibilidade; só Instagram | Definições consistentes por plataforma; mostrar indisponibilidade e data da últi |
 | FR-09-04 | P1 | parcial | sem comparação por hooks, temas, campanhas e responsáveis | Comparação de conteúdos, hooks, temas, formatos, campanhas e responsáveis. |
 | FR-09-05 | P1 | parcial | sem exportação nem relatórios programados | Rankings, gráficos, exportação e relatórios programados. |
@@ -247,8 +250,8 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 |---|---|---|---|---|
 | FR-05-01 | feito |  | review_inbox: filtros por estado, responsável, prioridade, prazo e texto (o tipo é só guião até haver media, FR-05-03); W2-06 content_comments (bloco, frase citada, versão, respostas, resolver), /c/[ws]/revisao; w2_review_comments 33/33; e2e/review.spec.ts 3/3; ADR-0025 | 2026-10-29 (E2E) |
 | FR-05-02 | feito |  | decisões versionadas em content_transitions; w2_content 47/47; W2-06 content_comments (bloco, frase citada, versão, respostas, resolver), /c/[ws]/revisao; w2_review_comments 33/33; e2e/review.spec.ts 3/3; ADR-0025 | 2026-10-29 (E2E) |
-| FR-05-03 | por começar | sem revisão de vídeo | review.comment/approve só planeadas (W5) | — |
-| FR-05-04 | parcial | só guiões; notificações dependem de automação configurada | content_transition com motivo; task_rules W3-01 | — |
+| FR-05-03 | parcial | anotações desenhadas no vídeo; momento escrito à mão (o player da Drive não dá o tempo); verificação com conta real em produção | W5-04 media_review_list/media_detail/media_comment_add (t_ms)/media_decide, /c/[ws]/revisao?ver=videos com player da Drive; w5_media_review 35/35; media-time 17/17; ADR-0031, CHG-006 | — |
+| FR-05-04 | parcial | sem notificações nas decisões de vídeo; notificações de guiões dependem de automação configurada | content_transition com motivo; task_rules W3-01; ; vídeo: media_decide com motivo obrigatório (W5-04) | — |
 | FR-05-05 | parcial | sem fluxos de aprovação configuráveis (só regras de tarefas por evento) | task_rule_save W3-01 | — |
 | FR-05-06 | parcial | sem comparação entre versões; bloqueio de publicação sem publicação | content_history; approved_version_id | — |
 | FR-05-07 | parcial | só guiões (sem vídeo) | content_transitions append-only, validacao_anulada no audit; w1_review_fixes 11/11 | — |
@@ -283,7 +286,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-08-01 | por começar | sem biblioteca de media | media.upload só planeada (W5) | — |
 | FR-08-02 | por começar | sem biblioteca de media | nada no código | — |
 | FR-08-03 | por começar | sem biblioteca de media | media.download/share só planeadas | — |
-| FR-08-04 | por começar | sem biblioteca de media | nada no código | — |
+| FR-08-04 | parcial | sem substituição por upload nem associação a take/publicação; só vídeo por link da Drive | content_media: versão por guião e hook, histórico de decisões (W5-04) | — |
 | FR-08-05 | por começar | sem biblioteca de media (só validação do logótipo: tipo e 500 KB) | w1_settings_branding | — |
 | FR-08-06 | por começar | sem biblioteca de media | nada no código | — |
 
@@ -575,7 +578,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
-| ING-01 | por começar | sem object storage nem Drive | só bucket branding | — |
+| ING-01 | parcial | object storage (R2) para trabalho, proxies e finais; retenção | CHG-006: finais para revisão na Drive da agência, a app guarda só o ID do ficheiro (W5-04) | — |
 | ING-02 | por começar | sem ingestão da câmara | media.ingest planeada | — |
 | ING-03 | parcial | sem ingestão do ficheiro da câmara, transcrição com tempos por palavra e sincronização pelo áudio | recording_marks, recording_marks_add, recording_timeline (W5-01, ADR-0026); w5_recording_marks 17/17; e2e/recording-marks.spec.ts 2/2 | — |
 | ING-04 | por começar | sem upload pelo telemóvel | nada no código | — |
