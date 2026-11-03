@@ -12,10 +12,10 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 |---|---|
 | feito | 24 |
 | parcial | 197 |
-| por começar | 46 |
+| por começar | 53 |
 | bloqueado | 3 |
 | adiado | 3 |
-| **total** | **273** |
+| **total** | **280** |
 
 ## Pendentes abertos (bloqueados primeiro, depois por prioridade)
 
@@ -636,6 +636,18 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | EDL-04 | por começar | sem biblioteca de vídeos de atenção | nada no código | — |
 | EDL-05 | por começar | sem pós-produção multi-agente | nada no código nem no motor | — |
 | EDL-06 | por começar | piloto não iniciado | nada no código | — |
+
+## 39.1 Editor de vídeo (EDL-07..EDL-13, CHG-007)
+
+| ID | Estado | O que falta | Evidência | Verificado |
+|---|---|---|---|---|
+| EDL-07 | por começar |  |  | — |
+| EDL-08 | por começar |  |  | — |
+| EDL-09 | por começar |  |  | — |
+| EDL-10 | por começar |  |  | — |
+| EDL-11 | por começar |  |  | — |
+| EDL-12 | por começar |  |  | — |
+| EDL-13 | por começar |  |  | — |
 
 ## 40. Centro de desempenho (PERF)
 
