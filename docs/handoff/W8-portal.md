@@ -23,10 +23,10 @@ Tocados sem mudar o estado (o portal só reutiliza): R-13, R-14, TEAM-10, PUB-06
 - **workflow-registry:** sem estados nem transições novas. O portal dispara as transições existentes: editorial `in_review → approved | changes_requested | rejected` (content_transition[_reasoned]) e publicação `planeada → aprovada` (pub_approve), e cria `ideas(kind=talent_request, status=nova)` (evento `request.created`).
 
 ## CHANGELOG (linha sugerida)
-- W8 portal do cliente (SCALE-08, ADR-0041): `/c/<cliente>/portal` atrás da flag `client.portal` com guiões e publicações à espera do cliente (aprovação pelas RPCs existentes), entregas do mês contra o contratado sem valores, resumo de desempenho e pedidos de conteúdo; cada bloco verifica a sua capacidade e vem indisponível com motivo; staff da agência vê "como o cliente vê". Migração `20261030160100_w8_portal.sql` (só funções e 1 flag).
+- W8 portal do cliente (SCALE-08, ADR-0041): `/c/<cliente>/portal` atrás da flag `client.portal` com guiões e publicações à espera do cliente (aprovação pelas RPCs existentes), entregas do mês contra o contratado sem valores, resumo de desempenho e pedidos de conteúdo; cada bloco verifica a sua capacidade e vem indisponível com motivo; staff da agência vê "como o cliente vê". Migração `20261103153732_w8_portal.sql` (só funções e 1 flag).
 
 ## Migrações
-- `supabase/migrations/20261030160100_w8_portal.sql` — aditiva: flag `client.portal`, funções `_portal_off`, `_portal_require`, `_portal_scripts`, `_portal_publications`, `_portal_deliveries`, `_portal_reports`, `_portal_requests` (fechadas), `portal_block`, `portal_home` (anon/authenticated). Nenhuma função existente muda. Rollback comentado no fim.
+- `supabase/migrations/20261103153732_w8_portal.sql` — aditiva: flag `client.portal`, funções `_portal_off`, `_portal_require`, `_portal_scripts`, `_portal_publications`, `_portal_deliveries`, `_portal_reports`, `_portal_requests` (fechadas), `portal_block`, `portal_home` (anon/authenticated). Nenhuma função existente muda. Rollback comentado no fim.
 
 ## Ficheiros
 - UI: `src/app/c/[ws]/portal/page.tsx`, `src/components/portal/{portal-shared,portal-approvals,portal-status}.tsx`, item "Portal" em `src/components/app-shared.tsx`, aviso no Início `src/app/c/[ws]/page.tsx`.

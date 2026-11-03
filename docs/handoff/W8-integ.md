@@ -47,7 +47,7 @@ Colaborador, revisor, leitor e código de equipa: sem acesso. Dono da agência: 
 - W8 integ: centro de integrações por cliente (contas sociais por ligar com âmbitos e validade, revogar real com motivo e purga do segredo, recolha de métricas e motor de agentes lidos da base com testar) e vista da agência para o dono (Drive, R2 e Resend por ligar, limites das APIs, workers, estado por cliente). Registo de tipos como dados; capacidades `integrations.read`, `integrations.agency.read`, `integrations.manage` ativa; flag `integrations.center` (ADR-0039).
 
 ## Migrações
-- `supabase/migrations/20261030140100_w8_integ.sql` (aditiva; rollback comentado no fim). Tabelas: `integration_types`, `integration_checks`, `integration_secret_purges` (fechadas à API). Não substitui nenhuma função existente.
+- `supabase/migrations/20261103153513_w8_integ.sql` (aditiva; rollback comentado no fim). Tabelas: `integration_types`, `integration_checks`, `integration_secret_purges` (fechadas à API). Não substitui nenhuma função existente.
 
 ## Decisões em aberto para o Tomás
 1. Limiares [pressuposto]: scraping atrasado depois de 48 h, worker ativo com contacto em 30 min, conta "a expirar" a 7 dias. Estão no registo (`stale_after`) e mudam-se por migração.
