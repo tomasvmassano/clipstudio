@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-03 (revisão de vídeo)
+
+- **W5-04** revisão de vídeo por link da Google Drive (FR-05-03, FR-05-04 e FR-08-04 parciais; CHG-006, ADR-0031). Separador "Vídeos" em Revisão: vídeos por guião e hook, player da Drive embutido e "Abrir na Drive", comentários num momento (0:23) que abrem a Drive nesse ponto, respostas, resolver, aprovar ou pedir alterações/rejeitar com motivo, versões por hook e histórico de decisões. Migração `w5_media_review` (aditiva): `content_media`, `media_comments`, `media_decisions` e 6 RPCs; `media.upload` e `review.approve` ativas; código de equipa do Numeiro passa a decidir vídeos. Testes: `w5_media_review` 35/35, `media-time` 17/17. CI fixado em ubuntu-24.04 noutro PR.
+
 ## 2026-10-31 (pré-visualização dos estilos)
 
 - **W8-08** cartões de estilo como o vídeo vai sair (VAR-02 parcial). No catálogo e no editor, cada estilo mostra-se em 1080×1920 com o tipo de letra real (Instrument Serif, Inter), o tamanho, a caixa, as cores e o destaque de cada camada, com texto de exemplo e marcadores para o vídeo e as imagens. No editor, "Mostrar caixas e zona segura" volta a mostrar os retângulos. Tipos opcionais novos na camada (letra, tamanho, alinhamento, linhas, destaque, fundo, raio, sombra). Sem migração nem mudança de permissões. Também em produção (dados, auditado): S14 e S15 v3 com as regras de edição medidas nos reels do lucasanswers e título a 76 px; S16 "Imagem por frase (telemóvel)" novo, v3.
