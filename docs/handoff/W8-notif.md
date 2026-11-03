@@ -32,8 +32,8 @@ Ramo `w8-notif` (a partir de `w7-vaga2`). ADR-0040. Nada em produção, sem push
 - **CHANGELOG:** "**W8 Notificações por evento** (FR-15-05, FR-14-02; ADR-0040). Catálogo dos 11 tipos com canais (na app; email e resumo diário guardados como preferência mas indisponíveis até haver envio), definições por cliente em Definições → Notificações (ligar/desligar, marcar obrigatórias; atribuições e erros de automação sempre obrigatórios) e preferências pessoais no perfil com silêncio por cliente. Aplicado no servidor em `_notify`, com supressões contadas por dia. Atrás de `notifications.prefs`. Testes: SQL w8_notif 72."
 
 ## Migrações
-- `supabase/migrations/20261030150100_w8_notif_p1.sql` — flag, catálogo (canais e tipos), `notification_ws_prefs`, `notification_user_prefs`, `notification_mutes`, `notification_suppressions` (RLS ligada, `revoke all`). Rollback no fim.
-- `supabase/migrations/20261030150200_w8_notif_p2.sql` — `_flag_on_for`, `_notif_suppress_reason`, **`_notify` substituída** (mesma assinatura/permissões), auxiliares JSON e as 6 RPCs. Rollback no fim (repõe o `_notify` original de W3 antes dos drops).
+- `supabase/migrations/20261103153544_w8_notif_p1.sql` — flag, catálogo (canais e tipos), `notification_ws_prefs`, `notification_user_prefs`, `notification_mutes`, `notification_suppressions` (RLS ligada, `revoke all`). Rollback no fim.
+- `supabase/migrations/20261103153646_w8_notif_p2.sql` — `_flag_on_for`, `_notif_suppress_reason`, **`_notify` substituída** (mesma assinatura/permissões), auxiliares JSON e as 6 RPCs. Rollback no fim (repõe o `_notify` original de W3 antes dos drops).
 - Só aditivas (expand). Aplicar p1 antes de p2.
 
 ## Ficheiros

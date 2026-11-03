@@ -35,9 +35,9 @@ Ramo `w8-media` (a partir de `w7-vaga2`). ADR-0038. Nada em produção, sem push
 - **CHANGELOG:** "**W8 Biblioteca de media** (FR-08-01..06, ING-01 parcial; ADR-0038). Nova página Biblioteca por cliente: carregar vídeo, áudio, imagens, miniaturas, legendas e documentos com progresso e retentativa automática, caminho gerado no servidor e SHA-256 conferido; versões imutáveis com histórico e substituição; ligação a guião, take, publicação e campanha; filtros e pesquisa; pré-visualização e descarga por links curtos; links de partilha com validade, revogação e auditoria; lixo recuperável, órfãos e eliminação definitiva com confirmação; tipos, tamanho e quota por cliente (dono da agência). Bruto do Drive como link externo. Supabase Storage (bucket privado `media`) atrás de um adaptador para R2. Sem antivírus (indicado na página). Atrás de `media.library`. Testes: SQL w8_media 117, unitários media-format 17."
 
 ## Migrações
-- `supabase/migrations/20261030130100_w8_media_p1.sql` — capacidades, flag, bucket `media` (privado, 50 MiB, lista de MIME), `media_assets`, `media_versions`, `media_policies`, `media_shares`, `media_access_grants` (RLS ligada, `revoke all`), guardas, auxiliares, `_media_object_can` e 3 políticas novas em `storage.objects` (só `bucket_id = 'media'`).
-- `supabase/migrations/20261030130200_w8_media_p2.sql` — leitura, metadados, links, upload, acesso, lixo.
-- `supabase/migrations/20261030130300_w8_media_p3.sql` — partilha, purge, política.
+- `supabase/migrations/20261103152309_w8_media_p1.sql` — capacidades, flag, bucket `media` (privado, 50 MiB, lista de MIME), `media_assets`, `media_versions`, `media_policies`, `media_shares`, `media_access_grants` (RLS ligada, `revoke all`), guardas, auxiliares, `_media_object_can` e 3 políticas novas em `storage.objects` (só `bucket_id = 'media'`).
+- `supabase/migrations/20261103152523_w8_media_p2.sql` — leitura, metadados, links, upload, acesso, lixo.
+- `supabase/migrations/20261103153124_w8_media_p3.sql` — partilha, purge, política.
 - Só aditivas; não substituem nenhuma função existente. Aplicar por ordem. Rollback comentado no fim de cada uma (o bucket só sai depois de esvaziado pela API).
 - `scripts/db/bootstrap.sql`: **sem mudanças** (o `storage` mínimo chegou).
 
