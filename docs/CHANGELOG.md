@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-11-04 (navegar como papel)
+
+- **W1-17** navegar na app como um papel ou uma pessoa (BIZ-07, CAP-05, ADR-0045): botão em Permissões → Ver como; durante 30 minutos menus, páginas e dados são os do alvo, o servidor recusa qualquer escrita e uma faixa fixa diz como quem e até quando, com "Sair". Auditado. `_authorize` passa a estreitar só a própria sessão com pré-visualização ativa. Testes `w1_preview` 25/25, suite SQL completa, `preview` 5/5.
+- BIZ-08: mapeamento de cargos validado pelo Tomás (04/11). Páginas públicas (PLAT-01) adiadas pelo Tomás até haver domínio (04/11).
+
 ## 2026-11-03 (notificações da revisão de vídeo)
 
 - **W5-05** notificações da revisão de vídeo (FR-05-04, ADR-0044): quem registou o vídeo e o responsável do guião são avisados quando um vídeo é aprovado, rejeitado ou tem alterações pedidas (com o motivo); comentários avisam quem registou e respostas avisam o autor do comentário. Preferências no catálogo (grupo Guiões). Na caixa, o aviso abre o vídeo na revisão (`?ver=videos&asset=`). Migração aditiva `20261103171148_w5_media_review_notif_body`; testes `w5_media_review_notif` 16/16, `w8_notif` 72/72 (13 tipos), `notif-format` 19/19.

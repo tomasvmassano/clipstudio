@@ -19,6 +19,7 @@ export const ACTION_LABEL: Record<string, string> = {
   "script.rescheduled": "mudou o dia de um guião", "review.changes_requested": "pediu alterações num guião",
   "brief.saved": "guardou um brief", "content.source_linked": "ligou uma fonte a um guião", "content.source_unlinked": "desligou uma fonte de um guião",
   "reference.linked": "ligou uma referência", "request.created": "fez um pedido de tema",
+  "access.preview_started": "começou a navegar como outro papel ou pessoa", "access.preview_stopped": "saiu da pré-visualização",
   "recording.session_opened": "abriu o teleprompter", "recording.queue_set": "mudou a fila de gravação", "recording.confirmed": "confirmou uma gravação",
   "take.recorded": "registou um take", "take.update": "mudou um take",
   "production.scheduled": "agendou a produção", "production.not_started": "tirou da agenda",

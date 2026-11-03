@@ -21,7 +21,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | ID | P | Estado | O que falta | Título |
 |---|---|---|---|---|
-| PLAT-01 | P0 | bloqueado | precisa do Tomás: domínio próprio, páginas públicas, Business Verification Meta, registo das apps | Pré-requisitos, já |
+| PLAT-01 | P0 | bloqueado | precisa do Tomás: domínio próprio, Business Verification Meta, registo das apps; páginas públicas adiadas pelo Tomás a 2026-11-04 até haver domínio | Pré-requisitos, já |
 | PLAT-02 | P0 | bloqueado | depende de PLAT-01 e de ligar contas + métricas em produção (PERF-08) | Fase A, só leitura |
 | PLAT-03 | P0 | bloqueado | depende de PLAT-01 e do publicador (PUB-01) | Fase B, publicação |
 | FR-01-02 | P0 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | Widgets configuráveis por função e por workspace; comparação temporal e explicaç |
@@ -159,8 +159,8 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | SCALE-06 | P1 | parcial | recomendações só de leitura; limiares por calibrar | Learning loop: |
 | BIZ-05 | P1 | parcial | verificação com conta real (R-15) | Contratos por cliente |
 | BIZ-06 | P1 | parcial | custo de IA só em EUR; verificação com conta real (R-15) | Custos e margem por cliente |
-| BIZ-07 | P1 | parcial | faixa persistente ao navegar a app como o papel (hoje é uma vista no separador Ver como) | Pré-visualizar como papel |
-| BIZ-08 | P1 | parcial | modelos fixos, sem papéis personalizados; mapeamento por validar | Cargos como modelos de permissões |
+| BIZ-07 | P1 | parcial | verificação com sessão real em produção | Pré-visualizar como papel |
+| BIZ-08 | P1 | parcial | verificação com sessão real (convite com cargo) | Cargos como modelos de permissões |
 | PERF-07 | P1 | parcial | o motor (Aprendiz/Estratega) ainda não lê as alavancas | Alavancas "o que replicar" |
 | FR-01-06 | P2 | parcial | filtros persistentes por utilizador por fazer | Estados vazios explicativos, loading, erro/retry, filtros persistentes por utili |
 | FR-02-06 | P2 | parcial | sem diff visual entre versões | Histórico de versões com diff e restauro, conflitos de edição e autoria. |
@@ -618,8 +618,8 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | BIZ-04 | parcial | verificação com conta real (R-15) | resposta construída por pessoa; sem biz.finance não sai nenhum campo financeiro (W6, ADR-0032); w6_biz; e2e/biz.spec.ts | — |
 | BIZ-05 | parcial | verificação com conta real (R-15) | client_contracts versionados, EUR/AED, câmbio com data (W6, ADR-0032); w6_biz | — |
 | BIZ-06 | parcial | custo de IA só em EUR; verificação com conta real (R-15) | agency_costs com repartição e anulação, margem, custo por vídeo e por 1.000 views (W6, ADR-0032); w6_biz | — |
-| BIZ-07 | parcial | faixa persistente ao navegar a app como o papel (hoje é uma vista no separador Ver como) | access_simulate por papel, só leitura e auditado (W1-16); produção 03/11: Ver como numeiro@gmail.com, só leitura, access.simulated no audit | 2026-11-03 (sessão real do dono da agência, produção) |
-| BIZ-08 | parcial | modelos fixos, sem papéis personalizados; mapeamento por validar | invite_member_with_title e aplicação ao aceitar (W7, ADR-0037); w7_learn; e2e/learn.spec.ts | — |
+| BIZ-07 | parcial | verificação com sessão real em produção | access_simulate por papel, só leitura e auditado (W1-16); produção 03/11: Ver como numeiro@gmail.com, só leitura, access.simulated no audit; W1-17: navegar como papel/pessoa em toda a app, servidor só leitura (_authorize estreita), faixa fixa, auditado (ADR-0045); w1_preview 25/25 | 2026-11-03 (sessão real do dono da agência, produção) |
+| BIZ-08 | parcial | verificação com sessão real (convite com cargo) | invite_member_with_title e aplicação ao aceitar (W7, ADR-0037); w7_learn; e2e/learn.spec.ts; mapeamento validado pelo Tomás a 2026-11-04 | — |
 | BIZ-09 | por começar | sem score de saúde | nada no código | — |
 
 ## 39. Ingestão, armazenamento e linha de edição (ING, EDL)
@@ -678,7 +678,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
-| PLAT-01 | bloqueado | precisa do Tomás: domínio próprio, páginas públicas, Business Verification Meta, registo das apps | PRD §44 itens em aberto; produção em clipstudio-jchs.vercel.app | — |
+| PLAT-01 | bloqueado | precisa do Tomás: domínio próprio, Business Verification Meta, registo das apps; páginas públicas adiadas pelo Tomás a 2026-11-04 até haver domínio | PRD §44 itens em aberto; produção em clipstudio-jchs.vercel.app | — |
 | PLAT-02 | bloqueado | depende de PLAT-01 e de ligar contas + métricas em produção (PERF-08) | nada submetido | — |
 | PLAT-03 | bloqueado | depende de PLAT-01 e do publicador (PUB-01) | nada submetido | — |
 | PLAT-04 | por começar | sem apps aprovadas a manter | nada submetido | — |

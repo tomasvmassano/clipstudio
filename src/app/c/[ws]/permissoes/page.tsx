@@ -19,6 +19,9 @@ import { explainAccess, fetchCapabilityLabels, fetchMatrix, isLive, revokeGrant,
 import { clientNavGroups } from "@/components/app-shared";
 import { INVITE_ROLES } from "@/lib/team";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
+import { startPreview } from "@/lib/preview";
+import { clientPath } from "@/lib/ws-path";
 
 /*
  * Permissões (PRD CAP-02/03/05). Por pessoa: o que tem, porquê, e exceções (permitir/negar com motivo e prazo).
@@ -314,6 +317,16 @@ function SeeAs({ ws, m, onlyLive }: { ws: string; m: Matrix; onlyLive: boolean }
     catch (e) { setErr((e as Error).message); setSim(null); }
     finally { setBusy(false); }
   };
+  const { refresh } = useSession();
+  const router = useRouter();
+  const [navBusy, setNavBusy] = useState(false);
+  const navigate = async () => {
+    const [kind, id] = target.split(":");
+    setNavBusy(true); setErr("");
+    try { await startPreview(ws, kind === "u" ? { user: id } : { role: id }); await refresh(); router.push(clientPath(ws)); }
+    catch (e) { setErr((e as Error).message); }
+    finally { setNavBusy(false); }
+  };
   const allowed = new Set((sim?.capabilities ?? []).filter((c) => c.allowed).map((c) => c.key));
   const menu = clientNavGroups.flatMap((g) => g.items).filter((i) => i.path && !i.soon && !i.orgCap && (!i.cap || allowed.has(i.cap)));
   const caps = (sim?.capabilities ?? []).filter((c) => !onlyLive || isLive(c as unknown as Capability));
@@ -337,6 +350,12 @@ function SeeAs({ ws, m, onlyLive }: { ws: string; m: Matrix; onlyLive: boolean }
           <div role="status" className="rounded-md border border-amber-500/50 bg-amber-500/10 px-3 py-2 text-sm">
             Pré-visualização como <b>{sim.target.kind === "role" ? `papel ${ROLE_LABEL[sim.target.label] ?? sim.target.label}` : sim.target.label}</b>
             {sim.target.kind === "user" && sim.target.role ? ` (${ROLE_LABEL[sim.target.role] ?? sim.target.role})` : ""}. Só leitura: nada muda e fica registado no histórico.
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <Button size="sm" disabled={navBusy} onClick={() => void navigate()}>
+                {navBusy && <Loader2Icon className="animate-spin" />} Navegar na app como {sim.target.kind === "role" ? "este papel" : "esta pessoa"}
+              </Button>
+              <span className="text-xs text-muted-foreground">Durante 30 minutos vês menus, páginas e dados como o alvo; o servidor recusa qualquer alteração. Sais pela faixa no topo.</span>
+            </div>
           </div>
           <div className="grid gap-4 md:grid-cols-[minmax(0,14rem)_1fr]">
             <div>
