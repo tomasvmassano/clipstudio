@@ -34,9 +34,12 @@ Estado: **ativo** (existe e é verificado no servidor por `authorize()`; também
 | `references.manage` | Referências | M | ws | ativo | Guardar reel, adicionar por link, classificar, favorito, coleções, arquivar, ligar a fontes (`reference_create`, `reference_update`, `reference_link`) |
 | `review.comment` | Revisão (M05) | M | ws, proj | ativo (guiões, W2-06) | Comentar e responder em guiões (`content_comment_add`); ler com `scripts.read` (`content_comments`, `review_inbox` em `/c/[ws]/revisao`); resolver: autor, `scripts.edit` ou `scripts.approve` (`content_comment_resolve`). Revisão de vídeo em W5 |
 | `review.approve` | Revisão | A | ws, proj | W5 | — |
-| `media.upload` | Biblioteca (M08) | M | ws, proj | W5 | — |
-| `media.download` | Biblioteca | M | ws, proj | W5 | — |
-| `media.share` | Biblioteca | A | ws, proj | W5 | — |
+| `media.read` | Biblioteca (M08) | B | ws | ativo (W8) | `/c/[ws]/biblioteca` (flag `media.library`): ver, filtrar, pesquisar e pré-visualizar por URL assinado curto (`media_library`, `media_asset`, `media_access`, `/api/media/versions/:id/url`) |
+| `media.upload` | Biblioteca (M08) | M | ws, proj | ativo (W8) | Carregar com progresso e retentativa, versão nova, editar, lixo/recuperar, links externos (`/api/media/uploads`, `media_upload_begin/target/complete/abandon`, `media_asset_save`, `media_link_add`, `media_trash`, `media_restore`) |
+| `media.download` | Biblioteca | M | ws, proj | ativo (W8) | Descarregar por URL assinado de 2 min (`media_access` purpose=download) |
+| `media.share` | Biblioteca | A | ws, proj | ativo (W8) | Links de partilha de 1 h a 7 dias, revogáveis e auditados (`media_share_create/revoke`, `/api/media/share/:token`) |
+| `media.manage` | Biblioteca | A | ws | ativo (W8) | Órfãos e eliminação definitiva com `APAGAR` (`media_purge_begin/finish`, `/api/media/purge`) |
+| `media.policy.manage` | Biblioteca | A | org | ativo (W8) | Tipos, tamanho por ficheiro, quota e dias no lixo por cliente; só o dono da agência (`media_policy_save`) |
 | `clipping.create` | Clipping | M | ws, proj | W5 | — |
 | `clipping.export` | Clipping | M | ws, proj | W5 | — |
 | `tasks.read` | Tarefas (M11, TEAM-06) | B | ws, proj, own | ativo | `/tarefas` (lista, detalhe, comentários, histórico); também o código de equipa |
@@ -66,6 +69,25 @@ Estado: **ativo** (existe e é verificado no servidor por `authorize()`; também
 | `media.ingest` | Ingestão FX3/telemóvel (ING-02..04) | M | ws | W5 (CHG-003) | — |
 | `edit.package.run` | Pacote de edição (EDL-01) | M | ws | W5 (CHG-003) | — |
 | `styles.manage` | Catálogo de estilos (VAR-02) e preset de edição (EDL-01) | M | ws | ativo (W5-02) | `/c/[ws]/edicao`: criar e gravar estilos (versão nova a cada gravação, `edit_style_save`), ativar, passar a rascunho e arquivar (`edit_style_set_status`), gravar o preset (`edit_preset_save`), começar pelo ponto de partida (`edit_catalog_init`). Ler com `scripts.read` (`edit_catalog`, `edit_style_history`) |
+| `flags.manage` | Funcionalidades em teste (MIG-09, CAP-09) | A | org | ativo (W0) | `/funcionalidades`: fase de cada módulo novo para a agência e por cliente (`flags_admin`, `flag_set`). `my_flags` diz o que está ligado para cada pessoa; não dá acesso a nada |
+| `biz.read` | Vista de negócio (BIZ-01..04) | M | org | ativo (W6, flag `biz.view`) | `/negocio` e faixa "Precisa da tua atenção" no Painel (`biz_overview`): operacional só dos clientes atribuídos; o dono vê todos |
+| `biz.finance` | Contratos, receita, custos e margem (BIZ-03/05/06) | A | org | ativo (W6, flag `biz.view`) | Campos e totais financeiros em `biz_overview`, `biz_contracts`, `biz_contract_history`, `biz_costs`; só o dono da agência |
+| `contracts.manage` | Gerir contratos, câmbio e custos (BIZ-05/06) | A | org | ativo (W6, flag `biz.view`) | `/negocio/contratos`: `biz_contract_save` (versões), `biz_fx_save`, `biz_cost_save`, `biz_cost_void` |
+| `analytics.manage` | Centro de desempenho: contas e origem (PERF-01, R-16) | M | ws | ativo (W6, flag `perf.center`) | `/c/[ws]/desempenho/centro`: camada, criador e estado da conta (`perf_account_set`), corrigir origem com motivo (`perf_origin_set`). Ler com `analytics.read` (`perf_center`, `perf_publications`, `perf_breakdown`, `perf_levers`); linhagem pelo publicador com `publishing.publish` (`perf_record_lineage`); `perf_tick` de hora a hora só para service_role |
+| `tasks.delegate` | Passar tarefas (OPS-03) | B | ws | ativo (W6, flag `ops.workspace`) | `task_delegate`: as suas tarefas (com `tasks.manage`, qualquer uma) para alguém com `tasks.work` no mesmo cliente; notifica uma vez |
+| `ops.presence` | Quem trabalha em quê (OPS-02/04/10) | B | ws | ativo (W6, flag `ops.team_presence`) | `/c/[ws]/quem-trabalha` (`team_presence`), `presence_ping`, `availability_set`; canal `presence:<cliente>` só de leitura. Fila pessoal: `my_queue`, `inbox_item_act` (ver, adiar, mostrar já), sem capacidade nova |
+| `busca.global` (flag) | Pesquisa global e ações rápidas (FR-16-01/02, FR-01-05) | — | ws | ativo (W7, flag) | Ctrl/Cmd+K: guiões, fontes, referências, tarefas, campanhas, pessoas e estilos dos clientes a que a pessoa tem acesso, com a capacidade de leitura de cada entidade (`search_global`, `search_scope`); criar com sources.create, scripts.create, projects.manage, tasks.manage. ADR-0035 |
+| `guioes.bulk` (flag) | Operações em lote nos guiões (FR-17-07) | — | ws | ativo (W7, flag) | `content_bulk` (responsável, campanha, etiquetas com scripts.edit; aprovar com scripts.approve; reagendar com calendar.schedule) com pré-visualização e idempotência; `content_bulk_export` com scripts.export |
+| `publishing.approve` | Aprovar publicações originais (PUB-06) | A | ws | ativo (W7, flag `pub.planning`) | `pub_approve`, `pub_approve_batch`: presa à revisão, versão e destino; política do cliente (TEAM-10) |
+| `publishing.republish.approve` | Aprovar republicações (PUB-06) | A | ws | ativo (W7) | idem para republicações |
+| `publishing.policy.manage` | Quem tem de aprovar publicações (TEAM-10) | A | ws | ativo (W7) | `pub_policy_save` |
+| `publishing.limits.manage` | Limites das APIs das plataformas (PUB-02) | A | org | ativo (W7) | `pub_limit_save`, só o dono da agência |
+| `publishing.schedule` | Planear publicações (PUB-04) | M | ws | ativo (W7, flag `pub.planning`) | `pub_save`, `pub_cancel`, `pub_variant_save`, calendário de publicações `?l=pub`. Nada publica |
+| `social_accounts.manage` | Contas de destino (FR-21-01) | A | ws | ativo (W7) | `pub_account_add`; credenciais só por referência, por conta |
+| `learn.read` / `learn.manage` | Retrabalho, experiências, vencedores e recomendações (FR-17-10/11/12, SCALE-06) | M | ws | ativo (W7, flags `learn.rework`, `learn.experiments`) | `/c/[ws]/aprendizagem/retrabalho` e `/experiencias`; categoria ao rejeitar por `content_transition_reasoned` |
+| `privacy.manage` | Pedidos de eliminação de dados (FR-14-05) | A | org | ativo (W7, flag `profile.data_export`) | tratar pedidos em `/equipa-agencia`; exportar os próprios dados com `profile.export` |
+| `team.job_titles` (flag) | Cargos no convite (BIZ-08) | — | ws | ativo (W7, flag) | `invite_member_with_title`: cargo pré-seleciona papel e exceções sugeridas; o cargo não dá acesso |
+| `costs.content` (flag) | Custos por guião e publicação (FR-10-05) | — | ws | ativo (W7, flag) | `/c/[ws]/custos` com `costs.read`; CSV auditado |
 | `projects.manage` | Campanhas e séries (FR-02-03) | M | ws | ativo (W2-07) | Criar, renomear e arquivar campanhas e séries (`project_save`); ler com `scripts.read` (`projects_list`). Campanha, responsável, plataformas e etiquetas do guião com `scripts.edit` (`content_meta_set`, `content_owners`); filtros da fila do teleprompter |
 | `performance.read` | Centro de desempenho (PERF) | B | ws, org | W6 (CHG-003) | — |
 | `performance.origin.override` | Corrigir origem sistema/externo (R-16) | M | ws | W6 (CHG-003) | — |
@@ -74,8 +96,12 @@ Estado: **ativo** (existe e é verificado no servidor por `authorize()`; também
 | `references.dissect` | Referências por link: dissecar e adaptar (REF-01..04) | M | ws, org | W4 (CHG-005) | — |
 | `styles.library.manage` | Biblioteca de estilos da agência (REF-05..07) | M | org | W5 (CHG-005) | — |
 | `styles.import` | Importar estilo da agência para um cliente (REF-08) | M | org, ws | W5 (CHG-005) | — |
-| `integrations.manage` | Settings (M15) | A | ws | W6 | — |
+| `integrations.manage` | Settings (M15) | A | ws | ativo (W8) | Testar recolha e motor (`integrations_test`), revogar conta social com motivo e purga do segredo (`integrations_social_revoke`); ligar/renovar indisponíveis sem OAuth |
+| `integrations.read` | Settings (M15) | B | ws | ativo (W8) | `/c/[ws]/definicoes/integracoes` (flag `integrations.center`, `integrations_overview`): contas sociais, recolha de métricas, motor de agentes; estados reais, sem tokens |
+| `integrations.agency.read` | Settings (M15) | B | org | ativo (W8) | `/integracoes` (`integrations_agency`): Drive, R2, Resend, limites das APIs, workers e estado por cliente |
 | — (própria pessoa) | Perfil (M14) | todos com conta | user | ativo (W1-15) | `/perfil` e `/c/[ws]/perfil`: nome, fotografia, palavra-passe, verificação em dois passos, fuso, tema, cliente preferido, terminar sessões, histórico de segurança (`profile_update`, `my_security_log`, `security_event`); sem capacidade: cada pessoa só mexe no que é seu |
-| `settings.manage` | Settings | A | ws | ativo (parcial) | `/definicoes`: nome, @, fuso, moeda, logótipo (bucket privado `branding`), cor da marca, só gravar aprovados (`workspace_update`, `workspace_settings`); limite de tarefas por pessoa com `tasks.manage`; integrações, notificações, segurança e dados do M15 por fazer |
+| `settings.manage` | Settings | A | ws | ativo (parcial) | `/definicoes`: nome, @, fuso, moeda, logótipo (bucket privado `branding`), cor da marca, só gravar aprovados (`workspace_update`, `workspace_settings`); limite de tarefas por pessoa com `tasks.manage`; integrações, notificações, segurança e dados do M15 por fazer; notificações por evento em `/definicoes/notificacoes` (flag `notifications.prefs`, `notif_settings`/`notif_settings_set`: ligar/desligar por tipo e canal, obrigatórias; W8, ADR-0040) |
+| — (quem recebe) | Notificações (FR-14-02) | B | ws, own | ativo (W8) | Preferências pessoais no perfil e silêncio por cliente (`my_notif_workspaces`, `my_notif_prefs`, `my_notif_pref_set`, `my_notif_mute`; flag `notifications.prefs`), dentro do que o cliente permite |
+| `scripts.read` (portal) | Portal do cliente (SCALE-08) | B | ws | ativo (W8) | `/c/[ws]/portal` (flag `client.portal`, `portal_home`, `portal_block`): aprovações pelas RPCs existentes, entregas sem valores, desempenho, pedidos; sem capacidade própria (ADR-0041) |
 
 Regras: ter `edit` não dá `approve` nem `publish` (CAP-04); uma feature flag ligada não concede acesso (CAP-09); toda a key nova entra aqui no mesmo PR em que nasce, senão o CI falha (PRD §34).

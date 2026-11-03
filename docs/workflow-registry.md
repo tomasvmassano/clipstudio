@@ -179,3 +179,48 @@ Campanha (`projects`): `ativa ↔ arquivada`. Arquivar não tira os guiões; só
 ## Blocos do teleprompter (W2-08, FR-03-02)
 
 Ordem: Hook 1..N, Body (texto antes da primeira marca), blocos personalizados (`## Nome` no corpo, chave `x_<nome>`), CTA. Takes, saltos de bloco, retoma e marcas de tempo usam estas chaves; um take num bloco do corpo exige o bloco no texto atual. Mudar marcas é editar o texto (versão nova).
+
+## Contrato do cliente e custos (W6, BIZ-05/06)
+
+Cada gravação de um contrato cria uma versão nova (v1, v2, …) com "em vigor desde"; as versões não se alteram nem apagam. Estado ativo ou terminado; pagamento em dia, pendente ou vencido. Gravar sobre uma versão antiga: 40001, recarregar. Câmbio EUR→AED escrito à mão, com data e fonte visíveis. Custos: lançado, depois anulado com motivo (uma vez, sem apagar). Auditoria `biz.contract_saved`, `biz.fx_saved`, `biz.cost_saved`, `biz.cost_voided`.
+
+## Desempenho (W6, PERF-03, R-16, R-18)
+
+Leitura do scraper → `perf_capture` (de hora a hora, idempotente) → fotografia por idade (1 h, 24 h, 72 h, 7 d, 30 d; leitura dentro de ±25% da idade, nunca interpolada) → índice pela mediana da mesma conta na mesma idade nos 30 dias anteriores. Publicação importada: origem `externo`, linhagem inferida e marcada; correção manual de origem com motivo e auditoria. Publicador: `perf_record_lineage` (gravada no momento, imutável, idempotente por conta e id externo).
+
+## Caixa e presença (W6, OPS-02/03/04/10, FR-17-01)
+
+Item da fila (um por objeto, notificações juntas): novo → visto (não aprova) → adiado (1 min a 30 dias) → volta a mostrar (hora, "mostrar já" ou notificação nova). Versão nova do guião ou tarefa que volta torna-o novo. Tarefa passada: `task.delegated` com antes/depois, "em curso" volta a "por fazer", notificação `task_delegated` uma vez. Presença: online (sinal ≤ 120 s), ativo (≤ 5 min, só com consentimento), a trabalhar (tarefa iniciada pela pessoa), estado manual com fim opcional. Sem horas nem histórico.
+
+
+## Operações em lote nos guiões (W7, FR-17-07)
+
+Escolher guiões, ação, pré-visualização (o servidor corre e desfaz; mostra por guião o que muda e o que não pode), confirmar com chave de idempotência, resultado por item. Cada guião passa pelas funções de sempre (`content_meta_set`, `content_transition`, `content_reschedule`). Auditoria do lote `script.bulk`; exportação `script.exported`.
+
+## Publicação planeada (W7, PUB-02/04/06, TEAM-10, FR-21, VAR-01)
+
+`planeada` → `aprovada` (só por `pub_approve`, com a política do cliente cumprida para a revisão atual e a versão aprovada do guião) → (PUB-01: a publicar, publicada, falhou); `cancelada` com motivo. Mudar versão, variante, conta, hora, legenda, hashtags ou origem cria revisão nova, volta a `planeada` e invalida as aprovações. Limites das APIs recusam o planeamento acima do limite. Variante nova muda pelo menos 2 de 5 elementos; irmã na mesma plataforma com menos de 2 diferenças é bloqueada. Nada publica.
+
+## Aprendizagem (W7, FR-17-10/11/12)
+
+Rejeitar ou pedir alterações com categoria (`content_transition_reasoned` chama `content_transition` e liga a categoria; texto obrigatório). Experiência: rascunho → a decorrer (regras fechadas) → concluída (confirmada só com critério cumprido, fotografia guardada) ou cancelada. Repetir vencedor: guião em rascunho ligado à publicação, aprovação editorial normal. Convite com cargo: ao aceitar aplica cargo e exceções em nome de quem convidou, se ainda as puder dar. Pedido de eliminação: pendente → tratado ou recusado pelo dono da agência; nada se apaga sozinho.
+
+## Biblioteca de media (W8, FR-08)
+
+Versão: `pendente` (registada, 24 h) → `pronta` (objeto com o tamanho e o MIME declarados; SHA-256 conferido no servidor ou declarado) | `falhou` (diferença ou desistência). `pendente` expirada e `falhou` são órfãs → `apagada` (objeto removido pela API, com `APAGAR`). Ativo: `ativo` ↔ `no_lixo` (prazo da política do cliente) → `eliminado` (lápide; só com `media.manage` e `APAGAR`, quando já não há objetos). Eventos: `asset.uploaded`, `asset.linked`, `asset.trashed`, `asset.restored`, `asset.purged`.
+
+## Integrações (W8, FR-17-16)
+
+Conta social: `por_ligar` → (serviço de OAuth futuro) `ligada` → `expirada` (derivado da validade) → `revogada` (`integrations_social_revoke`, motivo obrigatório, auditoria `integrations.social_revoked`, evento `integration.social_revoked`, pedido de purga do segredo). `revogada` só volta a `ligada` com nova ligação OAuth. Teste: pedido → `integration_checks` (ok, aviso, falhou, sem dados), auditoria `integrations.tested`, repetição em 30 s devolve o mesmo.
+
+## Notificações (W8, FR-15-05)
+
+Evento → `_notify` → sem acesso, quem age ou já existe: nada → obrigatória: cria → desligada no cliente, cliente silenciado ou desligada pela pessoa: não cria e soma ao contador diário (`notification_suppressions`) → senão cria. As preferências só valem com a flag `notifications.prefs` ligada para quem recebe. Email e resumo diário: preferência guardada, sem envio.
+
+## Portal do cliente (W8, SCALE-08)
+
+Sem estados novos. O portal dispara as transições existentes: editorial `in_review` → `approved` | `changes_requested` | `rejected` (`content_transition`, `content_transition_reasoned`), publicação `planeada` → `aprovada` (`pub_approve`) e cria pedidos `ideas(kind=talent_request, status=nova)` (`talent_request_create`, evento `request.created`).
+
+## Restauro de backup (W8, QA-15)
+
+Parar a escrita → restaurar → verificar (checksums, catálogo, RPCs e isolamento) → Storage → segredos → religar. Passo a passo em `docs/runbooks/restauro.md`; ensaio em `scripts/backup/drill.sh`.

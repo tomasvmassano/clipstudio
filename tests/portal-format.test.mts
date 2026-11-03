@@ -1,0 +1,21 @@
+import { indexLabel, monthTitle, ofContracted, progressPct, requestStatusLabel, requestTextError } from "../src/lib/portal-format.ts";
+
+let bad = 0; let n = 0;
+const eq = (name: string, got: unknown, exp: unknown) => { n++; if (got !== exp) { bad++; console.log("FAIL", name, JSON.stringify(got), "esperado", JSON.stringify(exp)); } };
+eq("contra o contratado", ofContracted(12, 30), "12 de 30");
+eq("sem contrato não inventa alvo", ofContracted(4, null), "4");
+eq("nulo conta zero entregue", ofContracted(null, 30), "0 de 30");
+eq("barra", progressPct(15, 30), 50);
+eq("barra limitada a 100", progressPct(40, 30), 100);
+eq("sem contrato sem barra", progressPct(3, null), null);
+eq("contrato zero sem barra", progressPct(3, 0), null);
+eq("índice", indexLabel(1.234), "1,23×");
+eq("índice sem amostra", indexLabel(null), "sem amostra");
+eq("estado do pedido", requestStatusLabel("usada"), "Em produção");
+eq("estado desconhecido passa", requestStatusLabel("x"), "x");
+eq("pedido curto", requestTextError("  ab "), "Escreve pelo menos 3 caracteres.");
+eq("pedido ok", requestTextError("Vídeo sobre rendas"), null);
+eq("pedido longo", requestTextError("x".repeat(2001)), "No máximo 2000 caracteres.");
+eq("mês", monthTitle("2026-10-01"), "outubro de 2026");
+console.log(`portal-format: ${n - bad}/${n}`);
+if (bad) process.exit(1);

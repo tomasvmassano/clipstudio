@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import {
 	Building2Icon, GaugeIcon, KeyRoundIcon, ScrollIcon, SettingsIcon, SlidersHorizontalIcon,
 	LayoutGridIcon, ScrollTextIcon, MonitorPlayIcon, LightbulbIcon, BarChart3Icon, BotIcon,
-	ClapperboardIcon, FilmIcon, LibraryIcon, ShieldCheckIcon, UsersIcon, UsersRoundIcon, WalletIcon, FileTextIcon, HistoryIcon, InboxIcon, ListTodoIcon, CalendarDaysIcon,
+	BriefcaseBusinessIcon, ClapperboardIcon, FlaskRoundIcon, RotateCcwIcon, FilmIcon, ReceiptIcon, FlaskConicalIcon, LibraryIcon, ShieldCheckIcon, UsersIcon, UsersRoundIcon, WalletIcon, FileTextIcon, DoorOpenIcon, HistoryIcon, PlugIcon, InboxIcon, ListTodoIcon, CalendarDaysIcon,
 } from "lucide-react";
 
 export type SidebarNavItem = {
@@ -17,6 +17,10 @@ export type SidebarNavItem = {
 	cap?: string;
 	/** Capacidade de âmbito agência (não depende do cliente aberto). */
 	orgCap?: string;
+	/** Funcionalidade em teste (MIG-09): só aparece com a flag ligada para esta pessoa. */
+	flag?: string;
+	/** Some quando esta flag está ligada (ex.: o "Em breve" de um módulo que já está em teste para esta pessoa). */
+	unlessFlag?: string;
 	subItems?: SidebarNavItem[];
 };
 
@@ -31,8 +35,12 @@ export const agencyNavGroups: SidebarNavGroup[] = [
 		items: [
 			{ title: "Painel", path: "/", icon: <GaugeIcon />, orgCap: "dashboard.agency" },
 			{ title: "Clientes", path: "/clientes", icon: <Building2Icon />, orgCap: "workspaces.read" },
+			{ title: "Negócio", path: "/negocio", icon: <BriefcaseBusinessIcon />, orgCap: "biz.read", flag: "biz.view" },
+			{ title: "Contratos e custos", path: "/negocio/contratos", icon: <ReceiptIcon />, orgCap: "biz.finance", flag: "biz.view" },
 			{ title: "Caixa de entrada", path: "/caixa", icon: <InboxIcon />, orgCap: "dashboard.agency" },
 			{ title: "Equipa da agência", path: "/equipa-agencia", icon: <UsersRoundIcon />, orgCap: "team.read" },
+			{ title: "Integrações", path: "/integracoes", icon: <PlugIcon />, orgCap: "integrations.agency.read" },
+			{ title: "Funcionalidades em teste", path: "/funcionalidades", icon: <FlaskConicalIcon />, orgCap: "flags.manage" },
 		],
 	},
 	{
@@ -52,6 +60,7 @@ export const clientNavGroups: SidebarNavGroup[] = [
 		items: [
 			{ title: "Início", path: "/", icon: <LayoutGridIcon /> },
 			{ title: "Caixa de entrada", path: "/caixa", icon: <InboxIcon />, cap: "tasks.work" },
+			{ title: "Portal", path: "/portal", icon: <DoorOpenIcon />, cap: "scripts.read", flag: "client.portal" },
 		],
 	},
 	{
@@ -60,9 +69,11 @@ export const clientNavGroups: SidebarNavGroup[] = [
 			{ title: "Guiões", path: "/guioes", icon: <ScrollTextIcon />, cap: "scripts.read" },
 			{ title: "Revisão", path: "/revisao", icon: <ClapperboardIcon />, cap: "scripts.read" },
 			{ title: "Tarefas", path: "/tarefas", icon: <ListTodoIcon />, cap: "tasks.read" },
+			{ title: "Quem trabalha em quê", path: "/quem-trabalha", icon: <UsersRoundIcon />, cap: "ops.presence", flag: "ops.team_presence" },
 			{ title: "Calendário", path: "/calendario", icon: <CalendarDaysIcon />, cap: "calendar.read" },
 			{ title: "Teleprompter", path: "/teleprompter", icon: <MonitorPlayIcon />, cap: "recording.use" },
 			{ title: "Estilos de edição", path: "/edicao", icon: <FilmIcon />, cap: "scripts.read" },
+			{ title: "Biblioteca", path: "/biblioteca", icon: <LibraryIcon />, cap: "media.read", flag: "media.library" },
 			{ title: "Fontes", path: "/fontes", icon: <LightbulbIcon />, cap: "sources.read" },
 			{ title: "Referências", path: "/referencias", icon: <UsersIcon />, cap: "references.read" },
 		],
@@ -71,8 +82,12 @@ export const clientNavGroups: SidebarNavGroup[] = [
 		label: "Análise",
 		items: [
 			{ title: "Desempenho", path: "/desempenho", icon: <BarChart3Icon />, cap: "analytics.read" },
+			{ title: "Centro de desempenho", path: "/desempenho/centro", icon: <GaugeIcon />, cap: "analytics.read", flag: "perf.center" },
 			{ title: "Sala dos agentes", path: "/agentes", icon: <BotIcon />, cap: "agents.read" },
 			{ title: "Agentes e execuções", path: "/agentes/configuracao", icon: <SlidersHorizontalIcon />, cap: "agents.read" },
+			{ title: "Retrabalho", path: "/aprendizagem/retrabalho", icon: <RotateCcwIcon />, cap: "learn.read", flag: "learn.rework" },
+			{ title: "Experiências e vencedores", path: "/aprendizagem/experiencias", icon: <FlaskRoundIcon />, cap: "learn.read", flag: "learn.experiments" },
+			{ title: "Custos", path: "/custos", icon: <WalletIcon />, cap: "costs.read", flag: "costs.content" },
 		],
 	},
 	{
@@ -82,13 +97,14 @@ export const clientNavGroups: SidebarNavGroup[] = [
 			{ title: "Permissões", path: "/permissoes", icon: <KeyRoundIcon />, cap: "team.read" },
 			{ title: "Histórico", path: "/historico", icon: <ScrollIcon />, cap: "audit.read" },
 			{ title: "Definições", path: "/definicoes", icon: <SettingsIcon />, cap: "team.read" },
+			{ title: "Integrações", path: "/definicoes/integracoes", icon: <PlugIcon />, cap: "integrations.read", flag: "integrations.center" },
 		],
 	},
 	{
 		label: "Em breve",
 		items: [
-			{ title: "Biblioteca", icon: <LibraryIcon />, soon: true },
-			{ title: "Custos", icon: <WalletIcon />, soon: true },
+			{ title: "Biblioteca", icon: <LibraryIcon />, soon: true, unlessFlag: "media.library" },
+			{ title: "Custos", icon: <WalletIcon />, soon: true, unlessFlag: "costs.content" },
 		],
 	},
 ];

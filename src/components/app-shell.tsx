@@ -8,6 +8,7 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppHeader } from "@/components/app-header";
 import { AppSidebar } from "@/components/app-sidebar";
 import { TeamCodeDialog } from "@/components/team-code";
+import { PresenceBeacon } from "@/components/ops/presence-beacon";
 
 /** Aplica o tema guardado no perfil (FR-14-02) uma vez por sessão; depois manda o que a pessoa escolher. */
 function ThemeSync() {
@@ -39,6 +40,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 			</SidebarProvider>
 			<TeamCodeDialog />
 			<ThemeSync />
+			<PresenceBeacon />
 		</div>
 	);
 }

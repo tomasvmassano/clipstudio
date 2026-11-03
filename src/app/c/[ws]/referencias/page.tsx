@@ -2,6 +2,7 @@
 
 import { WsLink } from "@/components/ws-link";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { ArchiveIcon, BookmarkPlusIcon, ExternalLinkIcon, Loader2Icon, PencilIcon, PlusIcon, RotateCwIcon, SearchIcon, StarIcon, UndoIcon } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -23,7 +24,8 @@ const nf = new Intl.NumberFormat("pt-PT", { notation: "compact", maximumFraction
 const fmtDay = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString("pt-PT", { day: "2-digit", month: "short" }) : "");
 
 export default function ReferenciasPage() {
-  return <WorkspaceGate need="references.read">{(access) => <Referencias access={access} />}</WorkspaceGate>;
+  const q = useSearchParams().get("q") ?? "";
+  return <WorkspaceGate need="references.read">{(access) => <Referencias key={q} access={access} />}</WorkspaceGate>;
 }
 
 type Tab = "biblioteca" | "descobrir" | "arquivo";
@@ -78,7 +80,9 @@ function Metrics({ m }: { m: RefMetrics | null }) {
 function Library({ access, manage, archived, onError }: { access: Access; manage: boolean; archived: boolean; onError: (m: string) => void }) {
   const [items, setItems] = useState<Reference[] | null>(null);
   const [err, setErr] = useState("");
-  const [q, setQ] = useState(""); const [query, setQuery] = useState("");
+  // ?q= vem da pesquisa global (FR-16-01): abre a lista já filtrada
+  const initialQ = (useSearchParams().get("q") ?? "").slice(0, 100);
+  const [q, setQ] = useState(initialQ); const [query, setQuery] = useState(initialQ);
   const [colecao, setColecao] = useState(""); const [favoritos, setFavoritos] = useState(false);
   const [editing, setEditing] = useState<Reference | null>(null);
   const [allCols, setAllCols] = useState<string[]>([]);

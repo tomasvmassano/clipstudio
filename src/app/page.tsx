@@ -13,6 +13,7 @@ import { Delta, DeltaIcon, DeltaValue } from "@/components/delta";
 import { KpiCard } from "@/components/kpi-card";
 import { useSession } from "@/components/session-provider";
 import { WorkspaceGate } from "@/components/workspace-gate";
+import { PainelAttention } from "@/components/painel-attention";
 import { clientPath } from "@/lib/ws-path";
 import { useLogoUrl } from "@/lib/branding";
 import {
@@ -94,6 +95,7 @@ function Agencia() {
         )}
       </div>
 
+      <PainelAttention />
       {err ? (
         <Alert variant="destructive">
           <AlertDescription className="flex flex-wrap items-center justify-between gap-2">

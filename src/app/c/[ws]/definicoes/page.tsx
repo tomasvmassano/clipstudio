@@ -18,6 +18,7 @@ import type { Access } from "@/lib/access";
 import { removeLogo, uploadLogo, useLogoUrl } from "@/lib/branding";
 import { CURRENCIES, fetchSettings, TIMEZONES, updateClient, type ClientPatch, type Settings } from "@/lib/clients";
 import { setWipLimit } from "@/lib/tasks";
+import { useFlags } from "@/lib/flags";
 
 /*
  * Definições do cliente (PRD M15). Geral, regras e atalhos para o que já tem casa própria
@@ -36,6 +37,7 @@ function Definicoes({ access }: { access: Access }) {
   const [err, setErr] = useState("");
   const [rev, setRev] = useState(0);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const flags = useFlags(access.ws, access.token ?? null, mode !== "loading");
 
   useEffect(() => {
     let alive = true;
@@ -74,6 +76,7 @@ function Definicoes({ access }: { access: Access }) {
           <Shortcut href="/tarefas?tab=templates" title="Templates e checklists" detail={`${s.counts.templates} ativo${s.counts.templates === 1 ? "" : "s"}`} show={s.can.tasks} />
           <Shortcut href="/tarefas?tab=regras" title="Automações de tarefas" detail={`${s.counts.automacoes} ativa${s.counts.automacoes === 1 ? "" : "s"}`} show={s.can.tasks} />
           <Shortcut href="/equipa" title="Equipa e acessos" detail="Convidar, papéis, remover" show />
+          <Shortcut href="/definicoes/notificacoes" title="Notificações" detail="Eventos, canais e obrigatórias" show={!!flags?.has("notifications.prefs")} />
         </CardContent>
       </Card>
       <Card>

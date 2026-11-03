@@ -10,6 +10,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { WorkspaceGate } from "@/components/workspace-gate";
+import { WorkInbox } from "@/components/ops/work-inbox";
+import type { Access } from "@/lib/access";
+import { useFlags } from "@/lib/flags";
+import { fetchMyQueue } from "@/lib/ops";
 import { useSession } from "@/components/session-provider";
 import { fetchInbox, fmtDue, markRead, STATUS_LABEL, type Inbox } from "@/lib/tasks";
 import { cn } from "@/lib/utils";
@@ -24,8 +28,31 @@ const FILTER_KEY = "inbox.ws";
 export default function CaixaPage() {
   const { mode, wsRequested } = useSession();
   // na agência (/caixa) não há cliente aberto: a caixa junta todos; dentro de um cliente passa pela porta do cliente
-  if (!wsRequested && mode === "user") return <Caixa />;
-  return <WorkspaceGate>{() => <Caixa />}</WorkspaceGate>;
+  if (!wsRequested && mode === "user") return <AgencyCaixa />;
+  return <WorkspaceGate>{(access) => <ClientCaixa access={access} />}</WorkspaceGate>;
+}
+
+/* Minha área de trabalho (OPS-03, ADR-0034) entra atrás da flag ops.workspace; desligada, a caixa fica como estava. */
+function ClientCaixa({ access }: { access: Access }) {
+  const { mode, ws } = useSession();
+  const flags = useFlags(access.ws, access.token, mode !== "loading");
+  if (mode === "user" && !flags) return <Skeleton className="h-64" aria-label="A carregar" />;
+  if (mode === "user" && flags?.has("ops.workspace")) return <WorkInbox ws={access.ws} workspaces={[]} tz={ws?.timezone ?? "Asia/Dubai"} />;
+  return <Caixa />;
+}
+
+/** Na agência a flag é por cliente: a área de trabalho aparece se estiver ligada em pelo menos um cliente. */
+function AgencyCaixa() {
+  const { workspaces, ws } = useSession();
+  const [on, setOn] = useState<boolean | null>(null);
+  useEffect(() => {
+    let alive = true;
+    fetchMyQueue(null).then((q) => { if (alive) setOn(q.enabled.length > 0); }).catch(() => { if (alive) setOn(false); });
+    return () => { alive = false; };
+  }, []);
+  if (on === null) return <Skeleton className="h-64" aria-label="A carregar" />;
+  if (on) return <WorkInbox ws={null} workspaces={workspaces.map((w) => ({ id: w.id, name: w.name }))} tz={ws?.timezone ?? "Asia/Dubai"} />;
+  return <Caixa />;
 }
 
 function Caixa() {

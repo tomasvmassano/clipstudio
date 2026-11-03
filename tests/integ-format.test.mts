@@ -1,0 +1,21 @@
+import { ago, daysUntil, expiryText, reasonOk, stateLabel } from "../src/lib/integ-format.ts";
+
+let bad = 0; let n = 0;
+const eq = (name: string, got: unknown, exp: unknown) => { n++; if (got !== exp) { bad++; console.log("FAIL", name, JSON.stringify(got), "esperado", JSON.stringify(exp)); } };
+const now = Date.parse("2026-10-30T12:00:00Z");
+eq("estado conhecido", stateLabel("por_ligar"), "Por ligar");
+eq("estado desconhecido aparece tal como vem", stateLabel("novo_estado"), "novo_estado");
+eq("sem estado", stateLabel(null), "Desconhecido");
+eq("nunca sincronizou", ago(null, now), "nunca");
+eq("minutos", ago("2026-10-30T11:55:00Z", now), "há 5 min");
+eq("horas", ago("2026-10-30T09:00:00Z", now), "há 3 h");
+eq("dias", ago("2026-10-27T12:00:00Z", now), "há 3 dias");
+eq("data no futuro", ago("2026-10-30T12:05:00Z", now), "agora");
+eq("dias até expirar", daysUntil("2026-11-09T12:00:00Z", now), 10);
+eq("expira em", expiryText("2026-11-09T12:00:00Z", now), "expira em 10 dias");
+eq("expirado", expiryText("2026-10-29T12:00:00Z", now), "o token já expirou");
+eq("sem validade", expiryText(null, now), "sem validade registada");
+eq("motivo curto", reasonOk("  a "), false);
+eq("motivo ok", reasonOk("Conta entregue"), true);
+console.log(`integ-format: ${n - bad}/${n}`);
+if (bad) process.exit(1);
