@@ -11,8 +11,8 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | Estado | Requisitos |
 |---|---|
 | feito | 24 |
-| parcial | 195 |
-| por começar | 48 |
+| parcial | 196 |
+| por começar | 47 |
 | bloqueado | 3 |
 | adiado | 3 |
 | **total** | **273** |
@@ -96,7 +96,8 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-04-03 | P1 | parcial | sem filtros por categoria, tema, idioma e data; pesquisa simples, não full-text | Filtros por categoria, tema, fonte, idioma, data, estado e pesquisa full-text. |
 | FR-04-04 | P1 | parcial | sem favoritos | Estados nova, triagem, selecionada, utilizada, descartada; favoritos, duplicados |
 | FR-04-05 | P1 | parcial | sem resumo, relevância e ângulos para fontes adicionadas na app; motor (Repórter) por alojar | Resumo por IA com referências à fonte, classificação de relevância e ângulos sug |
-| FR-05-04 | P1 | parcial | só guiões; notificações dependem de automação configurada | Aprovar, rejeitar ou pedir alterações com motivo e notificações. |
+| FR-05-03 | P1 | parcial | anotações desenhadas no vídeo; momento escrito à mão (o player da Drive não dá o tempo); verificação com conta real em produção | Revisão de vídeo com player, comentários por timestamp, anotações e histórico. |
+| FR-05-04 | P1 | parcial | sem notificações nas decisões de vídeo; notificações de guiões dependem de automação configurada | Aprovar, rejeitar ou pedir alterações com motivo e notificações. |
 | FR-05-05 | P1 | parcial | sem fluxos de aprovação configuráveis (só regras de tarefas por evento) | Fluxos configuráveis de aprovação por workspace/projeto; responsáveis e prazos. |
 | FR-06-03 | P1 | parcial | worker por alojar: nada corre em produção | Execução manual/agendada, progresso, logs, erros, retry e cancelamento. |
 | FR-06-04 | P1 | parcial | sem teste antes de ativar; prompts no código do motor, não versionados na app | Versionamento de prompts/configurações, testes antes de ativar, rollback e audit |
@@ -296,8 +297,8 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 |---|---|---|---|---|
 | FR-05-01 | feito |  | review_inbox: filtros por estado, responsável, prioridade, prazo e texto (o tipo é só guião até haver media, FR-05-03); W2-06 content_comments (bloco, frase citada, versão, respostas, resolver), /c/[ws]/revisao; w2_review_comments 33/33; e2e/review.spec.ts 3/3; ADR-0025 | 2026-10-29 (E2E) |
 | FR-05-02 | feito |  | decisões versionadas em content_transitions; w2_content 47/47; W2-06 content_comments (bloco, frase citada, versão, respostas, resolver), /c/[ws]/revisao; w2_review_comments 33/33; e2e/review.spec.ts 3/3; ADR-0025 | 2026-10-29 (E2E) |
-| FR-05-03 | por começar | sem revisão de vídeo | review.comment/approve só planeadas (W5) | — |
-| FR-05-04 | parcial | só guiões; notificações dependem de automação configurada | content_transition com motivo; task_rules W3-01 | — |
+| FR-05-03 | parcial | anotações desenhadas no vídeo; momento escrito à mão (o player da Drive não dá o tempo); verificação com conta real em produção | W5-04 sobre a biblioteca (W8): media_review_list/detail/comment (t_ms)/decide, /c/[ws]/revisao?ver=videos com player da Drive; w5_media_review 31/31; media-time 18/18; ADR-0043, CHG-006 | — |
+| FR-05-04 | parcial | sem notificações nas decisões de vídeo; notificações de guiões dependem de automação configurada | content_transition com motivo; task_rules W3-01; ; vídeo: media_review_decide com motivo obrigatório (W5-04) | — |
 | FR-05-05 | parcial | sem fluxos de aprovação configuráveis (só regras de tarefas por evento) | task_rule_save W3-01 | — |
 | FR-05-06 | parcial | sem comparação entre versões; bloqueio de publicação sem publicação | content_history; approved_version_id | — |
 | FR-05-07 | parcial | só guiões (sem vídeo) | content_transitions append-only, validacao_anulada no audit; w1_review_fixes 11/11 | — |
@@ -624,7 +625,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
-| ING-01 | parcial | R2 por implementar (adaptador pronto); bruto do Drive só como link externo; sem proxies | Supabase Storage (bucket privado media) atrás de src/lib/storage (ADR-0038); W8 (ramo w8-vaga3): SQL 1648/1648, E2E 143/143 no stack local; ainda não aplicado em produção | — |
+| ING-01 | parcial | R2 por implementar (adaptador pronto); bruto do Drive só como link externo; sem proxies | Supabase Storage (bucket privado media) atrás de src/lib/storage (ADR-0038); W8 (ramo w8-vaga3): SQL 1648/1648, E2E 143/143 no stack local; ainda não aplicado em produção; ; CHG-006: finais para revisão na Drive da agência, versão por link na biblioteca (W5-04) | — |
 | ING-02 | por começar | sem ingestão da câmara | media.ingest planeada | — |
 | ING-03 | parcial | sem ingestão do ficheiro da câmara, transcrição com tempos por palavra e sincronização pelo áudio | recording_marks, recording_marks_add, recording_timeline (W5-01, ADR-0026); w5_recording_marks 17/17; e2e/recording-marks.spec.ts 2/2 | — |
 | ING-04 | por começar | sem upload pelo telemóvel | nada no código | — |

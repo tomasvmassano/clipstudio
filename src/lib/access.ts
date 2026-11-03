@@ -58,6 +58,10 @@ export function friendlyError(msg: string): string {
   if (msg.includes("funcionalidade_desligada")) return "Esta funcionalidade ainda está em teste e não está ligada para ti.";
   if (msg.includes("conflito_edicao")) return "Alguém mudou este guião entretanto. Recarreguei a versão mais recente: revê e volta a guardar.";
   if (msg.includes("motivo_obrigatorio")) return "Escreve o motivo.";
+  if (msg.includes("versao_antiga")) return "Há uma versão mais recente deste vídeo. Decide sobre essa.";
+  if (msg.includes("ja_aprovado")) return "Este vídeo já foi aprovado. Para mudar, junta uma versão nova na biblioteca.";
+  if (msg.includes("momento_invalido")) return "Esse momento fica fora do vídeo.";
+  if (msg.includes("media_nao_encontrado")) return "Este vídeo já não existe ou não tens acesso.";
   if (msg.includes("transicao_invalida")) return "Esta ação já não se aplica ao estado atual do guião. Recarrega.";
   if (msg.includes("nao_elegivel")) return "Guiões rejeitados ou arquivados não se gravam.";
   if (msg.includes("aprovacao_necessaria")) return "Neste cliente só se gravam guiões aprovados.";
