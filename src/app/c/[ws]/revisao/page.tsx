@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { MessagesSquareIcon, RotateCwIcon, SearchIcon } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { GuiaoCard } from "@/components/guiao-card";
 import { useScriptActions, useScriptCaps } from "@/components/use-guioes";
+import { VideoReviewPanel } from "@/components/video-review";
 import { WorkspaceGate } from "@/components/workspace-gate";
 import type { Access } from "@/lib/access";
 import { subscribeGuioes } from "@/lib/data";
@@ -126,10 +128,38 @@ function RevisaoInner({ access }: { access: Access }) {
   );
 }
 
+/** Separadores Guiões | Vídeos (W5-04). O separador fica no URL (?ver=videos) para se poder partilhar o link. */
+function RevisaoTabs({ access }: { access: Access }) {
+  const sp = useSearchParams(); const router = useRouter(); const path = usePathname();
+  const tab = sp.get("ver") === "videos" ? "videos" : "guioes";
+  const go = (t: string) => {
+    const p = new URLSearchParams(sp.toString());
+    if (t === "videos") p.set("ver", "videos"); else p.delete("ver");
+    router.replace(`${path}${p.size ? `?${p}` : ""}`, { scroll: false });
+  };
+  return (
+    <div className="flex flex-col gap-4">
+      <ToggleGroup value={[tab]} onValueChange={(v) => { const t = (v as string[])[0]; if (t) go(t); }} variant="outline" size="sm" aria-label="O que rever">
+        <ToggleGroupItem value="guioes">Guiões</ToggleGroupItem>
+        <ToggleGroupItem value="videos">Vídeos</ToggleGroupItem>
+      </ToggleGroup>
+      {tab === "videos" ? (
+        <div className="flex flex-col gap-4">
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight">Revisão de vídeos</h1>
+            <p className="text-sm text-muted-foreground">Abre um hook para ver o vídeo, comentar num momento e aprovar ou pedir alterações.</p>
+          </div>
+          <VideoReviewPanel access={access} />
+        </div>
+      ) : <RevisaoInner access={access} />}
+    </div>
+  );
+}
+
 export default function RevisaoPage() {
   return (
     <Suspense fallback={<Skeleton className="h-40 w-full" />}>
-      <WorkspaceGate need="scripts.read">{(access) => <RevisaoInner access={access} />}</WorkspaceGate>
+      <WorkspaceGate need="scripts.read">{(access) => <RevisaoTabs access={access} />}</WorkspaceGate>
     </Suspense>
   );
 }

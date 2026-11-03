@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-11-03 (revisão de vídeo)
+
+- **W5-04** revisão de vídeo por link da Google Drive (FR-05-03, FR-05-04 e FR-08-04 parciais; CHG-006, ADR-0031). Separador "Vídeos" em Revisão: vídeos por guião e hook, player da Drive embutido e "Abrir na Drive", comentários num momento (0:23) que abrem a Drive nesse ponto, respostas, resolver, aprovar ou pedir alterações/rejeitar com motivo, versões por hook e histórico de decisões. Migração `w5_media_review` (aditiva): `content_media`, `media_comments`, `media_decisions` e 6 RPCs; `media.upload` e `review.approve` ativas; código de equipa do Numeiro passa a decidir vídeos. Testes: `w5_media_review` 35/35, `media-time` 17/17. CI fixado em ubuntu-24.04 noutro PR.
 ## 2026-11-03 (CHG-006 revisão de vídeo por link da Drive)
 
 - **CHG-006** (só documentação; FR-05-03, ING-01). Enquanto não houver object storage, os vídeos a rever ficam na Google Drive da agência e a plataforma guarda o link: player da Drive embutido, "Abrir na Drive", comentários com o momento escrito por quem comenta, aprovar ou pedir alterações com motivo. Sem alteração funcional.
