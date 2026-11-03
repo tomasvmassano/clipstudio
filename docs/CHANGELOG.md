@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-04 (editor de vídeo, fase 1)
+
+- **W5-06** editor de vídeo (EDL-07, EDL-09 parcial; CHG-007, ADR-0046): documento de edição versionado por vídeo, em tempo da fonte; página `/c/[ws]/editor?asset=` com palco, inspetor e linha do tempo (secções, cortes, câmara, legendas, visuais, som), desfazer/refazer e atalhos; gravar versão com conflito protegido; abre da revisão. Os 68 vídeos do Numeiro entram com a versão 1 tirada do plano do render. Sem imagem na pré-visualização nem exportar até haver R2 e worker (à vista na UI). Testes `w5_edit_doc` 21/21, suite SQL 1764, `edit-doc` 25/25.
+
 ## 2026-11-04 (navegar como papel)
 
 - **W1-17** navegar na app como um papel ou uma pessoa (BIZ-07, CAP-05, ADR-0045): botão em Permissões → Ver como; durante 30 minutos menus, páginas e dados são os do alvo, o servidor recusa qualquer escrita e uma faixa fixa diz como quem e até quando, com "Sair". Auditado. `_authorize` passa a estreitar só a própria sessão com pré-visualização ativa. Testes `w1_preview` 25/25, suite SQL completa, `preview` 5/5.

@@ -22,6 +22,10 @@ Envio (W1-14, ADR-0023): `invitation_issue_link` gera um token novo (só o hash 
 
 Por versão de um ativo da biblioteca: `por rever → alterações pedidas | rejeitado | aprovado` (`media_review_decide`; motivo obrigatório exceto aprovar). Só a versão atual se decide; aprovado é final. Uma versão nova no mesmo ativo (`media_link_add`) fica `por rever`; a anterior guarda estado, comentários e decisões. Comentários `aberto ⇄ resolvido`. Eventos: `media.commented`, `media.decided`; auditoria `media.review.decided`. Notificações (W5-05, ADR-0044): `video_decision` a quem registou o ativo/versão e ao responsável do guião; `video_comment` a quem registou e, numa resposta, ao autor do comentário; idempotentes por decisão/comentário e pessoa.
 
+## Edição de vídeo (W5-06, CHG-007)
+
+Por vídeo: documento com versões imutáveis `v1 (import/IA) → v2 (editada) → …`; gravar exige a versão atual como base (conflito 40001 senão); restaurar uma versão antiga grava-a como nova. Exportar (EDL-11) transformará uma versão em versão nova do ativo, que volta a "por rever". Evento `edit.version_saved`; auditoria `edit.version_saved`.
+
 ## Segurança da conta (W1-15)
 
 Verificação em dois passos: `desligada → a configurar` (`mfa.enroll`, fator por verificar, não bloqueia nada) `→ ligada` (código certo; evento `security.mfa_enabled`) `→ desligada` (`mfa.unenroll` numa sessão aal2; `security.mfa_disabled`). Com ela ligada, cada entrada é `aal1 → aal2` depois do código; em aal1 o servidor recusa tudo. Palavra-passe: mudar (com a atual) ou recuperar pelo link (`security.password_changed`). `security.signed_out_everywhere` antes de terminar todas as sessões.

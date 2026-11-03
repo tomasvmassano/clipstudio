@@ -62,6 +62,9 @@ export function friendlyError(msg: string): string {
   if (msg.includes("nada_a_alterar")) return "Nada para guardar.";
   if (msg.includes("guiao_nao_encontrado")) return "Este guião já não existe neste cliente ou não tens acesso.";
   if (msg.includes("funcionalidade_desligada")) return "Esta funcionalidade ainda está em teste e não está ligada para ti.";
+  if (msg.includes("conflito_versao_edicao")) return "Alguém gravou uma versão deste vídeo entretanto. Recarrega a versão mais recente e volta a aplicar as tuas alterações.";
+  if (msg.startsWith("documento_invalido:")) return "Não dá para gravar: " + msg.slice("documento_invalido:".length).trim() + ".";
+  if (msg.includes("versao_imutavel")) return "As versões de edição não se alteram: grava uma nova.";
   if (msg.includes("conflito_edicao")) return "Alguém mudou este guião entretanto. Recarreguei a versão mais recente: revê e volta a guardar.";
   if (msg.includes("motivo_obrigatorio")) return "Escreve o motivo.";
   if (msg.includes("versao_antiga")) return "Há uma versão mais recente deste vídeo. Decide sobre essa.";

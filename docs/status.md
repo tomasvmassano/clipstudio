@@ -10,10 +10,10 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | Estado | Requisitos |
 |---|---|
-| feito | 24 |
-| parcial | 197 |
-| por começar | 53 |
-| bloqueado | 3 |
+| feito | 25 |
+| parcial | 198 |
+| por começar | 49 |
+| bloqueado | 5 |
 | adiado | 3 |
 | **total** | **280** |
 
@@ -21,6 +21,8 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | ID | P | Estado | O que falta | Título |
 |---|---|---|---|---|
+| EDL-08 | P0 | bloqueado | precisa de R2 (proxies), conta do Tomás; hoje o palco mostra cortes, legendas e hook sem imagem | Pré-visualização ao vivo |
+| EDL-11 | P0 | bloqueado | precisa do worker alojado e de R2, contas do Tomás; botão Exportar desativado com o motivo | Exportar |
 | PLAT-01 | P0 | bloqueado | precisa do Tomás: domínio próprio, Business Verification Meta, registo das apps; páginas públicas adiadas pelo Tomás a 2026-11-04 até haver domínio | Pré-requisitos, já |
 | PLAT-02 | P0 | bloqueado | depende de PLAT-01 e de ligar contas + métricas em produção (PERF-08) | Fase A, só leitura |
 | PLAT-03 | P0 | bloqueado | depende de PLAT-01 e do publicador (PUB-01) | Fase B, publicação |
@@ -73,6 +75,8 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | ING-03 | P0 | parcial | sem ingestão do ficheiro da câmara, transcrição com tempos por palavra e sincronização pelo áudio | Um ficheiro longo por câmara por sessão |
 | EDL-01 | P0 | parcial | job do pacote de edição (precisa de ingestão ING-01..03, render e worker alojado) | Pacote de edição automático |
 | EDL-03 | P0 | parcial | ligar ao job do pacote e guardar o relatório por variante na app (EDL-02); calibrar limites no piloto | QC técnico em código antes de qualquer revisão por IA |
+| EDL-07 | P0 | parcial | versão 1 gerada pela IA no job do pacote (EDL-01); visuais e música ainda vazios | Documento de edição |
+| EDL-09 | P0 | parcial | arrastar pontas e mover na linha do tempo; visuais, música e volume por trecho editáveis; imagem na pré-visualização (EDL-08) | Linha do tempo (modo completo) |
 | PERF-01 | P0 | parcial | criador/marca é só um campo por conta; verificação com conta real (R-15) | Hierarquia |
 | PERF-02 | P0 | parcial | o publicador (PUB) tem de chamar perf_record_lineage | Etiquetas obrigatórias à publicação (R-18) |
 | PERF-03 | P0 | parcial | histórico só desde a primeira captura; 1 h quase nunca existe com scraping diário | Fotografias por idade |
@@ -159,7 +163,6 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | SCALE-06 | P1 | parcial | recomendações só de leitura; limiares por calibrar | Learning loop: |
 | BIZ-05 | P1 | parcial | verificação com conta real (R-15) | Contratos por cliente |
 | BIZ-06 | P1 | parcial | custo de IA só em EUR; verificação com conta real (R-15) | Custos e margem por cliente |
-| BIZ-07 | P1 | parcial | verificação com sessão real em produção | Pré-visualizar como papel |
 | BIZ-08 | P1 | parcial | verificação com sessão real (convite com cargo) | Cargos como modelos de permissões |
 | PERF-07 | P1 | parcial | o motor (Aprendiz/Estratega) ainda não lê as alavancas | Alavancas "o que replicar" |
 | FR-01-06 | P2 | parcial | filtros persistentes por utilizador por fazer | Estados vazios explicativos, loading, erro/retry, filtros persistentes por utili |
@@ -618,7 +621,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | BIZ-04 | parcial | verificação com conta real (R-15) | resposta construída por pessoa; sem biz.finance não sai nenhum campo financeiro (W6, ADR-0032); w6_biz; e2e/biz.spec.ts | — |
 | BIZ-05 | parcial | verificação com conta real (R-15) | client_contracts versionados, EUR/AED, câmbio com data (W6, ADR-0032); w6_biz | — |
 | BIZ-06 | parcial | custo de IA só em EUR; verificação com conta real (R-15) | agency_costs com repartição e anulação, margem, custo por vídeo e por 1.000 views (W6, ADR-0032); w6_biz | — |
-| BIZ-07 | parcial | verificação com sessão real em produção | access_simulate por papel, só leitura e auditado (W1-16); produção 03/11: Ver como numeiro@gmail.com, só leitura, access.simulated no audit; W1-17: navegar como papel/pessoa em toda a app, servidor só leitura (_authorize estreita), faixa fixa, auditado (ADR-0045); w1_preview 25/25 | 2026-11-03 (sessão real do dono da agência, produção) |
+| BIZ-07 | feito |  | access_simulate por papel, só leitura e auditado (W1-16); produção 03/11: Ver como numeiro@gmail.com, só leitura, access.simulated no audit; W1-17: navegar como papel/pessoa em toda a app, servidor só leitura (_authorize estreita), faixa fixa, auditado (ADR-0045); w1_preview 25/25; produção 04/11: navegar como Leitor, faixa, menu reduzido, sair devolve tudo, 0 erros | 2026-11-04 (sessão real do dono da agência, produção) |
 | BIZ-08 | parcial | verificação com sessão real (convite com cargo) | invite_member_with_title e aplicação ao aceitar (W7, ADR-0037); w7_learn; e2e/learn.spec.ts; mapeamento validado pelo Tomás a 2026-11-04 | — |
 | BIZ-09 | por começar | sem score de saúde | nada no código | — |
 
@@ -641,11 +644,11 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
-| EDL-07 | por começar |  |  | — |
-| EDL-08 | por começar |  |  | — |
-| EDL-09 | por começar |  |  | — |
+| EDL-07 | parcial | versão 1 gerada pela IA no job do pacote (EDL-01); visuais e música ainda vazios | edit_documents/edit_versions imutáveis, edit_doc_get/save com conflito, 68 vídeos importados do plano (W5-06, ADR-0046); w5_edit_doc 21/21; edit-doc 25/25 | — |
+| EDL-08 | bloqueado | precisa de R2 (proxies), conta do Tomás; hoje o palco mostra cortes, legendas e hook sem imagem |  | — |
+| EDL-09 | parcial | arrastar pontas e mover na linha do tempo; visuais, música e volume por trecho editáveis; imagem na pré-visualização (EDL-08) | /c/[ws]/editor: faixas, aparar ±0,1/0,5 s, dividir, tirar, reordenar, corrigir palavras e hook, desfazer/refazer, atalhos (W5-06) | — |
 | EDL-10 | por começar |  |  | — |
-| EDL-11 | por começar |  |  | — |
+| EDL-11 | bloqueado | precisa do worker alojado e de R2, contas do Tomás; botão Exportar desativado com o motivo |  | — |
 | EDL-12 | por começar |  |  | — |
 | EDL-13 | por começar |  |  | — |
 
