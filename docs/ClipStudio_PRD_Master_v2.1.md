@@ -1250,6 +1250,7 @@ Referências externas consultadas em 2026-10-28: ClickUp (custom roles, workload
 ## 36. Registo de alterações
 
 - **CHG-006 — 2026-11-03:** revisão de vídeo por link da Google Drive enquanto não há object storage (FR-05-03, ING-01): player da Drive embutido, comentários com o momento escrito por quem comenta, aprovar ou pedir alterações com motivo. Decisão do Tomás para rever os 69 vídeos do Numeiro.
+- **CHG-007 — 2026-11-04:** editor de vídeo (§39.1, EDL-07..EDL-13): documento de edição versionado, pré-visualização ao vivo no browser, linha do tempo e modo guiado, exportar por job, notas ao Claude com aceitação, estilos guardados. Decisão do Tomás depois de rever os 69 vídeos do Numeiro.
 - **CHG-005 — 2026-10-30:** §45 Referências por link (REF-01..09): colar link, dissecção, 3 guiões adaptados por link com 3 hooks, via rápida, extração do estilo de edição, biblioteca de estilos da agência e importação para clientes; R-20 recolha de vídeos de referência pelo mecanismo do Scout (decisão, risco de termos de serviço aceite); estilo S14 proposto. Origem: IDEA-008 e IDEA-009.
 - **CHG-004 — 2026-10-29:** registo de estado por requisito (`docs/status.md`) validado no CI, regra de início e fim de tarefa, adiamentos registados e revisão automática diária, em §33.
 - **CHG-003 — 2026-10-29:** Parte IV (§37-§44): R-16 origem sistema/externo, R-17 hipérbole de persona (decisão de produto, fora do âmbito factual do AGENTS §7), R-18 linhagem gravada no momento, R-19 só APIs oficiais; vista de negócio da agência (BIZ-01..09); ingestão, armazenamento (decide §14) e linha de edição (ING-01..04, EDL-01..06); centro de desempenho (PERF-01..09); variantes, estilos e republicação (VAR-01..07); publicação automática e calendário (PUB-01..06); aprovações das plataformas (PLAT-01..04); sequência de entrega revista (§44, medição antes de media). §26, §27, §14 e §33 com remissões. Origem: inbox de ideias IDEA-001..007.
@@ -1316,6 +1317,26 @@ Complementa §8, M05, M08, SCALE-02, SCALE-03 e decide o ponto em aberto de §14
 **EDL-05 [P1] Pós-produção multi-agente v2 (IDEA-002).** Ondas em paralelo (ingest em código; corte, cor, criativo, revisão do texto; produtor; design, som, packaging; QC; painel de personas e compliance). Acrescenta: notas do painel guardadas por vídeo e calibradas contra resultados reais a 24 h/72 h/7 d (personas que não preveem são revistas ou removidas); máximo 2 reruns, orçamento por vídeo, idempotência e dead-letter; custo por agente e por vídeo; memória de revisões do cliente (cada revisão vira regra que o produtor lê); routing de modelos por tarefa. O "All pass" passa a "pronto para revisão humana", nunca entrega direta.
 
 **EDL-06 [P1] Piloto.** ~100 renders, 4 estilos, ~40 publicados em 3-4 semanas. Avança se [pressuposto]: custo de render ≤ 0,05 USD/variante; QC à primeira ≥ 90%; ≥ 50% aprovadas sem edição; ≤ 30 s de revisão por variante; mediana das publicadas ≥ 0,5× a mediana da conta; zero alertas de saúde da conta.
+
+### 39.1 Editor de vídeo (EDL-07..EDL-13, CHG-007)
+
+A primeira versão é da IA; as pessoas ajustam na app. A edição é um **documento versionado**, não um ficheiro: o MP4 é só o resultado de exportar uma versão. Espaço: cliente. Decisões do Tomás (04/11): editor para agência e cliente (o cliente no modo guiado), pré-visualização ao vivo no browser, primeira versão com cortes, som e música, B-roll e gráficos, legendas e hook.
+
+**EDL-07 [P0] Documento de edição.** Cada variante (hook × estilo) tem um documento: segmentos (fonte, entrada/saída, câmara, zoom, ordem), legendas (palavra a palavra com tempos, estilo, posição), hook de texto, gráficos e B-roll (ativo, posição, entrada/saída, animação), som (música, volume por trecho, efeitos, ducking), secções. Cada gravação cria uma versão nova (imutável); a versão exportada liga ao ativo da biblioteca e à revisão (FR-05-03). A IA (EDL-01) escreve a versão 1; o QC (EDL-03) corre sobre o documento antes de exportar.
+
+**EDL-08 [P0] Pré-visualização ao vivo.** O browser toca o proxy das gravações (ING-01, URL assinada curta) e desenha legendas, hook, gráficos e B-roll por cima a partir do documento, com o tempo exato; uma alteração vê-se sem render. Diferenças entre a pré-visualização e o export são defeito.
+
+**EDL-09 [P0] Linha do tempo (modo completo).** Faixas de cortes, legendas, gráficos/B-roll, som e secções; aparar, dividir, apagar, reordenar e mover; corrigir texto e tempo de uma palavra; trocar ou mover um visual; volume por trecho e trocar música; desfazer/refazer; atalhos de teclado. Para quem tiver `edit.timeline`.
+
+**EDL-10 [P1] Modo guiado.** Passos Estilo → Corte → Hook → Visual → Legendas → Exportar; em cada secção a escolha da IA e 2-3 alternativas, mais uma nota livre. Para quem tiver `edit.guided` (por defeito também o cliente). Escolher uma alternativa altera o documento como qualquer outra edição.
+
+**EDL-11 [P0] Exportar.** Um job durável e idempotente (worker, FR-17-14) renderiza a versão do documento em 1080×1920, corre o QC técnico (EDL-03) e junta o ficheiro como versão nova do ativo, que volta a "por rever". Estado do job visível; falha com motivo e "tentar de novo"; nunca substitui uma versão aprovada (AGENTS §2.6).
+
+**EDL-12 [P1] Notas ao Claude.** Uma nota num momento ("N") pode ser enviada ao agente de edição, que propõe alterações ao documento como diferença; a pessoa aceita, ajusta ou recusa. Nada se aplica sem aceitação (AGENTS §7). Custo e versão do agente registados.
+
+**EDL-13 [P1] Estilos guardados.** "Guardar como estilo" grava as escolhas (legendas, hook, cor, música, layouts) como preset versionado do cliente, que a IA usa na versão 1 seguinte; complementa VAR-02 e a memória de revisões de EDL-05.
+
+Pré-requisitos: object storage com proxies (ING-01, R2) e worker alojado. Capacidades novas: `edit.timeline` (dono, admin, gestor; atribuível), `edit.guided` (todos os papéis do cliente exceto leitor), `edit.export` (dono, admin, gestor). Sequência (§44): entra no passo (4), com EDL-07, -08, -09 e -11 primeiro, depois -10, -12 e -13.
 
 ## 40. Centro de desempenho (PERF)
 
