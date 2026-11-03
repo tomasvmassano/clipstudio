@@ -282,6 +282,8 @@ Cada requisito abaixo tem ID único, prioridade de entrega (P0 crítico, P1 esse
 
 **FR-05-03 [P1]** Revisão de vídeo com player, comentários por timestamp, anotações e histórico.
 
+*CHG-006:* enquanto não houver object storage (ING-01), o vídeo a rever é um link para a Google Drive da agência, ligado ao guião e à variante (hook, estilo, versão). O player é o da Drive embutido, com "Abrir na Drive" num clique. Como o player da Drive não expõe o tempo de reprodução, o momento do comentário é escrito por quem comenta (mm:ss) e clicar nele abre a Drive nesse ponto. Aprovar ou pedir alterações exige motivo quando não é aprovação (FR-05-04).
+
 **Aceitação:** dado um utilizador autorizado no workspace A, a operação produz o estado/resultado descrito, persiste após refresh, apresenta erro recuperável quando a dependência falha e não revela nem modifica dados do workspace B.
 
 **FR-05-04 [P1]** Aprovar, rejeitar ou pedir alterações com motivo e notificações.
@@ -1247,6 +1249,7 @@ Referências externas consultadas em 2026-10-28: ClickUp (custom roles, workload
 
 ## 36. Registo de alterações
 
+- **CHG-006 — 2026-11-03:** revisão de vídeo por link da Google Drive enquanto não há object storage (FR-05-03, ING-01): player da Drive embutido, comentários com o momento escrito por quem comenta, aprovar ou pedir alterações com motivo. Decisão do Tomás para rever os 69 vídeos do Numeiro.
 - **CHG-005 — 2026-10-30:** §45 Referências por link (REF-01..09): colar link, dissecção, 3 guiões adaptados por link com 3 hooks, via rápida, extração do estilo de edição, biblioteca de estilos da agência e importação para clientes; R-20 recolha de vídeos de referência pelo mecanismo do Scout (decisão, risco de termos de serviço aceite); estilo S14 proposto. Origem: IDEA-008 e IDEA-009.
 - **CHG-004 — 2026-10-29:** registo de estado por requisito (`docs/status.md`) validado no CI, regra de início e fim de tarefa, adiamentos registados e revisão automática diária, em §33.
 - **CHG-003 — 2026-10-29:** Parte IV (§37-§44): R-16 origem sistema/externo, R-17 hipérbole de persona (decisão de produto, fora do âmbito factual do AGENTS §7), R-18 linhagem gravada no momento, R-19 só APIs oficiais; vista de negócio da agência (BIZ-01..09); ingestão, armazenamento (decide §14) e linha de edição (ING-01..04, EDL-01..06); centro de desempenho (PERF-01..09); variantes, estilos e republicação (VAR-01..07); publicação automática e calendário (PUB-01..06); aprovações das plataformas (PLAT-01..04); sequência de entrega revista (§44, medição antes de media). §26, §27, §14 e §33 com remissões. Origem: inbox de ideias IDEA-001..007.
@@ -1294,7 +1297,7 @@ Complementa R-04, M01 e o Painel da agência (CHG-001). Espaço: agência.
 
 Complementa §8, M05, M08, SCALE-02, SCALE-03 e decide o ponto em aberto de §14 sobre armazenamento. Espaço: cliente.
 
-**ING-01 [P0] Armazenamento fora da app (decisão).** A app guarda só metadados, miniaturas e links assinados. **Bruto** em Google Drive da agência, sem prazo (arquivo pesquisável). **Cópias de trabalho, proxies e finais** em object storage S3-compatível (proposta: Cloudflare R2) com retenção: proxies e variantes rejeitadas apagadas ao fim de 7-14 dias [pressuposto]; finais aprovados guardados. Bucket e prefixo por workspace; acesso por URL assinada e curta.
+**ING-01 [P0] Armazenamento fora da app (decisão).** A app guarda só metadados, miniaturas e links assinados. **Bruto** em Google Drive da agência, sem prazo (arquivo pesquisável). **Cópias de trabalho, proxies e finais** em object storage S3-compatível (proposta: Cloudflare R2) com retenção: proxies e variantes rejeitadas apagadas ao fim de 7-14 dias [pressuposto]; finais aprovados guardados. Bucket e prefixo por workspace; acesso por URL assinada e curta. *CHG-006 (fase atual):* até haver o object storage, os finais para revisão ficam na Google Drive da agência (pasta do cliente) e a app guarda o link e o ID do ficheiro; a partilha do ficheiro é gerida na Drive, não pela app.
 
 **ING-02 [P0] Entrada da câmara (Sony FX3).** Recomendado gravar XAVC HS 4K 100 Mbps 4:2:2 10-bit (~45 GB/h por câmara) com proxy HD em simultâneo. O proxy sobe primeiro e arranca transcrição, cortes e revisão; o 4K sobe depois e só entra no render final (o reframe 9:16 precisa do 4K). Entrada por pasta Drive vigiada ou upload direto retomável.
 
