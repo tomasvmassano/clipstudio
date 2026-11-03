@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-03 (verificação em produção)
+
+- Verificação com sessão real do dono em produção (R-15): 51 rotas sem página de erro nem erros na consola; teleprompter, pesquisa, calendário, Ver como e vista de negócio exercitados. Registo de estado atualizado (FR-16-02, FR-03-01/03/05, FR-11-01, BIZ-01..03, BIZ-07, CAP-05, FR-05-03, R-15; QA-07 passa a parcial). Achados em `docs/qa/verificacao-sessao-real-2026-11-03.md`.
+
 ## 2026-11-03 (revisão de vídeo)
 
 - **W5-04** revisão de vídeo por link da Google Drive, por cima da biblioteca de media (FR-05-03, FR-05-04 parcial; CHG-006, ADR-0043). Separador "Vídeos" em Revisão: vídeos por guião e hook, player da Drive embutido e "Abrir na Drive", comentários num momento (0:23) que abrem a Drive nesse ponto, respostas, resolver, aprovar ou pedir alterações/rejeitar com motivo, versões e histórico de decisões. Migração `w5_media_review` (aditiva, depois das W8): `media_reviews`, `media_comments`, `media_decisions` e 5 RPCs; `review.approve` ativa. Testes: `w5_media_review` 31/31, `media-time` 18/18.
