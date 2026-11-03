@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-03 (revisão de vídeo)
+
+- **W5-04** revisão de vídeo por link da Google Drive, por cima da biblioteca de media (FR-05-03, FR-05-04 parcial; CHG-006, ADR-0043). Separador "Vídeos" em Revisão: vídeos por guião e hook, player da Drive embutido e "Abrir na Drive", comentários num momento (0:23) que abrem a Drive nesse ponto, respostas, resolver, aprovar ou pedir alterações/rejeitar com motivo, versões e histórico de decisões. Migração `w5_media_review` (aditiva, depois das W8): `media_reviews`, `media_comments`, `media_decisions` e 5 RPCs; `review.approve` ativa. Testes: `w5_media_review` 31/31, `media-time` 18/18.
+
 ## 2026-11-03 (CHG-006 revisão de vídeo por link da Drive)
 
 - **CHG-006** (só documentação; FR-05-03, ING-01). Enquanto não houver object storage, os vídeos a rever ficam na Google Drive da agência e a plataforma guarda o link: player da Drive embutido, "Abrir na Drive", comentários com o momento escrito por quem comenta, aprovar ou pedir alterações com motivo. Sem alteração funcional.

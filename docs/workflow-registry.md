@@ -18,6 +18,10 @@ Envio (W1-14, ADR-0023): `invitation_issue_link` gera um token novo (só o hash 
 
 `aberto → resolvido → aberto` (resolver/reabrir, `content_comment_resolve`). Cada comentário guarda a versão do guião em que foi feito; depois de uma versão nova aparece como "numa versão anterior". Respostas num nível, herdam o bloco. Eventos: `script.commented`, `script.comment_resolved`, `script.comment_reopened`; notificações `script_mention` e `script_comment`.
 
+## Revisão de vídeo (W5-04, CHG-006)
+
+Por versão de um ativo da biblioteca: `por rever → alterações pedidas | rejeitado | aprovado` (`media_review_decide`; motivo obrigatório exceto aprovar). Só a versão atual se decide; aprovado é final. Uma versão nova no mesmo ativo (`media_link_add`) fica `por rever`; a anterior guarda estado, comentários e decisões. Comentários `aberto ⇄ resolvido`. Eventos: `media.commented`, `media.decided`; auditoria `media.review.decided`. Sem notificações nesta fase.
+
 ## Segurança da conta (W1-15)
 
 Verificação em dois passos: `desligada → a configurar` (`mfa.enroll`, fator por verificar, não bloqueia nada) `→ ligada` (código certo; evento `security.mfa_enabled`) `→ desligada` (`mfa.unenroll` numa sessão aal2; `security.mfa_disabled`). Com ela ligada, cada entrada é `aal1 → aal2` depois do código; em aal1 o servidor recusa tudo. Palavra-passe: mudar (com a atual) ou recuperar pelo link (`security.password_changed`). `security.signed_out_everywhere` antes de terminar todas as sessões.
