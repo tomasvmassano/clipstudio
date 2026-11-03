@@ -59,3 +59,15 @@ export function fmtInTz(iso: string, tz: string | null | undefined): string {
     return new Intl.DateTimeFormat("pt-PT", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "UTC" }).format(new Date(iso)) + " UTC";
   }
 }
+
+/** Para onde leva uma notificação da caixa, relativo ao cliente. Vídeos abrem na revisão de vídeo (W5-05). */
+export function notifPath(entityType: string, entityId: string): string {
+  const id = encodeURIComponent(entityId);
+  switch (entityType) {
+    case "task": return `/tarefas?task=${id}`;
+    case "media_asset": return `/revisao?ver=videos&asset=${id}`;
+    case "content": return "/guioes";
+    case "agent_job": return "/agentes/configuracao";
+    default: return "/";
+  }
+}

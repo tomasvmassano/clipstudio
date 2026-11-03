@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-03 (notificações da revisão de vídeo)
+
+- **W5-05** notificações da revisão de vídeo (FR-05-04, ADR-0044): quem registou o vídeo e o responsável do guião são avisados quando um vídeo é aprovado, rejeitado ou tem alterações pedidas (com o motivo); comentários avisam quem registou e respostas avisam o autor do comentário. Preferências no catálogo (grupo Guiões). Na caixa, o aviso abre o vídeo na revisão (`?ver=videos&asset=`). Migração aditiva `20261103171148_w5_media_review_notif_body`; testes `w5_media_review_notif` 16/16, `w8_notif` 72/72 (13 tipos), `notif-format` 19/19.
+
 ## 2026-11-03 (verificação em produção)
 
 - Verificação com sessão real do dono em produção (R-15): 51 rotas sem página de erro nem erros na consola; teleprompter, pesquisa, calendário, Ver como e vista de negócio exercitados. Registo de estado atualizado (FR-16-02, FR-03-01/03/05, FR-11-01, BIZ-01..03, BIZ-07, CAP-05, FR-05-03, R-15; QA-07 passa a parcial). Achados em `docs/qa/verificacao-sessao-real-2026-11-03.md`.
