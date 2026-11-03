@@ -4,7 +4,8 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { checkToken, loadSession, saveSession } from "@/lib/data";
-import { LEGACY_CAPS, loadContext, type Access, type AppContext, type WorkspaceCtx } from "@/lib/access";
+import { LEGACY_CAPS, loadContext, setPreviewMode, type Access, type AppContext, type WorkspaceCtx } from "@/lib/access";
+import { isActive, myPreviews, stopPreview, type Preview } from "@/lib/preview";
 import type { Session } from "@/lib/types";
 import { clientPath, stripWs, wsIdFromPath } from "@/lib/ws-path";
 
@@ -37,6 +38,9 @@ type Ctx = {
   mfaRequired: boolean;
   access: Access | null;
   can: (cap: string) => boolean;
+  /** Pré-visualização ativa neste cliente (BIZ-07): só leitura no servidor; `can` passa a ser o do alvo. */
+  preview: Preview | null;
+  endPreview: () => Promise<void>;
   /** Capacidades de âmbito agência (criar clientes, etc.). O servidor volta a verificar. */
   canOrg: (cap: string) => boolean;
   /** Abre outro cliente, na mesma página se estiver dentro de um cliente. */
@@ -51,7 +55,7 @@ type Ctx = {
 
 const SessionCtx = createContext<Ctx>({
   mode: "loading", email: null, label: null, workspaces: [], ws: null, wsRequested: null, agencyName: null, lastWs: () => null, inviteError: null, profile: null, mfaRequired: false,
-  access: null, can: () => false, canOrg: () => false,
+  access: null, can: () => false, canOrg: () => false, preview: null, endPreview: async () => {},
   setWorkspace: () => {}, signInCode: async () => false, signOut: async () => {}, refresh: async () => {}, error: "",
   dialogOpen: false, setDialogOpen: () => {},
 });
@@ -73,6 +77,7 @@ function legacyWorkspace(s: Session): WorkspaceCtx {
 export function SessionProvider({ children }: { children: ReactNode }) {
   const [mode, setMode] = useState<Mode>("loading");
   const [ctx, setCtx] = useState<AppContext | null>(null);
+  const [previews, setPreviews] = useState<Preview[]>([]);
   const [legacy, setLegacy] = useState<Session | null>(null);
   const [error, setError] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -89,6 +94,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       if (data.session) {
         const c = await loadContext();
         setCtx(c);
+        // pré-visualizações ativas (BIZ-07); falhar aqui não impede a app de abrir
+        setPreviews(await myPreviews().catch(() => []));
         setLegacy(null);
         saveSession(null); // quem entra com conta deixa de ter o código guardado neste browser
         setCodeCookie(false);
@@ -144,6 +151,22 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       router.replace(`/login?mfa=1&next=${encodeURIComponent(pathname)}`);
     }
   }, [mfaRequired, pathname, router]);
+  const [now, setNow] = useState(() => Date.now());
+  const preview = mode === "user" && ws ? previews.find((p) => p.workspace_id === ws.id && isActive(p, now)) ?? null : null;
+  useEffect(() => { setPreviewMode(!!preview); }, [preview]);
+  // quando o prazo passa com a página aberta, a faixa sai e a app volta a pedir o contexto
+  useEffect(() => {
+    if (!preview) return;
+    const ms = new Date(preview.expires_at).getTime() - Date.now() + 500;
+    const id = setTimeout(() => { setNow(Date.now()); void resolve(); }, Math.max(ms, 0));
+    return () => clearTimeout(id);
+  }, [preview, resolve]);
+  const endPreview = useCallback(async () => {
+    if (!ws) return;
+    await stopPreview(ws.id);
+    setPreviews((l) => l.filter((p) => p.workspace_id !== ws.id));
+    await resolve();
+  }, [ws, resolve]);
   const access = useMemo<Access | null>(() => (ws ? { ws: ws.id, token: mode === "code" ? legacy?.token ?? null : null } : null), [ws, mode, legacy]);
 
   const value: Ctx = {
@@ -159,7 +182,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     profile: mode === "user" ? ctx?.user ?? null : null,
     mfaRequired,
     access,
-    can: (cap) => !!ws?.capabilities.includes(cap),
+    can: (cap) => (preview ? preview.capabilities.includes(cap) : !!ws?.capabilities.includes(cap)),
+    preview,
+    endPreview,
     canOrg: (cap) => mode === "user" && !!ctx?.agency?.some((a) => a.status === "active" && a.capabilities?.includes(cap)),
     setWorkspace: (id) => { store.set(WS_KEY, id); router.push(clientPath(id, wsId ? stripWs(pathname) : "")); },
     signInCode: async (token) => {

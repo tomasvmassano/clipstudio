@@ -47,7 +47,13 @@ export async function loadContext(): Promise<AppContext | null> {
 }
 
 /** Mensagens de erro do servidor em PT-PT. */
+// Em pré-visualização (BIZ-07) o servidor recusa as escritas com 42501: a mensagem diz porquê.
+let previewMode = false;
+export function setPreviewMode(on: boolean) { previewMode = on; }
+
 export function friendlyError(msg: string): string {
+  if (previewMode && (msg.includes("sem_permissao") || msg.includes("permission denied")))
+    return "Estás em pré-visualização: só leitura. Sai da pré-visualização para fazer alterações.";
   if (msg.includes("sem_permissao") || msg.includes("permission denied")) return "Não tens permissão para isto neste workspace.";
   if (msg.includes("codigo_invalido") || msg.includes("nao_autenticado")) return "Sessão inválida ou expirada. Entra outra vez.";
   if (msg.includes("acima_do_teto")) return "Não podes dar a alguém um papel acima do teu.";
