@@ -20,7 +20,7 @@ Envio (W1-14, ADR-0023): `invitation_issue_link` gera um token novo (só o hash 
 
 ## Revisão de vídeo (W5-04, CHG-006)
 
-Por versão de um ativo da biblioteca: `por rever → alterações pedidas | rejeitado | aprovado` (`media_review_decide`; motivo obrigatório exceto aprovar). Só a versão atual se decide; aprovado é final. Uma versão nova no mesmo ativo (`media_link_add`) fica `por rever`; a anterior guarda estado, comentários e decisões. Comentários `aberto ⇄ resolvido`. Eventos: `media.commented`, `media.decided`; auditoria `media.review.decided`. Sem notificações nesta fase.
+Por versão de um ativo da biblioteca: `por rever → alterações pedidas | rejeitado | aprovado` (`media_review_decide`; motivo obrigatório exceto aprovar). Só a versão atual se decide; aprovado é final. Uma versão nova no mesmo ativo (`media_link_add`) fica `por rever`; a anterior guarda estado, comentários e decisões. Comentários `aberto ⇄ resolvido`. Eventos: `media.commented`, `media.decided`; auditoria `media.review.decided`. Notificações (W5-05, ADR-0044): `video_decision` a quem registou o ativo/versão e ao responsável do guião; `video_comment` a quem registou e, numa resposta, ao autor do comentário; idempotentes por decisão/comentário e pessoa.
 
 ## Segurança da conta (W1-15)
 

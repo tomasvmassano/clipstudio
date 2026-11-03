@@ -137,6 +137,12 @@ function RevisaoTabs({ access }: { access: Access }) {
     if (t === "videos") p.set("ver", "videos"); else p.delete("ver");
     router.replace(`${path}${p.size ? `?${p}` : ""}`, { scroll: false });
   };
+  const setAsset = useCallback((id: string | null) => {
+    const p = new URLSearchParams(window.location.search);
+    if (id) p.set("asset", id); else p.delete("asset");
+    if (p.get("asset") === sp.get("asset")) return;
+    router.replace(`${path}${p.size ? `?${p}` : ""}`, { scroll: false });
+  }, [path, router, sp]);
   return (
     <div className="flex flex-col gap-4">
       <ToggleGroup value={[tab]} onValueChange={(v) => { const t = (v as string[])[0]; if (t) go(t); }} variant="outline" size="sm" aria-label="O que rever">
@@ -149,7 +155,7 @@ function RevisaoTabs({ access }: { access: Access }) {
             <h1 className="text-2xl font-semibold tracking-tight">Revisão de vídeos</h1>
             <p className="text-sm text-muted-foreground">Abre um hook para ver o vídeo, comentar num momento e aprovar ou pedir alterações.</p>
           </div>
-          <VideoReviewPanel access={access} />
+          <VideoReviewPanel access={access} asset={sp.get("asset")} onAsset={setAsset} />
         </div>
       ) : <RevisaoInner access={access} />}
     </div>

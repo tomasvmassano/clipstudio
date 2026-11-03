@@ -1,6 +1,7 @@
 "use client";
 
 import { clientPath } from "@/lib/ws-path";
+import { notifPath } from "@/lib/notif-format";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BellIcon, CalendarClockIcon, CheckCheckIcon, ClipboardCheckIcon, ListTodoIcon, RotateCwIcon, UserXIcon } from "lucide-react";
@@ -125,7 +126,7 @@ function Caixa() {
             empty="Nada de novo.">
             {f.notifications.map((n) => (
               <li key={n.id} data-notification={n.id} className={cn("flex items-start gap-2 rounded-md p-2", !n.read_at && "bg-muted/60")}>
-                <button type="button" className="min-w-0 flex-1 text-left" onClick={() => { if (!n.read_at) void markRead([n.id]); go(n.workspace_id, n.entity_type === "task" ? `/tarefas?task=${n.entity_id}` : "/"); }}>
+                <button type="button" className="min-w-0 flex-1 text-left" onClick={() => { if (!n.read_at) void markRead([n.id]); go(n.workspace_id, notifPath(n.entity_type, n.entity_id)); }}>
                   <span className={cn("block text-sm", !n.read_at && "font-medium")}>{n.title}</span>
                   <span className="block text-xs text-muted-foreground">{n.workspace} · {fmtDue(n.created_at)}{n.body ? ` · ${n.body}` : ""}</span>
                 </button>

@@ -21,13 +21,17 @@ const tone = (s: ReviewStatus): "default" | "secondary" | "destructive" | "outli
   s === "approved" ? "default" : s === "changes_requested" ? "destructive" : s === "rejected" ? "secondary" : "outline";
 const when = (iso: string) => new Date(iso).toLocaleString("pt-PT", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 
-/** Revisão de vídeo (FR-05-03, CHG-006): vídeos por guião e hook, com o player da Drive, comentários por momento e decisão com motivo. */
-export function VideoReviewPanel({ access }: { access: Access }) {
+/** Revisão de vídeo (FR-05-03, CHG-006): vídeos por guião e hook, com o player da Drive, comentários por momento e decisão com motivo.
+ *  `asset` abre esse vídeo (link da caixa, W5-05); `onAsset` guarda no URL o vídeo aberto, para o link se poder partilhar. */
+export function VideoReviewPanel({ access, asset = null, onAsset }: { access: Access; asset?: string | null; onAsset?: (id: string | null) => void }) {
   const [status, setStatus] = useState<ReviewStatus[]>(["in_review", "changes_requested"]);
   const [q, setQ] = useState("");
   const [list, setList] = useState<ReviewList | null>(null);
   const [err, setErr] = useState("");
-  const [open, setOpen] = useState<string | null>(null);
+  // com onAsset o vídeo aberto vive no URL (controlado); sem ele, no estado local
+  const [local, setLocal] = useState<string | null>(asset);
+  const open = onAsset ? asset : local;
+  const setOpen = onAsset ?? setLocal;
 
   const reload = useCallback(async () => {
     try { setList(await fetchReviewList(access, { status, q: q.trim() || undefined })); setErr(""); }

@@ -1,4 +1,4 @@
-import { fmtInTz, groupBy, muteUntil, personalLock, suppressedLine } from "../src/lib/notif-format.ts";
+import { fmtInTz, groupBy, muteUntil, notifPath, personalLock, suppressedLine } from "../src/lib/notif-format.ts";
 
 let bad = 0; let n = 0;
 const eq = (name: string, got: unknown, exp: unknown) => { n++; if (got !== exp) { bad++; console.log("FAIL", name, JSON.stringify(got), "esperado", JSON.stringify(exp)); } };
@@ -22,5 +22,9 @@ let threw = false; try { muteUntil("zzz", now); } catch { threw = true; }
 eq("opção desconhecida falha", threw, true);
 eq("hora mostrada no fuso do cliente", fmtInTz("2026-10-30T18:00:00Z", "Asia/Dubai").includes("22:00"), true);
 eq("fuso inválido cai para UTC e diz", fmtInTz("2026-10-30T18:00:00Z", "Nao/Existe").endsWith("UTC"), true);
+eq("vídeo abre na revisão de vídeo", notifPath("media_asset", "a b"), "/revisao?ver=videos&asset=a%20b");
+eq("tarefa abre a tarefa", notifPath("task", "7"), "/tarefas?task=7");
+eq("guião abre os guiões", notifPath("content", "numeiro-1"), "/guioes");
+eq("tipo desconhecido vai ao início", notifPath("x", "1"), "/");
 console.log(`notif-format: ${n - bad}/${n}`);
 if (bad) process.exit(1);
