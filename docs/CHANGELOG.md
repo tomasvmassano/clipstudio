@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-03 (CHG-006 revisão de vídeo por link da Drive)
+
+- **CHG-006** (só documentação; FR-05-03, ING-01). Enquanto não houver object storage, os vídeos a rever ficam na Google Drive da agência e a plataforma guarda o link: player da Drive embutido, "Abrir na Drive", comentários com o momento escrito por quem comenta, aprovar ou pedir alterações com motivo. Sem alteração funcional.
+
 ## 2026-10-31 (pré-visualização dos estilos)
 
 - **W8-08** cartões de estilo como o vídeo vai sair (VAR-02 parcial). No catálogo e no editor, cada estilo mostra-se em 1080×1920 com o tipo de letra real (Instrument Serif, Inter), o tamanho, a caixa, as cores e o destaque de cada camada, com texto de exemplo e marcadores para o vídeo e as imagens. No editor, "Mostrar caixas e zona segura" volta a mostrar os retângulos. Tipos opcionais novos na camada (letra, tamanho, alinhamento, linhas, destaque, fundo, raio, sombra). Sem migração nem mudança de permissões. Também em produção (dados, auditado): S14 e S15 v3 com as regras de edição medidas nos reels do lucasanswers e título a 76 px; S16 "Imagem por frase (telemóvel)" novo, v3.

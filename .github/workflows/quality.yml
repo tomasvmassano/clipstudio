@@ -5,7 +5,7 @@ on:
     branches: [main]
 jobs:
   quality:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -32,7 +32,7 @@ jobs:
         run: npm run build
   db:
     # Testes SQL (RLS, RPCs, isolamento) numa base descartável: todas as migrações + dados sintéticos.
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     services:
       postgres:
         image: postgres:17
@@ -83,7 +83,7 @@ jobs:
           retention-days: 14
   e2e:
     # E2E com contas reais (agência, staff, cliente A, cliente B, código de equipa) numa stack Supabase local.
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
