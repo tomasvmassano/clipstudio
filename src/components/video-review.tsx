@@ -137,7 +137,7 @@ function VideoSheet({ access, assetId, onClose, onChanged }: { access: Access; a
       <SheetContent className="w-full overflow-y-auto sm:max-w-xl">
         <SheetHeader>
           <SheetTitle>{d ? `${variantLabel(d.item.variant)}${d.item.style ? ` · ${d.item.style}` : ""} · v${v!.version}` : "Vídeo"}</SheetTitle>
-          <SheetDescription>{d ? (d.item.guiao ? `Guião ${d.item.guiao.n} · ${d.item.guiao.tema ?? ""}` : d.item.title) : "A carregar…"}</SheetDescription>
+          <SheetDescription>{d ? (d.item.guiao ? `Guião ${d.item.guiao.n} · ${d.item.guiao.tema ?? ""}` : d.item.title) : err ? "Não foi possível abrir" : "A carregar…"}</SheetDescription>
         </SheetHeader>
         <div className="flex flex-col gap-4 px-4 pb-6">
           {err && <Alert variant="destructive"><AlertDescription>{err} <Button size="sm" variant="link" onClick={() => void load()}>Tentar de novo</Button></AlertDescription></Alert>}
