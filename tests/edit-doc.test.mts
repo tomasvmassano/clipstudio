@@ -1,4 +1,4 @@
-import { captionAt, deleteSegment, editWord, historyOf, hookEnd, layout, moveSegment, outToSrc, problem, push, redo, splitSegment, srcToOut, trimSegment, undo, wordsOut, type EditDoc } from "../src/lib/edit-doc.ts";
+import { addNote, addOverlay, captionAt, notesOut, resizeOverlay, setGain, setMusic, shiftOverlay, shiftWord, deleteSegment, editWord, historyOf, hookEnd, layout, moveSegment, outToSrc, problem, push, redo, splitSegment, srcToOut, trimSegment, undo, wordsOut, spanOut, type EditDoc } from "../src/lib/edit-doc.ts";
 
 let bad = 0; let n = 0;
 const eq = (name: string, got: unknown, exp: unknown) => { n++; const g = JSON.stringify(got), e = JSON.stringify(exp); if (g !== e) { bad++; console.log("FAIL", name, g, "esperado", e); } };
@@ -39,5 +39,21 @@ let h = historyOf(doc); h = push(h, t1); h = push(h, sp);
 eq("desfazer", undo(h).present === t1, true);
 eq("refazer", redo(undo(h)).present === sp, true);
 eq("editar depois de desfazer apaga o refazer", push(undo(h), doc).future.length, 0);
+const o1 = addOverlay(doc, { id: "o1", kind: "broll", label: "praia", asset: "a1" }, 3, 2);
+eq("visual no cursor fica no tempo da fonte", o1.overlays[0], { id: "o1", kind: "broll", label: "praia", asset: "a1", s: 21, e: 23 });
+eq("visual não passa o fim do corte", addOverlay(doc, { id: "o2", kind: "graphic", label: "x" }, 6.5, 5).overlays[0].e, 25);
+eq("visual segue o corte quando se apara", spanOut(trimSegment(o1, "b1", "in", 21), 21, 23), [{ at: 2, end: 4 }]);
+eq("mover visual", shiftOverlay(o1, "o1", 0.5).overlays[0].s, 21.5);
+eq("visual nunca fica com menos de 0,1 s", resizeOverlay(o1, "o1", "e", 10).overlays[0].e, 21.1);
+const m = setMusic(doc, { label: "Beat", asset: "m1" });
+eq("trocar música guarda o volume", m.audio.music, { label: "Beat", asset: "m1", db: -18 });
+const g = setGain(setGain(m, 20, 22, -30), 21, 23, -6);
+eq("volume por trecho substitui o que se sobrepõe", g.audio.gains, [{ s: 21, e: 23, db: -6 }]);
+eq("tirar a música tira os volumes", setMusic(g, null).audio.gains.length, 0);
+const nn = addNote(doc, 3, "  corta aqui ", "Tomás", "n1");
+eq("nota no momento", notesOut(nn).map((x) => [x.text, x.at]), [["corta aqui", 3]]);
+eq("nota num trecho cortado fica sem posição", notesOut(deleteSegment(nn, "b1"))[0].at, null);
+eq("nota vazia não entra", (addNote(doc, 3, "  ", null, "x").notes ?? []).length, 0);
+eq("mover palavra", shiftWord(doc, "w2", 0.2).captions.words[1].s, 21.2);
 console.log(`edit-doc: ${n - bad}/${n}`);
 if (bad) process.exit(1);

@@ -9,14 +9,14 @@
 3. **O servidor valida a forma mínima** (`_edit_doc_problem`: formato 1, 1-400 segmentos com ≥ 0,1 s, palavras válidas, hook ≤ 200, ≤ 1,5 MB); a app valida o mesmo antes de gravar.
 4. **Capacidades** `edit.timeline` (dono, admin, gestor), `edit.guided` (também revisor e colaborador), `edit.export` (dono, admin, gestor; só usada quando houver export). Ler o editor exige `media.read`, a biblioteca e a flag `edit.studio` (dono por omissão) e uma das duas de edição: o leitor não abre. Importar ou gravar como IA só com `edit.timeline`.
 5. **Versão 1 a partir dos planos do render.** Os 68 vídeos do Numeiro já têm `plan.json` (palavras, cortes, câmaras, caixa do título): convertidos para o formato 1 e gravados como `import`, com verificação de que as palavras caem no mesmo tempo (erro máximo 2 ms).
-6. **UI** `/c/[ws]/editor?asset=`: palco 9:16, inspetor (hook, corte, palavra), linha do tempo com faixas Secções, Cortes, Câmara, Legendas, Visuais e Som, zoom, cursor, desfazer/refazer e atalhos. Abre a partir da revisão do vídeo ("Abrir no editor").
+6. **UI** `/c/[ws]/editor?asset=`: palco 9:16, inspetor (hook, corte, palavra, visual, notas), linha do tempo com faixas Secções, Cortes, Câmara, Legendas, Visuais, Som e Notas, zoom, cursor, desfazer/refazer e atalhos. Arrastar as pontas de cortes e visuais apara; arrastar uma palavra ou um visual move-o (o arrasto entra no histórico só ao largar). Visuais e música vêm da biblioteca de media do cliente (`asset` = id do ativo); volume da música geral e por corte. Notas por momento (N) ficam no documento, em tempo da fonte, com autor e estado: são a entrada do agente (EDL-12). Abre a partir da revisão do vídeo ("Abrir no editor").
 
 ## Limitações (assumidas, à vista na UI)
 
 - **Sem imagem na pré-visualização** até haver proxies em R2 (EDL-08): o palco mostra cortes, câmara, legendas e hook no tempo certo; o vídeo exportado abre na Drive.
 - **Sem exportar** (EDL-11) até o worker estar alojado: o botão está desativado com o motivo; as versões gravadas ficam prontas.
-- Visuais e música ainda vazios nos 68 vídeos (o render atual não os usa); as faixas existem no formato.
-- Ajustes por botões (±0,1/0,5 s) e não por arrastar as pontas na linha do tempo nesta fase.
+- Visuais e música começam vazios nos 68 vídeos (o render atual não os usa); só se veem no export quando o worker os souber renderizar.
+- O palco mostra o nome do visual, não a imagem dele, até haver proxies.
 
 ## Rollback
 

@@ -10,6 +10,8 @@ export type Word = { id: string; w: string; s: number; e: number };
 export type Cam = { s: number; e: number; cam: string; zoom: number; intro?: boolean };
 export type Overlay = { id: string; kind: "broll" | "graphic" | "text"; label: string; asset?: string | null; s: number; e: number };
 export type Gain = { s: number; e: number; db: number };
+/** Nota num momento (tempo da fonte), para quem edita ou para o agente (EDL-12). Fica na versão. */
+export type Note = { id: string; s: number; text: string; by: string | null; done: boolean };
 export type EditDoc = {
   schema: 1; fps: number; size: [number, number]; style: string;
   segments: Seg[];
@@ -18,6 +20,7 @@ export type EditDoc = {
   hook: { text: string };
   overlays: Overlay[];
   audio: { music: { label: string; asset?: string | null; db: number } | null; sfx: { id: string; label: string; s: number }[]; gains: Gain[] };
+  notes?: Note[];
 };
 export type Placed = Seg & { at: number; dur: number };
 
@@ -119,6 +122,51 @@ export const setMusicDb = (doc: EditDoc, db: number): EditDoc =>
   ({ ...doc, audio: { ...doc.audio, music: doc.audio.music ? { ...doc.audio.music, db: Math.max(-40, Math.min(6, Math.round(db))) } : null } });
 export const removeOverlay = (doc: EditDoc, id: string): EditDoc => ({ ...doc, overlays: doc.overlays.filter((o) => o.id !== id) });
 
+/** Põe um visual (B-roll, gráfico ou texto) a começar no instante da saída indicado; fica preso ao trecho da fonte. */
+export function addOverlay(doc: EditDoc, o: Omit<Overlay, "s" | "e">, atOut: number, dur = 2): EditDoc {
+  const p = outToSrc(doc, atOut);
+  if (!p) return doc;
+  const s = p.src, e = Math.min(p.seg.out, s + dur);
+  if (e - s < MIN_SEG) return doc;
+  return { ...doc, overlays: [...doc.overlays, { ...o, s: r3(s), e: r3(e) }] };
+}
+/** Desloca um visual ou uma palavra no tempo da fonte (dentro do mesmo corte, para não ir parar a um trecho cortado). */
+export function shiftOverlay(doc: EditDoc, id: string, dt: number): EditDoc {
+  return { ...doc, overlays: doc.overlays.map((o) => (o.id === id ? { ...o, s: r3(Math.max(0, o.s + dt)), e: r3(Math.max(0, o.e + dt)) } : o)) };
+}
+export function resizeOverlay(doc: EditDoc, id: string, edge: "s" | "e", src: number): EditDoc {
+  return { ...doc, overlays: doc.overlays.map((o) => {
+    if (o.id !== id) return o;
+    return edge === "s" ? { ...o, s: r3(Math.min(Math.max(0, src), o.e - MIN_SEG)) } : { ...o, e: r3(Math.max(src, o.s + MIN_SEG)) };
+  }) };
+}
+export const setMusic = (doc: EditDoc, m: { label: string; asset: string | null } | null): EditDoc =>
+  ({ ...doc, audio: { ...doc.audio, music: m ? { label: m.label.slice(0, 120), asset: m.asset, db: doc.audio.music?.db ?? -18 } : null, gains: m ? doc.audio.gains : [] } });
+/** Volume da música num trecho da fonte (substitui o que já houver nesse trecho). */
+export function setGain(doc: EditDoc, s: number, e: number, db: number): EditDoc {
+  const g = { s: r3(s), e: r3(e), db: Math.max(-40, Math.min(6, Math.round(db))) };
+  return { ...doc, audio: { ...doc.audio, gains: [...doc.audio.gains.filter((x) => x.e <= s || x.s >= e), g].sort((a, b) => a.s - b.s) } };
+}
+export const clearGain = (doc: EditDoc, s: number): EditDoc => ({ ...doc, audio: { ...doc.audio, gains: doc.audio.gains.filter((g) => g.s !== s) } });
+
+export function addNote(doc: EditDoc, atOut: number, text: string, by: string | null, id: string): EditDoc {
+  const p = outToSrc(doc, atOut);
+  const clean = text.trim().slice(0, 500);
+  if (!p || !clean) return doc;
+  return { ...doc, notes: [...(doc.notes ?? []), { id, s: p.src, text: clean, by, done: false }] };
+}
+export const toggleNote = (doc: EditDoc, id: string): EditDoc => ({ ...doc, notes: (doc.notes ?? []).map((n) => (n.id === id ? { ...n, done: !n.done } : n)) });
+export const removeNote = (doc: EditDoc, id: string): EditDoc => ({ ...doc, notes: (doc.notes ?? []).filter((n) => n.id !== id) });
+/** Notas na saída, por ordem (as de trechos cortados ficam com at = null, para não se perderem). */
+export function notesOut(doc: EditDoc): (Note & { at: number | null })[] {
+  return (doc.notes ?? []).map((n) => ({ ...n, at: srcToOut(doc, n.s) })).sort((a, b) => (a.at ?? 1e9) - (b.at ?? 1e9));
+}
+/** Desloca uma palavra (as duas pontas). */
+export const shiftWord = (doc: EditDoc, id: string, dt: number): EditDoc => {
+  const w = doc.captions.words.find((x) => x.id === id);
+  return w ? editWord(doc, id, { s: Math.max(0, w.s + dt), e: Math.max(0, w.e + dt) }) : doc;
+};
+
 /** O mesmo que o servidor recusa (_edit_doc_problem), para avisar antes de gravar. null = válido. */
 export function problem(d: EditDoc): string | null {
   if (!d || d.schema !== 1) return "versão do formato desconhecida";
@@ -127,6 +175,7 @@ export function problem(d: EditDoc): string | null {
   for (const s of d.segments) if (!(s.in >= 0) || !(s.out - s.in >= MIN_SEG - 1e-9)) return "segmento com menos de 0,1 s";
   for (const w of d.captions?.words ?? []) if (!(w.e >= w.s) || w.w.length > 60) return "palavra de legenda inválida";
   if ((d.hook?.text ?? "").length > 200) return "hook demasiado longo";
+  for (const o of d.overlays ?? []) if (!(o.e - o.s >= MIN_SEG - 1e-9)) return "visual com menos de 0,1 s";
   return null;
 }
 
