@@ -3,6 +3,7 @@
 ## 2026-11-04 (editor de vídeo, fase 1)
 
 - **W5-06** editor de vídeo (EDL-07, EDL-09 parcial; CHG-007, ADR-0046): documento de edição versionado por vídeo, em tempo da fonte; página `/c/[ws]/editor?asset=` com palco, inspetor e linha do tempo (secções, cortes, câmara, legendas, visuais, som), desfazer/refazer e atalhos; gravar versão com conflito protegido; abre da revisão. Os 68 vídeos do Numeiro entram com a versão 1 tirada do plano do render. Sem imagem na pré-visualização nem exportar até haver R2 e worker (à vista na UI). Testes `w5_edit_doc` 21/21, suite SQL 1764, `edit-doc` 25/25.
+- W5-06: a área principal do editor já não alarga para lá do ecrã com a barra lateral aberta (`min-w-0` no SidebarInset).
 
 ## 2026-11-04 (navegar como papel)
 

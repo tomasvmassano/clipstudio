@@ -76,7 +76,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | EDL-01 | P0 | parcial | job do pacote de edição (precisa de ingestão ING-01..03, render e worker alojado) | Pacote de edição automático |
 | EDL-03 | P0 | parcial | ligar ao job do pacote e guardar o relatório por variante na app (EDL-02); calibrar limites no piloto | QC técnico em código antes de qualquer revisão por IA |
 | EDL-07 | P0 | parcial | versão 1 gerada pela IA no job do pacote (EDL-01); visuais e música ainda vazios | Documento de edição |
-| EDL-09 | P0 | parcial | imagem na pré-visualização (EDL-08); render de visuais e música no export (EDL-11); verificação com sessão real | Linha do tempo (modo completo) |
+| EDL-09 | P0 | parcial | imagem na pré-visualização (EDL-08); render de visuais e música no export (EDL-11) | Linha do tempo (modo completo) |
 | PERF-01 | P0 | parcial | criador/marca é só um campo por conta; verificação com conta real (R-15) | Hierarquia |
 | PERF-02 | P0 | parcial | o publicador (PUB) tem de chamar perf_record_lineage | Etiquetas obrigatórias à publicação (R-18) |
 | PERF-03 | P0 | parcial | histórico só desde a primeira captura; 1 h quase nunca existe com scraping diário | Fotografias por idade |
@@ -646,7 +646,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 |---|---|---|---|---|
 | EDL-07 | parcial | versão 1 gerada pela IA no job do pacote (EDL-01); visuais e música ainda vazios | edit_documents/edit_versions imutáveis, edit_doc_get/save com conflito, 68 vídeos importados do plano (W5-06, ADR-0046); w5_edit_doc 21/21; edit-doc 25/25; produção 04/11: 68 documentos com v1 importada do plano (13 866 palavras); produção 04/11: abrir, nota no cursor, gravar v2, v1 intacta, restaurar v1 como v3, 0 erros | 2026-11-04 (sessão real do dono da agência, produção) |
 | EDL-08 | bloqueado | precisa de R2 (proxies), conta do Tomás; hoje o palco mostra cortes, legendas e hook sem imagem |  | — |
-| EDL-09 | parcial | imagem na pré-visualização (EDL-08); render de visuais e música no export (EDL-11); verificação com sessão real | /c/[ws]/editor: faixas, arrastar pontas e mover, dividir, tirar, reordenar, palavras e hook, visuais e música da biblioteca, volume por corte, notas por momento, desfazer/refazer, atalhos (W5-06); edit-doc 37/37 | 2026-11-04 (sessão real do dono da agência, produção) |
+| EDL-09 | parcial | imagem na pré-visualização (EDL-08); render de visuais e música no export (EDL-11) | /c/[ws]/editor: faixas, arrastar pontas e mover, dividir, tirar, reordenar, palavras e hook, visuais e música da biblioteca, volume por corte, notas por momento, desfazer/refazer, atalhos (W5-06); edit-doc 37/37; área principal cabe no ecrã com a barra lateral (min-w-0) | 2026-11-04 (sessão real do dono da agência, produção) |
 | EDL-10 | por começar |  |  | — |
 | EDL-11 | bloqueado | precisa do worker alojado e de R2, contas do Tomás; botão Exportar desativado com o motivo |  | — |
 | EDL-12 | por começar |  |  | — |
