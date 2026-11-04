@@ -20,4 +20,4 @@
 
 ## Rollback
 
-Bloco no fim da migração; a flag `edit.studio` desliga a UI.
+Bloco no fim de `supabase/migrations/20261104180102_w5_editor_doc.sql`; a flag `edit.studio` desliga a UI.
