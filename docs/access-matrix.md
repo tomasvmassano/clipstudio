@@ -58,6 +58,9 @@ Um `agency_member` sem atribuição a um workspace **não vê nada** desse works
 | ligar referência a guião | precisa de `references.read` + `scripts.edit` no mesmo cliente |||||
 | `review.comment` | ✓ | ✓ | ✓ | ✓ | ✓ | — |
 | `review.approve` | ✓ | ✓ | ✓ | — | ✓ | — |
+| `edit.timeline` | ✓ | ✓ | ✓ | — | — | — |
+| `edit.guided` | ✓ | ✓ | ✓ | ✓ | ✓ | — |
+| `edit.export` | ✓ | ✓ | ✓ | — | — | — |
 | `media.upload` / `download` | ✓ | ✓ | ✓ | ✓ | ✓ | — |
 | `media.share` | ✓ | ✓ | ✓ | — | — | — |
 | `publishing.schedule` / `publish` | ✓ | ✓ | grant | — | — | — |

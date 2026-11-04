@@ -16,6 +16,9 @@ import {
   type ReviewDetail, type ReviewItem, type ReviewList, type ReviewStatus,
 } from "@/lib/media-review";
 import { driveLinks, fmtMoment, parseMoment } from "@/lib/media-time";
+import Link from "next/link";
+import { useFlags } from "@/lib/flags";
+import { clientPath } from "@/lib/ws-path";
 
 const tone = (s: ReviewStatus): "default" | "secondary" | "destructive" | "outline" =>
   s === "approved" ? "default" : s === "changes_requested" ? "destructive" : s === "rejected" ? "secondary" : "outline";
@@ -115,6 +118,7 @@ function VideoSheet({ access, assetId, onClose, onChanged }: { access: Access; a
   const [body, setBody] = useState("");
   const [reason, setReason] = useState("");
   const [asking, setAsking] = useState<"changes_requested" | "rejected" | null>(null);
+  const flags = useFlags(access.ws, access.token);
 
   const load = useCallback(async () => {
     try { setD(await fetchReview(access, assetId, ver)); setErr(""); } catch (e) { setErr((e as Error).message); }
@@ -151,6 +155,11 @@ function VideoSheet({ access, assetId, onClose, onChanged }: { access: Access; a
                   <a href={links.view} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 font-medium text-foreground underline underline-offset-2">
                     <ExternalLinkIcon className="size-3" /> Abrir na Drive
                   </a>
+                  {flags?.has("edit.studio") && (
+                    <Link href={clientPath(access.ws, `/editor?asset=${assetId}`)} className="inline-flex items-center gap-1 font-medium text-foreground underline underline-offset-2">
+                      Abrir no editor
+                    </Link>
+                  )}
                   <span>Se o vídeo não abrir, pede acesso ao ficheiro na Drive.</span>
                 </div>
               </div>
