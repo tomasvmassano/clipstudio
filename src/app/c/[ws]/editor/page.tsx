@@ -204,7 +204,7 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
   const back = clientPath(access.ws, `/revisao?ver=videos&asset=${st.asset.id}`);
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex min-w-0 flex-col gap-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <Link href={back} className="text-xs text-muted-foreground hover:underline">← Revisão</Link>
@@ -341,8 +341,8 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
         </div>
       </div>
 
-      {/* linha do tempo */}
-      <div className="flex flex-col gap-2 rounded-lg border p-3">
+      {/* linha do tempo (min-w-0: a faixa larga rola dentro, sem alargar a página) */}
+      <div className="flex min-w-0 flex-col gap-2 rounded-lg border p-3">
         <div className="flex flex-wrap items-center gap-3 text-sm">
           <span className="font-medium">Linha do tempo</span>
           <label className="flex items-center gap-2 text-muted-foreground">Zoom
@@ -372,7 +372,7 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
           <div className="w-20 shrink-0 text-xs text-muted-foreground">
             {["", "Secções", "Cortes", "Câmara", "Legendas", "Visuais", "Som", "Notas"].map((l, i) => <div key={i} style={{ height: i === 0 ? 20 : TRACK_H }} className="flex items-center">{l}</div>)}
           </div>
-          <div className="overflow-x-auto">
+          <div className="min-w-0 flex-1 overflow-x-auto">
             <div className="relative select-none" style={{ width }}>
               {/* régua */}
               <div className="relative h-5 cursor-pointer border-b" onClick={(e) => { const r = (e.currentTarget as HTMLDivElement).getBoundingClientRect(); setT(Math.min(duration, Math.max(0, (e.clientX - r.left) / pps))); }}>
