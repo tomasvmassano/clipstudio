@@ -101,6 +101,11 @@ Estado: **ativo** (existe e é verificado no servidor por `authorize()`; também
 | `references.dissect` | Referências por link: dissecar e adaptar (REF-01..04) | M | ws, org | W4 (CHG-005) | — |
 | `styles.library.manage` | Biblioteca de estilos da agência (REF-05..07) | M | org | W5 (CHG-005) | — |
 | `styles.import` | Importar estilo da agência para um cliente (REF-08) | M | org, ws | W5 (CHG-005) | — |
+| `lessons.read` | Aprendizagem: lições propostas e aprovadas (LRN-02..04) | B | ws, org | W7 (CHG-008) | — |
+| `lessons.manage` | Aprovar, editar e rejeitar lições (LRN-03/04) | A | ws, org | W7 (CHG-008) | — |
+| `clips.mine` | Correr o Clip Miner num vídeo longo (CLIP-01..07) | M | ws | W5 (CHG-008) | — |
+| `studio.capture` | Começar e parar sessão no agente de estúdio (STU-02) | M | ws | W5 (CHG-008) | — |
+| `gaze.correct` | Correção do olhar por IA (GAZE-05) | A | ws | W5 (CHG-008) | — |
 | `integrations.manage` | Settings (M15) | A | ws | ativo (W8) | Testar recolha e motor (`integrations_test`), revogar conta social com motivo e purga do segredo (`integrations_social_revoke`); ligar/renovar indisponíveis sem OAuth |
 | `integrations.read` | Settings (M15) | B | ws | ativo (W8) | `/c/[ws]/definicoes/integracoes` (flag `integrations.center`, `integrations_overview`): contas sociais, recolha de métricas, motor de agentes; estados reais, sem tokens |
 | `integrations.agency.read` | Settings (M15) | B | org | ativo (W8) | `/integracoes` (`integrations_agency`): Drive, R2, Resend, limites das APIs, workers e estado por cliente |
