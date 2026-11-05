@@ -4,6 +4,10 @@
 
 - **W5-17** o export desenha o aspeto guardado (legendas e hook: cor, destaque, fundo, tamanho, posição) e os visuais do documento (b-roll a ecrã inteiro, gráficos na caixa, cartões de texto), pela mesma lógica de cortes do editor (numeiro-engine #15). `edit_export_request` resolve os visuais para a versão no R2 do mesmo cliente (`_edit_resolve_visuals`); ativo sem versão R2 fica de fora com aviso, sem falhar o export (EDL-11, EDL-13). Testes `w5_export_visuais` 8/8, motor `test_render_doc`.
 
+## 2026-11-06 (E2E revisão dos exportados e frases-persona)
+
+- **W5-15** E2E Playwright com contas reais (EDL-02, R-17): `e2e/review-stored.spec.ts` (vídeo exportado na Revisão → Vídeos com notas do QC; sem R2 local o player mostra o erro e "Tentar de novo", sem spinner; com o link assinado simulado no browser e um clip WebM real: "Agora" preenche o momento, o tempo do comentário salta no vídeo, "Aprovar e seguinte" abre o hook seguinte; revisor vê o pacote mas não exporta, 42501; "Exportar todos" põe um export por vídeo e repetir não duplica; cliente B 403/42501 na rota, na API e no link da versão leve) e `e2e/persona-phrases.spec.ts` (admin grava versões, frase com outra pessoa bloqueada sem consentimento na UI e no servidor 22023, histórico, manager só leitura 42501, cliente B 42501). Sem mudanças de produto.
+
 ## 2026-11-06 (frases-persona)
 
 - **W5-14** lista de frases-persona por cliente (R-17, CHG-003; ADR-0053): Agentes → Frases-persona; cada gravação é uma versão nova e imutável, auditada com o que entrou e saiu; frases que envolvem outra pessoa exigem o consentimento registado; capacidade `persona.manage` (dono e admin do cliente). O worker recebe a lista em vigor e os agentes só usam essas frases (lista vazia: sem hipérbole de persona); a versão fica no log de cada chamada (numeiro-engine #14). Testes `w5_persona_phrases` 21/21, `persona-rules` 11/11, motor `test_persona` 4/4.
