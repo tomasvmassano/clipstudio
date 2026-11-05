@@ -61,6 +61,7 @@ Um `agency_member` sem atribuição a um workspace **não vê nada** desse works
 | `edit.timeline` | ✓ | ✓ | ✓ | — | — | — |
 | `edit.guided` | ✓ | ✓ | ✓ | ✓ | ✓ | — |
 | `edit.export` | ✓ | ✓ | ✓ | — | — | — |
+| gravar no modo guiado (só `edit.guided`) | só palavras, hook, tirar/repor cortes, música da biblioteca do cliente, notas próprias; resto recusado no servidor (ADR-0047) |||||
 | `media.upload` / `download` | ✓ | ✓ | ✓ | ✓ | ✓ | — |
 | `media.share` | ✓ | ✓ | ✓ | — | — | — |
 | `publishing.schedule` / `publish` | ✓ | ✓ | grant | — | — | — |

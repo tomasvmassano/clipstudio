@@ -24,7 +24,9 @@ Por versão de um ativo da biblioteca: `por rever → alterações pedidas | rej
 
 ## Edição de vídeo (W5-06, CHG-007)
 
-Por vídeo: documento com versões imutáveis `v1 (import/IA) → v2 (editada) → …`; gravar exige a versão atual como base (conflito 40001 senão); restaurar uma versão antiga grava-a como nova. Exportar (EDL-11) transformará uma versão em versão nova do ativo, que volta a "por rever". Evento `edit.version_saved`; auditoria `edit.version_saved`.
+Por vídeo: documento com versões imutáveis `v1 (import/IA) → v2 (editada) → …`; gravar exige a versão atual como base (conflito 40001 senão); restaurar uma versão antiga grava-a como nova. Exportar (EDL-11) transformará uma versão em versão nova do ativo, que volta a "por rever". Evento `edit.version_saved`; auditoria `edit.version_saved` (com `mode`).
+
+Modo guiado (W5-07, ADR-0047): quem só tem `edit.guided` grava pela mesma RPC, mas só texto de palavras e hook, tirar/repor cortes de versões anteriores, música da biblioteca do cliente e notas próprias; o resto é recusado (`42501 modo_guiado`).
 
 ## Segurança da conta (W1-15)
 

@@ -1,16 +1,20 @@
 import { supabase } from "@/lib/supabase";
 import { friendlyError, type Access } from "@/lib/access";
-import type { EditDoc } from "@/lib/edit-doc";
+import type { EditDoc, PoolSeg, Seg } from "@/lib/edit-doc";
 
 /** Editor de vídeo (EDL-07/09, ADR-0046): leitura e gravação de versões do documento de edição. O servidor decide tudo. */
 export type EditVersionMeta = { id: string; version_no: number; base_version_id: string | null; source: "import" | "ai" | "user" | "agent"; note: string | null; created_label: string | null; created_at: string };
 export type EditState = {
   asset: { id: string; title: string; content_id: string | null; tags: string[]; variant: string; style: string | null; drive_file_id: string | null; media_version_no: number | null };
-  guiao: { id: string; n: number; date: string; tema: string | null } | null;
+  guiao: { id: string; n: number; date: string; tema: string | null; hooks?: string[] } | null;
   document: { id: string; current_version_id: string; updated_at: string } | null;
   version: (EditVersionMeta & { doc: EditDoc }) | null;
   versions: EditVersionMeta[];
-  can: { timeline: boolean; guided: boolean; export: boolean };
+  /** A última versão escrita pela IA (import/ai): a "escolha da IA" no modo guiado (EDL-10). */
+  ai_choice?: { version_no: number; hook: string | null; music: EditDoc["audio"]["music"]; segments: Seg[] } | null;
+  /** Cortes de versões anteriores que não estão nesta (para repor no modo guiado). */
+  cut_pool?: PoolSeg[];
+  can: { timeline: boolean; guided: boolean; export: boolean; styles?: boolean };
 };
 
 async function rpc<T>(fn: string, args: Record<string, unknown>): Promise<T> {
