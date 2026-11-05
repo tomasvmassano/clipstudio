@@ -36,6 +36,7 @@ export const agencyNavGroups: SidebarNavGroup[] = [
 			{ title: "Clientes", path: "/clientes", icon: <Building2Icon />, orgCap: "workspaces.read" },
 			{ title: "Negócio", path: "/negocio", icon: <BriefcaseBusinessIcon />, orgCap: "biz.read", flag: "biz.view" },
 			{ title: "Contratos e custos", path: "/negocio/contratos", icon: <ReceiptIcon />, orgCap: "biz.finance", flag: "biz.view" },
+			{ title: "Custos", path: "/custos", icon: <WalletIcon />, orgCap: "costs.read_agency", flag: "costs.agency" },
 			{ title: "Caixa de entrada", path: "/caixa", icon: <InboxIcon />, orgCap: "dashboard.agency" },
 			{ title: "Equipa da agência", path: "/equipa-agencia", icon: <UsersRoundIcon />, orgCap: "team.read" },
 			{ title: "Integrações", path: "/integracoes", icon: <PlugIcon />, orgCap: "integrations.agency.read" },
@@ -46,7 +47,7 @@ export const agencyNavGroups: SidebarNavGroup[] = [
 		label: "Em breve",
 		items: [
 			{ title: "Calendário de todos", icon: <CalendarDaysIcon />, soon: true },
-			{ title: "Custos", icon: <WalletIcon />, soon: true },
+			{ title: "Custos", icon: <WalletIcon />, soon: true, unlessFlag: "costs.agency" },
 			{ title: "Histórico da agência", icon: <ScrollIcon />, soon: true },
 			{ title: "Definições da agência", icon: <SettingsIcon />, soon: true },
 		],

@@ -9,21 +9,47 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { FlagGate } from "@/components/flag-gate";
 import { WorkspaceGate } from "@/components/workspace-gate";
 import { WidgetBoundary } from "@/components/widget-boundary";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AiUsageView } from "@/components/costs/ai-usage";
 import { Bar, LearnState, Stat, selectCls, useLoad } from "@/components/learn/learn-shared";
 import type { Access } from "@/lib/access";
 import { download, eur, exportCosts, fetchCosts, monthLabel, toCsv, type CostReport } from "@/lib/learn";
 import { EDITORIAL_LABEL, type EditorialStatus } from "@/lib/types";
 
 /*
- * Custo por guião, vídeo e publicação (FR-10-05, ADR-0037): custo dos agentes repartido pelos guiões que cada execução
+ * Custos do cliente: consumo de IA por agente, modelo e execução (FR-10-01, ADR-0060) e
+ * custo por guião, vídeo e publicação (FR-10-05, ADR-0037): custo dos agentes repartido pelos guiões que cada execução
  * gerou e pelas publicações de cada guião, tendência mensal e CSV. Só com costs.read (o servidor omite tudo o resto).
  */
 
 export default function CustosPage() {
   return (
     <WorkspaceGate need="costs.read">
-      {(access) => <FlagGate flag="costs.content" ws={access.ws}><CostsView access={access} /></FlagGate>}
+      {(access) => <FlagGate flag="costs.content" ws={access.ws}><CostsTabs access={access} /></FlagGate>}
     </WorkspaceGate>
+  );
+}
+
+function CostsTabs({ access }: { access: Access }) {
+  const [tab, setTab] = useState<"ia" | "guioes">("ia");
+  return (
+    <div className="flex min-w-0 flex-col gap-4">
+      <Tabs value={tab} onValueChange={(x) => setTab(String(x) as "ia" | "guioes")}>
+        <TabsList className="flex h-auto flex-wrap justify-start">
+          <TabsTrigger value="ia">Consumo de IA</TabsTrigger>
+          <TabsTrigger value="guioes">Por guião e publicação</TabsTrigger>
+        </TabsList>
+      </Tabs>
+      {tab === "ia" ? (
+        <div className="flex min-w-0 flex-col gap-4">
+          <div className="min-w-0">
+            <h1 className="text-2xl font-semibold tracking-tight">Consumo de IA</h1>
+            <p className="text-sm text-muted-foreground">Custo dos agentes deste cliente por agente, modelo e execução.</p>
+          </div>
+          <AiUsageView ws={access.ws} token={access.token} />
+        </div>
+      ) : <CostsView access={access} />}
+    </div>
   );
 }
 

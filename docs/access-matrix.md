@@ -13,7 +13,7 @@ Fonte: PRD v2.1 §3 (papéis), §5A (TEAM-01…16), CAP-03/05/08. **PROPOSTA de 
 | `team.invite` (staff interno) | ✓ | se delegado | — | — |
 | `team.manage` (atribuir staff a clientes, `agency_staff_assign`) | ✓ | — (idem) | — | — |
 | `permissions.manage` (org) | ✓ | limitado | — | — |
-| `costs.read_agency` | ✓ | se delegado | — | — |
+| `costs.read_agency` (`/custos`, só clientes em que também tem `costs.read`) | ✓ | se delegado | — | — |
 | `audit.read` (org) | ✓ | ✓ | — | — |
 | `flags.manage` (funcionalidades em teste, `/funcionalidades`) | ✓ | — | — | — |
 | `biz.read` (vista de negócio, só operacional dos clientes atribuídos) | ✓ (todos) | ✓ | ✓ | ✓ |
@@ -69,10 +69,12 @@ Um `agency_member` sem atribuição a um workspace **não vê nada** desse works
 | `publishing.schedule` / `publish` | ✓ | ✓ | grant | — | — | — |
 | `analytics.read` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `costs.read` | ✓ | ✓ | grant | — | — | — |
+| `costs.export` (W10-10) | ✓ | ✓ | grant | — | — | — |
 | `agents.read` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `agents.rehearse` / `run` | ✓ | ✓ | ✓ | — | — | — |
 | `agents.configure` | ✓ | ✓ | — | — | — | — |
 | custo de execuções e limite diário | precisa de `costs.read`; sem ela a app e o RPC omitem custo, tokens, gasto e limite |||||
+| Custos de IA (`costs_ai_usage`, W10-10) | cliente: `costs.read` + flag `costs.content`; agência: `costs.read_agency` + flag `costs.agency`, só clientes com `costs.read`; exportar com `costs.export` em todos os clientes da resposta; código de equipa e anónimo sempre recusados (42501); execuções sem quem pediu. **Decisão pendente do owner:** `workspace_admin`/`workspace_owner` de cliente (client_staff) têm `costs.read`/`costs.export` por defeito (PRD §3 "se autorizado" vs AGENTS §9) |||||
 | worker do motor (`worker_claim`, `worker_heartbeat`, `worker_save_script`, `worker_finish`) | só `service_role` e o utilizador de base `engine_worker` (sem login até o dono definir password); nenhum papel de utilizador nem o código de equipa |||||
 | `engine_worker` nas tabelas | lê e escreve só as tabelas de pesquisa do motor; não lê `guioes`, `workspace_access`, `agent_jobs` nem configurações; guiões só por `worker_save_script` |||||
 | dados de pesquisa do motor (W4-03) | por cliente (`client_id` em reels, temas, citações, análises, generated, meta, relatórios); o motor só lê e escreve no cliente da execução; Descobrir e referências só mostram reels e análises do próprio cliente; anon e authenticated sem linhas (RLS sem política). A política do `engine_worker` exige o cliente da sessão (`engine.client_id`); sem ele não vê nada |||||
