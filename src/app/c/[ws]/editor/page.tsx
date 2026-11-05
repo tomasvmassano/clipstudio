@@ -18,13 +18,18 @@ import { SOURCE_LABEL, fetchEdit, saveEdit, type EditState } from "@/lib/edit";
 import { fetchLibrary, type MediaAsset } from "@/lib/media";
 import { useSession } from "@/components/session-provider";
 import {
-  addNote, addOverlay, captionAt, clearGain, deleteSegment, editWord, fmtT, historyOf, hookEnd, layout, moveSegment, notesOut, outToSrc, problem, push, redo,
+  addNote, addOverlay, clearGain, deleteSegment, editWord, fmtT, historyOf, layout, moveSegment, notesOut, problem, push, redo,
   removeNote, removeOverlay, resizeOverlay, setGain, setHook, setMusic, setMusicDb, shiftOverlay, shiftWord, spanOut, splitSegment, toggleNote, trimSegment, undo,
   wordsOut, type EditDoc, type History,
 } from "@/lib/edit-doc";
 import { variantLabel } from "@/lib/media-review";
 import { clientPath } from "@/lib/ws-path";
 import { cn } from "@/lib/utils";
+import { EditorStage } from "@/components/edit/editor-stage";
+import { ExportPanel } from "@/components/editor/export-panel";
+import { PreviewVideo } from "@/components/editor/preview-video";
+import { GuidedEditor } from "@/components/edit/guided-editor";
+import { LookPanel, SavedStylesPanel } from "@/components/edit/style-tools";
 
 type Sel = { kind: "seg" | "word" | "ov" | "note"; id: string } | null;
 type DragKind = "seg-in" | "seg-out" | "word" | "ov" | "ov-s" | "ov-e";
@@ -65,13 +70,15 @@ function EditorLoader({ access }: { access: Access }) {
       <Button size="sm" variant="outline" render={<Link href={clientPath(access.ws, `/revisao?ver=videos&asset=${asset}`)} />} nativeButton={false}>Voltar à revisão</Button>
     </AlertDescription></Alert>
   );
+  // modo guiado (EDL-10): quem só tem edit.guided; quem tem a linha do tempo pode abrir a vista guiada com ?modo=guiado
+  if (!st.can.timeline || sp.get("modo") === "guiado") return <GuidedEditor key={st.version.id} access={access} st={st} onReload={load} />;
   return <Editor key={st.version.id} access={access} st={st} onReload={load} />;
 }
 
 function Editor({ access, st, onReload }: { access: Access; st: EditState; onReload: (v?: string | null) => Promise<void> }) {
   const v = st.version!;
   const isCurrent = v.id === st.document?.current_version_id;
-  const canEdit = (st.can.timeline || st.can.guided) && isCurrent;
+  const canEdit = st.can.timeline && isCurrent;   // sem edit.timeline abre o modo guiado (GuidedEditor)
   const [h, setH] = useState<History>(() => historyOf(v.doc));
   const [drag, setDrag] = useState<Drag | null>(null);
   const doc = drag?.doc ?? h.present;      // enquanto se arrasta mostra o resultado; ao largar entra no histórico
@@ -82,7 +89,6 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
   const dirty = h.past.length > 0;
   const { segs, duration } = useMemo(() => layout(doc), [doc]);
   const words = useMemo(() => wordsOut(doc), [doc]);
-  const hEnd = useMemo(() => hookEnd(doc), [doc]);
   const [tRaw, setT] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [sel, setSel] = useState<Sel>(null);
@@ -195,11 +201,8 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
   const selWord = sel?.kind === "word" ? doc.captions.words.find((w) => w.id === sel.id) ?? null : null;
   const selOv = sel?.kind === "ov" ? doc.overlays.find((o) => o.id === sel.id) ?? null : null;
   const notes = notesOut(doc);
-  const srcNow = outToSrc(doc, t)?.src ?? null;
-  const ovNow = doc.overlays.filter((o) => srcNow != null && srcNow >= o.s && srcNow < o.e);
   const visuals = (lib ?? []).filter((a) => EDITABLE_KINDS.has(a.kind));
   const tracks = (lib ?? []).filter((a) => a.kind === "audio");
-  const caption = captionAt(doc, t);
   const width = Math.max(600, Math.ceil(duration * pps) + 40);
   const back = clientPath(access.ws, `/revisao?ver=videos&asset=${st.asset.id}`);
 
@@ -222,34 +225,20 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
           </select>
           <Button size="sm" variant="outline" disabled={!h.past.length} onClick={() => setH(undo)} aria-label="Desfazer"><Undo2Icon /></Button>
           <Button size="sm" variant="outline" disabled={!h.future.length} onClick={() => setH(redo)} aria-label="Refazer"><Redo2Icon /></Button>
-          <Button size="sm" disabled title="Exportar precisa do worker alojado e do armazenamento de vídeo (R2). As versões gravadas ficam prontas para exportar.">Exportar</Button>
+          <Button size="sm" variant="outline" render={<Link href={clientPath(access.ws, `/editor?asset=${st.asset.id}&modo=guiado`)} />} nativeButton={false}>Modo guiado</Button>
         </div>
       </div>
 
-      <Alert><AlertDescription>
-        Pré-visualização sem imagem até haver armazenamento de vídeo (R2): os cortes, as legendas e o hook aparecem no tempo certo; o vídeo exportado (v{st.asset.media_version_no ?? 1}) abre na Drive.
-        {st.asset.drive_file_id && <a className="ml-1 inline-flex items-center gap-1 underline" href={`https://drive.google.com/file/d/${st.asset.drive_file_id}/view`} target="_blank" rel="noreferrer">Abrir na Drive <ExternalLinkIcon className="size-3" /></a>}
-      </AlertDescription></Alert>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <ExportPanel access={access} ws={access.ws} asset={st.asset.id} versionId={isCurrent ? v.id : null} versionNo={v.version_no} dirty={dirty} canExport={st.can.export} />
+        {st.asset.drive_file_id && <a className="inline-flex items-center gap-1 text-sm underline" href={`https://drive.google.com/file/d/${st.asset.drive_file_id}/view`} target="_blank" rel="noreferrer">Vídeo anterior na Drive <ExternalLinkIcon className="size-3" /></a>}
+      </div>
       {msg && <Alert variant={msg.kind === "err" ? "destructive" : "default"}><AlertDescription>{msg.text}</AlertDescription></Alert>}
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,20rem)_1fr]">
         {/* palco 9:16 */}
         <div className="flex flex-col gap-2">
-          <div className="relative mx-auto aspect-[9/16] w-full max-w-[20rem] overflow-hidden rounded-lg border bg-neutral-900" aria-label="Pré-visualização">
-            <div className="absolute inset-0 flex items-center justify-center text-xs text-neutral-500">
-              {(() => { const s = segAt(t); const src = outToSrc(doc, t)?.src; const cam = doc.cameras.find((c) => src != null && src >= c.s && src < c.e);
-                return `${cam ? (cam.cam === "front" ? "Câmara frente" : "Câmara lado") : "Câmara"}${cam && cam.zoom !== 1 ? ` · zoom ${cam.zoom}` : ""} · corte ${segs.indexOf(s) + 1}`; })()}
-            </div>
-            {t < hEnd && doc.hook.text && (
-              <div className="absolute inset-x-[8%] top-[11%] text-center text-[15px] font-extrabold leading-tight text-white [text-shadow:0_1px_3px_#000,0_0_2px_#000]">{doc.hook.text}</div>
-            )}
-            {ovNow.map((o) => (
-              <div key={o.id} className="absolute inset-x-[10%] top-[38%] rounded border border-white/30 bg-black/50 px-2 py-1 text-center text-[11px] text-white">
-                {o.kind === "broll" ? "B-roll" : o.kind === "graphic" ? "Gráfico" : "Texto"}: {o.label}
-              </div>
-            ))}
-            {caption && <div className="absolute inset-x-[6%] bottom-[24%] text-center text-[17px] font-black text-white [text-shadow:0_2px_4px_#000,0_0_3px_#000]">{caption}</div>}
-          </div>
+          <EditorStage doc={doc} t={t} media={<PreviewVideo access={access} asset={st.asset.id} versionId={v.id} doc={doc} t={t} playing={playing} />} />
           <div className="flex items-center justify-center gap-2">
             <Button size="sm" variant="outline" onClick={() => setT((x) => Math.max(0, x - 1))} aria-label="Recuar 1 s"><ArrowLeftIcon /></Button>
             <Button size="sm" onClick={() => { if (t >= duration) setT(0); setPlaying((p) => !p); }} aria-label={playing ? "Pausa" : "Tocar"}>{playing ? <PauseIcon /> : <PlayIcon />}</Button>
@@ -304,6 +293,13 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
             </div>
           )}
           {!sel && <p className="text-muted-foreground">Clica num corte ou numa palavra na linha do tempo para a ajustar. Arrasta as pontas de um corte ou de um visual para aparar e uma palavra ou um visual para o mover. Atalhos: Espaço tocar, ←/→ 0,1 s (Shift 1 s), S dividir, N nota, Delete tirar, Cmd+Z desfazer.</p>}
+          <details className="border-t pt-3">
+            <summary className="cursor-pointer font-medium">Aspeto e estilos guardados</summary>
+            <div className="mt-2 flex flex-col gap-3">
+              <LookPanel doc={doc} disabled={!canEdit} onChange={apply} />
+              <SavedStylesPanel access={access} st={st} dirty={dirty} canSave={!!st.can.styles} onApplied={() => onReload()} />
+            </div>
+          </details>
           <div className="flex flex-col gap-2 border-t pt-3" aria-label="Notas">
             <span className="font-medium">Notas {notes.length > 0 && <span className="text-muted-foreground">({notes.filter((n) => !n.done).length} por tratar)</span>}</span>
             <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); apply(addNote(doc, t, newNote, me, nextId("n"))); setNewNote(""); }}>
@@ -335,7 +331,7 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
                 {!canEdit && <span className="text-xs text-muted-foreground">Não tens permissão para editar vídeos neste cliente.</span>}
               </>
             ) : (
-              <Button variant="outline" disabled={saving || !(st.can.timeline || st.can.guided)} onClick={() => void restore()}>Restaurar esta versão como nova</Button>
+              <Button variant="outline" disabled={saving || !st.can.timeline} onClick={() => void restore()}>Restaurar esta versão como nova</Button>
             )}
           </div>
         </div>

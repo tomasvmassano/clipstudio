@@ -12,6 +12,9 @@ export type Overlay = { id: string; kind: "broll" | "graphic" | "text"; label: s
 export type Gain = { s: number; e: number; db: number };
 /** Nota num momento (tempo da fonte), para quem edita ou para o agente (EDL-12). Fica na versão. */
 export type Note = { id: string; s: number; text: string; by: string | null; done: boolean };
+/** Aspeto das legendas e do hook (EDL-13): cores #RRGGBB, tamanho e centro vertical em px de 1080×1920 (dentro do retângulo seguro). */
+export type TextLook = { color?: string; highlight?: string | null; background?: string | null; size?: number; y?: number; upper?: boolean };
+export type Look = { captions?: TextLook | null; hook?: TextLook | null; from?: { key: string; version: number } | null };
 export type EditDoc = {
   schema: 1; fps: number; size: [number, number]; style: string;
   segments: Seg[];
@@ -21,6 +24,7 @@ export type EditDoc = {
   overlays: Overlay[];
   audio: { music: { label: string; asset?: string | null; db: number } | null; sfx: { id: string; label: string; s: number }[]; gains: Gain[] };
   notes?: Note[];
+  look?: Look | null;
 };
 export type Placed = Seg & { at: number; dur: number };
 
@@ -176,6 +180,91 @@ export function problem(d: EditDoc): string | null {
   for (const w of d.captions?.words ?? []) if (!(w.e >= w.s) || w.w.length > 60) return "palavra de legenda inválida";
   if ((d.hook?.text ?? "").length > 200) return "hook demasiado longo";
   for (const o of d.overlays ?? []) if (!(o.e - o.s >= MIN_SEG - 1e-9)) return "visual com menos de 0,1 s";
+  return lookProblem(d.look);
+}
+
+/** Muda o aspeto das legendas ou do hook. Um retoque à mão deixa de ser "o estilo X tal como guardado" (tira look.from). */
+export function setLook(doc: EditDoc, part: "captions" | "hook", patch: Partial<TextLook>): EditDoc {
+  const cur = doc.look ?? {};
+  const next: TextLook = { ...(cur[part] ?? {}), ...patch };
+  for (const k of Object.keys(next) as (keyof TextLook)[]) if (next[k] === undefined) delete next[k];
+  return { ...doc, look: { captions: cur.captions ?? null, hook: cur.hook ?? null, [part]: next } };
+}
+
+export const LOOK_LIMITS ={ size: [30, 140], y: [260, 1550] } as const;
+const HEX = /^#[0-9A-Fa-f]{6}$/;
+/** O mesmo que _edit_look_problem. */
+export function lookProblem(l: Look | null | undefined): string | null {
+  if (l == null) return null;
+  for (const part of [l.captions, l.hook]) {
+    if (part == null) continue;
+    for (const c of [part.color, part.highlight, part.background]) if (c != null && !HEX.test(c)) return "cor inválida no aspeto";
+    if (part.size != null && !(part.size >= LOOK_LIMITS.size[0] && part.size <= LOOK_LIMITS.size[1])) return "tamanho do texto entre 30 e 140";
+    if (part.y != null && !(part.y >= LOOK_LIMITS.y[0] && part.y <= LOOK_LIMITS.y[1])) return "texto fora do retângulo seguro (y 260-1550)";
+  }
+  return null;
+}
+
+/* ---------- modo guiado (EDL-10) ---------- */
+
+/** Um corte que já existiu numa versão anterior deste documento e não está nesta (vem do servidor: cut_pool). */
+export type PoolSeg = { seg: Seg; after: string | null; version_no: number };
+
+/** Repõe um corte: a seguir ao corte que o precedia, se ainda estiver; senão pela ordem da fonte. Não repete ids. */
+export function restoreSegment(doc: EditDoc, seg: Seg, after: string | null): EditDoc {
+  if (doc.segments.some((s) => s.id === seg.id)) return doc;
+  const ss = [...doc.segments];
+  let i: number;
+  if (after == null) i = 0;
+  else {
+    const j = ss.findIndex((s) => s.id === after);
+    i = j >= 0 ? j + 1 : (() => { const k = ss.findIndex((s) => s.in > seg.in); return k < 0 ? ss.length : k; })();
+  }
+  ss.splice(i, 0, seg);
+  return { ...doc, segments: ss };
+}
+
+/** Cortes que dá para repor: os do servidor e os da versão base que se tiraram agora (ainda por gravar). */
+export function restorable(doc: EditDoc, base: EditDoc, pool: PoolSeg[]): PoolSeg[] {
+  const have = new Set(doc.segments.map((s) => s.id));
+  const out = new Map<string, PoolSeg>();
+  base.segments.forEach((s, i) => { if (!have.has(s.id)) out.set(s.id, { seg: s, after: i ? base.segments[i - 1].id : null, version_no: 0 }); });
+  for (const p of pool) if (!have.has(p.seg.id) && !out.has(p.seg.id)) out.set(p.seg.id, p);
+  return [...out.values()];
+}
+
+/** Palavras de cada corte, pela ordem da saída (para corrigir as legendas sem a linha do tempo). */
+export function wordsBySegment(doc: EditDoc): { seg: Placed; words: (Word & { at: number; end: number })[] }[] {
+  const ws = wordsOut(doc);
+  return layout(doc).segs.map((seg) => ({ seg, words: ws.filter((w) => w.at >= seg.at - 1e-6 && w.at < seg.at + seg.dur - 1e-6) }));
+}
+
+const same = (a: unknown, b: unknown) => JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
+const omit = <T extends object>(o: T | null | undefined, ks: string[]) => Object.fromEntries(Object.entries(o ?? {}).filter(([k]) => !ks.includes(k)).sort(([a], [b]) => a.localeCompare(b)));
+
+/**
+ * Espelho de _edit_guided_problem (o servidor decide; isto avisa antes de gravar). null = permitido no modo guiado.
+ * pool: cortes de versões anteriores; label: o nome de quem grava. A música só se verifica no servidor (biblioteca).
+ */
+export function guidedProblem(base: EditDoc, next: EditDoc, pool: Seg[], label: string | null): string | null {
+  const free = ["segments", "captions", "hook", "audio", "notes"];
+  if (!same(omit(next, free), omit(base, free))) return "no modo guiado só mudam as legendas, o hook, os cortes, a música e as notas";
+  if (!same(omit(next.hook, ["text"]), omit(base.hook, ["text"]))) return "no modo guiado só muda o texto do hook";
+  const nw = next.captions.words, bw = base.captions.words;
+  if (!same(omit(next.captions, ["words"]), omit(base.captions, ["words"])) || nw.length !== bw.length) return "no modo guiado as palavras das legendas corrigem-se, não se tiram nem se juntam";
+  if (nw.some((w, i) => !same(omit(w, ["w"]), omit(bw[i], ["w"])) || !w.w.trim())) return "no modo guiado só se corrige o texto das palavras (os tempos ficam)";
+  if (!same(omit(next.audio, ["music", "gains"]), omit(base.audio, ["music", "gains"]))) return "no modo guiado o som só muda na música";
+  if (!same(next.audio.gains, base.audio.gains) && !(next.audio.music == null && next.audio.gains.length === 0)) return "no modo guiado o volume por trecho não muda";
+  const ids = next.segments.map((s) => s.id);
+  if (new Set(ids).size !== ids.length) return "cortes repetidos";
+  const known = [...base.segments, ...pool].map((s) => JSON.stringify(omit(s, [])));
+  if (next.segments.some((s) => !known.includes(JSON.stringify(omit(s, []))))) return "no modo guiado só se tiram cortes ou se repõem cortes de versões anteriores (sem aparar nem criar cortes)";
+  const order = next.segments.map((s) => base.segments.findIndex((b) => b.id === s.id)).filter((i) => i >= 0);
+  if (order.some((x, i) => i > 0 && x < order[i - 1])) return "no modo guiado a ordem dos cortes não muda";
+  const bn = base.notes ?? [], nn = next.notes ?? [];
+  if (bn.some((o) => !nn.some((x) => x.id === o.id && same(omit(x, ["done"]), omit(o, ["done"]))))) return "no modo guiado as notas não se apagam nem se reescrevem (só se marcam como feitas)";
+  if (nn.some((x) => !bn.some((o) => o.id === x.id) && (x.done || !x.text.trim() || x.text.length > 500 || x.s < 0 || (x.by != null && x.by !== label))))
+    return "nota nova inválida (momento, texto ou autor)";
   return null;
 }
 
