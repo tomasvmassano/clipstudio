@@ -238,3 +238,7 @@ Parar a escrita → restaurar → verificar (checksums, catálogo, RPCs e isolam
 Upload R2: `pendente` → (browser conclui) `pendente` + a verificar (`upload_claimed_at`, job `ingest`) → `pronta` (worker confere SHA-256 e tamanho; versão leve `pronta`|`falhou`) | `falhou` (diferença ou desistência ao fim das tentativas).
 Job: `queued` → `running` (lease 15 min, heartbeat 30 s) → `done` | `queued` (erro repetível, espera 30 s × 2ⁿ) | `failed` (não repetível) | `dead` (tentativas esgotadas) | `cancelled` (pedido em `queued` ou entre passos). Lease perdida volta a `queued`.
 Exportar: `edit_export_request` (versão gravada) → job `export` → `done` cria a versão nova do vídeo (atual) e avisa quem pediu; falhou/cancelado permite pedir outra vez.
+
+## Pacote de edição (W5-09)
+
+`edit_package_request` → job `package` (`queued` → `running` com passos: som, sincronização, transcrição, guião N) → documentos v1 (`ai`) um a um → `done` avisa quem pediu. Falhou/cancelado permite pedir outra vez.
