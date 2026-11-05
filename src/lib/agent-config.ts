@@ -17,7 +17,7 @@ export type ConfigVersion = {
 };
 export type AgentRow = { key: string; name: string; stage: string; description: string; model: string; tools: string[]; reads: string[]; writes: string[]; enabled: boolean };
 export type Job = {
-  id: string; kind: "daily_pipeline" | "scouts" | "analysis"; status: "queued" | "running" | "succeeded" | "failed" | "cancelled" | "dead";
+  id: string; kind: "daily_pipeline" | "scouts" | "analysis" | "reference_analysis" | "reference_scripts"; status: "queued" | "running" | "succeeded" | "failed" | "cancelled" | "dead";
   idempotency_key: string; attempts: number; max_attempts: number; scheduled_for: string; next_attempt_at: string; started_at: string | null;
   finished_at: string | null; heartbeat_at: string | null; progress: Record<string, unknown> | null; last_error: string | null;
   cancel_requested: boolean; run_id: string | null; requested_label: string | null; config_version: number;
@@ -32,7 +32,10 @@ export type Overview = {
 };
 
 export const STAGE_LABEL: Record<string, string> = { research: "Pesquisa", strategy: "Estratégia", creative: "Criação", quality: "Qualidade", learning: "Aprendizagem" };
-export const JOB_KIND: Record<Job["kind"], string> = { daily_pipeline: "Guiões do dia", scouts: "Pesquisa (scouts)", analysis: "Análise de referências" };
+export const JOB_KIND: Record<Job["kind"], string> = { daily_pipeline: "Guiões do dia", scouts: "Pesquisa (scouts)", analysis: "Análise de referências",
+  reference_analysis: "Dissecção de uma referência", reference_scripts: "3 guiões de uma referência" };
+/** Tipos que se correm à mão em Agentes (agent_job_enqueue). Os de referências só nascem em Referências, por referência. */
+export const RUNNABLE_KINDS: Job["kind"][] = ["daily_pipeline", "scouts", "analysis"];
 export const JOB_STATUS: Record<Job["status"], string> = {
   queued: "Em fila", running: "A correr", succeeded: "Concluída", failed: "Falhou", cancelled: "Cancelada", dead: "Falhou de vez",
 };

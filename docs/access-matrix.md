@@ -56,6 +56,8 @@ Um `agency_member` sem atribuição a um workspace **não vê nada** desse works
 | `requests.create` (pedido do talento) | ✓ | ✓ | ✓ | ✓ | ✓ | — |
 | `references.read` | ✓ | ✓ | ✓ | ✓ | ✓ | — |
 | `references.manage` | ✓ | ✓ | ✓ | — | — | — |
+| `references.analyze` (dissecar, REF-02) | ✓ | ✓ | ✓ | — | — | — |
+| `references.adapt` (3 guiões, REF-03) | ✓ | ✓ | ✓ | — | — | — |
 | ligar referência a guião | precisa de `references.read` + `scripts.edit` no mesmo cliente |||||
 | `review.comment` | ✓ | ✓ | ✓ | ✓ | ✓ | — |
 | `review.approve` | ✓ | ✓ | ✓ | — | ✓ | — |
@@ -122,5 +124,7 @@ Portal do cliente (W8, ADR-0041): entrar com `scripts.read` (staff da agência s
 
 **W5-12 (ADR-0052):** exportar o pacote inteiro exige `edit.export` (revisor e outro cliente: 42501); ver na revisão os vídeos exportados e a versão leve: `media.read`; comentar `review.comment`; decidir `review.approve`. Outro cliente: 42501.
 **W5-14 (ADR-0053):** ler a lista de frases-persona: `agents.read`; gravar uma versão nova: `persona.manage` com sessão individual (código de equipa e manager: 42501). Versões imutáveis, tabela fechada à API. O worker recebe só os textos e o nome de quem está envolvido (o consentimento fica na app). Outro cliente: 42501.
+
+**W10-04 (ADR-0059):** colar link: `references.manage`; dissecar e colar a transcrição: `references.analyze`; 3 guiões: `references.adapt`; ler a dissecção e os guiões gerados: `references.read`. Todas exigem a flag `references.link` (fase equipa da agência por defeito; desligada: 55000 mesmo com a capacidade). Código de equipa: 42501. Tabelas `reference_analyses` e `reference_script_outputs` fechadas à API; `worker_reference_*` só para `engine_worker`. Outro cliente: 42501; o mesmo vídeo noutro cliente não conta como repetido nem liga reels de outro cliente.
 
 **W9 (ADR-0051):** eliminar e recuperar guiões: `scripts.purge` (workspace_owner e dono da agência); aprovar gravados em lote: `scripts.approve`; pré-requisitos: ler `scripts.read`, configurar `settings.manage`. Outro cliente: 42501.
