@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import { serverSupabase } from "@/lib/server/supabase";
 import { body, fail, ok, rpc, sha256Stream, UUID, WS } from "@/lib/server/media";
-import { mediaStorage, VERIFY_MAX_BYTES } from "@/lib/storage";
+import { mediaStorage, r2Storage, VERIFY_MAX_BYTES } from "@/lib/storage";
 
 /**
  * POST /api/media/uploads/:id/complete · o servidor relê o objeto, calcula o SHA-256 e confirma (media_upload_complete
@@ -15,15 +15,25 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   const ws = String(b.ws ?? "");
   if (!UUID.test(id) || !WS.test(ws)) return fail({ code: "22023", message: "pedido_invalido", details: "Pedido inválido." });
   const sb = await serverSupabase();
-  const t = await rpc<{ bucket: string; path: string; size_bytes: number; object_exists: boolean }>(sb, "media_upload_target", { p_ws: ws, p_version: id });
+  const t = await rpc<{ bucket: string; path: string; size_bytes: number; object_exists: boolean | null }>(sb, "media_upload_target", { p_ws: ws, p_version: id });
   let sha: string | null = null;
   if (t.error) {
     // já confirmada (repetição) ou expirada: a RPC de confirmação decide e responde com o estado certo
     if (t.error.code !== "22023") return fail(t.error);
+  } else if (t.data.bucket === "r2") {
+    // R2: confere já que o objeto chegou com o tamanho certo (resposta rápida ao browser); o SHA-256 confere-o o worker
+    try {
+      const h = await r2Storage().head(t.data.path);
+      if (!h || h.size !== t.data.size_bytes) {
+        return fail({ code: "P0002", message: "objeto_em_falta", details: "O ficheiro ainda não chegou inteiro ao armazenamento: tenta enviar outra vez." });
+      }
+    } catch (e) {
+      return fail(e as Error);
+    }
   } else {
     if (!t.data.object_exists) return fail({ code: "P0002", message: "objeto_em_falta", details: "O ficheiro ainda não chegou ao armazenamento: tenta enviar outra vez." });
     if (t.data.size_bytes <= VERIFY_MAX_BYTES) {
-      const stream = await mediaStorage(sb).read(t.data.bucket, t.data.path);
+      const stream = await mediaStorage(sb, t.data.bucket).read(t.data.bucket, t.data.path);
       // lê no máximo o tamanho declarado + 1: se o objeto for maior, a RPC marca a diferença de tamanho
       const h = stream ? await sha256Stream(stream, t.data.size_bytes) : null;
       sha = h?.sha256 ?? null;

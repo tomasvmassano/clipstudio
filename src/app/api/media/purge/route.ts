@@ -24,9 +24,8 @@ export async function POST(req: NextRequest) {
   for (const o of begin.data.objects) byBucket.set(o.bucket, [...(byBucket.get(o.bucket) ?? []), o.path]);
   let storageError: string | undefined;
   try {
-    const st = mediaStorage(sb);
     for (const [bucket, paths] of byBucket) {
-      const r = await st.remove(bucket, paths);
+      const r = await mediaStorage(sb, bucket).remove(bucket, paths);
       if (r.error) storageError = r.error;
     }
   } catch (e) {
