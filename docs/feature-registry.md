@@ -101,7 +101,7 @@ Estado: **ativo** (existe e é verificado no servidor por `authorize()`; também
 | `styles.import` | Importar estilo da agência para um cliente (REF-08) | M | org, ws | W5 (CHG-005) | — |
 | `lessons.read` | Aprendizagem: lições propostas e aprovadas (LRN-02..04) | B | ws, org | W7 (CHG-008) | — |
 | `lessons.manage` | Aprovar, editar e rejeitar lições (LRN-03/04) | A | ws, org | W7 (CHG-008) | — |
-| `clips.mine` | Correr o Clip Miner num vídeo longo (CLIP-01..07) | M | ws | W5 (CHG-008) | — |
+| `clips.mine` | Correr o Clip Miner num vídeo longo (CLIP-01..07) | M | ws | ativo (W10-12, ADR-0060) | `/c/[ws]/cortes` (flags `clips.miner` + `edit.studio`, R2): pedir cortes de um vídeo longo da Biblioteca (`clips_request`); ver pedidos e cortes com pontuação, justificação, etiquetas e riscos (`clips_list`, acesso ao editor); exportar todos (`clips_export`, com `edit.export`); worker grava cada corte (`media_worker_clips_save`, só `engine_worker`) |
 | `studio.capture` | Começar e parar sessão no agente de estúdio (STU-02) | M | ws | W5 (CHG-008) | — |
 | `gaze.correct` | Correção do olhar por IA (GAZE-05) | A | ws | W5 (CHG-008) | — |
 | `integrations.manage` | Settings (M15) | A | ws | ativo (W8) | Testar recolha e motor (`integrations_test`), revogar conta social com motivo e purga do segredo (`integrations_social_revoke`); ligar/renovar indisponíveis sem OAuth |
@@ -125,6 +125,10 @@ Por cliente (só a fase `all`): uploads novos para o Cloudflare R2, envio por pa
 ### Revisão dos exportados e revisão em lote (W5-12, ADR-0052)
 
 `edit_package_export` (edit.export + R2, por vídeo as regras de `edit_export_request`): botão "Exportar todos" no pacote. `media_review_list/detail` passam a incluir ficheiros de vídeo guardados (export, upload) com player da app (`media_proxy_access`, media.read) e as notas do QC (`media_info.qc`, worker). Sem capacidades novas.
+
+### Cortes de vídeos longos (W10-12, ADR-0060)
+
+Flag `clips.miner` (por cliente, fase inicial `owner`; precisa também de `edit.studio` e `media.r2`). `clips_request` (clips.mine + R2; versão de vídeo R2 pronta do cliente, 2 min a 4 h, 5-10 cortes; idempotente), `clips_list` (acesso ao editor), `clips_export` (edit.export, por corte as regras de `edit_export_request`), `media_worker_clips_save` (só engine_worker; documento válido, só o vídeo do pedido, metadados válidos, nunca um corte bloqueado pelo portão da dignidade, master ativo). Tabela `media_job_clips` fechada à API. `media_review_list` inclui os cortes exportados (sem guião). Página `/c/[ws]/cortes`; menu "Cortes de vídeos longos".
 
 ### Fluxo editorial (W9, ADR-0051)
 
