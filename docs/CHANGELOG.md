@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-06 (auditoria das RPCs de 05/11)
+
+- **W5-16** auditoria adversarial do isolamento das RPCs novas (R2/jobs, pacote, modo guiado, estilos, W9, revisão dos exportados, frases-persona). Sem fuga entre clientes nem bypass do código de equipa, da pré-visualização ou do worker. Corrigido em `supabase/migrations/PENDING_w5_auditoria_fix.sql` (por aplicar em produção): guiões eliminados deixam de voltar pelo pacote automático, editor, revisão e lote (e não se ligam a ativos novos); `_content_deleted` deixa de dizer a um cliente que outro eliminou um guião; o worker só grava guiões do pedido; anon sem EXECUTE nas RPCs que exigem sessão individual. Teste `w5_auditoria_isolamento` 86/86 (94/94 com W5-14).
+
 ## 2026-11-06 (revisão dos exportados)
 
 - **W5-12** revisão em lote dos vídeos exportados (EDL-02, EDL-03, EDL-11, FR-05-03; ADR-0052): o vídeo exportado pelo editor entra finalmente na Revisão (antes só apareciam links da Drive), com player da app sobre a versão leve, comentários no momento ("Agora" usa o tempo do vídeo; clicar no tempo salta para lá), notas do QC técnico e "Aprovar e seguinte". O worker corre o QC (formato, fps, duração, áudio, loudness, pico, frames pretos/congelados, retângulo seguro) sobre cada export e grava-o em `media_info.qc`. "Exportar todos" num pacote acabado. Testes `w5_review_stored` 34/34, `review-queue` 12/12, motor `test_qc_summary_on_export`.
