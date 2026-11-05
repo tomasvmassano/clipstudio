@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-06 (frases-persona)
+
+- **W5-14** lista de frases-persona por cliente (R-17, CHG-003; ADR-0053): Agentes → Frases-persona; cada gravação é uma versão nova e imutável, auditada com o que entrou e saiu; frases que envolvem outra pessoa exigem o consentimento registado; capacidade `persona.manage` (dono e admin do cliente). O worker recebe a lista em vigor e os agentes só usam essas frases (lista vazia: sem hipérbole de persona); a versão fica no log de cada chamada (numeiro-engine #14). Testes `w5_persona_phrases` 21/21, `persona-rules` 11/11, motor `test_persona` 4/4.
+
 ## 2026-11-06 (auditoria das RPCs de 05/11)
 
 - **W5-16** auditoria adversarial do isolamento das RPCs novas (R2/jobs, pacote, modo guiado, estilos, W9, revisão dos exportados, frases-persona). Sem fuga entre clientes nem bypass do código de equipa, da pré-visualização ou do worker. Corrigido em `supabase/migrations/PENDING_w5_auditoria_fix.sql` (por aplicar em produção): guiões eliminados deixam de voltar pelo pacote automático, editor, revisão e lote (e não se ligam a ativos novos); `_content_deleted` deixa de dizer a um cliente que outro eliminou um guião; o worker só grava guiões do pedido; anon sem EXECUTE nas RPCs que exigem sessão individual. Teste `w5_auditoria_isolamento` 86/86 (94/94 com W5-14).

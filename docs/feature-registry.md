@@ -68,7 +68,7 @@ Estado: **ativo** (existe e é verificado no servidor por `authorize()`; também
 | `finance.read` | Agência: contratos, margem, custos (BIZ-04..06) | A | org, ws | W6 (CHG-003) | — |
 | `finance.manage` | Agência: contratos por cliente (BIZ-05) | A | org, ws | W6 (CHG-003) | — |
 | `access.preview` | Administração: pré-visualizar como papel (BIZ-07) | M | org, ws | W1 (CHG-003) | — |
-| `persona.manage` | Agentes: lista de frases-persona (R-17) | A | ws | W5 (CHG-003) | — |
+| `persona.manage` | Agentes: lista de frases-persona (R-17) | A | ws | ativo (W5-14, ADR-0053) | Agentes → Frases-persona: `persona_list_get`, `persona_list_version` (agents.read), `persona_list_save` (versão nova, conflito, consentimento de terceiros); `worker_claim.persona` |
 | `media.ingest` | Ingestão FX3/telemóvel (ING-02..04) | M | ws | W5 (CHG-003) | — |
 | `edit.package.run` | Pacote de edição (EDL-01) | M | ws | W5 (CHG-003) | — |
 | `styles.manage` | Catálogo de estilos (VAR-02) e preset de edição (EDL-01) | M | ws | ativo (W5-02) | `/c/[ws]/edicao`: criar e gravar estilos (versão nova a cada gravação, `edit_style_save`), ativar, passar a rascunho e arquivar (`edit_style_set_status`), gravar o preset (`edit_preset_save`), começar pelo ponto de partida (`edit_catalog_init`). Ler com `scripts.read` (`edit_catalog`, `edit_style_history`). No editor (W5-08, ADR-0048): `edit_style_from_doc` guarda o aspeto de um vídeo como estilo; `edit_saved_styles` e `edit_style_apply` (com `edit.timeline` ou `edit.guided`) aplicam-no a outro vídeo |
