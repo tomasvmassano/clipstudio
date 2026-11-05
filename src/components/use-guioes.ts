@@ -11,10 +11,13 @@ import { fetchReferences, linkReference } from "@/lib/references";
 import { useSession } from "@/components/session-provider";
 import { fetchOwners, fetchProjects, saveProject, setContentMeta, type MetaPatch, type Owner, type Project, type ProjectList } from "@/lib/projects";
 import { fetchReworkReasons, transitionReasoned, type ReworkReasonList } from "@/lib/learn";
+import { deleteContent } from "@/lib/content-delete";
 
 /** O que o utilizador pode fazer aos guiões neste workspace (o servidor volta a verificar cada ação). */
 export type ScriptCaps = {
   create: boolean; edit: boolean; submit: boolean; approve: boolean; reject: boolean; archive: boolean; record: boolean; export: boolean; refs: boolean;
+  /** eliminar guiões arquivados e recuperar eliminados (scripts.purge, sessão individual) */
+  purge: boolean;
   comment: boolean;
   /** gerir campanhas e séries */
   projects: boolean;
@@ -30,6 +33,8 @@ export type ScriptActions = {
   reworkReasons: () => Promise<ReworkReasonList>;
   record: (id: string, recorded: boolean) => Promise<Guiao>;
   duplicate: (id: string) => Promise<Guiao>;
+  /** Eliminar um guião arquivado (FR-02-01): depois de a pessoa confirmar na UI; sai da lista. */
+  remove: (id: string, reason: string, lock?: number) => Promise<void>;
   restore: (id: string, versionId: string, lock?: number) => Promise<Guiao>;
   history: (id: string) => Promise<ContentHistory>;
   context: (id: string) => Promise<ContentContext>;
@@ -98,6 +103,7 @@ export function useScriptCaps(): ScriptCaps {
     approve: can("scripts.approve"),
     reject: can("scripts.reject"),
     archive: can("scripts.delete"),
+    purge: can("scripts.purge"),
     record: can("recording.confirm"),
     export: can("scripts.export"),
     refs: can("references.read"),
@@ -128,6 +134,7 @@ export function useScriptActions(access: Access, put: (g: Guiao) => Guiao, reloa
     saveProject: (id, fields) => saveProject(access, id, fields),
     owners: () => fetchOwners(access),
     duplicate: async (id) => put(await duplicateContent(access, id)),
+    remove: async (id, reason, lock) => { await deleteContent(access, id, id, reason, lock); await reload(); },
     restore: async (id, versionId, lock) => put(await restoreVersion(access, id, versionId, lock)),
     history: (id: string) => fetchHistory(access, id),
     context: (id: string) => fetchContext(access, id),
