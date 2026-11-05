@@ -49,7 +49,7 @@ export const REASON_LABEL: Record<string, string> = {
   overdue: "atrasada", task_mention: "mencionaram-te", script_mention: "mencionaram-te", script_comment: "resposta a comentário",
   automation_error: "erro de automação", task_blocked: "bloqueio", task_done: "concluída", task_assigned: "atribuída",
   task_auto: "criada automaticamente", task_unassigned: "passou para outra pessoa", script_assigned: "ficaste responsável",
-  task_delegated: "passaram-ta",
+  task_delegated: "passaram-ta", system_health: "saúde do sistema",
 };
 export const AVAILABILITY_LABEL: Record<Availability, string> = {
   available: "Disponível", busy: "Ocupado", away: "Ausente", dnd: "Não incomodar",
