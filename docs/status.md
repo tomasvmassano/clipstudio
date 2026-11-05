@@ -11,8 +11,8 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | Estado | Requisitos |
 |---|---|
 | feito | 25 |
-| parcial | 203 |
-| por começar | 46 |
+| parcial | 204 |
+| por começar | 45 |
 | bloqueado | 3 |
 | adiado | 3 |
 | **total** | **280** |
