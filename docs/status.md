@@ -192,7 +192,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | R-01 | — | parcial | caminho do código de equipa (legacy_can) sem identidade individual; storage de media e pesquisa por fazer | Toda a leitura/escrita de dados de negócio deve ser autorizada no servidor com b |
 | R-02 | — | parcial | pesquisa e storage de media inexistentes; tabelas legadas usam client_id texto em vez de workspace_id | Todas as tabelas de negócio multi-tenant têm workspace_id, FK e RLS; storage, pe |
 | R-04 | — | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | Dashboard global da agência agrega apenas workspaces autorizados; o cliente vê a |
-| R-05 | — | parcial | tentativas negadas só no log da base (RAISE LOG), não em audit_events | Todas as ações críticas são auditáveis com ator, afiliação, âmbito, recurso, dat |
+| R-05 | — | parcial | recusas gravadas por um segundo pedido da sessão (melhor-esforço; o RAISE LOG continua a fonte completa); código de equipa (anónimo) não regista; migração PENDING_w10_auditoria_negacoes por aplicar em produção; verificação com conta real (R-15) | Todas as ações críticas são auditáveis com ator, afiliação, âmbito, recurso, dat |
 | R-07 | — | parcial | sem padrão comum de retry em todas as ações; media e publicação por fazer | Falhas de rede não podem aparentar sucesso; ações assíncronas apresentam estado  |
 | R-08 | — | parcial | sem operações externas nem publicações com chave de idempotência (só jobs internos) | Operações externas e publicações têm chave de idempotência. |
 | R-09 | — | parcial | soft-delete só em guiões, referências e clientes; sem política de eliminação | Timestamps UTC e timezone por workspace; soft-delete com recuperação controlada. |
@@ -240,7 +240,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | R-02 | parcial | pesquisa e storage de media inexistentes; tabelas legadas usam client_id texto em vez de workspace_id | RLS por authorize(); bucket branding; canais agents:<ws>; w4_engine_isolation 23/23; W4-03 | — |
 | R-03 | feito |  | W1-11 cliente único, w1_invite_isolation 23/23; workspace_access por papel; w1_clients 55/55 | — |
 | R-04 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | agency_dashboard só clientes autorizados; w1_dashboard 38/38; W1-10, ADR-0017 (sem sessão real no painel) | — |
-| R-05 | parcial | tentativas negadas só no log da base (RAISE LOG), não em audit_events | audit_events append-only; /historico W1-09; w1_audit 16/16; limitação W1 no CHANGELOG | — |
+| R-05 | parcial | recusas gravadas por um segundo pedido da sessão (melhor-esforço; o RAISE LOG continua a fonte completa); código de equipa (anónimo) não regista; migração PENDING_w10_auditoria_negacoes por aplicar em produção; verificação com conta real (R-15) | audit_events append-only; /historico W1-09; w1_audit 16/16; limitação W1 no CHANGELOG; W10-16 access.denied em audit_events via audit_denied_record (fetch do cliente Supabase, browser e /api), separador Tentativas recusadas (audit_denials_list); w10_auditoria_negacoes 35/35; denials 27/27; ADR-0066 | — |
 | R-06 | feito |  | content_versions imutáveis, approved_version_id, estados separados; w2_content 47/47; ADR-0002 | — |
 | R-07 | parcial | sem padrão comum de retry em todas as ações; media e publicação por fazer | error boundaries W1-12; autosave com conflito W2-02; takes offline W2-05; ADR-0019 | — |
 | R-08 | parcial | sem operações externas nem publicações com chave de idempotência (só jobs internos) | agent_jobs idempotency, eventos de tarefas, takes offline sem duplicar; w4_agents, w3_tasks | — |
@@ -397,7 +397,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-13-02 | feito |  | papéis workspace_owner..viewer + role_capabilities; w1_isolation 38/38, w1_permissions 35/35 | — |
 | FR-13-03 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | workspace_access por pessoa, workspace-switcher; W1-03, W1-11 | — |
 | FR-13-04 | parcial | sem transferência de propriedade | member_update suspender, último dono protegido (_last_client_owner); w1_clients 55/55 | — |
-| FR-13-05 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | audit_events em convites e papéis; /historico; w1_audit 16/16; invitation.sent e invitation.declined (W1-14) | — |
+| FR-13-05 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | audit_events em convites e papéis; /historico; w1_audit 16/16; invitation.sent e invitation.declined (W1-14); tentativas recusadas no histórico (W10-16, ADR-0066) | — |
 | FR-13-06 | parcial | sem grupos/equipas | atribuição de tarefas com _task_valid_assignee; W3-01 | — |
 
 ## M14 — Perfil

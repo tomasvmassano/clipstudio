@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-06 (tentativas recusadas no histórico)
+
+- **W10-16** tentativas recusadas passam a ficar em `audit_events` (R-05, FR-13-05; ADR-0066). Como o 42501 desfaz a transação, quem recebe a recusa (browser ou rota `/api`, pelo `fetch` do cliente Supabase em `src/lib/denials.ts`) faz um segundo pedido a `audit_denied_record`, que grava com o ator da sessão (`auth.uid()`), tentativa, capacidade confirmada, afiliação, via, correlação e pseudónimos do dia de IP e browser; limite de 30 por pessoa por minuto; tentativas a um cliente sem acesso ficam fora do histórico desse cliente e só a agência as vê. Separador "Tentativas recusadas" em Histórico (`audit_denials_list`, `audit.read`). O RAISE LOG continua. Migração `PENDING_w10_auditoria_negacoes.sql` (aditiva). Testes `w10_auditoria_negacoes` 35/35, `denials` 27/27.
+
 ## 2026-11-06 (CHG-008 gravação, aprendizagem e cortes)
 
 - **CHG-008** (só documentação; PRD §46). GAZE-01..06: teleprompter com coluna ligada à distância, linha de foco, modo frase, ritmo por pedal, hooks de memória, pontuação de olhar por take e piloto opcional de correção por IA. LRN-01..07: motivo em cada edição, agente "Editor de lições", lições aprovadas como versão da configuração em dois níveis (agência e cliente). CLIP-01..11: cortes de vídeos longos com o agente Clip Miner, com prioridade. STU-01..05: captura direta das câmaras com cópia no cartão, agente de estúdio e pacote de edição por guião. 5 capacidades planeadas. Sem alteração funcional.
