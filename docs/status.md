@@ -11,8 +11,8 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | Estado | Requisitos |
 |---|---|
 | feito | 25 |
-| parcial | 202 |
-| por começar | 47 |
+| parcial | 203 |
+| por começar | 46 |
 | bloqueado | 3 |
 | adiado | 3 |
 | **total** | **280** |
@@ -33,10 +33,10 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-06-01 | P0 | parcial | prompt, versão por agente, permissões e limites não constam do catálogo | Catálogo de agentes com função, versão, modelo, prompt, ferramentas, permissões  |
 | FR-07-01 | P0 | parcial | sem upload nem captura | Guardar referências por URL, upload ou captura autorizada; metadados e autoria. |
 | FR-07-02 | P0 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | Classificação por formato, estilo, narrativa, hook, duração, idioma e tags. |
-| FR-08-01 | P0 | parcial | verificação com sessão real de um upload grande no R2 (depende do worker ligado) | Upload de vídeo, áudio, imagens, thumbnails, legendas e documentos com progresso |
+| FR-08-01 | P0 | parcial | verificação com sessão real de um upload grande no R2 (sessão de 2026-11-06) | Upload de vídeo, áudio, imagens, thumbnails, legendas e documentos com progresso |
 | FR-08-02 | P0 | parcial | pastas são filtros (campanha, formato, estado, tipo, etiqueta) e pesquisa; verificação com sessão real | Pastas/coleções lógicas por campanha, projeto, formato e estado; pesquisa e tags |
 | FR-09-02 | P0 | parcial | só views, likes, comentários, partilhas por scraping; sem alcance, retenção, seguidores, conversões | Métricas por conteúdo e período: views, alcance, interações, retenção, seguidore |
-| FR-10-01 | P0 | parcial | sem módulo Custos; worker por alojar | Consumo de IA por agente, modelo, execução e workspace. |
+| FR-10-01 | P0 | parcial | sem módulo Custos | Consumo de IA por agente, modelo, execução e workspace. |
 | FR-11-01 | P0 | parcial | arrastar não verificado em produção; verificação com conta de cliente (R-15); E2E citado não está versionado no repo | Calendário editorial por dia, semana e mês; drag and drop com validação. |
 | FR-11-02 | P0 | parcial | verificação com sessão real (R-15) da equipa Numeiro | Tarefas, gravações, revisões, publicações, responsáveis, deadlines e dependência |
 | FR-14-01 | P0 | parcial | recuperação por email depende do SMTP do Supabase (limitado) até haver domínio (FR-13-01 adiado); verificação com a conta real do Tomás em produção | Nome, avatar, email verificado, password reset e MFA quando disponível. |
@@ -52,7 +52,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-17-04 | P0 | parcial | sem variantes, assets e publicações por conta ligadas | Relação um-para-muitos: conteúdo → hooks → takes → variantes → assets → publicaç |
 | FR-17-05 | P0 | parcial | verificação com sessão real (R-15) da equipa Numeiro | Transições configuráveis de workflow geram tarefas e notificações idempotentes,  |
 | FR-17-13 | P0 | parcial | verificação com conta real (R-15) | Auto-save com indicador persistido, proteção contra alterações concorrentes e re |
-| FR-17-14 | P0 | parcial | worker por alojar | Jobs duráveis com idempotency key, retries exponenciais, timeout, dead-letter, c |
+| FR-17-14 | P0 | parcial | verificação com carga real (pacote e exports da sessão de 2026-11-06) | Jobs duráveis com idempotency key, retries exponenciais, timeout, dead-letter, c |
 | FR-17-15 | P0 | parcial | sem alertas nem dashboard de saúde | Observabilidade com logs estruturados, correlação por workspace/run/content, ale |
 | FR-21-01 | P0 | parcial | OAuth (PLAT-02/03) | permissões e credenciais são por conta. |
 | FR-21-02 | P0 | parcial | publicador (PUB-01) tem de voltar a verificar ao publicar | não publicar sem aprovação humana do asset/versão e do destino. |
@@ -69,14 +69,15 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | BIZ-02 | P0 | parcial | 3 regras sem dados (saúde a cair, renovação com saúde, posts perto de zero) | Faixa "Precisa da tua atenção" |
 | BIZ-03 | P0 | parcial | AGI distinto do MRR (decisão); índice com fotografias por idade (PERF-03); sem contratos nem câmbio registados | KPIs e tabela por cliente |
 | BIZ-04 | P0 | parcial | verificação com conta real (R-15) | Dois níveis de acesso na mesma vista |
-| ING-01 | P0 | parcial | ligar media.r2 no Numeiro depois das chaves; carregar as gravações da sessão; bruto antigo do Drive continua como link | Armazenamento fora da app (decisão) |
+| ING-01 | P0 | parcial | carregar as gravações da sessão de 2026-11-06; bruto antigo do Drive continua como link | Armazenamento fora da app (decisão) |
 | ING-03 | P0 | parcial | verificação com a sessão real; ligar as marcas de gravação às janelas | Um ficheiro longo por câmara por sessão |
 | EDL-01 | P0 | parcial | verificação com a sessão real de 2026-11-06; deteção de cara para o enquadramento; usar as marcas de gravação (ING-03) para afinar as janelas | Pacote de edição automático |
-| EDL-03 | P0 | parcial | ligar ao job do pacote e guardar o relatório por variante na app (EDL-02); calibrar limites no piloto | QC técnico em código antes de qualquer revisão por IA |
+| EDL-02 | P0 | parcial | verificação com a sessão real de 2026-11-06 (pacote → exportar todos → rever); versão leve a 540p em vez de 720p (ADR-0052) | Revisão em lote |
+| EDL-03 | P0 | parcial | relatório por variante só no export (não sobre o documento antes de exportar); pHash face às irmãs não corre no export; calibrar limites no piloto (EDL-06) | QC técnico em código antes de qualquer revisão por IA |
 | EDL-07 | P0 | parcial | versão 1 gerada pela IA no job do pacote (EDL-01); visuais e música ainda vazios | Documento de edição |
-| EDL-08 | P0 | parcial | ligar o palco na página do editor; carregar as gravações da sessão no R2; verificação com sessão real depois do worker ligado | Pré-visualização ao vivo |
+| EDL-08 | P0 | parcial | carregar as gravações da sessão no R2; verificação com sessão real | Pré-visualização ao vivo |
 | EDL-09 | P0 | parcial | imagem na pré-visualização (EDL-08); render de visuais e música no export (EDL-11) | Linha do tempo (modo completo) |
-| EDL-11 | P0 | parcial | visuais (b-roll) no render; worker ligado no Railway; verificação com sessão real | Exportar |
+| EDL-11 | P0 | parcial | visuais (b-roll) no render; verificação com sessão real | Exportar |
 | PERF-01 | P0 | parcial | criador/marca é só um campo por conta; verificação com conta real (R-15) | Hierarquia |
 | PERF-02 | P0 | parcial | o publicador (PUB) tem de chamar perf_record_lineage | Etiquetas obrigatórias à publicação (R-18) |
 | PERF-03 | P0 | parcial | histórico só desde a primeira captura; 1 h quase nunca existe com scraping diário | Fotografias por idade |
@@ -336,7 +337,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
-| FR-08-01 | parcial | verificação com sessão real de um upload grande no R2 (depende do worker ligado) | biblioteca /c/[ws]/biblioteca com upload, progresso e retentativa (ADR-0038); w8_media 117; W8 (ramo w8-vaga3): SQL 1648/1648, E2E 143/143 no stack local; ainda não aplicado em produção; R2 por cliente com envio por partes até 50 GiB e SHA-256 incremental no browser, verificação pelo worker (W5-07, ADR-0047) | — |
+| FR-08-01 | parcial | verificação com sessão real de um upload grande no R2 (sessão de 2026-11-06) | biblioteca /c/[ws]/biblioteca com upload, progresso e retentativa (ADR-0038); w8_media 117; W8 (ramo w8-vaga3): SQL 1648/1648, E2E 143/143 no stack local; ainda não aplicado em produção; R2 por cliente com envio por partes até 50 GiB e SHA-256 incremental no browser, verificação pelo worker (W5-07, ADR-0047) | — |
 | FR-08-02 | parcial | pastas são filtros (campanha, formato, estado, tipo, etiqueta) e pesquisa; verificação com sessão real | filtros e pesquisa em media_library (ADR-0038); W8 (ramo w8-vaga3): SQL 1648/1648, E2E 143/143 no stack local; ainda não aplicado em produção | — |
 | FR-08-03 | parcial | partilha só da versão atual; verificação com sessão real | pré-visualização 5 min, descarga 2 min, links de partilha 1 h a 7 dias revogáveis e auditados; W8 (ramo w8-vaga3): SQL 1648/1648, E2E 143/143 no stack local; ainda não aplicado em produção | — |
 | FR-08-04 | parcial | verificação com sessão real | versões imutáveis, substituição, histórico, ligação a guião/take/publicação/campanha; W8 (ramo w8-vaga3): SQL 1648/1648, E2E 143/143 no stack local; ainda não aplicado em produção | — |
@@ -359,7 +360,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
-| FR-10-01 | parcial | sem módulo Custos; worker por alojar | custo e tokens por execução em /agentes/configuracao; kpi.costs; W4-02b | — |
+| FR-10-01 | parcial | sem módulo Custos | custo e tokens por execução em /agentes/configuracao; kpi.costs; W4-02b; worker de agentes alojado no Railway desde 2026-11-05 | — |
 | FR-10-02 | por começar | sem custos de armazenamento, processamento e integrações | nada no código | — |
 | FR-10-03 | parcial | sem custos manuais; só moeda do cliente | moeda em /definicoes W1-07 | — |
 | FR-10-04 | parcial | sem orçamentos, limite soft, alertas nem autorização para ultrapassar | budget_eur_day limite rígido no worker; W4-02 | — |
@@ -543,7 +544,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
 | FR-17-13 | parcial | verificação com conta real (R-15) | autosave com indicador e lock_version (W2-02); rascunho local com recuperação e aviso ao sair (W2-09); e2e/drafts.spec.ts | — |
-| FR-17-14 | parcial | worker por alojar | agent_jobs: idempotência, backoff, lease, dead-letter, cancelar; w4_agents 44/44, w4_worker 30/30 | — |
+| FR-17-14 | parcial | verificação com carga real (pacote e exports da sessão de 2026-11-06) | agent_jobs: idempotência, backoff, lease, dead-letter, cancelar; w4_agents 44/44, w4_worker 30/30; media_jobs (lease, heartbeat, backoff, dead, cancelar) e worker de agentes alojados no Railway desde 2026-11-05 | — |
 | FR-17-15 | parcial | sem alertas nem dashboard de saúde | correlation_id em audit/transições; agent_job_attempts; estado do worker na UI | — |
 | FR-17-16 | parcial | OAuth real (PLAT-01..03); Drive, R2 e Resend por ligar | centro em /c/[ws]/definicoes/integracoes e /integracoes (ADR-0039); w8_integ 58; W8 (ramo w8-vaga3): SQL 1648/1648, E2E 143/143 no stack local; ainda não aplicado em produção | — |
 
@@ -631,13 +632,13 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
-| ING-01 | parcial | ligar media.r2 no Numeiro depois das chaves; carregar as gravações da sessão; bruto antigo do Drive continua como link | Supabase Storage (bucket privado media) atrás de src/lib/storage (ADR-0038); W8 (ramo w8-vaga3): SQL 1648/1648, E2E 143/143 no stack local; ainda não aplicado em produção; ; CHG-006: finais para revisão na Drive da agência, versão por link na biblioteca (W5-04); Cloudflare R2 implementado (sigv4, envio por partes, proxies pelo worker; W5-07, ADR-0047) | — |
+| ING-01 | parcial | carregar as gravações da sessão de 2026-11-06; bruto antigo do Drive continua como link | Supabase Storage (bucket privado media) atrás de src/lib/storage (ADR-0038); W8 (ramo w8-vaga3): SQL 1648/1648, E2E 143/143 no stack local; ainda não aplicado em produção; ; CHG-006: finais para revisão na Drive da agência, versão por link na biblioteca (W5-04); Cloudflare R2 implementado (sigv4, envio por partes, proxies pelo worker; W5-07, ADR-0047); media.r2 ligado no Numeiro; webm de teste verificado pelo worker com versão leve em produção (2026-11-05) | — |
 | ING-02 | por começar | sem ingestão da câmara | media.ingest planeada | — |
 | ING-03 | parcial | verificação com a sessão real; ligar as marcas de gravação às janelas | recording_marks, recording_marks_add, recording_timeline (W5-01, ADR-0026); w5_recording_marks 17/17; e2e/recording-marks.spec.ts 2/2; ficheiro longo por câmara no R2 (W5-07) com transcrição com tempos por palavra e sincronização pelo áudio no pacote (W5-09) | — |
 | ING-04 | por começar | sem upload pelo telemóvel | nada no código | — |
 | EDL-01 | parcial | verificação com a sessão real de 2026-11-06; deteção de cara para o enquadramento; usar as marcas de gravação (ING-03) para afinar as janelas | preset de edição versionado por cliente com o defeito do PRD (edit_presets, edit_preset_save; W5-02, ADR-0027); job package no worker (transcrição, sincronização pelo som, janelas por guião, takes pela IA, documento v1 por hook), página Edição automática (W5-09, ADR-0048); w5_edit_package 19/19; janelas 20/23 dentro de 5 s na sessão de teste | — |
-| EDL-02 | por começar | sem revisão em lote de variantes | nada no código | — |
-| EDL-03 | parcial | ligar ao job do pacote e guardar o relatório por variante na app (EDL-02); calibrar limites no piloto | numeiro-engine #7: engine/qc.py, run.py qc, tests/test_qc.py 11/11 no CI do motor (ADR-0028) | — |
+| EDL-02 | parcial | verificação com a sessão real de 2026-11-06 (pacote → exportar todos → rever); versão leve a 540p em vez de 720p (ADR-0052) | edit_package_export, revisão com ficheiros guardados e player da app, QC por vídeo, Aprovar e seguinte (W5-12, ADR-0052); w5_review_stored 34/34; review-queue 12/12 | — |
+| EDL-03 | parcial | relatório por variante só no export (não sobre o documento antes de exportar); pHash face às irmãs não corre no export; calibrar limites no piloto (EDL-06) | numeiro-engine #7: engine/qc.py, run.py qc, tests/test_qc.py 11/11 no CI do motor (ADR-0028); QC sobre cada export no worker, relatório em media_info.qc e na revisão (W5-12); test_qc_summary_on_export | — |
 | EDL-04 | por começar | sem biblioteca de vídeos de atenção | nada no código | — |
 | EDL-05 | por começar | sem pós-produção multi-agente | nada no código nem no motor | — |
 | EDL-06 | por começar | piloto não iniciado | nada no código | — |
@@ -647,10 +648,10 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
 | EDL-07 | parcial | versão 1 gerada pela IA no job do pacote (EDL-01); visuais e música ainda vazios | edit_documents/edit_versions imutáveis, edit_doc_get/save com conflito, 68 vídeos importados do plano (W5-06, ADR-0046); w5_edit_doc 21/21; edit-doc 25/25; produção 04/11: 68 documentos com v1 importada do plano (13 866 palavras); produção 04/11: abrir, nota no cursor, gravar v2, v1 intacta, restaurar v1 como v3, 0 erros | 2026-11-04 (sessão real do dono da agência, produção) |
-| EDL-08 | parcial | ligar o palco na página do editor; carregar as gravações da sessão no R2; verificação com sessão real depois do worker ligado | edit_preview_sources, media_proxy_access, /api/media/versions/:id/proxy, PreviewVideo (um vídeo por câmara no tempo da sessão), versão leve pelo worker (W5-07, ADR-0047); w5_media_r2 39/39; edit-preview 2/2 | — |
+| EDL-08 | parcial | carregar as gravações da sessão no R2; verificação com sessão real | edit_preview_sources, media_proxy_access, /api/media/versions/:id/proxy, PreviewVideo (um vídeo por câmara no tempo da sessão), versão leve pelo worker (W5-07, ADR-0047); w5_media_r2 39/39; edit-preview 2/2; palco ligado na página do editor e no modo guiado (PR #62); worker no Railway a gerar versões leves (verificado em produção 2026-11-05) | — |
 | EDL-09 | parcial | imagem na pré-visualização (EDL-08); render de visuais e música no export (EDL-11) | /c/[ws]/editor: faixas, arrastar pontas e mover, dividir, tirar, reordenar, palavras e hook, visuais e música da biblioteca, volume por corte, notas por momento, desfazer/refazer, atalhos (W5-06); edit-doc 37/37; área principal cabe no ecrã com a barra lateral (min-w-0) | 2026-11-04 (sessão real do dono da agência, produção) |
 | EDL-10 | parcial | 2-3 alternativas por secção geradas pela IA (job do pacote, EDL-01); imagem no palco (EDL-08); verificação com sessão real de cliente (R-15) | modo guiado /c/[ws]/editor (só edit.guided ou ?modo=guiado): passos Estilo, Corte, Hook, Visual e música, Legendas, Exportar; edit_doc_save valida a diferença no servidor (_edit_guided_problem, W5-10, ADR-0049); w5_edit_guided 38/38 (19 recusas entre modos, música de outro cliente, admin de B); edit-doc 61/61 | — |
-| EDL-11 | parcial | visuais (b-roll) no render; worker ligado no Railway; verificação com sessão real | edit_export_request/list/cancel, media_jobs export, engine/render_doc.py (cortes, câmaras, janelas, zoom, legendas S14/S15, hook, volume, música, -14 LUFS), ExportPanel (W5-07); render local do guião 3: 60,4 s em ~2,5 min | — |
+| EDL-11 | parcial | visuais (b-roll) no render; verificação com sessão real | edit_export_request/list/cancel, media_jobs export, engine/render_doc.py (cortes, câmaras, janelas, zoom, legendas S14/S15, hook, volume, música, -14 LUFS), ExportPanel (W5-07); render local do guião 3: 60,4 s em ~2,5 min; worker numeiro-engine no Railway ligado (abedaf5304ce-1-media, 2026-11-05); exports entram na revisão com QC (W5-12) | — |
 | EDL-12 | por começar |  |  | — |
 | EDL-13 | parcial | a IA usar o estilo na versão 1 (job do pacote, EDL-01); o render do export desenhar o aspeto (EDL-11); verificação com sessão real | Guardar como estilo no editor (aspeto, música, layout da versão gravada) no catálogo do VAR-02, versionado (edit_style_from_doc, coluna look); aplicar a outro vídeo cria versão nova, também no modo guiado (edit_style_apply) (W5-11, ADR-0050); w5_edit_saved_styles 24/24; edit-doc 63/63 | — |
 

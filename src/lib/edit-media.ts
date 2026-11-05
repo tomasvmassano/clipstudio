@@ -61,3 +61,8 @@ export const requestPackage = (a: Access, front: string, side: string, guioes: s
   rpc<PackageJob>("edit_package_request", { p_ws: a.ws, p_front: front, p_side: side, p_guioes: guioes, p_style: style, p_token: a.token });
 export const listPackages = (a: Access) => rpc<PackageJob[]>("edit_package_list", { p_ws: a.ws, p_token: a.token });
 export const listEditDocs = (a: Access) => rpc<EditDocRow[]>("edit_doc_list", { p_ws: a.ws, p_token: a.token });
+
+/** Exportar todos os vídeos de um pacote (EDL-02): um job por vídeo; os que falham (ex.: câmara em falta) vêm em `failed`. */
+export type PackageExportResult = { queued: number; jobs: { asset_id: string; job_id: string; status: ExportJob["status"] }[];
+  failed: { asset_id: string; title: string; error: string }[] };
+export const exportPackage = (a: Access, job: string) => rpc<PackageExportResult>("edit_package_export", { p_ws: a.ws, p_job: job, p_token: a.token });

@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-06 (revisão dos exportados)
+
+- **W5-12** revisão em lote dos vídeos exportados (EDL-02, EDL-03, EDL-11, FR-05-03; ADR-0052): o vídeo exportado pelo editor entra finalmente na Revisão (antes só apareciam links da Drive), com player da app sobre a versão leve, comentários no momento ("Agora" usa o tempo do vídeo; clicar no tempo salta para lá), notas do QC técnico e "Aprovar e seguinte". O worker corre o QC (formato, fps, duração, áudio, loudness, pico, frames pretos/congelados, retângulo seguro) sobre cada export e grava-o em `media_info.qc`. "Exportar todos" num pacote acabado. Testes `w5_review_stored` 34/34, `review-queue` 12/12, motor `test_qc_summary_on_export`.
+
 ## 2026-11-05 (fluxo editorial)
 
 - **W9-01..04** (ADR-0051): eliminar guiões arquivados com confirmação e recuperação em 30 dias (FR-02-01, `scripts.purge`); aprovar em lote os guiões já gravados, presos à versão gravada (FR-02-05); calendário com revisões de vídeo e publicações (FR-11-02); pré-requisitos configuráveis nas transições de produção (FR-17-05). Testes `w9_*` 100/100.

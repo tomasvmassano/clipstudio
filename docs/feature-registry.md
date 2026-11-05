@@ -117,6 +117,10 @@ Por cliente (só a fase `all`): uploads novos para o Cloudflare R2, envio por pa
 
 `edit_package_request` (edit.timeline + R2), `edit_package_list` e `edit_doc_list` (acesso ao editor), `media_worker_package_save` (só engine_worker). Página `/c/[ws]/edicao-automatica` (flag `edit.studio`).
 
+### Revisão dos exportados e revisão em lote (W5-12, ADR-0052)
+
+`edit_package_export` (edit.export + R2, por vídeo as regras de `edit_export_request`): botão "Exportar todos" no pacote. `media_review_list/detail` passam a incluir ficheiros de vídeo guardados (export, upload) com player da app (`media_proxy_access`, media.read) e as notas do QC (`media_info.qc`, worker). Sem capacidades novas.
+
 ### Fluxo editorial (W9, ADR-0051)
 
 `scripts.purge` (novo): `content_delete`, `content_undelete`, `content_deleted_list`. `content_pending_approval` e `content_bulk(approve, recorded_only)`. `calendar_range` com revisões e publicações. `workflow_prereqs` (scripts.read) e `workflow_prereq_set` (settings.manage).

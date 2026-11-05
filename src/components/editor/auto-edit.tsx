@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { Loader2Icon, RotateCwIcon, SparklesIcon } from "lucide-react";
+import { ClapperboardIcon, Loader2Icon, RotateCwIcon, SparklesIcon } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,7 @@ import { selectCls } from "@/components/media/media-shared";
 import { useSession } from "@/components/session-provider";
 import type { Access } from "@/lib/access";
 import { fetchGuioes, todayDubai } from "@/lib/data";
-import { EXPORT_STATUS, listEditDocs, listPackages, requestPackage, type PackageJob } from "@/lib/edit-media";
+import { EXPORT_STATUS, exportPackage, listEditDocs, listPackages, requestPackage, type PackageExportResult, type PackageJob } from "@/lib/edit-media";
 import { fetchLibrary } from "@/lib/media";
 
 const STYLES = [{ id: "S15", label: "S15 · frases com destaque" }, { id: "S14", label: "S14 · uma palavra de cada vez" }];
@@ -28,7 +28,9 @@ export function AutoEditView({ access }: { access: Access }) {
   const gui = useLoad(() => fetchGuioes(access, todayDubai(), 10), `${access.ws}:g:${tick}`);
   const jobs = useLoad(() => listPackages(access), `${access.ws}:p:${tick}`);
   const docs = useLoad(() => listEditDocs(access), `${access.ws}:d:${tick}`);
-  const active = (jobs.last ?? []).some((j) => j.status === "queued" || j.status === "running");
+  const mayExport = can("edit.export");
+  const active = (jobs.last ?? []).some((j) => j.status === "queued" || j.status === "running")
+    || (docs.last ?? []).some((d) => d.export?.status === "queued" || d.export?.status === "running");
   useEffect(() => {
     if (!active) return;
     const id = setInterval(() => setTick((n) => n + 1), 8000);
@@ -123,7 +125,7 @@ export function AutoEditView({ access }: { access: Access }) {
         <h2 id="pacotes" className="mb-2 font-medium">Pacotes</h2>
         <LoadState loading={!jobs.last && !jobs.error} error={jobs.error} reload={jobs.reload} label="os pacotes">
           {(jobs.last ?? []).length === 0 ? <p className="text-sm text-muted-foreground">Ainda não há pacotes.</p> : (
-            <div className="flex flex-col gap-2">{(jobs.last ?? []).map((j) => <PackageRow key={j.id} j={j} ws={access.ws} />)}</div>
+            <div className="flex flex-col gap-2">{(jobs.last ?? []).map((j) => <PackageRow key={j.id} j={j} access={access} mayExport={mayExport} onDone={() => setTick((n) => n + 1)} />)}</div>
           )}
         </LoadState>
       </section>
@@ -156,8 +158,16 @@ export function AutoEditView({ access }: { access: Access }) {
   );
 }
 
-function PackageRow({ j, ws }: { j: PackageJob; ws: string }) {
+function PackageRow({ j, access, mayExport, onDone }: { j: PackageJob; access: Access; mayExport: boolean; onDone: () => void }) {
+  const ws = access.ws;
   const running = j.status === "running";
+  const [busy, setBusy] = useState(false);
+  const [res, setRes] = useState<PackageExportResult | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+  const exportAll = async () => {
+    setBusy(true); setErr(null);
+    try { setRes(await exportPackage(access, j.id)); onDone(); } catch (e) { setErr((e as Error).message); } finally { setBusy(false); }
+  };
   return (
     <div className="rounded-md border p-3 text-sm" aria-live="polite">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -172,6 +182,24 @@ function PackageRow({ j, ws }: { j: PackageJob; ws: string }) {
           {j.outputs.map((o) => <Link key={o.asset_id} className="rounded border px-2 py-0.5 text-xs hover:bg-muted" href={`/c/${ws}/editor?asset=${o.asset_id}`}>{o.title}</Link>)}
         </div>
       )}
+      {j.status === "done" && j.outputs.length > 0 && (
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          {mayExport && (
+            <Button size="sm" onClick={exportAll} disabled={busy}>
+              {busy ? <Loader2Icon className="animate-spin" /> : <ClapperboardIcon />} Exportar todos ({j.outputs.length})
+            </Button>
+          )}
+          <Link className="text-xs underline" href={`/c/${ws}/revisao?ver=videos`}>Rever os exportados</Link>
+          {!mayExport && <span className="text-xs text-muted-foreground">Exportar precisa da permissão de exportar vídeos.</span>}
+        </div>
+      )}
+      {res && (
+        <p className="mt-1 text-xs text-muted-foreground" role="status">
+          {res.queued} {res.queued === 1 ? "vídeo na fila" : "vídeos na fila"} para exportar. Cada um entra na revisão quando acabar, com as notas do QC.
+          {res.failed.length > 0 && <span className="block text-destructive">Não deu para {res.failed.length}: {res.failed.slice(0, 3).map((f) => `${f.title} (${f.error})`).join("; ")}.</span>}
+        </p>
+      )}
+      {err && <p className="mt-1 text-xs text-destructive" role="alert">{err} <button type="button" className="underline" onClick={exportAll}>Tentar de novo</button></p>}
       {j.status === "done" && (j.result?.missing?.length ?? 0) > 0 && <p className="mt-1 text-xs text-amber-500">Não encontrei na gravação: {j.result!.missing!.join(", ")}.</p>}
       {j.status === "done" && j.result?.offset && <p className="mt-1 text-xs text-muted-foreground">Câmaras sincronizadas pelo som (desvio {j.result.offset.front.toFixed(2)} s, confiança {j.result.offset.confidence}).</p>}
     </div>
