@@ -30,4 +30,4 @@ O Tomás escolheu o Cloudflare R2 (2026-11-05) para os vídeos: as gravações b
 
 ## Rollback
 
-Bloco no fim de `supabase/migrations/*_w5_media_r2_jobs.sql`. Primeiro `flag_set('media.r2', <ws>, 'off')`: uploads novos voltam ao Supabase; as versões R2 já prontas continuam a abrir enquanto as chaves estiverem no servidor.
+Bloco no fim de `supabase/migrations/20261105175803_w5_media_r2_jobs.sql`. Primeiro `flag_set('media.r2', <ws>, 'off')`: uploads novos voltam ao Supabase; as versões R2 já prontas continuam a abrir enquanto as chaves estiverem no servidor.
