@@ -132,4 +132,4 @@ Por cliente (só a fase `all`): uploads novos para o Cloudflare R2, envio por pa
 
 ### Verificador antes da revisão humana (W10-06, VAR-04, ADR-0054)
 
-Sem capacidade nova. Ler com `scripts.read` (`content_verifications`, sessão ou código de equipa do próprio cliente): marcas por hook no cartão do guião em Guiões e Revisão. Escrever só `engine_worker`/`service_role` (`worker_save_verification`, apenas guiões gravados pela própria execução com a lease). Tabela `script_verifications` fechada à API. O verificador não aprova nem rejeita: quem revê decide com `scripts.approve`/`scripts.reject` como antes.
+Sem capacidade nova. Ler com `scripts.read` (`content_verifications`, sessão ou código de equipa do próprio cliente): marcas por hook no cartão do guião em Guiões e Revisão. Escrever só `engine_worker`/`service_role` (`worker_save_verification`, apenas guiões gravados pela própria execução com a lease). Tabela `script_verifications` fechada à API. Flag `scripts.verifier` (ligada para todos por omissão; desligada, a app não chama o servidor). O verificador não aprova nem rejeita: quem revê decide com `scripts.approve`/`scripts.reject` como antes.

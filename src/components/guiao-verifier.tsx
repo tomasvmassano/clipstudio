@@ -19,13 +19,14 @@ const FLAG_STYLE: Record<VerifierFlag, string> = {
   bloqueado: "bg-destructive text-white border-transparent",
 };
 
-type State = { status: "loading" | "ready" | "error"; v: Verification | null; error?: string };
+type State = { status: "loading" | "ready" | "off" | "error"; v: Verification | null; error?: string };
+const toState = (v: Verification | null | "off"): State => (v === "off" ? { status: "off", v: null } : { status: "ready", v });
 
 /** Resultado do verificador do motor para este guião (VAR-04). Guiões do motor acabados de gravar podem ainda não o ter. */
 export function useVerification(g: Guiao, actions: ScriptActions) {
   const [s, setS] = useState<State>({ status: "loading", v: null });
   const load = useCallback(async (fresh = false) => {
-    try { setS({ status: "ready", v: await actions.verification(g.id, fresh) }); }
+    try { setS(toState(await actions.verification(g.id, fresh))); }
     catch (e) { setS({ status: "error", v: null, error: (e as Error).message }); }
   }, [actions, g.id]);
   useEffect(() => {
@@ -33,7 +34,7 @@ export function useVerification(g: Guiao, actions: ScriptActions) {
     let retry: ReturnType<typeof setTimeout> | undefined;
     actions.verification(g.id).then((v) => {
       if (!alive) return;
-      setS({ status: "ready", v });
+      setS(toState(v));
       // o worker grava a verificação logo a seguir ao guião: se o guião é de agora, volta a ver uma vez
       if (!v && g.origem === "motor" && Date.now() - new Date(g.created_at).getTime() < 3 * 60_000) {
         retry = setTimeout(() => { if (alive) void load(true); }, 8000);
@@ -84,6 +85,7 @@ function HookDetail({ hook }: { hook: VerifierHook }) {
 /** Resumo do verificador no cartão do guião. Nunca chumba nem aprova: quem revê decide. */
 export function VerifierSummary({ g, state }: { g: Guiao; state: ReturnType<typeof useVerification> }) {
   const { status, v, error, reload } = state;
+  if (status === "off") return null;
   if (status === "error") {
     return (
       <p role="alert" className="flex flex-wrap items-center gap-2 text-xs text-destructive">

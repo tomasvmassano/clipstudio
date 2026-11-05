@@ -56,6 +56,8 @@ begin
     where s.content_id = sa and s.version_id is not distinct from g.current_version_id and s.verifier_version = '2026-11-06.1'
       and s.persona_version = 3 and s.model = 'claude-haiku-5-5' and s.marca = 'bloqueado' and s.workspace_id = 'ws_v_a'));
   insert into t values ('evento script.verified', true, exists (select 1 from domain_events where type = 'script.verified' and entity_id = sa and payload->>'marca' = 'bloqueado'));
+  insert into t values ('flag scripts.verifier registada e ligada para todos', true,
+    exists (select 1 from feature_flag_defs where key = 'scripts.verifier' and default_stage = 'all'));
   insert into t values ('guião continua em revisão (nada chumbado sozinho)', true, (select editorial_status from guioes where id = sa) <> 'rejected');
 
   execute 'set local role authenticated';

@@ -1,11 +1,17 @@
 import { supabase } from "@/lib/supabase";
 import { friendlyError, type Access } from "@/lib/access";
+import { fetchMyFlags } from "@/lib/flags";
 import { parseVerification, type Verification } from "@/lib/verifier-format";
+
+/** "off": a flag `scripts.verifier` está desligada para esta pessoa no cliente (ou a app ainda não tem a migração). */
+export type VerificationLookup = Verification | null | "off";
+export const VERIFIER_FLAG = "scripts.verifier";
 
 /**
  * Leitura do verificador (VAR-04) em lote: os cartões pedem um guião cada; os pedidos do mesmo instante vão numa só
  * chamada a `content_verifications` (scripts.read no servidor, sessão ou código). Só os resultados encontrados ficam em
- * cache: um guião acabado de gerar pode ainda não ter a verificação.
+ * cache: um guião acabado de gerar pode ainda não ter a verificação. Atrás da flag `scripts.verifier` (CAP-09): desligada,
+ * não chama o servidor.
  */
 export function verificationLoader(access: Access) {
   const cache = new Map<string, Verification>();
@@ -29,10 +35,13 @@ export function verificationLoader(access: Access) {
     }
   };
 
-  return (id: string, fresh = false): Promise<Verification | null> => {
+  let on: Promise<boolean> | null = null;
+  return async (id: string, fresh = false): Promise<VerificationLookup> => {
+    on ??= fetchMyFlags(access.ws, access.token).then((l) => l.includes(VERIFIER_FLAG), () => false);
+    if (!(await on)) return "off";
     const hit = !fresh && cache.get(id);
-    if (hit) return Promise.resolve(hit);
-    return new Promise((resolve, reject) => {
+    if (hit) return hit;
+    return new Promise<Verification | null>((resolve, reject) => {
       queue.push({ id, resolve, reject });
       if (!timer) timer = setTimeout(() => { void flush().catch((e: Error) => { queue.forEach((b) => b.reject(e)); }); }, 30);
     });

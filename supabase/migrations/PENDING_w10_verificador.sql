@@ -2,6 +2,13 @@
 -- Aditiva (expandir): tabela nova fechada à API, uma função do worker e uma de leitura. Nada do que existe muda:
 -- o motor antigo não chama worker_save_verification e a app antiga não lê a tabela.
 
+-- Disponibilidade (CAP-09, ADR-0031): ligado para todos com acesso; a agência pode desligar cliente a cliente em /funcionalidades.
+-- Sem esta migração a flag não existe e a app não chama o servidor (sem 404 na consola).
+insert into feature_flag_defs (key, label, module, scope, default_stage, description) values
+  ('scripts.verifier', 'Verificador dos guiões do motor', 'Guiões', 'ws', 'all',
+   'Marcas do verificador (VAR-04) por hook no cartão do guião: persona da lista aprovada, opinião, facto com fonte datada, terceiro identificado, validade e PT-PT. Não aprova nem rejeita.')
+on conflict do nothing;
+
 create table if not exists public.script_verifications (
   id uuid primary key default gen_random_uuid(),
   workspace_id text not null references public.clients(id),
@@ -92,5 +99,6 @@ grant execute on function public.content_verifications(text, text[], text) to an
 /* Rollback (compatível, a app e o motor anteriores não dependem de nada disto):
    drop function if exists public.content_verifications(text, text[], text);
    drop function if exists public.worker_save_verification(uuid, text, text, jsonb);
-   drop table if exists public.script_verifications;   -- perde os resultados guardados (o agent_log do motor mantém cada chamada)
+   drop table if exists public.script_verifications;
+   delete from feature_flags where key = 'scripts.verifier'; delete from feature_flag_defs where key = 'scripts.verifier';   -- perde os resultados guardados (o agent_log do motor mantém cada chamada)
    delete from domain_events where type = 'script.verified'; (opcional) */

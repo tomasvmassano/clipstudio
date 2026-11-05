@@ -8,7 +8,8 @@
 2. **O LLM classifica, as regras decidem a marca** (`reconcile`): persona só passa se a frase estiver na lista aprovada em vigor no claim (normalizada, tal e qual; lista vazia = fora da regra; sem lista = rever); facto exige fonte datada (a ideia de origem com URL e data) e mesmo assim fica "atenção, não verificado"; terceiro identificado leva marca jurídica (exceto famosos dentro de uma frase-persona aprovada, R-17); validade leva data de expiração; promessa de ganhos fica fora da regra. O LLM só pode agravar uma marca. Se o LLM falhar, ficam as regras e o resultado diz "só regras". Com `ENGINE_MOCK=1` o LLM é substituído pelas mesmas heurísticas.
 3. **Nunca chumba sozinho.** O guião entra em revisão como antes; o resultado vai ao lado e a UI mostra marcas por hook com o porquê. Quem revê decide.
 4. **Guardar ao lado, não dentro do guião.** Tabela `script_verifications` (fechada à API) escrita por `worker_save_verification` (lease, só guiões de `agent_job_outputs` da própria execução, idempotente por execução e guião, forma validada, 64 KB), com a versão do texto (`current_version_id`), versão do verificador, modelo, versão dos prompts e da lista de frases-persona. Leitura por `content_verifications(ws, ids, token)` com `scripts.read`.
-5. **Expandir/contrair entre repositórios.** A app sem a migração: o worker apanha 42883, regista e segue (guião gravado, sem verificação). O motor antigo não chama a função nova.
+5. **Flag `scripts.verifier`** (CAP-09, ligada para todos por omissão, desligável por cliente em /funcionalidades). Sem a migração a flag não existe e a app não chama `content_verifications` (sem 404 nem erro na consola).
+6. **Expandir/contrair entre repositórios.** A app sem a migração: o worker apanha 42883, regista e segue (guião gravado, sem verificação). O motor antigo não chama a função nova.
 
 ## Alternativas rejeitadas
 
