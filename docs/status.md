@@ -12,10 +12,10 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 |---|---|
 | feito | 25 |
 | parcial | 204 |
-| por começar | 45 |
+| por começar | 74 |
 | bloqueado | 3 |
 | adiado | 3 |
-| **total** | **280** |
+| **total** | **309** |
 
 ## Pendentes abertos (bloqueados primeiro, depois por prioridade)
 
@@ -716,3 +716,52 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | REF-07 | por começar |  |  | — |
 | REF-08 | por começar |  |  | — |
 | REF-09 | por começar |  |  | — |
+
+## 46.1 Olhar na câmara e teleprompter (GAZE)
+
+| ID | Estado | O que falta | Evidência | Verificado |
+|---|---|---|---|---|
+| GAZE-01 | por começar |  |  | — |
+| GAZE-02 | por começar |  |  | — |
+| GAZE-03 | por começar |  |  | — |
+| GAZE-04 | por começar |  |  | — |
+| GAZE-05 | por começar |  |  | — |
+| GAZE-06 | por começar |  |  | — |
+
+## 46.2 Aprendizagem contínua com edições e rejeições (LRN)
+
+| ID | Estado | O que falta | Evidência | Verificado |
+|---|---|---|---|---|
+| LRN-01 | por começar |  |  | — |
+| LRN-02 | por começar |  |  | — |
+| LRN-03 | por começar |  |  | — |
+| LRN-04 | por começar |  |  | — |
+| LRN-05 | por começar |  |  | — |
+| LRN-06 | por começar |  |  | — |
+| LRN-07 | por começar |  |  | — |
+
+## 46.3 Cortes de vídeos longos (CLIP)
+
+| ID | Estado | O que falta | Evidência | Verificado |
+|---|---|---|---|---|
+| CLIP-01 | por começar |  |  | — |
+| CLIP-02 | por começar |  |  | — |
+| CLIP-03 | por começar |  |  | — |
+| CLIP-04 | por começar |  |  | — |
+| CLIP-05 | por começar |  |  | — |
+| CLIP-06 | por começar |  |  | — |
+| CLIP-07 | por começar |  |  | — |
+| CLIP-08 | por começar |  |  | — |
+| CLIP-09 | por começar |  |  | — |
+| CLIP-10 | por começar |  |  | — |
+| CLIP-11 | por começar |  |  | — |
+
+## 46.4 Estúdio ligado à app (STU)
+
+| ID | Estado | O que falta | Evidência | Verificado |
+|---|---|---|---|---|
+| STU-01 | por começar |  |  | — |
+| STU-02 | por começar |  |  | — |
+| STU-03 | por começar |  |  | — |
+| STU-04 | por começar |  |  | — |
+| STU-05 | por começar |  |  | — |

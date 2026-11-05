@@ -1249,6 +1249,7 @@ Referências externas consultadas em 2026-10-28: ClickUp (custom roles, workload
 
 ## 36. Registo de alterações
 
+- **CHG-008 — 2026-11-06:** §46: olhar na câmara e teleprompter (GAZE-01..06), aprendizagem contínua com edições e rejeições em dois níveis, agência e cliente (LRN-01..07), cortes de vídeos longos com o agente Clip Miner, com prioridade (CLIP-01..11), estúdio ligado à app com captura direta e pacote por guião (STU-01..05); sequência revista em §46.5. Origem: IDEA-010 a IDEA-013.
 - **CHG-006 — 2026-11-03:** revisão de vídeo por link da Google Drive enquanto não há object storage (FR-05-03, ING-01): player da Drive embutido, comentários com o momento escrito por quem comenta, aprovar ou pedir alterações com motivo. Decisão do Tomás para rever os 69 vídeos do Numeiro.
 - **CHG-007 — 2026-11-04:** editor de vídeo (§39.1, EDL-07..EDL-13): documento de edição versionado, pré-visualização ao vivo no browser, linha do tempo e modo guiado, exportar por job, notas ao Claude com aceitação, estilos guardados. Decisão do Tomás depois de rever os 69 vídeos do Numeiro.
 - **CHG-005 — 2026-10-30:** §45 Referências por link (REF-01..09): colar link, dissecção, 3 guiões adaptados por link com 3 hooks, via rápida, extração do estilo de edição, biblioteca de estilos da agência e importação para clientes; R-20 recolha de vídeos de referência pelo mecanismo do Scout (decisão, risco de termos de serviço aceite); estilo S14 proposto. Origem: IDEA-008 e IDEA-009.
@@ -1437,3 +1438,87 @@ R-20 (CHG-005, decisão de produto). **Recolha de vídeos de referência de terc
 **Exemplo de referência (29/10):** reel @marcotrunzo (15,9 s, ~2,68 M reproduções): um só take em selfie, sem cortes nem zooms, legenda branca em negrito com sombra em blocos de 3 a 6 palavras no terço superior e um cartão de imagem por frase acima da legenda (a "prova" de cada afirmação). Proposto como estilo **S14 "Recibo por frase"** no catálogo de VAR-02. A reviravolta do original acusa pessoas identificadas de crimes; na adaptação aplica-se R-17.
 
 **Em aberto:** o tratamento de acusações falsas a terceiros identificados mantém-se como em R-17 até decisão do Tomás sobre a proposta registada na inbox de ideias (o motor não as gera; se uma pessoa da equipa as escrever, ficam marcadas com aviso jurídico e só avançam com aprovação explícita e auditada). Política de atualização de estilos importados (REF-08) a confirmar.
+
+## 46. Gravação, aprendizagem e cortes de vídeos longos (CHG-008)
+
+Origem: IDEA-010 a IDEA-013 da inbox de ideias do Tomás (01/11 a 06/11/2026), com estudos de suporte (olhar na câmara com teleponto; cortes de vídeos longos). Números marcados [pressuposto] são pontos de partida a calibrar.
+
+### 46.1 Olhar na câmara e teleprompter (GAZE)
+
+Problema: comentários do público notam que o Numeiro lê o teleponto. Causa provável (verificada no código a 01/11): o teleprompter mostra o texto numa coluna até 1100 px; cada linha varre ~6-13° a 1-1,5 m, quando o público só sente contacto visual dentro de um cone de ~4-9°. Regra geométrica: ângulo = 2·atan(largura / 2·distância); alvo ±3°, teto ±4,5°.
+
+**GAZE-01 [P0] Coluna do teleprompter ligada à distância.** Definição de distância (m) e tamanho do ecrã por dispositivo; a app calcula e aplica a largura máxima da coluna para o alvo de ±3° (≈10,5 cm a 1 m, ≈26 cm a 2,5 m). Estende FR-03-03 e FR-03-05.
+
+**GAZE-02 [P0] Linha de foco e modo frase.** Linha de leitura fixa à altura da lente; modo frase com 2-4 palavras por linha, quebras nas pausas naturais.
+
+**GAZE-03 [P1] Ritmo e memória.** Ritmo por pedal ou comando Bluetooth; modo voz opcional que só pausa no silêncio; modo "hooks de memória" (mostra só a palavra-chave de cada hook).
+
+**GAZE-04 [P1] Pontuação de olhar por take no QC.** No proxy, com MediaPipe (Apache-2.0) e calibração por sessão: % de frames fora do eixo da lente (limiar ~4,5° [pressuposto]), varrimentos de linha por minuto e piscar. Usa-se para escolher o melhor take e dar feedback ao criador por sessão. Liga a EDL-03. Modelos com licença só de investigação ou não comercial (OpenFace 3.0, ETH-XGaze) não se usam em produção.
+
+**GAZE-05 [P2] Correção do olhar por IA, piloto opcional.** Só depois de GAZE-01..04 e medido o efeito. Piloto em 20 takes com uma API (ex.: Sieve, ~0,20 USD/min) ou NVIDIA Maxine Eye Contact alojado (licença por GPU); corrigir só segmentos finais assinalados; nova versão ligada; revisão humana no telemóvel. Rotulagem no TikTok e cláusula de consentimento no contrato do criador são decisões do Tomás antes de publicar vídeos corrigidos.
+
+**GAZE-06 [P0] Protocolo de estúdio e gravação (sem código).** Teleponto a ~2,5 m, ecrã 12-15" de alto brilho, objetiva ~65-70 mm; hooks ditos de memória; corpo em blocos de 1-2 frases com olhares naturais; um take de memória por guião; guiões reescritos para PT-PT falado. Medir comentários "está a ler" e retenção antes e depois.
+
+### 46.2 Aprendizagem contínua com edições e rejeições (LRN)
+
+Assenta em FR-17-10 (motivos de retrabalho), FR-06-04 (versões da configuração), FR-02-06 e SCALE-06.
+
+**LRN-01 [P0] Motivo em cada edição.** Cada edição humana a um guião gerado guarda o par versão do motor → versão aprovada e um motivo: chips de um toque (taxonomia de FR-17-10 mais hook fraco, frase longa, não soa ao cliente, PT-BR, factual, palavra proibida, ritmo, fecho fraco) e texto livre opcional. **Decisão:** opcional, obrigatório quando a edição muda mais de ~30% do texto. Aprovar sem editar conta como sinal positivo.
+
+**LRN-02 [P0] Agente "Editor de lições".** Job diário depois da revisão: agrupa os pares e motivos do dia e propõe lições curtas e verificáveis, cada uma com evidência (número de edições, exemplos antes/depois).
+
+**LRN-03 [P0] Aprovação de lições.** Lições propostas aparecem em Aprendizagem → Lições; aprova, edita ou rejeita quem tiver a capacidade (decisão). Aprovar cria uma nova versão da configuração dos agentes, com voltar atrás. Nada muda sozinho (AGENTS §7).
+
+**LRN-04 [P0] Dois níveis (decisão).** **Agência:** regras gerais sobre o que funciona nos algoritmos e dá mais desempenho, aprendidas dos resultados de todos os clientes, guardadas só como regras (nunca guiões, números ou métricas de outro cliente, R-13/R-14), aprovadas no espaço da agência e herdadas por todos. **Cliente:** maneira de comunicar e tipos de vídeo, aprendidas das edições, rejeições e resultados desse cliente. Em conflito, prevalece a lição do cliente.
+
+**LRN-05 [P0] Uso pelo motor.** Hook Smith, Guionista e Crítico recebem as lições aprovadas e 5-10 pares antes/depois parecidos (formato, tema); o Crítico ganha uma regra da rubrica por lição; lições mecânicas passam a verificação em código no Editor.
+
+**LRN-06 [P1] Medir a melhoria.** Por versão da configuração: % de guiões aprovados sem edição, distância de edição, rejeições por categoria, tempo até aprovar e, mais tarde, desempenho dos publicados (PERF). Alerta e voltar atrás quando uma versão piora.
+
+**LRN-07 [P2] Sem treino de modelo por agora.** Lições e exemplos no prompt (imediatos, auditáveis, reversíveis). Reavaliar um modelo treinado só com milhares de pares e ganho estagnado.
+
+### 46.3 Cortes de vídeos longos (CLIP)
+
+Concretiza SCALE-03 (clip factory) e VAR-06 para vídeos longos dos clientes (YouTube, podcasts, vlogs). **Prioridade (decisão do Tomás, 05/11):** é das funcionalidades com mais prioridade; ver §46.5.
+
+**CLIP-01 [P0] Fonte = ficheiro master original.** Upload ou Drive do cliente, em 4K quando houver. A YouTube Data API não descarrega vídeos e os termos do YouTube proíbem descarregar; o link do YouTube serve para metadados, capítulos e métricas.
+
+**CLIP-02 [P0] Transcrição com oradores.** Tempos por palavra e separação de oradores, em PT-PT; fornecedor escolhido depois de um teste com episódios reais do cliente.
+
+**CLIP-03 [P0] Agente "Clip Miner": candidatos e ranking.** Segmentação; proposta de candidatos; crítica e ranking com a rubrica e as máquinas da bíblia de estilo do cliente; resultado por candidato: início/fim em IDs de frase (nunca tempos inventados), tese, máquina viral, etiquetas de polémica, gatilho de identidade, riscos, pontuação e justificação. O LLM ordena; não se apresenta a pontuação como previsão de viral.
+
+**CLIP-04 [P0] Etiquetas de polémica e portão da dignidade.** Taxonomia alinhada com a bíblia de estilo: inimigo (comportamento, crença, ego), gatilho de identidade, tensão, afirmação forte, número, confissão. Ataque à dignidade de um grupo essencializado bloqueado sempre; pessoa identificada assinalada (regra final para afirmações sobre terceiros pendente, ver §46.5).
+
+**CLIP-05 [P0] Diversidade e cortes limpos.** 5-10 cortes por vídeo; diversificação com limites por máquina e por tema, pelo menos um corte não polémico; pontos de corte ajustados em código a fins de frase e silêncios; duração alvo 25-60 s para opinião [pressuposto].
+
+**CLIP-06 [P0] Preparação do corte.** Gancho no 0:00; reordenação só com frases inteiras, no máximo 3 trechos e sem mudar a tese (o revisor vê original e reordenado lado a lado); título por cima com ≤ 8 palavras; 3 hooks; cartão de contexto quando preciso; CTA de 1-2 s para o vídeo completo.
+
+**CLIP-07 [P0] Vertical, legendas, estilo e revisão.** Reframe 9:16 com deteção do orador ativo (dois oradores: alternância ou split, com tempo mínimo por plano e suavização); legendas e estilos do catálogo (VAR-02) e preset do cliente (EDL-01); QC (EDL-03); fila de revisão em lote (EDL-02). Fontes multi-câmara usam os planos individuais diretamente.
+
+**CLIP-08 [P1] Promover o vídeo completo.** Link na descrição; tarefa manual por Short para definir o "vídeo relacionado" no YouTube Studio (a API não o permite); comentário fixado à mão; medir tráfego dos cortes para o vídeo longo.
+
+**CLIP-09 [P1] Segunda vaga por retenção.** Com OAuth do cliente, a curva de retenção do vídeo pela YouTube Analytics API (disponível ~3-7 dias depois) gera uma segunda vaga de cortes nos picos que o público reviu.
+
+**CLIP-10 [P1] Aprender e comparar.** Aprovações, rejeições e edições (LRN) e desempenho (PERF) ajustam os pesos; mais tarde, um ranker próprio com retenção quando houver 100-300 episódios [pressuposto]. Comparação com OpusClip/Klap no piloto.
+
+**CLIP-11 [P0] Piloto.** 5 vídeos reais de clientes; avança se [pressuposto]: ≥ 50% dos cortes aprovados, ≤ 1 corte com contexto perdido por vídeo, nenhum corte a deturpar o que foi dito, cortes na fila em ≤ 30 min por hora de fonte, revisão ≤ 45 min por hora de fonte, desempenho mediano ≥ 0,5× a mediana da conta.
+
+### 46.4 Estúdio ligado à app (STU)
+
+Concretiza ING-02 e ING-03 para gravação ao vivo e edição guião a guião.
+
+**STU-01 [P0] Captura direta com segurança no cartão.** Cada câmara por HDMI limpo para uma placa de captura UVC no computador do estúdio; o OBS grava em formato legível durante a gravação; cada câmara grava também no seu cartão como segurança (nunca só no computador). Upload alternativo pela Drive mantém-se, e o telemóvel continua por ING-04.
+
+**STU-02 [P0] Agente de estúdio.** Programa local no computador do estúdio, ligado à app: "Começar sessão" põe o OBS a gravar (OBS WebSocket) e regista a hora exata; a app avisa-o em tempo real de cada marca do teleprompter ("Gravaste? → Sim"); o agente corta esse guião das câmaras com ffmpeg em cópia direta (±1 s de margem) e envia para o storage (ING-01). O teleprompter corre num dispositivo à parte.
+
+**STU-03 [P0] Pacote de edição por guião.** O job de pacote (EDL-01, W5-09) passa a aceitar um guião de cada vez, disparado pelo envio do agente: transcrição, hook 1/2/3, corpo, repetições, último take bom, 3 vídeos por hook e estilos do preset, para a revisão em lote. Meta [pressuposto]: vídeos para rever poucos minutos depois de cada "Sim". Falha: o corte pode ser refeito a partir das marcas e da gravação contínua.
+
+**STU-04 [P1] Validação do equipamento.** Ensaio de 20-60 min antes de comprar o resto: frames perdidos por atraso de codificação, cada placa na sua porta, disco externo rápido, upload real. MacBook Pro M4 base com 16 GB: deve aguentar 2 câmaras 4K (a confirmar); 3 câmaras é o ponto de risco (alternativas: câmara do plano largo mais leve ou só no cartão, ou um Mac com chip Pro/Max).
+
+**STU-05 [P1] Variante podcast.** 2 pessoas, 3 câmaras (plano largo + dois individuais em cruzado), 2 microfones para uma interface de áudio ou para a câmara principal, gravação contínua sem teleprompter; o episódio entra direto no Clip Miner (§46.3) e os planos individuais dão os cortes verticais.
+
+### 46.5 Sequência e decisões em aberto
+
+**Sequência (altera §44 na ordem, não no âmbito):** GAZE-06 já, sem código; a seguir às tarefas W5 em curso: CLIP-01..07 e CLIP-11 (MVP do Clip Miner, a reutilizar storage, transcrição, catálogo de estilos, QC e revisão em lote), STU-01..03 e GAZE-01..02; depois LRN-01..05, GAZE-03..04, CLIP-08..09; por fim LRN-06..07, CLIP-10 e GAZE-05.
+
+**Em aberto:** regra final para afirmações falsas sobre terceiros (R-17 mantém-se até decisão; proposta: o motor não as gera, as escritas por pessoas ficam marcadas e só avançam com aprovação explícita e auditada); usar a curva "mais revistos" recolhida por scraper na seleção (fora da exceção R-20, que cobre referências) ou só a retenção oficial com OAuth; autorização dos convidados que aparecem nos vídeos; revisor por cliente e prazo máximo do upload aos cortes aprovados; rotulagem no TikTok de vídeos com olhar corrigido; fornecedor de transcrição depois do teste em PT-PT.
