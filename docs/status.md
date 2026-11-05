@@ -375,7 +375,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-11-01 | parcial | arrastar não verificado em produção; verificação com conta de cliente (R-15); E2E citado não está versionado no repo | /calendario dia/semana/mês, arrastar com validação; content_reschedule; w3_calendar 39/39; produção 03/11: vistas semana e mês, navegação de mês, guiões e tarefas no dia | 2026-11-03 (sessão real do dono da agência, produção) |
 | FR-11-02 | parcial | verificação com sessão real (R-15) da equipa Numeiro | tarefas, gravações, dependências; W3-01, W3-02; calendário com revisões de vídeo e publicações planeadas (W9-03); w9_calendario 14/14; migração aplicada em produção 2026-11-06 | — |
 | FR-11-03 | parcial | sem vistas por equipa, plataforma, campanha; sem deteção de conflitos | atrasados a vermelho; limitações W3-02 | — |
-| FR-11-04 | parcial | aplicar PENDING_w10_prazos em produção, ligar a flag notifications.deadlines e verificar com sessão real (R-15) | template_apply, content_checklist; w3_templates 35/35; W3-03; W10-14 (PR por abrir): avisos de prazo 24 h/atraso, guião por aprovar com gravação amanhã, revisão de vídeo atrasada, mudança de prazo; tick pg_cron 15 min; w10_prazos 39/39 | — |
+| FR-11-04 | parcial | aplicar PENDING_w10_prazos em produção, ligar a flag notifications.deadlines e verificar com sessão real (R-15) | template_apply, content_checklist; w3_templates 35/35; W3-03; W10-14 (#83): avisos de prazo 24 h/atraso, guião por aprovar com gravação amanhã, revisão de vídeo atrasada, mudança de prazo; tick pg_cron 15 min; w10_prazos 39/39 | — |
 | FR-11-05 | parcial | sem ficheiros, revisões nem publicações ligadas | detalhe do guião com tarefas no calendário (W3-02) | — |
 
 ## M12 — Publicação
