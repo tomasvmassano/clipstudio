@@ -11,7 +11,7 @@ import type { Access } from "@/lib/access";
 import { fetchPrereqs, prereqGrid, setPrereq, type Prereqs } from "@/lib/workflow-prereqs";
 
 /*
- * Pré-requisitos das transições de produção (FR-17-05, ADR-0047): por cliente, que condições têm de se verificar antes de
+ * Pré-requisitos das transições de produção (FR-17-05, ADR-0051): por cliente, que condições têm de se verificar antes de
  * agendar, marcar gravado, passar a edição ou marcar pronto. O servidor recusa a transição e diz a causa e quem tem de agir.
  * "Marcar gravado × guião aprovado" é a mesma regra que "Só se gravam guiões aprovados" (acima): mudar uma muda a outra.
  */

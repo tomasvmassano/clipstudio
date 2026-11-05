@@ -1,4 +1,4 @@
--- W9-04 · Pré-requisitos configuráveis nas transições de produção (PRD FR-17-05, FR-15-02; AGENTS §6; ADR-0047).
+-- W9-04 · Pré-requisitos configuráveis nas transições de produção (PRD FR-17-05, FR-15-02; AGENTS §6; ADR-0051).
 -- Cada cliente escolhe, por transição (agendar, marcar gravado, passar a edição, marcar pronto), que condições têm de se
 -- verificar: guião aprovado, sem tarefas bloqueadas do guião, vídeo aprovado na revisão. content_production verifica no
 -- servidor e recusa com 22023 'pre_requisito_em_falta' e um detalhe em PT com a causa e o próximo responsável.

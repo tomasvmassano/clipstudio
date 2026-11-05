@@ -1,4 +1,4 @@
--- W9-01 · Eliminar guiões arquivados (PRD FR-02-01, R-09; AGENTS §2.6, §5; ADR-0047).
+-- W9-01 · Eliminar guiões arquivados (PRD FR-02-01, R-09; AGENTS §2.6, §5; ADR-0051).
 -- Eliminar = lápide (soft-delete com recuperação controlada, R-09): o guião sai de todas as listas, pesquisas, calendário,
 -- exportações e ações; as versões e transições ficam (são imutáveis e são a prova das aprovações, AGENTS §2.6), mas deixam de
 -- ser legíveis pela API. Só um guião arquivado, sem tarefas abertas, publicações por cancelar, publicações feitas nem ativos

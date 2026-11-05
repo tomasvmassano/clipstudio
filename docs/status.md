@@ -25,7 +25,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | PLAT-02 | P0 | bloqueado | depende de PLAT-01 e de ligar contas + métricas em produção (PERF-08) | Fase A, só leitura |
 | PLAT-03 | P0 | bloqueado | depende de PLAT-01 e do publicador (PUB-01) | Fase B, publicação |
 | FR-01-02 | P0 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | Widgets configuráveis por função e por workspace; comparação temporal e explicaç |
-| FR-02-01 | P0 | parcial | sem eliminação definitiva com confirmação (só arquivo) | CRUD de guiões, duplicação, arquivo, recuperação e eliminação com confirmação. |
+| FR-02-01 | P0 | parcial | verificação com sessão real (R-15) depois de aplicar a migração | CRUD de guiões, duplicação, arquivo, recuperação e eliminação com confirmação. |
 | FR-03-01 | P0 | parcial | verificação com conta de cliente (R-15) | Fila de gravação por data, campanha e responsável, apenas conteúdos elegíveis; r |
 | FR-03-02 | P0 | parcial | verificação com conta real (R-15) | Blocos identificados Hook 1, Hook 2, Body, CTA e personalizados; seleção e repet |
 | FR-04-01 | P0 | parcial | sem anexo; edição dos campos da fonte não confirmada | CRUD de fontes com URL, título, origem, data, idioma, autor, tags, categoria, re |
@@ -38,7 +38,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-09-02 | P0 | parcial | só views, likes, comentários, partilhas por scraping; sem alcance, retenção, seguidores, conversões | Métricas por conteúdo e período: views, alcance, interações, retenção, seguidore |
 | FR-10-01 | P0 | parcial | sem módulo Custos; worker por alojar | Consumo de IA por agente, modelo, execução e workspace. |
 | FR-11-01 | P0 | parcial | arrastar não verificado em produção; verificação com conta de cliente (R-15); E2E citado não está versionado no repo | Calendário editorial por dia, semana e mês; drag and drop com validação. |
-| FR-11-02 | P0 | parcial | sem revisões nem publicações no calendário | Tarefas, gravações, revisões, publicações, responsáveis, deadlines e dependência |
+| FR-11-02 | P0 | parcial | verificação com sessão real (R-15) depois de aplicar a migração | Tarefas, gravações, revisões, publicações, responsáveis, deadlines e dependência |
 | FR-14-01 | P0 | parcial | recuperação por email depende do SMTP do Supabase (limitado) até haver domínio (FR-13-01 adiado); verificação com a conta real do Tomás em produção | Nome, avatar, email verificado, password reset e MFA quando disponível. |
 | FR-14-02 | P0 | parcial | idioma só PT-PT; email e resumo pessoais guardados mas sem envio; verificação com sessão real | Idioma, timezone, tema, notificações e preferências do teleprompter. |
 | FR-15-01 | P0 | parcial | sem idioma configurável (só PT-PT) | Geral: nome, logótipo, idioma, timezone, moeda e branding. |
@@ -50,7 +50,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | TEAM-16 | P0 | parcial | faltam exportação, storage de media, pesquisa e realtime com contas reais | Segurança e testes de autorização |
 | FR-17-01 | P0 | parcial | filtros guardados no browser; verificação com conta real (R-15) | Inbox unificada por utilizador com tarefas, aprovações, menções, erros de automa |
 | FR-17-04 | P0 | parcial | sem variantes, assets e publicações por conta ligadas | Relação um-para-muitos: conteúdo → hooks → takes → variantes → assets → publicaç |
-| FR-17-05 | P0 | parcial | sem pré-requisitos nas transições | Transições configuráveis de workflow geram tarefas e notificações idempotentes,  |
+| FR-17-05 | P0 | parcial | verificação com sessão real (R-15) depois de aplicar a migração | Transições configuráveis de workflow geram tarefas e notificações idempotentes,  |
 | FR-17-13 | P0 | parcial | verificação com conta real (R-15) | Auto-save com indicador persistido, proteção contra alterações concorrentes e re |
 | FR-17-14 | P0 | parcial | worker por alojar | Jobs duráveis com idempotency key, retries exponenciais, timeout, dead-letter, c |
 | FR-17-15 | P0 | parcial | sem alertas nem dashboard de saúde | Observabilidade com logs estruturados, correlação por workspace/run/content, ale |
@@ -93,7 +93,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-01-04 | P1 | parcial | sem calendário compacto no Início | Calendário editorial compacto e atividade recente com ator e timestamp. |
 | FR-01-05 | P1 | parcial | verificação com conta real (R-15) | Ações rápidas criar fonte, guião, projeto e tarefa; cada ação respeita permissõe |
 | FR-02-03 | P1 | parcial | título próprio (usa o tema); verificação com conta real (R-15) | Campos: título, cliente/workspace, campanha, tema, formato, plataforma, responsá |
-| FR-02-05 | P1 | parcial | sem ações em lote | Enviar para revisão, aprovar/rejeitar/pedir alterações com comentário obrigatóri |
+| FR-02-05 | P1 | parcial | verificação com sessão real (R-15) depois de aplicar a migração | Enviar para revisão, aprovar/rejeitar/pedir alterações com comentário obrigatóri |
 | FR-03-03 | P1 | parcial | verificação com conta de cliente (R-15); E2E citado não está versionado no repo | Espelhamento horizontal e vertical independentes; velocidade, fonte, line-height |
 | FR-03-04 | P1 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | Play/pause, scroll manual, fullscreen por gesto, atalhos configuráveis, controlo |
 | FR-03-05 | P1 | parcial | verificação com conta de cliente (R-15); E2E citado não está versionado no repo | Guardado de preferências por utilizador e dispositivo; bloqueio de suspensão qua |
@@ -262,11 +262,11 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
-| FR-02-01 | parcial | sem eliminação definitiva com confirmação (só arquivo) | content_create/duplicate, arquivar/recuperar; w2_content 47/47; W2-02 | — |
+| FR-02-01 | parcial | verificação com sessão real (R-15) depois de aplicar a migração | content_create/duplicate, arquivar/recuperar; w2_content 47/47; W2-02; eliminação definitiva como lápide com confirmação e recuperação 30 dias (W9-01, ADR-0051); w9_guioes_eliminar 36/36 | — |
 | FR-02-02 | feito |  | editor por blocos com autosave e indicador W2-02; content_save; comentários no cartão do guião (W2-06 content_comments (bloco, frase citada, versão, respostas, resolver), /c/[ws]/revisao; w2_review_comments 33/33; e2e/review.spec.ts 3/3; ADR-0025) | 2026-10-29 (E2E) |
 | FR-02-03 | parcial | título próprio (usa o tema); verificação com conta real (R-15) | guioes: título, cliente, tema, formato, data; fontes ligadas (content_sources); campanha, responsável, plataformas, etiquetas (content_meta_set, projects; W2-07, ADR-0029); w2_content_meta 30/30; e2e/content-meta.spec.ts | — |
 | FR-02-04 | feito |  | editorial_status e production_status independentes; w2_content 47/47, w3_calendar 39/39 | — |
-| FR-02-05 | parcial | sem ações em lote | content_transition com motivo obrigatório na rejeição; W2-02; w2_content | — |
+| FR-02-05 | parcial | verificação com sessão real (R-15) depois de aplicar a migração | content_transition com motivo obrigatório na rejeição; W2-02; w2_content; aprovar em lote os guiões gravados, presos à versão gravada (W9-02); w9_aprovar_gravados 25/25 | — |
 | FR-02-06 | parcial | sem diff visual entre versões | content_history, content_restore_version, lock_version; guiao-history.tsx; W2-02 | — |
 | FR-02-07 | parcial | sem pesquisa, ordenação, vistas guardadas nem impressão | filtros por estado e Exportar .txt em guioes/page.tsx | — |
 | FR-02-08 | por começar | sem sugestões de IA no editor | nada no código | — |
@@ -369,7 +369,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
 | FR-11-01 | parcial | arrastar não verificado em produção; verificação com conta de cliente (R-15); E2E citado não está versionado no repo | /calendario dia/semana/mês, arrastar com validação; content_reschedule; w3_calendar 39/39; produção 03/11: vistas semana e mês, navegação de mês, guiões e tarefas no dia | 2026-11-03 (sessão real do dono da agência, produção) |
-| FR-11-02 | parcial | sem revisões nem publicações no calendário | tarefas, gravações, dependências; W3-01, W3-02 | — |
+| FR-11-02 | parcial | verificação com sessão real (R-15) depois de aplicar a migração | tarefas, gravações, dependências; W3-01, W3-02; calendário com revisões de vídeo e publicações planeadas (W9-03); w9_calendario 14/14 | — |
 | FR-11-03 | parcial | sem vistas por equipa, plataforma, campanha; sem deteção de conflitos | atrasados a vermelho; limitações W3-02 | — |
 | FR-11-04 | parcial | sem notificações de prazo (só de atribuição) | template_apply, content_checklist; w3_templates 35/35; W3-03 | — |
 | FR-11-05 | parcial | sem ficheiros, revisões nem publicações ligadas | detalhe do guião com tarefas no calendário (W3-02) | — |
@@ -517,7 +517,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
-| FR-17-05 | parcial | sem pré-requisitos nas transições | task_rules e domain_events_handoff idempotentes; w3_tasks 53/53 | — |
+| FR-17-05 | parcial | verificação com sessão real (R-15) depois de aplicar a migração | task_rules e domain_events_handoff idempotentes; w3_tasks 53/53; pré-requisitos configuráveis por transição de produção, verificados no servidor (W9-04); w9_prerequisitos 25/25 | — |
 | FR-17-06 | parcial | sem SLA nem escalonamento; fila de exceções só com sem responsável e erro de automação | /caixa sem responsável; automation_error (W4-01) | — |
 
 ## 19.4 Operação de alto volume

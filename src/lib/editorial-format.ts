@@ -1,6 +1,6 @@
 /*
  * Regras puras do fluxo editorial (sem rede), partilhadas pela UI e pelos testes unitários (tests/editorial-format.test.mts):
- * aprovar gravados em lote (W9-02), confirmação de eliminar (W9-01), calendário (W9-03) e pré-requisitos (W9-04). ADR-0047.
+ * aprovar gravados em lote (W9-02), confirmação de eliminar (W9-01), calendário (W9-03) e pré-requisitos (W9-04). ADR-0051.
  */
 
 // ---------- aprovar gravados (W9-02) ----------

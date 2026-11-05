@@ -1,4 +1,4 @@
--- supabase/tests/w9_prerequisitos.sql : pré-requisitos configuráveis nas transições de produção (FR-17-05; ADR-0047).
+-- supabase/tests/w9_prerequisitos.sql : pré-requisitos configuráveis nas transições de produção (FR-17-05; ADR-0051).
 -- Rollback no fim. Negativos exigem o SQLSTATE certo.
 do $$
 declare

@@ -1,4 +1,4 @@
--- supabase/tests/w9_aprovar_gravados.sql : aprovar em lote guiões já gravados (FR-02-05, FR-17-07; AGENTS §2.6; ADR-0047).
+-- supabase/tests/w9_aprovar_gravados.sql : aprovar em lote guiões já gravados (FR-02-05, FR-17-07; AGENTS §2.6; ADR-0051).
 -- Rollback no fim. Negativos exigem o SQLSTATE certo.
 do $$
 declare

@@ -1,4 +1,4 @@
--- supabase/tests/w9_guioes_eliminar.sql : eliminar guiões arquivados (FR-02-01, R-09; ADR-0047). Rollback no fim.
+-- supabase/tests/w9_guioes_eliminar.sql : eliminar guiões arquivados (FR-02-01, R-09; ADR-0051). Rollback no fim.
 -- Negativos exigem o SQLSTATE certo; outro erro conta como falha.
 do $$
 declare

@@ -3,7 +3,7 @@ import { friendlyError, type Access } from "@/lib/access";
 import type { Prereqs } from "@/lib/editorial-format";
 export { prereqGrid, type Prereqs, type PrereqRule } from "@/lib/editorial-format";
 
-/* Pré-requisitos configuráveis das transições de produção (FR-17-05, ADR-0047). O servidor verifica sempre em content_production. */
+/* Pré-requisitos configuráveis das transições de produção (FR-17-05, ADR-0051). O servidor verifica sempre em content_production. */
 
 async function rpc<T>(fn: string, args: Record<string, unknown>): Promise<T> {
   const { data, error } = await supabase().rpc(fn, args);

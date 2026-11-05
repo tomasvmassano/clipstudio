@@ -1,4 +1,4 @@
--- supabase/tests/w9_calendario.sql : calendário com revisões de vídeo e publicações (FR-11-02; ADR-0047). Rollback no fim.
+-- supabase/tests/w9_calendario.sql : calendário com revisões de vídeo e publicações (FR-11-02; ADR-0051). Rollback no fim.
 do $$
 declare
   org uuid := (select id from organizations where slug='clipstudio');

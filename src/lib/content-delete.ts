@@ -3,7 +3,7 @@ import { friendlyError, type Access } from "@/lib/access";
 import type { Guiao } from "@/lib/types";
 
 /*
- * Eliminar guiões arquivados (FR-02-01, R-09, ADR-0047). Só com sessão individual e scripts.purge; o servidor volta a verificar
+ * Eliminar guiões arquivados (FR-02-01, R-09, ADR-0051). Só com sessão individual e scripts.purge; o servidor volta a verificar
  * tudo (arquivado, confirmação = ID do guião, sem tarefas abertas, publicações nem ativos). Recuperável durante 30 dias.
  */
 

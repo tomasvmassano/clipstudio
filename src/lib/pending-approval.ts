@@ -4,7 +4,7 @@ import type { PendingApproval } from "@/lib/editorial-format";
 export { approvable, blockedReason, type PendingApproval, type PendingItem } from "@/lib/editorial-format";
 
 /*
- * Guiões já gravados que ficaram por aprovar, de todos os dias (FR-02-05, FR-17-07; ADR-0047). A aprovação em lote usa
+ * Guiões já gravados que ficaram por aprovar, de todos os dias (FR-02-05, FR-17-07; ADR-0051). A aprovação em lote usa
  * content_bulk com recorded_only: o servidor só aprova se o texto for exatamente o que foi gravado (AGENTS §2.6).
  */
 

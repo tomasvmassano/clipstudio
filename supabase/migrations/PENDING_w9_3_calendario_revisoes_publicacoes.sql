@@ -1,4 +1,4 @@
--- W9-03 · Calendário com revisões de vídeo e publicações planeadas (PRD FR-11-02; ADR-0008, ADR-0036, ADR-0043, ADR-0047).
+-- W9-03 · Calendário com revisões de vídeo e publicações planeadas (PRD FR-11-02; ADR-0008, ADR-0036, ADR-0043, ADR-0051).
 -- calendar_range passa a devolver, além de guiões, tarefas e sessões:
 --   reviews      vídeos em revisão ou com alterações pedidas (versão atual, link da Drive), no dia do prazo: a tarefa aberta de
 --                revisão/edição do guião com prazo mais cedo; sem tarefa, o dia do guião (due_source = 'guiao'). Só com sessão

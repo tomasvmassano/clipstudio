@@ -12,7 +12,7 @@ import { CONFIRM_WORD, confirmOk, fetchDeleted, undeleteContent, type DeletedScr
 import type { Guiao } from "@/lib/types";
 
 /*
- * Eliminar um guião arquivado (FR-02-01, ADR-0047). Confirmação explícita: escrever "eliminar". O servidor recusa se o guião
+ * Eliminar um guião arquivado (FR-02-01, ADR-0051). Confirmação explícita: escrever "eliminar". O servidor recusa se o guião
  * tiver tarefas abertas, publicações por cancelar, já publicado ou ativos na biblioteca, e diz qual.
  */
 export function DeleteScriptDialog({ g, onDelete, onClose }: {

@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-05 (fluxo editorial)
+
+- **W9-01..04** (ADR-0051): eliminar guiões arquivados com confirmação e recuperação em 30 dias (FR-02-01, `scripts.purge`); aprovar em lote os guiões já gravados, presos à versão gravada (FR-02-05); calendário com revisões de vídeo e publicações (FR-11-02); pré-requisitos configuráveis nas transições de produção (FR-17-05). Testes `w9_*` 100/100.
+
 ## 2026-11-05 (pacote de edição automático)
 
 - **W5-09** edição automática a partir da sessão gravada (EDL-01, ING-03; ADR-0048): job `package` no worker (transcrição com tempos por palavra, sincronização das câmaras pelo som, janela de cada guião, escolha dos takes pela IA, documento v1 por hook com confiança e avisos), página `/c/[ws]/edicao-automatica` com o progresso e a lista dos vídeos para rever. Testes `w5_edit_package` 19/19, `test_package` 4/4.

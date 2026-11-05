@@ -1,4 +1,4 @@
--- W9-02 · Aprovar guiões já gravados que ficaram por aprovar (PRD FR-02-05, FR-17-07; AGENTS §2.6; ADR-0047).
+-- W9-02 · Aprovar guiões já gravados que ficaram por aprovar (PRD FR-02-05, FR-17-07; AGENTS §2.6; ADR-0051).
 -- Contexto: guiões antigos foram gravados antes de haver aprovação no fluxo novo (status legado 'aprovado', editorial
 -- 'in_review'). A equipa precisa de os ver todos (não só os do dia) e aprovar em lote, sabendo que aprova exatamente o texto
 -- que foi gravado. Não mexe em dados: é uma ação que a equipa faz na app.

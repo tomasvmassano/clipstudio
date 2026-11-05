@@ -14,7 +14,7 @@ import { bulkRun, type BulkItem, type BulkResult } from "@/lib/search";
 import { EDITORIAL_LABEL, type EditorialStatus } from "@/lib/types";
 
 /*
- * "Gravados por aprovar" (FR-02-05, FR-17-07; ADR-0047): guiões já gravados que ficaram em revisão, de todos os dias, para
+ * "Gravados por aprovar" (FR-02-05, FR-17-07; ADR-0051): guiões já gravados que ficaram em revisão, de todos os dias, para
  * aprovar em lote. Pré-visualização primeiro (o servidor corre e desfaz), confirmação com chave de idempotência. Só entram os
  * que têm o texto igual ao que foi gravado; o servidor volta a verificar cada um (recorded_only).
  */
