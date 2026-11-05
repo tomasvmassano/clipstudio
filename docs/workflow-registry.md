@@ -250,6 +250,9 @@ Exportar: `edit_export_request` (versão gravada) → job `export` → `done` cr
 ## Revisão em lote (W5-12, ADR-0052)
 
 Pacote `done` → "Exportar todos" (`edit_package_export`) → um job `export` por vídeo (idempotente pela versão do documento; um que falhe não trava os outros) → `done`: versão nova do vídeo com QC em `media_info.qc` → `in_review` na Revisão → aprovar (preso a essa versão) / pedir alterações / rejeitar; "Aprovar e seguinte" abre o próximo por rever. O QC não bloqueia: é nota para quem decide.
+## Frases-persona (W5-14, ADR-0053)
+
+Versão 0 (sem lista: agentes sem hipérbole de persona) → gravar → versão N+1 (imutável; conflito se outra pessoa gravou a N entretanto) → próximas execuções dos agentes usam a versão em vigor no claim e registam-na no `agent_log`. Voltar atrás = gravar uma versão nova a partir da antiga.
 
 ## Guião eliminado e pré-requisitos (W9, ADR-0051)
 

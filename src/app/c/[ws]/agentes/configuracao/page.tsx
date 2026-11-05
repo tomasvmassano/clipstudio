@@ -19,6 +19,7 @@ import {
   type AgentConfig, type Format, type Job, type Overview,
 } from "@/lib/agent-config";
 import { fmtDue } from "@/lib/tasks";
+import { PersonaPhrases } from "@/components/persona-phrases";
 import { cn } from "@/lib/utils";
 
 /*
@@ -30,7 +31,7 @@ export default function AgentesConfigPage() {
   return <WorkspaceGate need="agents.read">{(access) => <AgentesConfig access={access} />}</WorkspaceGate>;
 }
 
-type Tab = "execucoes" | "catalogo" | "configuracao";
+type Tab = "execucoes" | "catalogo" | "configuracao" | "persona";
 
 function AgentesConfig({ access }: { access: Access }) {
   const [o, setO] = useState<Overview | null>(null);
@@ -74,6 +75,7 @@ function AgentesConfig({ access }: { access: Access }) {
           <ToggleGroupItem value="execucoes">Execuções</ToggleGroupItem>
           <ToggleGroupItem value="catalogo">Catálogo</ToggleGroupItem>
           {o.can.configure && <ToggleGroupItem value="configuracao">Configuração</ToggleGroupItem>}
+          <ToggleGroupItem value="persona">Frases-persona</ToggleGroupItem>
         </ToggleGroup>
       </div>
 
@@ -110,6 +112,7 @@ function AgentesConfig({ access }: { access: Access }) {
         onCancel={(j) => run(() => cancelJob(access, j.id), j.status === "running" ? "Pedido de cancelamento enviado ao worker." : "Execução cancelada.")}
         onRetry={(j) => run(() => retryJob(access, j.id), "Execução de volta à fila.")} />}
       {tab === "catalogo" && <Catalog o={o} />}
+      {tab === "persona" && <PersonaPhrases access={access} />}
       {tab === "configuracao" && o.can.configure && <ConfigEditor access={access} o={o} onSaved={(t) => { setMsg({ text: t, ok: true }); setRev((n) => n + 1); }} />}
     </div>
   );
