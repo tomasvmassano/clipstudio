@@ -132,14 +132,15 @@ export async function sha256File(file: Blob, onProgress?: (loaded: number) => vo
 
 class PutError extends Error { constructor(readonly status: number, message: string) { super(message); } }
 
-function put(target: UploadTarget, file: Blob, onProgress: (loaded: number) => void, signal?: AbortSignal): Promise<string | null> {
+function put(target: UploadTarget, file: Blob, onProgress: (loaded: number) => void, signal?: AbortSignal, wantEtag = false): Promise<string | null> {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open(target.method, target.url);
     for (const [k, v] of Object.entries(target.headers)) xhr.setRequestHeader(k, v);
     xhr.upload.onprogress = (e) => { if (e.lengthComputable) onProgress(e.loaded); };
     xhr.onload = () => {
-      if (xhr.status >= 200 && xhr.status < 300) resolve(xhr.getResponseHeader("ETag"));
+      // só nas partes do R2 (CORS expõe o ETag); ler o cabeçalho noutros armazenamentos deixa um erro na consola
+      if (xhr.status >= 200 && xhr.status < 300) resolve(wantEtag ? xhr.getResponseHeader("ETag") : null);
       else {
         let msg = `Erro ${xhr.status}`;
         try { const b = JSON.parse(xhr.responseText) as { message?: string; error?: string }; msg = b.message || b.error || msg; } catch { /* resposta sem JSON: fica o código */ }
@@ -178,7 +179,7 @@ async function sendMultipart(a: Access, versionId: string, t: MultipartTarget, f
     for (let attempt = 1; ; attempt++) {
       try {
         const blob = file.slice((n - 1) * t.part_bytes, Math.min(file.size, n * t.part_bytes));
-        const etag = await put({ url: urls.get(n)!, method: "PUT", headers: {}, expires_in_seconds: 0 }, blob, (l) => { inFlight.set(n, l); tick(); }, signal);
+        const etag = await put({ url: urls.get(n)!, method: "PUT", headers: {}, expires_in_seconds: 0 }, blob, (l) => { inFlight.set(n, l); tick(); }, signal, true);
         if (!etag) throw new PutError(0, "O armazenamento não devolveu a confirmação da parte (ETag). Confirma a política CORS do bucket.");
         inFlight.delete(n); done.set(n, etag); tick();
         return;
