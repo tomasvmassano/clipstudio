@@ -246,3 +246,7 @@ Exportar: `edit_export_request` (versão gravada) → job `export` → `done` cr
 ## Pacote de edição (W5-09)
 
 `edit_package_request` → job `package` (`queued` → `running` com passos: som, sincronização, transcrição, guião N) → documentos v1 (`ai`) um a um → `done` avisa quem pediu. Falhou/cancelado permite pedir outra vez.
+
+## Guião eliminado e pré-requisitos (W9, ADR-0051)
+
+`archived` → eliminado (lápide, 30 dias recuperável para `archived`). Produção: avançar para agendado/gravado/edição/pronto verifica os pré-requisitos do cliente; recusa com `pre_requisito_em_falta` e a causa; recuar nunca é bloqueado.

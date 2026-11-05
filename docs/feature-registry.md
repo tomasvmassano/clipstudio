@@ -116,3 +116,7 @@ Por cliente (só a fase `all`): uploads novos para o Cloudflare R2, envio por pa
 ### Edição automática (W5-09, ADR-0048)
 
 `edit_package_request` (edit.timeline + R2), `edit_package_list` e `edit_doc_list` (acesso ao editor), `media_worker_package_save` (só engine_worker). Página `/c/[ws]/edicao-automatica` (flag `edit.studio`).
+
+### Fluxo editorial (W9, ADR-0051)
+
+`scripts.purge` (novo): `content_delete`, `content_undelete`, `content_deleted_list`. `content_pending_approval` e `content_bulk(approve, recorded_only)`. `calendar_range` com revisões e publicações. `workflow_prereqs` (scripts.read) e `workflow_prereq_set` (settings.manage).

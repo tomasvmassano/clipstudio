@@ -118,3 +118,5 @@ Portal do cliente (W8, ADR-0041): entrar com `scripts.read` (staff da agência s
 **W5-07 (ADR-0047):** exportar (`edit_export_request`, `edit_export_cancel`) exige `edit.export`; ver exports e as fontes da imagem do editor exige o acesso ao editor (`edit.timeline` ou `edit.guided`); a versão leve exige `media.read`. `media_worker_claim/heartbeat/finish` só para `engine_worker` (o browser recebe 42501). Outro cliente: 42501 em tudo.
 
 **W5-09 (ADR-0048):** pedir pacote exige `edit.timeline`; ver pacotes e documentos exige acesso ao editor; gravar documentos do pacote só `engine_worker`. Outro cliente: 42501.
+
+**W9 (ADR-0051):** eliminar e recuperar guiões: `scripts.purge` (workspace_owner e dono da agência); aprovar gravados em lote: `scripts.approve`; pré-requisitos: ler `scripts.read`, configurar `settings.manage`. Outro cliente: 42501.

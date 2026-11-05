@@ -2,6 +2,7 @@ import { supabase } from "@/lib/supabase";
 import { realtime } from "@/lib/realtime";
 import { friendlyError, type Access } from "@/lib/access";
 import type { ContentHistory, ContentPatch, EditorialTarget, Guiao, Idea, Session } from "@/lib/types";
+import { prereqMessage } from "@/lib/editorial-format";
 
 // ---------- datas (sempre em Asia/Dubai) ----------
 export function todayDubai(): string {
@@ -53,7 +54,8 @@ export function tpQueue(all: Guiao[], date: string): Guiao[] {
 async function rpc<T>(fn: string, args: Record<string, unknown>, prefix = ""): Promise<T> {
   const { data, error } = await supabase().rpc(fn, args);
   if (error) {
-    const e = new Error(prefix + friendlyError(error.message)) as Error & { code?: string };
+    // pré-requisito em falta (FR-17-05): o detalhe diz a causa e quem tem de agir
+    const e = new Error(prefix + (prereqMessage(error.message, error.details) ?? friendlyError(error.message))) as Error & { code?: string };
     e.code = error.code;
     throw e;
   }

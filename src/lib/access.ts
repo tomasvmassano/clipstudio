@@ -75,6 +75,13 @@ export function friendlyError(msg: string): string {
   if (msg.includes("transicao_invalida")) return "Esta ação já não se aplica ao estado atual do guião. Recarrega.";
   if (msg.includes("nao_elegivel")) return "Guiões rejeitados ou arquivados não se gravam.";
   if (msg.includes("aprovacao_necessaria")) return "Neste cliente só se gravam guiões aprovados.";
+  if (msg.includes("pre_requisito_em_falta")) return "Falta um pré-requisito desta transição. Vê as regras em Definições.";
+  if (msg.includes("confirmacao_invalida")) return "Confirmação em falta ou errada: nada foi eliminado.";
+  if (msg.includes("nao_arquivado")) return "Só se eliminam guiões arquivados. Arquiva-o primeiro.";
+  if (msg.includes("tem_dependencias")) return "Este guião ainda tem tarefas, publicações ou ativos ligados.";
+  if (msg.includes("prazo_expirado")) return "Já passaram mais de 30 dias: não se recupera.";
+  if (msg.includes("sessao_individual")) return "Isto precisa de uma sessão individual (não do código de equipa).";
+  if (msg.includes("texto_mudou")) return "O texto mudou depois de gravado: abre o guião e decide à mão.";
   if (msg.includes("arquivado")) return "Este guião está arquivado. Recupera-o primeiro.";
   if (msg.startsWith("duplicado:")) return "Esta fonte já existe neste cliente.";
   if (msg.includes("url_obrigatorio")) return "Falta o link da referência.";

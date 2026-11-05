@@ -25,6 +25,7 @@ import { DetailsSheet, metaNames, useMetaLists } from "@/components/guiao-detail
 import { KIND_LABEL, PLATFORMS } from "@/lib/projects";
 import { MARKER } from "@/lib/recording";
 import { ReasonForm } from "@/components/guiao-reason-form";
+import { DeleteScriptDialog } from "@/components/guiao-delete";
 
 const MECH = ["pergunta", "contra", "numero", "ego", "confissao", "segredo"];
 
@@ -77,6 +78,7 @@ export function GuiaoCard({ g, carried, caps, actions, onError, startInEdit, ope
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [nComments, setNComments] = useState<number | undefined>(openComments);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [hasLocal, setHasLocal] = useState(false);
   useEffect(() => {
     const v = readLocalDraft(g);
@@ -224,6 +226,11 @@ export function GuiaoCard({ g, carried, caps, actions, onError, startInEdit, ope
                   <UndoIcon /> Recuperar do arquivo
                 </Button>
               )}
+              {st === "archived" && caps.purge && (
+                <Button size="sm" variant="ghost" className="text-destructive" disabled={busy} onClick={() => setDeleting(true)}>
+                  <Trash2Icon /> Eliminar
+                </Button>
+              )}
               {st !== "archived" && caps.edit && (
                 <Button size="sm" variant="outline" onClick={() => setMode("edit")}>
                   <PencilIcon /> Editar
@@ -269,6 +276,7 @@ export function GuiaoCard({ g, carried, caps, actions, onError, startInEdit, ope
       </CardContent>
       <BriefSheet g={g} open={briefOpen} onOpenChange={setBriefOpen} actions={actions} canEdit={caps.edit && st !== "archived"} canRefs={caps.refs} />
       {detailsOpen && <DetailsSheet g={g} open={detailsOpen} onOpenChange={setDetailsOpen} actions={actions} canEdit={caps.edit && st !== "archived"} canProjects={caps.projects} />}
+      {deleting && <DeleteScriptDialog g={g} onClose={() => setDeleting(false)} onDelete={(reason) => actions.remove(g.id, reason, g.lock_version)} />}
       <CommentsSheet g={g} open={commentsOpen} onOpenChange={setCommentsOpen} onCount={setNComments} />
       <HistorySheet g={g} open={historyOpen} onOpenChange={setHistoryOpen} actions={actions} canRestore={caps.edit && st !== "archived"} onError={onError} />
     </Card>

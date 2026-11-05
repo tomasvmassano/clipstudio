@@ -1,6 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import { friendlyError, type Access } from "@/lib/access";
 import { addDays } from "@/lib/data";
+import { prereqMessage } from "@/lib/editorial-format";
 
 /* Calendário e produção (PRD M11; ADR-0008). */
 
@@ -18,8 +19,21 @@ export type CalTask = {
   content_id: string | null; lock_version: number; overdue: boolean;
 };
 export type CalSession = { id: string; date: string; closed: boolean; takes: number };
+/** Vídeo em revisão no dia do prazo (tarefa de revisão/edição aberta; sem tarefa, o dia do guião). W9-03, FR-11-02. */
+export type CalReview = {
+  asset_id: string; title: string; variant: string; version: number; status: "in_review" | "changes_requested"; content_id: string; n: number;
+  tema: string | null; due_day: string; due_at: string | null; due_source: "tarefa" | "guiao"; task_id: string | null; assignee_email: string | null;
+  overdue: boolean; open_comments: number;
+};
+/** Publicação planeada ou aprovada no dia local. W9-03, FR-11-02. */
+export type CalPublication = {
+  id: string; status: "planeada" | "aprovada"; platform: string; kind: string; account_handle: string | null; scheduled_at: string;
+  local_day: string; local_time: string; content_id: string; n: number; tema: string | null; overdue: boolean;
+};
 export type CalendarData = {
   today: string; contents: CalContent[]; tasks: CalTask[]; sessions: CalSession[];
+  /** ausentes antes da migração W9-03: a UI trata como vazio */
+  reviews?: CalReview[]; publications?: CalPublication[]; layers?: { reviews: boolean; publications: boolean };
   can: { schedule: boolean; production: boolean; record: boolean; tasks: boolean };
 };
 
@@ -40,7 +54,7 @@ export function nextProduction(s: ProductionStatus, can: CalendarData["can"]): {
 async function rpc<T>(fn: string, args: Record<string, unknown>): Promise<T> {
   const { data, error } = await supabase().rpc(fn, args);
   if (error) {
-    const e = new Error(friendlyError(error.message)) as Error & { code?: string };
+    const e = new Error(prereqMessage(error.message, error.details) ?? friendlyError(error.message)) as Error & { code?: string };
     e.code = error.code;
     throw e;
   }

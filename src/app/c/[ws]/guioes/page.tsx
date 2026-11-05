@@ -14,6 +14,8 @@ import { TeamCode } from "@/components/team-code";
 import { useGuioes } from "@/components/use-guioes";
 import { WorkspaceGate } from "@/components/workspace-gate";
 import { GuioesBulkBar } from "@/components/guioes-bulk";
+import { DeletedScripts } from "@/components/guiao-delete";
+import { PendingApprovalButton } from "@/components/guioes-pending";
 import { useSession } from "@/components/session-provider";
 import { useFlags } from "@/lib/flags";
 import { fetchProjects } from "@/lib/projects";
@@ -134,6 +136,7 @@ function GuioesInner({ access }: { access: Access }) {
           )}
           {caps.export && <Button size="sm" variant="outline" onClick={exportTxt}><DownloadIcon /> Exportar .txt</Button>}
           {bulkOn && !selecting && <Button size="sm" variant="outline" onClick={() => setSelecting(true)}><ListChecksIcon /> Selecionar</Button>}
+          {caps.approve && <PendingApprovalButton access={access} onDone={reload} />}
           <Button size="sm" render={<WsLink href={`/teleprompter?date=${date}`} />} nativeButton={false}><MonitorPlayIcon /> Teleprompter</Button>
         </div>
       </div>
@@ -200,6 +203,8 @@ function GuioesInner({ access }: { access: Access }) {
         <ToggleGroupItem value="rejeitados">Rejeitados</ToggleGroupItem>
         {caps.archive && <ToggleGroupItem value="arquivados">Arquivados</ToggleGroupItem>}
       </ToggleGroup>
+
+      {filter === "arquivados" && caps.purge && !access.token && <DeletedScripts access={access} onRestored={reload} />}
 
       {loading ? (
         <div className="flex flex-col gap-3">
