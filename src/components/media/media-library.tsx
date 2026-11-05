@@ -31,7 +31,8 @@ const PHASE: Record<UploadProgress["phase"], string> = {
   a_confirmar: "a confirmar no servidor", a_verificar: "chegou, a verificar no servidor", pronta: "pronto", falhou: "falhou", cancelado: "cancelado",
 };
 
-/** `asset` abre esse ativo (link da pesquisa global, W10); `onAsset` guarda no URL o ativo aberto, para o link se poder partilhar. */
+/** `asset` (vindo do URL, link da pesquisa global W10) abre esse ativo; ao fechar, `onAsset(null)` tira-o do URL. Abrir um ativo
+ *  com um clique não mexe no URL, para que recarregar a página não volte a abrir a ficha. */
 export function MediaLibraryView({ access, asset = null, onAsset }: { access: Access; asset?: string | null; onAsset?: (id: string | null) => void }) {
   const [view, setView] = useState<MediaView>("ativos");
   const [q, setQ] = useState("");
@@ -39,9 +40,10 @@ export function MediaLibraryView({ access, asset = null, onAsset }: { access: Ac
   const [filters, setFilters] = useState<MediaFilters>({});
   const key = JSON.stringify({ ws: access.ws, view, q: qApplied, filters });
   const lib = useLoad(() => fetchLibrary(access, { ...filters, view, q: qApplied }), key);
-  const [local, setLocal] = useState<string | null>(asset);
-  const opened = onAsset ? asset : local;
-  const setOpened = (id: string | null) => (onAsset ? onAsset(id) : setLocal(id));
+  const [opened, setLocal] = useState<string | null>(asset);
+  const [linked, setLinked] = useState<string | null>(asset);
+  if (asset !== linked) { setLinked(asset); if (asset) setLocal(asset); }   // link novo com a página já aberta
+  const setOpened = (id: string | null) => { setLocal(id); if (!id && asset) onAsset?.(null); };
   const [upOpen, setUpOpen] = useState(false);
   const [linkOpen, setLinkOpen] = useState(false);
   const [policyOpen, setPolicyOpen] = useState(false);
