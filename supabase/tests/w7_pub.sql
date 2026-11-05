@@ -342,7 +342,7 @@ begin
     and not has_table_privilege('authenticated', 'public.social_accounts', 'select') and not has_table_privilege('anon', 'public.pub_variants', 'select'));
   insert into t values ('capacidades e flag registadas', true,
     (select count(*) from capabilities where key in ('publishing.approve','publishing.republish.approve','publishing.policy.manage','publishing.limits.manage') and status = 'ativo') = 4
-    and (select status from capabilities where key = 'publishing.publish') = 'W6'
+    and (select status from capabilities where key = 'publishing.publish') in ('W6', 'ativo')   -- ativa desde W10-03 (registo manual, ADR-0054)
     and exists (select 1 from feature_flag_defs where key = 'pub.planning' and default_stage = 'owner'));
   insert into t values ('eventos e auditoria das transições', true,
     (select count(*) from domain_events where type = 'publication.approval_invalidated') >= 2

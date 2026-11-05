@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { AlertTriangleIcon, CheckIcon, ChevronRightIcon, ExternalLinkIcon, MessagesSquareIcon, RotateCwIcon, SearchIcon, ShieldCheckIcon, TimerIcon, Undo2Icon } from "lucide-react";
+import { AlertTriangleIcon, CheckIcon, ChevronRightIcon, ExternalLinkIcon, MessagesSquareIcon, RotateCwIcon, SearchIcon, SendIcon, ShieldCheckIcon, TimerIcon, Undo2Icon } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,8 @@ import { driveLinks, fmtMoment, parseMoment } from "@/lib/media-time";
 import Link from "next/link";
 import { useFlags } from "@/lib/flags";
 import { clientPath } from "@/lib/ws-path";
+import { fetchRecordOptions, type RecordOptions } from "@/lib/pub";
+import { RecordPublicationDialog } from "@/components/pub/pub-record";
 
 const tone = (s: ReviewStatus): "default" | "secondary" | "destructive" | "outline" =>
   s === "approved" ? "default" : s === "changes_requested" ? "destructive" : s === "rejected" ? "secondary" : "outline";
@@ -126,6 +128,9 @@ function VideoSheet({ access, assetId, onClose, onChanged, next, onNext }: {
   const [reason, setReason] = useState("");
   const [asking, setAsking] = useState<"changes_requested" | "rejected" | null>(null);
   const flags = useFlags(access.ws, access.token);
+  const [recOpts, setRecOpts] = useState<RecordOptions | null>(null);
+  const [recording, setRecording] = useState(false);
+  const [recMsg, setRecMsg] = useState("");
 
   const load = useCallback(async () => {
     try { setD(await fetchReview(access, assetId, ver)); setErr(""); } catch (e) { setErr((e as Error).message); }
@@ -144,6 +149,19 @@ function VideoSheet({ access, assetId, onClose, onChanged, next, onNext }: {
   const stored = v?.player === "ficheiro";
   const seek = (ms: number) => { const el = video.current; if (el) { el.currentTime = ms / 1000; void el.play().catch(() => {}); } };
   const roots = d?.comments.filter((c) => !c.parent_id) ?? [];
+  // FR-12-02: vídeo aprovado e atual → pode registar-se a publicação feita à mão (se houver publicação aprovada e a capacidade)
+  const recordable = !!v && v.status === "approved" && v.current && !!flags?.has("pub.planning");
+  const recVersion = recordable ? v!.id : null;
+  const [recTick, setRecTick] = useState(0);
+  useEffect(() => {
+    if (!recVersion) return;
+    let alive = true;
+    fetchRecordOptions(access, { version: recVersion })
+      .then((o) => { if (alive) setRecOpts(o); })
+      .catch(() => { if (alive) setRecOpts(null); });   // sem registo possível: a secção não aparece; a revisão continua a funcionar
+    return () => { alive = false; };
+  }, [access, recVersion, recTick]);
+  const recPublished = recOpts?.publications.filter((p) => p.published?.media_version_id === recVersion) ?? [];
 
   return (
     <Sheet open onOpenChange={(o) => { if (!o) onClose(); }}>
@@ -226,6 +244,25 @@ function VideoSheet({ access, assetId, onClose, onChanged, next, onNext }: {
                 </div>
               )}
               {!v.current && <Alert><AlertDescription>Esta é uma versão antiga. As decisões fazem-se na mais recente.</AlertDescription></Alert>}
+              {recordable && recOpts && recOpts.video?.version_id === v.id && (recOpts.can_record || recPublished.length > 0) && (
+                <section className="flex flex-col gap-2 rounded-md border p-3 text-sm" aria-label="Publicação">
+                  {recPublished.map((p) => (
+                    <p key={p.id} className="flex flex-wrap items-center gap-1">
+                      <SendIcon className="size-3.5" /> Publicado em @{p.account_handle} · {p.published!.local_day.split("-").reverse().join("/")} {p.published!.local_time}
+                      <a href={p.published!.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 underline underline-offset-2">
+                        <ExternalLinkIcon className="size-3" /> ver post</a>
+                    </p>
+                  ))}
+                  {recMsg && <p role="status" className="text-emerald-600 dark:text-emerald-400">{recMsg}</p>}
+                  {recOpts.can_record && (recOpts.publications.some((p) => p.status === "aprovada") ? (
+                    <Button size="sm" variant="outline" className="self-start" onClick={() => setRecording(true)}><SendIcon /> Registar publicação</Button>
+                  ) : recPublished.length === 0 && (
+                    <p className="text-muted-foreground">
+                      Para registar a publicação, planeia e aprova-a no <Link href={clientPath(access.ws, "/calendario?l=pub")} className="underline underline-offset-2">calendário de publicações</Link>.
+                    </p>
+                  ))}
+                </section>
+              )}
               {stored && <QcPanel qc={v.qc} onSeek={seek} />}
 
               <section className="flex flex-col gap-2" aria-label="Comentários">
@@ -300,6 +337,10 @@ function VideoSheet({ access, assetId, onClose, onChanged, next, onNext }: {
           )}
         </div>
       </SheetContent>
+      {recording && v && (
+        <RecordPublicationDialog access={access} versionId={v.id} onClose={() => setRecording(false)}
+          onDone={(m) => { setRecMsg(m); setRecTick((n) => n + 1); }} />
+      )}
     </Sheet>
   );
 }

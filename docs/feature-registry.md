@@ -52,7 +52,7 @@ Estado: **ativo** (existe e é verificado no servidor por `authorize()`; também
 | `production.update` | Calendário | M | ws, own | ativo | gravado → em edição → pronto (e voltar); marcar e acrescentar itens da checklist do guião |
 | `tasks.manage` | Tarefas | M | ws, proj | ativo | criar, atribuir, prazos, prioridades, dependências, cancelar; automações de handoff (`task_rule_save`); templates (`template_save`, `template_apply`, `template_clone` exige gerir os dois clientes); carga e limite de WIP (`workload`) |
 | `publishing.schedule` | Publicação (M12) | A | ws, conta | W6 | — |
-| `publishing.publish` | Publicação | A | ws, conta | W6 | — |
+| `publishing.publish` | Publicação: registar publicação manual (FR-12-02) | A | ws, conta | ativo (W10-03, flag `pub.planning`) | ver linha W10-03 abaixo |
 | `social_accounts.manage` | Publicação | A | ws | W6 | — |
 | `analytics.read` | Desempenho (M09) | B | ws, conta | ativo | `/desempenho`, `/` |
 | `dashboard.configure` | Início (M01) | M | ws | ativo | `/` Personalizar: widgets e ordem por função no cliente (`dashboard_layouts_get`, `dashboard_layout_set`, `dashboard_layout_reset`), auditado |
@@ -87,6 +87,7 @@ Estado: **ativo** (existe e é verificado no servidor por `authorize()`; também
 | `publishing.limits.manage` | Limites das APIs das plataformas (PUB-02) | A | org | ativo (W7) | `pub_limit_save`, só o dono da agência |
 | `publishing.schedule` | Planear publicações (PUB-04) | M | ws | ativo (W7, flag `pub.planning`) | `pub_save`, `pub_cancel`, `pub_variant_save`, calendário de publicações `?l=pub`. Nada publica |
 | `social_accounts.manage` | Contas de destino (FR-21-01) | A | ws | ativo (W7) | `pub_account_add`; credenciais só por referência, por conta |
+| `publishing.publish` | Registar publicação manual (FR-12-02, R-18, FR-21-04) | A | ws | ativo (W10-03, flag `pub.planning`; ADR-0054) | "Registar publicação" na folha da publicação aprovada (`/c/[ws]/calendario?l=pub`) e na folha do vídeo aprovado (`/c/[ws]/revisao?ver=videos`): `pub_record_published` (link do post, hora, versão atual aprovada do vídeo; idempotente; correção só com motivo), `pub_record_options` (ler com `calendar.read`). Grava a linhagem (`_perf_record_lineage` + `_pub_link_lineage`). Sessão individual. A app não publica nada |
 | `learn.read` / `learn.manage` | Retrabalho, experiências, vencedores e recomendações (FR-17-10/11/12, SCALE-06) | M | ws | ativo (W7, flags `learn.rework`, `learn.experiments`) | `/c/[ws]/aprendizagem/retrabalho` e `/experiencias`; categoria ao rejeitar por `content_transition_reasoned` |
 | `privacy.manage` | Pedidos de eliminação de dados (FR-14-05) | A | org | ativo (W7, flag `profile.data_export`) | tratar pedidos em `/equipa-agencia`; exportar os próprios dados com `profile.export` |
 | `team.job_titles` (flag) | Cargos no convite (BIZ-08) | — | ws | ativo (W7, flag) | `invite_member_with_title`: cargo pré-seleciona papel e exceções sugeridas; o cargo não dá acesso |

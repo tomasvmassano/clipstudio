@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Loader2Icon, RotateCwIcon } from "lucide-react";
+import { ExternalLinkIcon, Loader2Icon, RotateCwIcon, SendIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -15,11 +15,12 @@ import {
   type ContentDetail, type ContentOption, type Publication, type PubCalendar, type PubInput,
 } from "@/lib/pub";
 import {
-  BLOCKED_LABEL, cleanElements, CONNECTION_LABEL, ELEMENT_HINT, ELEMENT_KEYS, ELEMENT_LABEL, parseHashtags, PLATFORM_LABEL, PLATFORMS,
+  BLOCKED_LABEL, RECORD_BLOCKED_LABEL, cleanElements, CONNECTION_LABEL, ELEMENT_HINT, ELEMENT_KEYS, ELEMENT_LABEL, parseHashtags, PLATFORM_LABEL, PLATFORMS,
   SIDE_LABEL, STATUS_LABEL, variantDiff, type Elements, type Platform,
 } from "@/lib/pub-rules";
 import { fromLocalInput, toLocalInput } from "@/lib/tasks";
 import { cn } from "@/lib/utils";
+import { RecordPublicationDialog } from "@/components/pub/pub-record";
 
 const selectCls = "h-9 w-full rounded-md border bg-background px-2 text-sm";
 const when = (iso: string, tz: string) => new Date(iso).toLocaleString("pt-PT", { timeZone: tz, day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
@@ -30,7 +31,7 @@ type Props = { access: Access; data: PubCalendar; pub: Publication | null; defau
 export function PubSheet({ access, data, pub, defaultDay, onClose, onChanged }: Props) {
   const tz = data.timezone;
   const isNew = !pub;
-  const editable = data.can.schedule && pub?.status !== "cancelada";
+  const editable = data.can.schedule && pub?.status !== "cancelada" && pub?.status !== "publicada";
   const [options, setOptions] = useState<ContentOption[] | null>(null);
   const [contentId, setContentId] = useState(pub?.content_id ?? "");
   const [detail, setDetail] = useState<ContentDetail | null>(null);
@@ -49,6 +50,7 @@ export function PubSheet({ access, data, pub, defaultDay, onClose, onChanged }: 
   const [cancelReason, setCancelReason] = useState("");
   const [confirmApprove, setConfirmApprove] = useState(false);
   const [variantForm, setVariantForm] = useState(false);
+  const [recording, setRecording] = useState(false);
 
   useEffect(() => {
     if (!isNew) return;
@@ -125,7 +127,7 @@ export function PubSheet({ access, data, pub, defaultDay, onClose, onChanged }: 
         <div className="flex flex-col gap-4 px-4 pb-6 text-sm">
           {pub && (
             <div className="flex flex-wrap gap-2">
-              <Badge variant={pub.status === "aprovada" ? "default" : "outline"}>{STATUS_LABEL[pub.status]}</Badge>
+              <Badge variant={pub.status === "aprovada" || pub.status === "publicada" ? "default" : "outline"}>{STATUS_LABEL[pub.status]}</Badge>
               {pub.kind === "republicacao" && <Badge variant="secondary">Republicação</Badge>}
               <Badge variant="outline">Versão {pub.version_no}{pub.version_approved ? " (aprovada)" : " (por aprovar)"}</Badge>
               {pub.variant && <Badge variant="outline">{pub.variant.label}{pub.variant.counts_as_new ? "" : " · não conta como nova"}</Badge>}
@@ -263,6 +265,41 @@ export function PubSheet({ access, data, pub, defaultDay, onClose, onChanged }: 
             </section>
           )}
 
+          {pub && (pub.status === "aprovada" || pub.status === "publicada") && (
+            <section className="flex flex-col gap-2" aria-labelledby="pub-record-title">
+              <h3 id="pub-record-title" className="font-semibold">Publicação</h3>
+              {pub.published ? (
+                <>
+                  <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">
+                    <dt className="text-muted-foreground">Post</dt>
+                    <dd><a href={pub.published.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 break-all underline underline-offset-2">
+                      <ExternalLinkIcon className="size-3 shrink-0" /> {pub.published.url}</a></dd>
+                    <dt className="text-muted-foreground">Publicado</dt><dd>{dayTitle(pub.published.local_day)} às {pub.published.local_time} ({tz}) · à mão</dd>
+                    <dt className="text-muted-foreground">Vídeo</dt><dd>{pub.published.asset_title ?? "?"}{pub.published.media_version_no ? ` · v${pub.published.media_version_no}` : ""}</dd>
+                    <dt className="text-muted-foreground">Registado por</dt><dd>{pub.published.by_label ?? "?"} em {when(pub.published.recorded_at, tz)}</dd>
+                  </dl>
+                  {pub.published.history.filter((h) => h.action === "pub.published_corrected").length > 0 && (
+                    <ul className="flex flex-col gap-1 text-xs text-muted-foreground" aria-label="Correções do registo">
+                      {pub.published.history.filter((h) => h.action === "pub.published_corrected").map((h, i) => (
+                        <li key={i}>Corrigido por {h.by ?? "?"} em {when(h.at, tz)}: {h.reason}{h.before_url && h.before_url !== h.url ? ` (antes: ${h.before_url})` : ""}</li>
+                      ))}
+                    </ul>
+                  )}
+                  {pub.can_record && <Button variant="outline" size="sm" className="self-start" onClick={() => setRecording(true)}>Corrigir registo</Button>}
+                </>
+              ) : pub.can_record ? (
+                <>
+                  <p className="text-muted-foreground">Já publicaste à mão? Regista o link do post para as métricas ficarem ligadas a esta publicação.</p>
+                  <Button className="self-start" onClick={() => setRecording(true)}><SendIcon /> Registar publicação</Button>
+                </>
+              ) : pub.record_blocked && pub.record_blocked !== "sem_capacidade" ? (
+                <p className="text-muted-foreground">{RECORD_BLOCKED_LABEL[pub.record_blocked] ?? pub.record_blocked}</p>
+              ) : (
+                <p className="text-muted-foreground">Ainda não registada como publicada.</p>
+              )}
+            </section>
+          )}
+
           {pub && editable && (
             <form className="flex flex-col gap-2" onSubmit={(e) => { e.preventDefault(); cancel(); }}>
               <h3 className="font-semibold">Cancelar publicação</h3>
@@ -273,6 +310,10 @@ export function PubSheet({ access, data, pub, defaultDay, onClose, onChanged }: 
         </div>
       </SheetContent>
 
+      {recording && pub && (
+        <RecordPublicationDialog access={access} publicationId={pub.id} onClose={() => setRecording(false)}
+          onDone={(m) => { onChanged(m); onClose(); }} />
+      )}
       {confirmApprove && pub && (
         <Dialog open onOpenChange={(v) => { if (!v) setConfirmApprove(false); }}>
           <DialogContent>

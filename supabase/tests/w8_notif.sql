@@ -29,8 +29,8 @@ begin
   select array_agg(m[1]) into kinds from regexp_matches(
     (select pg_get_constraintdef(oid) from pg_constraint where conname = 'notifications_kind_check'), '''([a-z_]+)''', 'g') m;
   insert into t values ('catálogo cobre todos os tipos de notifications.kind', true,
-    cardinality(kinds) = 13 and not exists (select 1 from unnest(kinds) k where k not in (select kind from notification_event_defs))
-    and (select count(*) from notification_event_defs) = 13);   -- 13 desde W5-05 (video_decision, video_comment)
+    cardinality(kinds) = 14 and not exists (select 1 from unnest(kinds) k where k not in (select kind from notification_event_defs))
+    and (select count(*) from notification_event_defs) = 14);   -- 14 desde W10-03 (publication_published)
   insert into t values ('obrigatórios: atribuições e erro de automação', true,
     (select array_agg(kind order by kind) from notification_event_defs where mandatory) = array['automation_error','script_assigned','task_assigned','task_auto','task_delegated']);
   insert into t values ('só "na app" está disponível; email e resumo com motivo', true,
@@ -83,8 +83,8 @@ begin
   execute 'set local role authenticated';
   perform set_config('request.jwt.claims', json_build_object('sub', u_adm, 'role','authenticated')::text, true);
   j := notif_settings('nt_a');
-  insert into t values ('admin vê 13 tipos e 3 canais, gere, sem supressões', true,
-    (j->>'enabled')::boolean and (j->>'can_manage')::boolean and jsonb_array_length(j->'events') = 13
+  insert into t values ('admin vê 14 tipos e 3 canais, gere, sem supressões', true,
+    (j->>'enabled')::boolean and (j->>'can_manage')::boolean and jsonb_array_length(j->'events') = 14
     and jsonb_array_length(j->'channels') = 3 and jsonb_array_length(j->'suppressed_30d') = 0);
   insert into t values ('predefinição: tudo ligado na app, email desligado', true,
     not exists (select 1 from jsonb_array_elements(j->'events') e, jsonb_array_elements(e->'channels') c
