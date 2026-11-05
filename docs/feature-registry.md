@@ -112,3 +112,7 @@ Regras: ter `edit` não dá `approve` nem `publish` (CAP-04); uma feature flag l
 ### Flag `media.r2` (W5-07, ADR-0047)
 
 Por cliente (só a fase `all`): uploads novos para o Cloudflare R2, envio por partes até 50 GiB, verificação e versão leve pelo worker (`media_jobs`, `media_worker_*` só para `engine_worker`), proxy por `media_proxy_access` + `/api/media/versions/:id/proxy`. Sem capacidades novas: usa `media.upload`, `media.read`, `edit.export`.
+
+### Edição automática (W5-09, ADR-0048)
+
+`edit_package_request` (edit.timeline + R2), `edit_package_list` e `edit_doc_list` (acesso ao editor), `media_worker_package_save` (só engine_worker). Página `/c/[ws]/edicao-automatica` (flag `edit.studio`).

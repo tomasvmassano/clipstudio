@@ -43,3 +43,21 @@ export const cancelExport = (a: Access, job: string) => rpc<ExportJob>("edit_exp
 export const EXPORT_STATUS: Record<ExportJob["status"], string> = {
   queued: "na fila", running: "a exportar", done: "pronto", failed: "falhou", dead: "falhou depois de várias tentativas", cancelled: "cancelado",
 };
+
+// ---------- pacote automático (EDL-01, ADR-0048) ----------
+export type PackageJob = Omit<ExportJob, "kind" | "result"> & {
+  kind: "package"; front_name: string | null; side_name: string | null;
+  guioes: { id: string; n: number; tema: string | null }[] | null;
+  outputs: { guiao_id: string; hook: number; asset_id: string; title: string }[];
+  result: { documents?: unknown[]; missing?: string[]; flags?: string[]; offset?: { front: number; confidence: number } } | null;
+};
+export type EditDocRow = {
+  asset_id: string; title: string; content_id: string | null; tags: string[]; version_no: number; source: "import" | "ai" | "user" | "agent";
+  updated_at: string; created_label: string | null; has_video: boolean; confidence: { hook?: number | null; body?: number | null } | null;
+  flags: string[] | null; guiao: { id: string; n: number; date: string; tema: string | null } | null;
+  export: { status: ExportJob["status"]; progress: ExportJob["progress"] } | null;
+};
+export const requestPackage = (a: Access, front: string, side: string, guioes: string[], style: string) =>
+  rpc<PackageJob>("edit_package_request", { p_ws: a.ws, p_front: front, p_side: side, p_guioes: guioes, p_style: style, p_token: a.token });
+export const listPackages = (a: Access) => rpc<PackageJob[]>("edit_package_list", { p_ws: a.ws, p_token: a.token });
+export const listEditDocs = (a: Access) => rpc<EditDocRow[]>("edit_doc_list", { p_ws: a.ws, p_token: a.token });

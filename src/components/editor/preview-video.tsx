@@ -41,6 +41,8 @@ export function PreviewVideo({ access, asset, versionId, doc, t, playing }: {
 
   const shot = useMemo(() => shotAt({ ...doc, source: { ...(doc as EditDoc & { source?: object }).source, windows: src?.windows ?? (doc as EditDoc & { source?: { windows?: Windows } }).source?.windows } } as EditDoc, t), [doc, t, src]);
   const sound = audioCam(doc);
+  const offsets = ((doc as EditDoc & { source?: { offsets?: Record<string, number> } }).source?.offsets) ?? {};
+  const offKey = JSON.stringify(offsets);
   const allReady = src && Object.keys(src.cams).length > 0 && Object.keys(src.cams).every((k) => urls[k]);
 
   useEffect(() => {
@@ -48,12 +50,14 @@ export function PreviewVideo({ access, asset, versionId, doc, t, playing }: {
     for (const [cam, v] of Object.entries(refs.current)) {
       if (!v) continue;
       if (!shot) { v.pause(); continue; }
-      if (Math.abs(v.currentTime - shot.session) > (playing ? DRIFT_S : 0.04)) v.currentTime = shot.session;
+      const want = Math.max(0, shot.session + (Number(offsets[cam]) || 0));   // cada câmara no seu tempo (desvio pelo som)
+      if (Math.abs(v.currentTime - want) > (playing ? DRIFT_S : 0.04)) v.currentTime = want;
       v.muted = cam !== sound;
       if (playing && v.paused) void v.play().catch(() => { /* o browser pode recusar som sem gesto: fica em silêncio */ });
       if (!playing && !v.paused) v.pause();
     }
-  }, [allReady, shot, playing, sound]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allReady, shot, playing, sound, offKey]);
 
   if (err) return <StageNote text={`Imagem indisponível: ${err}`} />;
   if (!src) return <StageNote text="A preparar a imagem…" />;

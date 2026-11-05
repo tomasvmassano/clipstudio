@@ -70,8 +70,8 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | BIZ-03 | P0 | parcial | AGI distinto do MRR (decisão); índice com fotografias por idade (PERF-03); sem contratos nem câmbio registados | KPIs e tabela por cliente |
 | BIZ-04 | P0 | parcial | verificação com conta real (R-15) | Dois níveis de acesso na mesma vista |
 | ING-01 | P0 | parcial | ligar media.r2 no Numeiro depois das chaves; carregar as gravações da sessão; bruto antigo do Drive continua como link | Armazenamento fora da app (decisão) |
-| ING-03 | P0 | parcial | sem ingestão do ficheiro da câmara, transcrição com tempos por palavra e sincronização pelo áudio | Um ficheiro longo por câmara por sessão |
-| EDL-01 | P0 | parcial | job do pacote de edição (precisa de ingestão ING-01..03, render e worker alojado) | Pacote de edição automático |
+| ING-03 | P0 | parcial | verificação com a sessão real; ligar as marcas de gravação às janelas | Um ficheiro longo por câmara por sessão |
+| EDL-01 | P0 | parcial | verificação com a sessão real de 2026-11-06; deteção de cara para o enquadramento; usar as marcas de gravação (ING-03) para afinar as janelas | Pacote de edição automático |
 | EDL-03 | P0 | parcial | ligar ao job do pacote e guardar o relatório por variante na app (EDL-02); calibrar limites no piloto | QC técnico em código antes de qualquer revisão por IA |
 | EDL-07 | P0 | parcial | versão 1 gerada pela IA no job do pacote (EDL-01); visuais e música ainda vazios | Documento de edição |
 | EDL-08 | P0 | parcial | ligar o palco na página do editor; carregar as gravações da sessão no R2; verificação com sessão real depois do worker ligado | Pré-visualização ao vivo |
@@ -631,9 +631,9 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 |---|---|---|---|---|
 | ING-01 | parcial | ligar media.r2 no Numeiro depois das chaves; carregar as gravações da sessão; bruto antigo do Drive continua como link | Supabase Storage (bucket privado media) atrás de src/lib/storage (ADR-0038); W8 (ramo w8-vaga3): SQL 1648/1648, E2E 143/143 no stack local; ainda não aplicado em produção; ; CHG-006: finais para revisão na Drive da agência, versão por link na biblioteca (W5-04); Cloudflare R2 implementado (sigv4, envio por partes, proxies pelo worker; W5-07, ADR-0047) | — |
 | ING-02 | por começar | sem ingestão da câmara | media.ingest planeada | — |
-| ING-03 | parcial | sem ingestão do ficheiro da câmara, transcrição com tempos por palavra e sincronização pelo áudio | recording_marks, recording_marks_add, recording_timeline (W5-01, ADR-0026); w5_recording_marks 17/17; e2e/recording-marks.spec.ts 2/2 | — |
+| ING-03 | parcial | verificação com a sessão real; ligar as marcas de gravação às janelas | recording_marks, recording_marks_add, recording_timeline (W5-01, ADR-0026); w5_recording_marks 17/17; e2e/recording-marks.spec.ts 2/2; ficheiro longo por câmara no R2 (W5-07) com transcrição com tempos por palavra e sincronização pelo áudio no pacote (W5-09) | — |
 | ING-04 | por começar | sem upload pelo telemóvel | nada no código | — |
-| EDL-01 | parcial | job do pacote de edição (precisa de ingestão ING-01..03, render e worker alojado) | preset de edição versionado por cliente com o defeito do PRD (edit_presets, edit_preset_save; W5-02, ADR-0027) | — |
+| EDL-01 | parcial | verificação com a sessão real de 2026-11-06; deteção de cara para o enquadramento; usar as marcas de gravação (ING-03) para afinar as janelas | preset de edição versionado por cliente com o defeito do PRD (edit_presets, edit_preset_save; W5-02, ADR-0027); job package no worker (transcrição, sincronização pelo som, janelas por guião, takes pela IA, documento v1 por hook), página Edição automática (W5-09, ADR-0048); w5_edit_package 19/19; janelas 20/23 dentro de 5 s na sessão de teste | — |
 | EDL-02 | por começar | sem revisão em lote de variantes | nada no código | — |
 | EDL-03 | parcial | ligar ao job do pacote e guardar o relatório por variante na app (EDL-02); calibrar limites no piloto | numeiro-engine #7: engine/qc.py, run.py qc, tests/test_qc.py 11/11 no CI do motor (ADR-0028) | — |
 | EDL-04 | por começar | sem biblioteca de vídeos de atenção | nada no código | — |

@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-05 (pacote de edição automático)
+
+- **W5-09** edição automática a partir da sessão gravada (EDL-01, ING-03; ADR-0048): job `package` no worker (transcrição com tempos por palavra, sincronização das câmaras pelo som, janela de cada guião, escolha dos takes pela IA, documento v1 por hook com confiança e avisos), página `/c/[ws]/edicao-automatica` com o progresso e a lista dos vídeos para rever. Testes `w5_edit_package` 19/19, `test_package` 4/4.
+
 ## 2026-11-05 (vídeo no R2, imagem no editor, exportar)
 
 - **W5-07** vídeo no Cloudflare R2 por cliente (flag `media.r2`; ING-01, FR-08-01, EDL-08, EDL-11; ADR-0047): envio direto do browser com URLs pré-assinados, por partes acima de 256 MiB (até 50 GiB), SHA-256 incremental no browser; o worker confere tamanho e SHA-256, gera a versão leve (540 px) e só então a versão fica pronta. Fila `media_jobs` com lease, cancelamento e repetição. Editor: imagem no palco a partir das versões leves das gravações (uma por câmara, no tempo da sessão) e exportar a versão gravada para uma versão nova do vídeo na revisão. Worker: `engine/media_worker.py` e `engine/render_doc.py` (numeiro-engine). Testes `w5_media_r2` 39/39, suite SQL 1803, `sigv4` (exemplo oficial AWS), `sha256-incremental`, `edit-preview`, render local do guião 3.
