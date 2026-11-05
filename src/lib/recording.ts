@@ -119,6 +119,10 @@ export type TpAction = "play" | "faster" | "slower" | "next" | "prev" | "next_bl
 export type TpPrefs = {
   speed: number; font: number; line_height: number; margin: number; mirror_h: boolean; mirror_v: boolean;
   contrast: "normal" | "alto" | "ambar"; keys: TpKeys; confirm_on_advance: boolean;
+  /** GAZE-01: distância dos olhos ao ecrã (m) e diagonal do ecrã (polegadas; null = por definir), por dispositivo */
+  distance_m: number; screen_in: number | null; column_fit: boolean;
+  /** GAZE-02: altura da linha de foco (% a partir do topo, onde está a lente) e modo frase */
+  focus_pct: number; phrase_mode: boolean;
 };
 export const ACTION_LABEL: Record<TpAction, string> = {
   play: "Rolar / parar", faster: "Mais depressa", slower: "Mais devagar", next: "Guião seguinte", prev: "Guião anterior",
@@ -132,6 +136,7 @@ export const DEFAULT_KEYS: Required<TpKeys> = {
 };
 export const DEFAULT_PREFS: TpPrefs = {
   speed: 4, font: 56, line_height: 1.38, margin: 6, mirror_h: false, mirror_v: false, contrast: "normal", keys: {}, confirm_on_advance: true,
+  distance_m: 1, screen_in: null, column_fit: true, focus_pct: 20, phrase_mode: false,
 };
 export const keyName = (k: string) => (k === " " ? "Espaço" : k === "Escape" ? "Esc" : k.startsWith("Arrow") ? { ArrowUp: "↑", ArrowDown: "↓", ArrowLeft: "←", ArrowRight: "→" }[k] ?? k : k);
 
@@ -147,6 +152,11 @@ export function clampPrefs(p: Partial<TpPrefs>): TpPrefs {
     contrast: p.contrast === "alto" || p.contrast === "ambar" ? p.contrast : "normal",
     keys: p.keys && typeof p.keys === "object" ? p.keys : {},
     confirm_on_advance: typeof p.confirm_on_advance === "boolean" ? p.confirm_on_advance : true,
+    distance_m: Math.round(n(p.distance_m, 0.3, 6, DEFAULT_PREFS.distance_m) * 20) / 20,
+    screen_in: typeof p.screen_in === "number" && Number.isFinite(p.screen_in) ? Math.round(Math.min(100, Math.max(4, p.screen_in)) * 10) / 10 : null,
+    column_fit: typeof p.column_fit === "boolean" ? p.column_fit : DEFAULT_PREFS.column_fit,
+    focus_pct: Math.round(n(p.focus_pct, 5, 60, DEFAULT_PREFS.focus_pct)),
+    phrase_mode: typeof p.phrase_mode === "boolean" ? p.phrase_mode : DEFAULT_PREFS.phrase_mode,
   };
 }
 
@@ -178,7 +188,24 @@ export function writeLocalPrefs(p: TpPrefs) {
   try { localStorage.setItem("tp.prefs", JSON.stringify(p)); } catch {}
 }
 export const fetchServerPrefs = (device: string) => rpc<Partial<TpPrefs> | null>("tp_prefs_get", { p_device: device });
-export const saveServerPrefs = (device: string, p: TpPrefs) => rpc<TpPrefs>("tp_prefs_set", { p_device: device, p_prefs: p });
+const GAZE_KEYS = ["distance_m", "screen_in", "column_fit", "focus_pct", "phrase_mode"] as const;
+/**
+ * Guarda na conta. Se o servidor ainda não conhecer as chaves do olhar (GAZE-01/02; migração por aplicar), guarda as
+ * restantes e avisa: as do olhar ficam só neste dispositivo, nada se perde em silêncio.
+ */
+export async function saveServerPrefs(device: string, p: TpPrefs): Promise<{ gazeLocalOnly: boolean }> {
+  try {
+    await rpc<TpPrefs>("tp_prefs_set", { p_device: device, p_prefs: p });
+    return { gazeLocalOnly: false };
+  } catch (e) {
+    const raw = (e as { raw?: string }).raw ?? "";
+    if (!raw.includes("preferencia_desconhecida")) throw e;
+    const legacy: Record<string, unknown> = { ...p };
+    GAZE_KEYS.forEach((k) => delete legacy[k]);
+    await rpc<TpPrefs>("tp_prefs_set", { p_device: device, p_prefs: legacy });
+    return { gazeLocalOnly: true };
+  }
+}
 
 // ---------- tempos de gravação (W5-01, ING-03) ----------
 // Cada marca (abrir guião, rolar, parar, mudar de bloco, take, confirmação, sair) leva a hora do dispositivo e um ref
