@@ -11,8 +11,8 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | Estado | Requisitos |
 |---|---|
 | feito | 25 |
-| parcial | 199 |
-| por começar | 48 |
+| parcial | 200 |
+| por começar | 47 |
 | bloqueado | 5 |
 | adiado | 3 |
 | **total** | **280** |
@@ -165,6 +165,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | BIZ-06 | P1 | parcial | custo de IA só em EUR; verificação com conta real (R-15) | Custos e margem por cliente |
 | BIZ-08 | P1 | parcial | verificação com sessão real (convite com cargo) | Cargos como modelos de permissões |
 | EDL-10 | P1 | parcial | 2-3 alternativas por secção geradas pela IA (job do pacote, EDL-01); imagem no palco (EDL-08); verificação com sessão real de cliente (R-15) depois de aplicar a migração | Modo guiado |
+| EDL-13 | P1 | parcial | a IA usar o estilo na versão 1 (job do pacote, EDL-01); o render do export desenhar o aspeto (EDL-11); verificação com sessão real depois de aplicar a migração | Estilos guardados |
 | PERF-07 | P1 | parcial | o motor (Aprendiz/Estratega) ainda não lê as alavancas | Alavancas "o que replicar" |
 | FR-01-06 | P2 | parcial | filtros persistentes por utilizador por fazer | Estados vazios explicativos, loading, erro/retry, filtros persistentes por utili |
 | FR-02-06 | P2 | parcial | sem diff visual entre versões | Histórico de versões com diff e restauro, conflitos de edição e autoria. |
@@ -651,7 +652,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | EDL-10 | parcial | 2-3 alternativas por secção geradas pela IA (job do pacote, EDL-01); imagem no palco (EDL-08); verificação com sessão real de cliente (R-15) depois de aplicar a migração | modo guiado /c/[ws]/editor (só edit.guided ou ?modo=guiado): passos Estilo, Corte, Hook, Visual e música, Legendas, Exportar; edit_doc_save valida a diferença no servidor (_edit_guided_problem, W5-07, ADR-0047); w5_edit_guided 38/38 (19 recusas entre modos, música de outro cliente, admin de B); edit-doc 61/61 | — |
 | EDL-11 | bloqueado | precisa do worker alojado e de R2, contas do Tomás; botão Exportar desativado com o motivo |  | — |
 | EDL-12 | por começar |  |  | — |
-| EDL-13 | por começar |  |  | — |
+| EDL-13 | parcial | a IA usar o estilo na versão 1 (job do pacote, EDL-01); o render do export desenhar o aspeto (EDL-11); verificação com sessão real depois de aplicar a migração | Guardar como estilo no editor (aspeto, música, layout da versão gravada) no catálogo do VAR-02, versionado (edit_style_from_doc, coluna look); aplicar a outro vídeo cria versão nova, também no modo guiado (edit_style_apply) (W5-08, ADR-0048); w5_edit_saved_styles 24/24; edit-doc 63/63 | — |
 
 ## 40. Centro de desempenho (PERF)
 

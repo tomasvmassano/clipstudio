@@ -35,6 +35,7 @@ Um `agency_member` sem atribuição a um workspace **não vê nada** desse works
 | `scripts.export` | ✓ | ✓ | ✓ | ✓ | ✓ | — |
 | `recording.use` / `confirm` | ✓ | ✓ | ✓ | ✓ (own) | — | — |
 | `styles.manage` (W5-02) | ✓ | ✓ | ✓ | — | — | — |
+| aplicar estilo guardado no editor (W5-08) | quem tem `edit.timeline` ou `edit.guided` no cliente; guardar como estilo só com `styles.manage` |||||
 | `projects.manage` (W2-07) | ✓ | ✓ | ✓ | — | — | — |
 | `analytics.manage` (W6, centro de desempenho) | ✓ | ✓ | ✓ | — | — | — |
 | `tasks.delegate` (W6) | ✓ | ✓ | ✓ | ✓ (as suas) | ✓ (as suas) | — |

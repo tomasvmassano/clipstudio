@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSession } from "@/components/session-provider";
 import { EditorStage } from "@/components/edit/editor-stage";
+import { SavedStylesPanel } from "@/components/edit/style-tools";
 import type { Access } from "@/lib/access";
 import { SOURCE_LABEL, saveEdit, type EditState } from "@/lib/edit";
 import {
@@ -32,11 +33,7 @@ const STEPS: { key: Step; label: string }[] = [
   { key: "visual", label: "Visual e música" }, { key: "legendas", label: "Legendas" }, { key: "exportar", label: "Exportar" },
 ];
 
-export function GuidedEditor({ access, st, onReload, styles }: {
-  access: Access; st: EditState; onReload: (v?: string | null) => Promise<void>;
-  /** Passo Estilo: conteúdo extra (estilos guardados, EDL-13). */
-  styles?: (doc: EditDoc) => React.ReactNode;
-}) {
+export function GuidedEditor({ access, st, onReload }: { access: Access; st: EditState; onReload: (v?: string | null) => Promise<void> }) {
   const v = st.version!;
   const base = v.doc;
   const isCurrent = v.id === st.document?.current_version_id;
@@ -171,7 +168,7 @@ export function GuidedEditor({ access, st, onReload, styles }: {
 
             <TabsContent value="estilo" className="flex flex-col gap-3 pt-2">
               <p>Estilo deste vídeo: <Badge variant="outline">{doc.style || "sem estilo"}</Badge>{doc.look?.from ? <> · aspeto do estilo guardado <Badge variant="outline">{doc.look.from.key} v{doc.look.from.version}</Badge></> : null}</p>
-              {styles?.(doc)}
+              <SavedStylesPanel access={access} st={st} dirty={dirty} canSave={!!st.can.styles} onApplied={() => onReload()} />
               <p className="text-muted-foreground">Queres outro aspeto? Deixa uma nota e a equipa trata disso.</p>
               {noteBox}
             </TabsContent>

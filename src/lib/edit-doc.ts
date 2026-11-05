@@ -183,7 +183,15 @@ export function problem(d: EditDoc): string | null {
   return lookProblem(d.look);
 }
 
-export const LOOK_LIMITS = { size: [30, 140], y: [260, 1550] } as const;
+/** Muda o aspeto das legendas ou do hook. Um retoque à mão deixa de ser "o estilo X tal como guardado" (tira look.from). */
+export function setLook(doc: EditDoc, part: "captions" | "hook", patch: Partial<TextLook>): EditDoc {
+  const cur = doc.look ?? {};
+  const next: TextLook = { ...(cur[part] ?? {}), ...patch };
+  for (const k of Object.keys(next) as (keyof TextLook)[]) if (next[k] === undefined) delete next[k];
+  return { ...doc, look: { captions: cur.captions ?? null, hook: cur.hook ?? null, [part]: next } };
+}
+
+export const LOOK_LIMITS ={ size: [30, 140], y: [260, 1550] } as const;
 const HEX = /^#[0-9A-Fa-f]{6}$/;
 /** O mesmo que _edit_look_problem. */
 export function lookProblem(l: Look | null | undefined): string | null {

@@ -1,4 +1,4 @@
-import { guidedProblem, restoreSegment, restorable, wordsBySegment, lookProblem, toggleNote, setHook, addNote, addOverlay, captionAt, notesOut, resizeOverlay, setGain, setMusic, shiftOverlay, shiftWord, deleteSegment, editWord, historyOf, hookEnd, layout, moveSegment, outToSrc, problem, push, redo, splitSegment, srcToOut, trimSegment, undo, wordsOut, spanOut, type EditDoc } from "../src/lib/edit-doc.ts";
+import { guidedProblem, restoreSegment, restorable, wordsBySegment, lookProblem, setLook, toggleNote, setHook, addNote, addOverlay, captionAt, notesOut, resizeOverlay, setGain, setMusic, shiftOverlay, shiftWord, deleteSegment, editWord, historyOf, hookEnd, layout, moveSegment, outToSrc, problem, push, redo, splitSegment, srcToOut, trimSegment, undo, wordsOut, spanOut, type EditDoc } from "../src/lib/edit-doc.ts";
 
 let bad = 0; let n = 0;
 const eq = (name: string, got: unknown, exp: unknown) => { n++; const g = JSON.stringify(got), e = JSON.stringify(exp); if (g !== e) { bad++; console.log("FAIL", name, g, "esperado", e); } };
@@ -83,5 +83,8 @@ eq("palavras por corte", wordsBySegment(doc).map((x) => x.words.map((w) => w.w))
 eq("aspeto: cor inválida", lookProblem({ captions: { color: "red" } }), "cor inválida no aspeto");
 eq("aspeto: fora do retângulo seguro", lookProblem({ hook: { y: 100 } }), "texto fora do retângulo seguro (y 260-1550)");
 eq("aspeto válido", problem({ ...doc, look: { captions: { color: "#FFFFFF", highlight: "#FFD400", size: 64, y: 1300 }, hook: { color: "#FFD400", background: null } } }), null);
+const lk = setLook({ ...doc, look: { captions: { color: "#FFFFFF" }, hook: null, from: { key: "E01", version: 1 } } }, "captions", { highlight: "#FFD400" });
+eq("aspeto: retoque mantém o resto e tira a origem do estilo", lk.look, { captions: { color: "#FFFFFF", highlight: "#FFD400" }, hook: null });
+eq("aspeto: sem fundo", setLook(doc, "hook", { background: null }).look?.hook, { background: null });
 console.log(`edit-doc: ${n - bad}/${n}`);
 if (bad) process.exit(1);

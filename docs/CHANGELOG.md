@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-05 (editor de vídeo, estilos guardados)
+
+- **W5-08** estilos guardados no editor (EDL-13 parcial; ADR-0048): aspeto das legendas e do hook no modo completo ("Aspeto e estilos guardados"); "Guardar como estilo" grava aspeto, música e volume e layout da versão gravada como estilo do cliente no catálogo do VAR-02 (E01..E99, versionado, coluna `look`); aplicar um estilo a outro vídeo cria versão nova, também no passo Estilo do modo guiado. Testes `w5_edit_saved_styles` 24/24, `edit-doc` 63/63.
+
 ## 2026-11-05 (editor de vídeo, modo guiado)
 
 - **W5-07** modo guiado do editor (EDL-10 parcial; ADR-0047): quem só tem `edit.guided` (cliente, revisor, colaborador) abre uma vista por passos sobre o mesmo documento: tirar/repor cortes, corrigir palavras, hook com alternativas (escolha da IA e hooks do guião), música da biblioteca, notas no momento. O servidor (`edit_doc_save` + `_edit_guided_problem`) recusa tudo o resto com `modo_guiado`. Palco partilhado (`EditorStage`) com camada para o vídeo do proxy. Aspeto opcional `look` no documento, validado. Testes `w5_edit_guided` 38/38, `edit-doc` 61/61.

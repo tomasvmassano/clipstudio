@@ -174,6 +174,8 @@ Estilo (`edit_styles`): `rascunho → ativo → rascunho`, qualquer um `→ arqu
 | ativar | `styles.manage` | layout com pelo menos uma camada e sem problemas | `edit.style_status` |
 | rascunho / arquivar | `styles.manage` | recusado se o preset atual usa o estilo | `edit.style_status` |
 | gravar preset | `styles.manage` | 1 a 12 saídas (`master`, `split_image_persona`, `split_attention`, `style`); estilos têm de estar ativos; fixa a versão de cada estilo; versão esperada (40001) | `edit.preset_saved` |
+| guardar como estilo (editor, W5-08) | `styles.manage` + abrir o editor | lê a versão gravada do vídeo (não o browser); estilo novo E01..E99 com nome (layout copiado do estilo do vídeo, se existir) ou versão nova de um existente com a versão esperada (40001) | `edit.style_saved` (antes/depois, vídeo de origem) |
+| aplicar estilo a um vídeo (W5-08) | `edit.timeline` ou `edit.guided` | estilo do mesmo cliente, não arquivado, com aspeto; música ainda ativa na biblioteca; base = versão atual (40001); cria versão nova do documento | `edit.style_applied`, evento `edit.version_saved` |
 
 
 ## Metadados do guião e campanhas (W2-07, FR-02-03, FR-03-01)

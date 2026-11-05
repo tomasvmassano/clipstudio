@@ -27,6 +27,7 @@ import { clientPath } from "@/lib/ws-path";
 import { cn } from "@/lib/utils";
 import { EditorStage } from "@/components/edit/editor-stage";
 import { GuidedEditor } from "@/components/edit/guided-editor";
+import { LookPanel, SavedStylesPanel } from "@/components/edit/style-tools";
 
 type Sel = { kind: "seg" | "word" | "ov" | "note"; id: string } | null;
 type DragKind = "seg-in" | "seg-out" | "word" | "ov" | "ov-s" | "ov-e";
@@ -291,6 +292,13 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
             </div>
           )}
           {!sel && <p className="text-muted-foreground">Clica num corte ou numa palavra na linha do tempo para a ajustar. Arrasta as pontas de um corte ou de um visual para aparar e uma palavra ou um visual para o mover. Atalhos: Espaço tocar, ←/→ 0,1 s (Shift 1 s), S dividir, N nota, Delete tirar, Cmd+Z desfazer.</p>}
+          <details className="border-t pt-3">
+            <summary className="cursor-pointer font-medium">Aspeto e estilos guardados</summary>
+            <div className="mt-2 flex flex-col gap-3">
+              <LookPanel doc={doc} disabled={!canEdit} onChange={apply} />
+              <SavedStylesPanel access={access} st={st} dirty={dirty} canSave={!!st.can.styles} onApplied={() => onReload()} />
+            </div>
+          </details>
           <div className="flex flex-col gap-2 border-t pt-3" aria-label="Notas">
             <span className="font-medium">Notas {notes.length > 0 && <span className="text-muted-foreground">({notes.filter((n) => !n.done).length} por tratar)</span>}</span>
             <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); apply(addNote(doc, t, newNote, me, nextId("n"))); setNewNote(""); }}>
