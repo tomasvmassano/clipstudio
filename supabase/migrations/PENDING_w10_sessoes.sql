@@ -1,4 +1,4 @@
--- W10-08 · Sessões e dispositivos (FR-14-03) e revogação imediata (R-11, CAP-06, FL-07, QA-03, QA-13). ADR-0055.
+-- W10-08 · Sessões e dispositivos (FR-14-03) e revogação imediata (R-11, CAP-06, FL-07, QA-03, QA-13). ADR-0061.
 -- Expand (aditivo, compatível com o código do main):
 --   * _session_alive: a sessão do JWT (claim session_id) tem de existir em auth.sessions. _mfa_ok passa a exigi-lo, por isso
 --     _authorize/_authorize_base/_org_can/my_context/profile_update recusam já um JWT de uma sessão terminada, sem esperar
@@ -139,7 +139,7 @@ language sql stable security definer set search_path = public as $$
 $$;
 
 -- eventos que a app regista depois de o Auth confirmar: igual a 20261029153629, mais "saiu desta sessão"
--- (a própria sessão termina-se com o signOut do Supabase Auth, que a apaga no servidor; ver ADR-0055)
+-- (a própria sessão termina-se com o signOut do Supabase Auth, que a apaga no servidor; ver ADR-0061)
 create or replace function public.security_event(p_action text) returns void
 language plpgsql security definer set search_path = public as $$
 declare uid uuid := auth.uid();
