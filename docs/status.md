@@ -25,7 +25,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | PLAT-02 | P0 | bloqueado | depende de PLAT-01 e de ligar contas + métricas em produção (PERF-08) | Fase A, só leitura |
 | PLAT-03 | P0 | bloqueado | depende de PLAT-01 e do publicador (PUB-01) | Fase B, publicação |
 | FR-01-02 | P0 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | Widgets configuráveis por função e por workspace; comparação temporal e explicaç |
-| FR-02-01 | P0 | parcial | verificação com sessão real (R-15) da equipa Numeiro; aplicar em produção PENDING_w5_auditoria_fix.sql (W5-16) | CRUD de guiões, duplicação, arquivo, recuperação e eliminação com confirmação. |
+| FR-02-01 | P0 | parcial | verificação com sessão real (R-15) da equipa Numeiro | CRUD de guiões, duplicação, arquivo, recuperação e eliminação com confirmação. |
 | FR-03-01 | P0 | parcial | verificação com conta de cliente (R-15) | Fila de gravação por data, campanha e responsável, apenas conteúdos elegíveis; r |
 | FR-03-02 | P0 | parcial | verificação com conta real (R-15) | Blocos identificados Hook 1, Hook 2, Body, CTA e personalizados; seleção e repet |
 | FR-04-01 | P0 | parcial | sem anexo; edição dos campos da fonte não confirmada | CRUD de fontes com URL, título, origem, data, idioma, autor, tags, categoria, re |
@@ -265,7 +265,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
-| FR-02-01 | parcial | verificação com sessão real (R-15) da equipa Numeiro; aplicar em produção PENDING_w5_auditoria_fix.sql (W5-16) | content_create/duplicate, arquivar/recuperar; w2_content 47/47; W2-02; eliminação definitiva como lápide com confirmação e recuperação 30 dias (W9-01, ADR-0051); w9_guioes_eliminar 36/36; migração aplicada em produção 2026-11-06; auditoria W5-16: eliminado não volta pelo editor/pacote/revisão/lote; w5_auditoria_isolamento 86/86 (94 com W5-14) | — |
+| FR-02-01 | parcial | verificação com sessão real (R-15) da equipa Numeiro | content_create/duplicate, arquivar/recuperar; w2_content 47/47; W2-02; eliminação definitiva como lápide com confirmação e recuperação 30 dias (W9-01, ADR-0051); w9_guioes_eliminar 36/36; migração aplicada em produção 2026-11-06; auditoria W5-16: eliminado não volta pelo editor/pacote/revisão/lote; w5_auditoria_isolamento 86/86 (94 com W5-14) | — |
 | FR-02-02 | feito |  | editor por blocos com autosave e indicador W2-02; content_save; comentários no cartão do guião (W2-06 content_comments (bloco, frase citada, versão, respostas, resolver), /c/[ws]/revisao; w2_review_comments 33/33; e2e/review.spec.ts 3/3; ADR-0025) | 2026-10-29 (E2E) |
 | FR-02-03 | parcial | título próprio (usa o tema); verificação com conta real (R-15) | guioes: título, cliente, tema, formato, data; fontes ligadas (content_sources); campanha, responsável, plataformas, etiquetas (content_meta_set, projects; W2-07, ADR-0029); w2_content_meta 30/30; e2e/content-meta.spec.ts | — |
 | FR-02-04 | feito |  | editorial_status e production_status independentes; w2_content 47/47, w3_calendar 39/39 | — |

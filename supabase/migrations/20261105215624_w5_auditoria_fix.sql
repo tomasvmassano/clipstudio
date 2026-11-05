@@ -1,5 +1,5 @@
--- W5-16 · auditoria das RPCs de 05/11 (isolamento, código de equipa, pré-visualização, soft delete). PENDENTE: não aplicada em produção.
--- Ao aplicar, renomear para <timestamp>_w5_auditoria_fix.sql. Expand (aditivo e compatível com o main): só substitui corpos de funções
+-- W5-16 · auditoria das RPCs de 05/11 (isolamento, código de equipa, pré-visualização, soft delete). Aplicada em produção (20261105215624).
+-- Expand (aditivo e compatível com o main): só substitui corpos de funções
 -- (mesma assinatura, mesmas chaves de resposta), junta um trigger que recusa ligar ativos a guiões eliminados e retira EXECUTE a anon.
 -- Achados (testes em supabase/tests/w5_auditoria_isolamento.sql):
 --  1. Guiões eliminados (W9, deleted_at) voltavam pelo editor/pacote: edit_package_request aceitava o id de um eliminado (copiava hooks
