@@ -1,4 +1,4 @@
-import { addNote, addOverlay, captionAt, notesOut, resizeOverlay, setGain, setMusic, shiftOverlay, shiftWord, deleteSegment, editWord, historyOf, hookEnd, layout, moveSegment, outToSrc, problem, push, redo, splitSegment, srcToOut, trimSegment, undo, wordsOut, spanOut, type EditDoc } from "../src/lib/edit-doc.ts";
+import { guidedProblem, restoreSegment, restorable, wordsBySegment, lookProblem, setLook, toggleNote, setHook, addNote, addOverlay, captionAt, notesOut, resizeOverlay, setGain, setMusic, shiftOverlay, shiftWord, deleteSegment, editWord, historyOf, hookEnd, layout, moveSegment, outToSrc, problem, push, redo, splitSegment, srcToOut, trimSegment, undo, wordsOut, spanOut, type EditDoc } from "../src/lib/edit-doc.ts";
 
 let bad = 0; let n = 0;
 const eq = (name: string, got: unknown, exp: unknown) => { n++; const g = JSON.stringify(got), e = JSON.stringify(exp); if (g !== e) { bad++; console.log("FAIL", name, g, "esperado", e); } };
@@ -55,5 +55,36 @@ eq("nota no momento", notesOut(nn).map((x) => [x.text, x.at]), [["corta aqui", 3
 eq("nota num trecho cortado fica sem posição", notesOut(deleteSegment(nn, "b1"))[0].at, null);
 eq("nota vazia não entra", (addNote(doc, 3, "  ", null, "x").notes ?? []).length, 0);
 eq("mover palavra", shiftWord(doc, "w2", 0.2).captions.words[1].s, 21.2);
+
+// modo guiado (EDL-10): espelho do servidor
+const gb: EditDoc = { ...doc, notes: [{ id: "n0", s: 21, text: "antiga", by: "Ana", done: false }] };
+const noB1 = deleteSegment(gb, "b1");
+eq("guiado: tirar um corte é permitido", guidedProblem(gb, noB1, [], "Rui"), null);
+eq("guiado: repor um corte tirado volta ao mesmo sítio", restoreSegment(noB1, gb.segments[1], "h").segments.map((s) => s.id), ["h", "b1", "b2"]);
+eq("guiado: repor sem o anterior vai pela ordem da fonte", restoreSegment(deleteSegment(noB1, "h"), gb.segments[0], "zz").segments.map((s) => s.id), ["h", "b2"]);
+eq("guiado: repor não repete", restoreSegment(gb, gb.segments[0], null).segments.length, 3);
+eq("guiado: cortes por repor incluem os tirados agora", restorable(noB1, gb, [{ seg: { id: "old", in: 1, out: 2, section: "body" }, after: null, version_no: 1 }]).map((p) => [p.seg.id, p.after]), [["b1", "h"], ["old", null]]);
+eq("guiado: repor um corte de versão anterior", guidedProblem(gb, restoreSegment(gb, { id: "old", in: 1, out: 2, section: "body" }, null), [{ id: "old", in: 1, out: 2, section: "body" }], null), null);
+eq("guiado: aparar recusado", guidedProblem(gb, trimSegment(gb, "b1", "in", 21), [], null), "no modo guiado só se tiram cortes ou se repõem cortes de versões anteriores (sem aparar nem criar cortes)");
+eq("guiado: dividir recusado", guidedProblem(gb, sp, [], null) !== null, true);
+eq("guiado: reordenar recusado", guidedProblem(gb, moveSegment(gb, "b2", -1), [], null), "no modo guiado a ordem dos cortes não muda");
+eq("guiado: corrigir palavra e hook", guidedProblem(gb, setHook(editWord(gb, "w2", { w: "corpinho" }), "Novo"), [], null), null);
+eq("guiado: tempo da palavra recusado", guidedProblem(gb, shiftWord(gb, "w2", 0.2), [], null), "no modo guiado só se corrige o texto das palavras (os tempos ficam)");
+eq("guiado: tirar palavra recusado", guidedProblem(gb, editWord(gb, "w2", { w: "" }), [], null) !== null, true);
+eq("guiado: visual recusado", guidedProblem(gb, o1, [], null) !== null, true);
+eq("guiado: volume por trecho recusado", guidedProblem({ ...gb, audio: m.audio }, setGain({ ...gb, audio: m.audio }, 20, 22, -30), [], null), "no modo guiado o volume por trecho não muda");
+eq("guiado: trocar música permitido (biblioteca verificada no servidor)", guidedProblem(gb, setMusic(gb, { label: "Beat", asset: "m1" }), [], null), null);
+eq("guiado: aspeto recusado", guidedProblem(gb, { ...gb, look: { captions: { color: "#FF0000" } } }, [], null) !== null, true);
+eq("guiado: nota nova com o próprio nome", guidedProblem(gb, addNote(gb, 3, "aqui", "Rui", "n1"), [], "Rui"), null);
+eq("guiado: nota em nome de outro recusada", guidedProblem(gb, addNote(gb, 3, "aqui", "Ana", "n1"), [], "Rui"), "nota nova inválida (momento, texto ou autor)");
+eq("guiado: marcar nota feita", guidedProblem(gb, toggleNote(gb, "n0"), [], "Rui"), null);
+eq("guiado: apagar nota recusado", guidedProblem(gb, { ...gb, notes: [] }, [], "Rui") !== null, true);
+eq("palavras por corte", wordsBySegment(doc).map((x) => x.words.map((w) => w.w)), [["Olá"], ["corpo"], ["fim"]]);
+eq("aspeto: cor inválida", lookProblem({ captions: { color: "red" } }), "cor inválida no aspeto");
+eq("aspeto: fora do retângulo seguro", lookProblem({ hook: { y: 100 } }), "texto fora do retângulo seguro (y 260-1550)");
+eq("aspeto válido", problem({ ...doc, look: { captions: { color: "#FFFFFF", highlight: "#FFD400", size: 64, y: 1300 }, hook: { color: "#FFD400", background: null } } }), null);
+const lk = setLook({ ...doc, look: { captions: { color: "#FFFFFF" }, hook: null, from: { key: "E01", version: 1 } } }, "captions", { highlight: "#FFD400" });
+eq("aspeto: retoque mantém o resto e tira a origem do estilo", lk.look, { captions: { color: "#FFFFFF", highlight: "#FFD400" }, hook: null });
+eq("aspeto: sem fundo", setLook(doc, "hook", { background: null }).look?.hook, { background: null });
 console.log(`edit-doc: ${n - bad}/${n}`);
 if (bad) process.exit(1);
