@@ -10,6 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSession } from "@/components/session-provider";
 import { EditorStage } from "@/components/edit/editor-stage";
+import { ExportPanel } from "@/components/editor/export-panel";
+import { PreviewVideo } from "@/components/editor/preview-video";
 import { SavedStylesPanel } from "@/components/edit/style-tools";
 import type { Access } from "@/lib/access";
 import { SOURCE_LABEL, saveEdit, type EditState } from "@/lib/edit";
@@ -149,7 +151,7 @@ export function GuidedEditor({ access, st, onReload }: { access: Access; st: Edi
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,20rem)_1fr]">
         <div className="flex flex-col gap-2">
-          <EditorStage doc={doc} t={t} />
+          <EditorStage doc={doc} t={t} media={<PreviewVideo access={access} asset={st.asset.id} versionId={v.id} doc={doc} t={t} playing={playing} />} />
           <div className="flex items-center justify-center gap-2">
             <Button size="sm" variant="outline" onClick={() => seek(t - 1)} aria-label="Recuar 1 s"><ArrowLeftIcon /></Button>
             <Button size="sm" onClick={() => { if (t >= duration) setT(0); setPlaying((p) => !p); }} aria-label={playing ? "Pausa" : "Tocar"}>{playing ? <PauseIcon /> : <PlayIcon />}</Button>
@@ -157,7 +159,6 @@ export function GuidedEditor({ access, st, onReload }: { access: Access; st: Edi
             <span className="tabular-nums text-sm text-muted-foreground">{fmtT(t)} / {fmtT(duration)}</span>
           </div>
           <input type="range" min={0} max={Math.max(0.1, duration)} step={0.1} value={t} onChange={(e) => seek(Number(e.target.value))} aria-label="Posição no vídeo" />
-          <p className="text-xs text-muted-foreground">Pré-visualização sem imagem até haver armazenamento de vídeo: o hook e as legendas aparecem no tempo certo.</p>
         </div>
 
         <div className="flex min-w-0 flex-col gap-3 rounded-lg border p-3 text-sm">
@@ -262,7 +263,8 @@ export function GuidedEditor({ access, st, onReload }: { access: Access; st: Edi
             </TabsContent>
 
             <TabsContent value="exportar" className="flex flex-col gap-3 pt-2">
-              <p>{dirty ? `${h.past.length} alteração(ões) por gravar.` : "Sem alterações por gravar."} Grava a versão abaixo; a exportação do vídeo faz-se a partir da versão gravada{st.can.export ? " (na linha do tempo)" : " por quem gere o cliente"}.</p>
+              <p>{dirty ? `${h.past.length} alteração(ões) por gravar.` : "Sem alterações por gravar."} Grava a versão abaixo; exporta-se sempre a versão gravada{st.can.export ? "" : ", por quem gere o cliente"}.</p>
+              <ExportPanel access={access} ws={access.ws} asset={st.asset.id} versionId={isCurrent ? v.id : null} versionNo={v.version_no} dirty={dirty} canExport={st.can.export} />
               {noteBox}
             </TabsContent>
           </Tabs>

@@ -26,6 +26,8 @@ import { variantLabel } from "@/lib/media-review";
 import { clientPath } from "@/lib/ws-path";
 import { cn } from "@/lib/utils";
 import { EditorStage } from "@/components/edit/editor-stage";
+import { ExportPanel } from "@/components/editor/export-panel";
+import { PreviewVideo } from "@/components/editor/preview-video";
 import { GuidedEditor } from "@/components/edit/guided-editor";
 import { LookPanel, SavedStylesPanel } from "@/components/edit/style-tools";
 
@@ -224,20 +226,19 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
           <Button size="sm" variant="outline" disabled={!h.past.length} onClick={() => setH(undo)} aria-label="Desfazer"><Undo2Icon /></Button>
           <Button size="sm" variant="outline" disabled={!h.future.length} onClick={() => setH(redo)} aria-label="Refazer"><Redo2Icon /></Button>
           <Button size="sm" variant="outline" render={<Link href={clientPath(access.ws, `/editor?asset=${st.asset.id}&modo=guiado`)} />} nativeButton={false}>Modo guiado</Button>
-          <Button size="sm" disabled title="Exportar precisa do worker alojado e do armazenamento de vídeo (R2). As versões gravadas ficam prontas para exportar.">Exportar</Button>
         </div>
       </div>
 
-      <Alert><AlertDescription>
-        Pré-visualização sem imagem até haver armazenamento de vídeo (R2): os cortes, as legendas e o hook aparecem no tempo certo; o vídeo exportado (v{st.asset.media_version_no ?? 1}) abre na Drive.
-        {st.asset.drive_file_id && <a className="ml-1 inline-flex items-center gap-1 underline" href={`https://drive.google.com/file/d/${st.asset.drive_file_id}/view`} target="_blank" rel="noreferrer">Abrir na Drive <ExternalLinkIcon className="size-3" /></a>}
-      </AlertDescription></Alert>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <ExportPanel access={access} ws={access.ws} asset={st.asset.id} versionId={isCurrent ? v.id : null} versionNo={v.version_no} dirty={dirty} canExport={st.can.export} />
+        {st.asset.drive_file_id && <a className="inline-flex items-center gap-1 text-sm underline" href={`https://drive.google.com/file/d/${st.asset.drive_file_id}/view`} target="_blank" rel="noreferrer">Vídeo anterior na Drive <ExternalLinkIcon className="size-3" /></a>}
+      </div>
       {msg && <Alert variant={msg.kind === "err" ? "destructive" : "default"}><AlertDescription>{msg.text}</AlertDescription></Alert>}
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,20rem)_1fr]">
         {/* palco 9:16 */}
         <div className="flex flex-col gap-2">
-          <EditorStage doc={doc} t={t} />
+          <EditorStage doc={doc} t={t} media={<PreviewVideo access={access} asset={st.asset.id} versionId={v.id} doc={doc} t={t} playing={playing} />} />
           <div className="flex items-center justify-center gap-2">
             <Button size="sm" variant="outline" onClick={() => setT((x) => Math.max(0, x - 1))} aria-label="Recuar 1 s"><ArrowLeftIcon /></Button>
             <Button size="sm" onClick={() => { if (t >= duration) setT(0); setPlaying((p) => !p); }} aria-label={playing ? "Pausa" : "Tocar"}>{playing ? <PauseIcon /> : <PlayIcon />}</Button>
