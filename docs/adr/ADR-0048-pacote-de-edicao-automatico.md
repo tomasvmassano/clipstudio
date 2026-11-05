@@ -27,4 +27,4 @@ O Numeiro grava a 2026-11-06 uma sessão nova para testar o sistema todo. Até a
 
 ## Rollback
 
-Bloco no fim de `supabase/migrations/*_w5_edit_package.sql`; a página só aparece com `edit.studio`.
+Bloco no fim de `supabase/migrations/20261105192728_w5_edit_package.sql`; a página só aparece com `edit.studio`.
