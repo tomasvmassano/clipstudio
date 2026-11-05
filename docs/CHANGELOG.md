@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-06
+
+- **W10-04** referências por link (REF-01..04, FR-07-01, FR-07-04; ADR-0059): Referências → Colar link (Reel/TikTok; o mesmo vídeo em qualquer formato de link abre o que já existe); Dissecção pelo motor (hook e mecanismo, máquina, tese, inimigo, estrutura com tempos, ritmo, métricas públicas e índice face à mediana do autor, afirmações sobre terceiros), versionada com modelo e versões de prompt/agente, com caminho manual (transcrição colada); Gerar 3 guiões com 3 hooks cada, em revisão e marcados "via rápida", bloqueados se parecidos demais com o original. Capacidades `references.analyze` e `references.adapt`, flag `references.link` (equipa da agência). Migração aditiva `PENDING_w10_referencias_link.sql`; testes `w10_referencias_link` 65/65, `reference-link` 13/13; motor numeiro-engine#19 `test_reference` 15/15.
+
 ## 2026-11-06 (CHG-008 gravação, aprendizagem e cortes)
 
 - **CHG-008** (só documentação; PRD §46). GAZE-01..06: teleprompter com coluna ligada à distância, linha de foco, modo frase, ritmo por pedal, hooks de memória, pontuação de olhar por take e piloto opcional de correção por IA. LRN-01..07: motivo em cada edição, agente "Editor de lições", lições aprovadas como versão da configuração em dois níveis (agência e cliente). CLIP-01..11: cortes de vídeos longos com o agente Clip Miner, com prioridade. STU-01..05: captura direta das câmaras com cópia no cartão, agente de estúdio e pacote de edição por guião. 5 capacidades planeadas. Sem alteração funcional.

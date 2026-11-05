@@ -11,8 +11,8 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | Estado | Requisitos |
 |---|---|
 | feito | 25 |
-| parcial | 204 |
-| por começar | 74 |
+| parcial | 208 |
+| por começar | 70 |
 | bloqueado | 3 |
 | adiado | 3 |
 | **total** | **309** |
@@ -108,7 +108,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-06-04 | P1 | parcial | sem teste antes de ativar; prompts no código do motor, não versionados na app | Versionamento de prompts/configurações, testes antes de ativar, rollback e audit |
 | FR-06-05 | P1 | parcial | sem latência e qualidade por execução | Custos, tokens, latência e qualidade por execução/agente. |
 | FR-07-03 | P1 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | Filtros, favoritos, coleções e pesquisa. |
-| FR-07-04 | P1 | parcial | só para reels recolhidos pelo motor; referências por link sem transcrição | Transcrição e análise de estrutura quando tecnicamente e legalmente permitido. |
+| FR-07-04 | P1 | parcial | recolha automática depende do APIFY_TOKEN no worker; TikTok só com transcrição colada; verificação com sessão real | Transcrição e análise de estrutura quando tecnicamente e legalmente permitido. |
 | FR-08-03 | P1 | parcial | partilha só da versão atual; verificação com sessão real | Pré-visualização, download, links temporários e permissões de partilha. |
 | FR-08-04 | P1 | parcial | verificação com sessão real | Versionamento, substituição, histórico e associação a guião/take/publicação. |
 | FR-08-05 | P1 | parcial | sem antivírus (decisão em aberto); limite por ficheiro depende do plano Supabase; retenção automática por fazer | Controlo de tipos, tamanho, antivírus quando aplicável, quotas e retenção. |
@@ -168,6 +168,10 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | EDL-10 | P1 | parcial | 2-3 alternativas por secção geradas pela IA (job do pacote, EDL-01); imagem no palco (EDL-08); verificação com sessão real de cliente (R-15) | Modo guiado |
 | EDL-13 | P1 | parcial | a IA usar o estilo na versão 1 (job do pacote, EDL-01); verificação com sessão real | Estilos guardados |
 | PERF-07 | P1 | parcial | o motor (Aprendiz/Estratega) ainda não lê as alavancas | Alavancas "o que replicar" |
+| REF-01 | P1 | parcial | campo só no espaço do cliente (agência sem biblioteca, REF-07); links curtos do TikTok não resolvidos; verificação com sessão real (R-15) | Colar link |
+| REF-02 | P1 | parcial | deploy do worker (numeiro-engine#19) e APIFY_TOKEN no worker (não verificado); verificação com sessão real (R-15) | Dissecção visível |
+| REF-03 | P1 | parcial | deploy do worker; calibrar limites de semelhança (pressuposto); verificador factual (VAR-04); verificação com sessão real | Adaptação ao cliente: 3 guiões por link (decisão), cada um com 3 hooks |
+| REF-04 | P1 | parcial | topo da fila do teleprompter, modo rápido pelo telemóvel (ING-04), estilo extraído (REF-05); meta de 10 min por medir | Via rápida |
 | FR-01-06 | P2 | parcial | filtros persistentes por utilizador por fazer | Estados vazios explicativos, loading, erro/retry, filtros persistentes por utili |
 | FR-02-06 | P2 | parcial | sem diff visual entre versões | Histórico de versões com diff e restauro, conflitos de edição e autoria. |
 | FR-02-07 | P2 | parcial | sem pesquisa, ordenação, vistas guardadas nem impressão | Filtros, pesquisa, ordenação, vistas guardadas, exportação e impressão. |
@@ -327,10 +331,10 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
-| FR-07-01 | parcial | sem upload nem captura | reference_create por link e a partir de reels; w2_references 36/36 | — |
+| FR-07-01 | parcial | sem upload nem captura | reference_create por link e a partir de reels; w2_references 36/36; colar link de Reel/TikTok com deteção do mesmo vídeo (W10-04) | — |
 | FR-07-02 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | classificação formato, estilo, narrativa, hook, duração, idioma, tags; w2_references 36/36; W2-04 | — |
 | FR-07-03 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | filtros, favoritos, coleções, pesquisa; references_list; W2-04; E2E 13/13 (não versionado) | — |
-| FR-07-04 | parcial | só para reels recolhidos pelo motor; referências por link sem transcrição | script_analysis do motor; references_discover | — |
+| FR-07-04 | parcial | recolha automática depende do APIFY_TOKEN no worker; TikTok só com transcrição colada; verificação com sessão real | script_analysis do motor; references_discover; dissecção de referências por link com transcrição recolhida ou colada (W10-04, ADR-0059) | — |
 | FR-07-05 | feito |  | reference_link a guiões e fontes, URL original; w2_references 36/36 | — |
 | FR-07-06 | parcial | métricas vêm de scraping, não de API oficial (conflito com R-19) | "scraper · data" na UI; ADR-0005 | — |
 
@@ -707,10 +711,10 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
 | R-20 | por começar |  |  | — |
-| REF-01 | por começar |  |  | — |
-| REF-02 | por começar |  |  | — |
-| REF-03 | por começar |  |  | — |
-| REF-04 | por começar |  |  | — |
+| REF-01 | parcial | campo só no espaço do cliente (agência sem biblioteca, REF-07); links curtos do TikTok não resolvidos; verificação com sessão real (R-15) | reference_paste + ref_key (W10-04, ADR-0059); w10_referencias_link 65/65; reference-link 13/13 | — |
+| REF-02 | parcial | deploy do worker (numeiro-engine#19) e APIFY_TOKEN no worker (não verificado); verificação com sessão real (R-15) | reference_analyses versionada e imutável, worker reference_analysis, dissecção na UI (W10-04, ADR-0059); w10_referencias_link 65/65; motor test_reference 15/15 | — |
+| REF-03 | parcial | deploy do worker; calibrar limites de semelhança (pressuposto); verificador factual (VAR-04); verificação com sessão real | reference_adapt + worker reference_scripts, 3 hooks, semelhança no motor e no servidor (W10-04); w10_referencias_link 65/65; motor test_reference 15/15 | — |
+| REF-04 | parcial | topo da fila do teleprompter, modo rápido pelo telemóvel (ING-04), estilo extraído (REF-05); meta de 10 min por medir | guiões origem via_rapida em revisão, badge, reference_script_outputs (W10-04) | — |
 | REF-05 | por começar |  |  | — |
 | REF-06 | por começar |  |  | — |
 | REF-07 | por começar |  |  | — |
