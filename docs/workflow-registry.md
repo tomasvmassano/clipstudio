@@ -229,6 +229,10 @@ Conta social: `por_ligar` → (serviço de OAuth futuro) `ligada` → `expirada`
 
 Evento → `_notify` → sem acesso, quem age ou já existe: nada → obrigatória: cria → desligada no cliente, cliente silenciado ou desligada pela pessoa: não cria e soma ao contador diário (`notification_suppressions`) → senão cria. As preferências só valem com a flag `notifications.prefs` ligada para quem recebe. Email e resumo diário: preferência guardada, sem envio.
 
+## Notificações de prazos (W10-14, FR-11-04, TEAM-12)
+
+Tick (`deadline_notify_tick`, pg_cron de 15 em 15 min, lock consultivo contra ticks sobrepostos) → para cada limiar: flag `notifications.deadlines` para quem recebe → acesso atual (`tasks.read`) e a capacidade do caso → registo `notification_deadline_sent (user_id, dedup_key)`: já existe = nada → `_notify` (preferências, obrigatório no cliente, dedup). Limiares e chaves: tarefa aberta com prazo em ≤ 24 h `task_due_soon:<tarefa>:<epoch do due_at>`; atrasada (até 7 dias) `task_overdue:<tarefa>:<epoch>`; guião `draft`/`in_review`/`changes_requested` por gravar (`not_started`/`scheduled`) com data = amanhã no fuso do cliente `script_unapproved_recording:<guião>:<data>`; vídeo `in_review`/`changes_requested` com o dia do prazo (regra do calendário W9-03) passado há ≤ 7 dias `video_review_overdue:<versão>:<dia>`. Mudar `due_at` ou a data muda a chave e volta a armar o aviso. Trigger `tasks_due_changed_notify` (depois de mudar `due_at`, mesmo responsável, tarefa aberta) → `task_due_changed` ao responsável, chave `due_changed:<tarefa>:<lock_version>`. Mudança de responsável: `task_assigned` ao novo e `task_unassigned` ao antigo (já existente). Registo limpo ao fim de 45 dias.
+
 ## Portal do cliente (W8, SCALE-08)
 
 Sem estados novos. O portal dispara as transições existentes: editorial `in_review` → `approved` | `changes_requested` | `rejected` (`content_transition`, `content_transition_reasoned`), publicação `planeada` → `aprovada` (`pub_approve`) e cria pedidos `ideas(kind=talent_request, status=nova)` (`talent_request_create`, evento `request.created`).

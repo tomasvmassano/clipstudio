@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-06 (notificações de prazos)
+
+- **W10-14** notificações de prazos e alterações (FR-11-04, TEAM-12; FR-15-05, FR-16-03, FR-17-06; ADR-0061): tick SQL de 15 em 15 min (`deadline_notify_tick`, pg_cron `deadline-notify-tick`) avisa o responsável de tarefas com prazo nas próximas 24 h e atrasadas (uma vez por limiar e por valor do prazo; mudar o prazo volta a armar), o responsável e quem aprova de guiões por aprovar com gravação amanhã no fuso do cliente, e quem tem a tarefa/decide de revisões de vídeo atrasadas (regra do calendário W9-03); trigger `tasks_due_changed_notify` avisa o responsável quando o prazo muda. Tudo por `_notify` (acesso atual, preferências, obrigatório do cliente), com registo `notification_deadline_sent` para nunca repetir nem contar supressões duas vezes; flag `notifications.deadlines` (fase owner) por quem recebe. 5 tipos novos no grupo "Prazos" das preferências; na caixa são alertas (mudança de prazo = tarefa). Migração `supabase/migrations/PENDING_w10_prazos.sql`; teste `supabase/tests/w10_prazos.sql` 39/39; `w8_notif` com 18 tipos.
+
 ## 2026-11-06 (CHG-008 gravação, aprendizagem e cortes)
 
 - **CHG-008** (só documentação; PRD §46). GAZE-01..06: teleprompter com coluna ligada à distância, linha de foco, modo frase, ritmo por pedal, hooks de memória, pontuação de olhar por take e piloto opcional de correção por IA. LRN-01..07: motivo em cada edição, agente "Editor de lições", lições aprovadas como versão da configuração em dois níveis (agência e cliente). CLIP-01..11: cortes de vídeos longos com o agente Clip Miner, com prioridade. STU-01..05: captura direta das câmaras com cópia no cartão, agente de estúdio e pacote de edição por guião. 5 capacidades planeadas. Sem alteração funcional.
