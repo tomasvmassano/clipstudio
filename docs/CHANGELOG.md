@@ -4,6 +4,10 @@
 
 - **W5-17** o export desenha o aspeto guardado (legendas e hook: cor, destaque, fundo, tamanho, posição) e os visuais do documento (b-roll a ecrã inteiro, gráficos na caixa, cartões de texto), pela mesma lógica de cortes do editor (numeiro-engine #15). `edit_export_request` resolve os visuais para a versão no R2 do mesmo cliente (`_edit_resolve_visuals`); ativo sem versão R2 fica de fora com aviso, sem falhar o export (EDL-11, EDL-13). Testes `w5_export_visuais` 8/8, motor `test_render_doc`.
 
+## 2026-11-06 (frases-persona)
+
+- **W5-14** lista de frases-persona por cliente (R-17, CHG-003; ADR-0053): Agentes → Frases-persona; cada gravação é uma versão nova e imutável, auditada com o que entrou e saiu; frases que envolvem outra pessoa exigem o consentimento registado; capacidade `persona.manage` (dono e admin do cliente). O worker recebe a lista em vigor e os agentes só usam essas frases (lista vazia: sem hipérbole de persona); a versão fica no log de cada chamada (numeiro-engine #14). Testes `w5_persona_phrases` 21/21, `persona-rules` 11/11, motor `test_persona` 4/4.
+
 ## 2026-11-06 (revisão dos exportados)
 
 - **W5-12** revisão em lote dos vídeos exportados (EDL-02, EDL-03, EDL-11, FR-05-03; ADR-0052): o vídeo exportado pelo editor entra finalmente na Revisão (antes só apareciam links da Drive), com player da app sobre a versão leve, comentários no momento ("Agora" usa o tempo do vídeo; clicar no tempo salta para lá), notas do QC técnico e "Aprovar e seguinte". O worker corre o QC (formato, fps, duração, áudio, loudness, pico, frames pretos/congelados, retângulo seguro) sobre cada export e grava-o em `media_info.qc`. "Exportar todos" num pacote acabado. Testes `w5_review_stored` 34/34, `review-queue` 12/12, motor `test_qc_summary_on_export`.
