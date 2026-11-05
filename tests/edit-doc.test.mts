@@ -1,4 +1,4 @@
-import { guidedProblem, restoreSegment, restorable, wordsBySegment, lookProblem, setLook, toggleNote, setHook, addNote, addOverlay, captionAt, notesOut, resizeOverlay, setGain, setMusic, shiftOverlay, shiftWord, deleteSegment, editWord, historyOf, hookEnd, layout, moveSegment, outToSrc, problem, push, redo, splitSegment, srcToOut, trimSegment, undo, wordsOut, spanOut, type EditDoc } from "../src/lib/edit-doc.ts";
+import { altSections, hookTexts, optionInDoc, guidedProblem, restoreSegment, restorable, wordsBySegment, lookProblem, setLook, toggleNote, setHook, addNote, addOverlay, captionAt, notesOut, resizeOverlay, setGain, setMusic, shiftOverlay, shiftWord, deleteSegment, editWord, historyOf, hookEnd, layout, moveSegment, outToSrc, problem, push, redo, splitSegment, srcToOut, trimSegment, undo, wordsOut, spanOut, type EditDoc } from "../src/lib/edit-doc.ts";
 
 let bad = 0; let n = 0;
 const eq = (name: string, got: unknown, exp: unknown) => { n++; const g = JSON.stringify(got), e = JSON.stringify(exp); if (g !== e) { bad++; console.log("FAIL", name, g, "esperado", e); } };
@@ -86,5 +86,18 @@ eq("aspeto válido", problem({ ...doc, look: { captions: { color: "#FFFFFF", hig
 const lk = setLook({ ...doc, look: { captions: { color: "#FFFFFF" }, hook: null, from: { key: "E01", version: 1 } } }, "captions", { highlight: "#FFD400" });
 eq("aspeto: retoque mantém o resto e tira a origem do estilo", lk.look, { captions: { color: "#FFFFFF", highlight: "#FFD400" }, hook: null });
 eq("aspeto: sem fundo", setLook(doc, "hook", { background: null }).look?.hook, { background: null });
+const alts = { hook_texts: ["Outro hook", "Hook", "  ", "Outro hook"], sections: {
+  cta: { replaces: ["b2"], options: [{ id: "alt_cta_1", segments: [{ id: "alt_cta_1_s01", in: 40, out: 42, section: "body" as const }], words: [], text: "x", duration: 2, confidence: null, note: "" }] },
+  hook: { replaces: ["h"], options: [{ id: "alt_hook_1", segments: [{ id: "alt_hook_1_s01", in: 50, out: 52, section: "hook" as const }], words: [], text: "y", duration: 2, confidence: 0.6, note: "" },
+                                     { id: "vazia", segments: [], words: [], text: "", duration: 0, confidence: null, note: "" }] },
+  body: { replaces: [], options: [] } } };
+eq("alternativas: secções com opções, pela ordem hook, corpo, CTA", altSections(alts).map((s) => [s.key, s.options.map((o) => o.id)]), [["hook", ["alt_hook_1"]], ["cta", ["alt_cta_1"]]]);
+eq("alternativas: sem dados", altSections(null), []);
+eq("alternativas: textos do hook sem o atual, vazios ou repetidos", hookTexts(alts, "Hook"), ["Outro hook"]);
+const opt = alts.sections.hook.options[0];
+eq("alternativa ainda não usada", optionInDoc(doc, opt), false);
+eq("alternativa em uso (cortes iguais)", optionInDoc({ ...doc, segments: [...opt.segments, ...doc.segments.slice(1)] }, opt), true);
+eq("alternativa aparada já não conta como em uso", optionInDoc({ ...doc, segments: [{ ...opt.segments[0], out: 51.5 }] }, opt), false);
+eq("opção sem cortes nunca está em uso", optionInDoc(doc, { segments: [] }), false);
 console.log(`edit-doc: ${n - bad}/${n}`);
 if (bad) process.exit(1);
