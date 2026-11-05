@@ -30,3 +30,26 @@ export function blockedReason(it: PendingItem, can: PendingApproval["can"]): str
 /** A palavra que a pessoa escreve para confirmar (a UI manda depois o ID do guião ao servidor). */
 export const CONFIRM_WORD = "eliminar";
 export const confirmOk = (typed: string) => typed.trim().toLowerCase() === CONFIRM_WORD;
+
+// ---------- pré-requisitos das transições (W9-04) ----------
+export type PrereqCatalog = {
+  transitions: { key: string; label: string; to: string }[];
+  requirements: { key: string; label: string; applies: string[] }[];
+};
+export type PrereqRule = { transition: string; requirement: string; enabled: boolean };
+export type Prereqs = { catalog: PrereqCatalog; rules: PrereqRule[]; can: { manage: boolean } };
+
+/** Grelha transição × condição: null onde a condição não se aplica (a UI deriva do catálogo do servidor). */
+export function prereqGrid(p: Prereqs): { transition: PrereqCatalog["transitions"][number]; cells: (PrereqRule | null)[] }[] {
+  return p.catalog.transitions.map((t) => ({
+    transition: t,
+    cells: p.catalog.requirements.map((r) => (r.applies.includes(t.key)
+      ? p.rules.find((x) => x.transition === t.key && x.requirement === r.key) ?? { transition: t.key, requirement: r.key, enabled: false }
+      : null)),
+  }));
+}
+
+/** Texto a mostrar quando o servidor recusa uma transição por pré-requisito: o detalhe (causa + próximo responsável). */
+export function prereqMessage(message: string, details: string | null | undefined): string | null {
+  return message.includes("pre_requisito_em_falta") ? (details || "Falta um pré-requisito desta transição. Vê as regras em Definições.") : null;
+}

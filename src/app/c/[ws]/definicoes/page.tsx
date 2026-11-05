@@ -19,6 +19,7 @@ import { removeLogo, uploadLogo, useLogoUrl } from "@/lib/branding";
 import { CURRENCIES, fetchSettings, TIMEZONES, updateClient, type ClientPatch, type Settings } from "@/lib/clients";
 import { setWipLimit } from "@/lib/tasks";
 import { useFlags } from "@/lib/flags";
+import { WorkflowPrereqsCard } from "@/components/workflow-prereqs";
 
 /*
  * Definições do cliente (PRD M15). Geral, regras e atalhos para o que já tem casa própria
@@ -69,6 +70,7 @@ function Definicoes({ access }: { access: Access }) {
 
       <General s={s} ws={access.ws} save={save} />
       <Rules s={s} access={access} save={save} onWip={(n) => setS({ ...s, wip_limit: n })} setMsg={setMsg} />
+      <WorkflowPrereqsCard access={access} version={s.require_approval_to_record} onChanged={() => setRev((n) => n + 1)} />
       <Card>
         <CardHeader><CardTitle className="text-base">Noutros sítios</CardTitle><CardDescription>Estas definições têm página própria.</CardDescription></CardHeader>
         <CardContent className="grid gap-2 sm:grid-cols-2">

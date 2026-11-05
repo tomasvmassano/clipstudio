@@ -1,6 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import { friendlyError, type Access } from "@/lib/access";
 import { addDays } from "@/lib/data";
+import { prereqMessage } from "@/lib/editorial-format";
 
 /* Calendário e produção (PRD M11; ADR-0008). */
 
@@ -53,7 +54,7 @@ export function nextProduction(s: ProductionStatus, can: CalendarData["can"]): {
 async function rpc<T>(fn: string, args: Record<string, unknown>): Promise<T> {
   const { data, error } = await supabase().rpc(fn, args);
   if (error) {
-    const e = new Error(friendlyError(error.message)) as Error & { code?: string };
+    const e = new Error(prereqMessage(error.message, error.details) ?? friendlyError(error.message)) as Error & { code?: string };
     e.code = error.code;
     throw e;
   }
