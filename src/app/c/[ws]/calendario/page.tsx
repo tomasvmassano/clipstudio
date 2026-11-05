@@ -4,7 +4,7 @@ import { wsPath } from "@/lib/ws-path";
 import { WsLink } from "@/components/ws-link";
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ChevronLeftIcon, ChevronRightIcon, ClapperboardIcon, ListTodoIcon, Loader2Icon, RotateCwIcon } from "lucide-react";
+import { ChevronLeftIcon, ChevronRightIcon, ClapperboardIcon, FilmIcon, ListTodoIcon, Loader2Icon, RotateCwIcon, SendIcon } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,7 @@ import { useSession } from "@/components/session-provider";
 import type { Access } from "@/lib/access";
 import {
   dayInTz, dayTitle, fetchCalendar, monthTitle, nextProduction, PRODUCTION_LABEL, rangeFor, reschedule, setProductionStatus, shift,
-  type CalContent, type CalendarData, type CalTask, type CalView,
+  type CalContent, type CalendarData, type CalPublication, type CalReview, type CalTask, type CalView,
 } from "@/lib/calendar";
 import { todayDubai } from "@/lib/data";
 import { fromLocalInput, toLocalInput, updateTask } from "@/lib/tasks";
@@ -28,7 +28,8 @@ import { useFlags } from "@/lib/flags";
 import { PubCalendar } from "@/components/pub/pub-calendar";
 
 /*
- * Calendário (PRD M11 FR-11-01/02): guiões por dia com o estado de produção, tarefas pelo prazo e sessões de gravação.
+ * Calendário (PRD M11 FR-11-01/02): guiões por dia com o estado de produção, tarefas pelo prazo, sessões de gravação,
+ * vídeos em revisão pelo prazo e publicações planeadas (W9-03; camadas só para quem as pode ler).
  * Arrastar muda o dia (validado no servidor: nada para o passado, conflitos de edição recusados). Sem rato: "Mover para".
  */
 
@@ -90,7 +91,7 @@ function Calendario({ access }: { access: Access }) {
   const router = useRouter();
   const view = (["month", "week", "day"].includes(params.get("v") ?? "") ? params.get("v") : "week") as CalView;
   const anchor = /^\d{4}-\d{2}-\d{2}$/.test(params.get("d") ?? "") ? params.get("d")! : todayDubai();
-  const [show, setShow] = useState({ contents: true, tasks: true });
+  const [show, setShow] = useState({ contents: true, tasks: true, reviews: true, publications: true });
   const [data, setData] = useState<CalendarData | null>(null);
   const [err, setErr] = useState("");
   const [msg, setMsg] = useState("");
@@ -112,8 +113,10 @@ function Calendario({ access }: { access: Access }) {
   const nav = (v: CalView, d: string) => router.replace(wsPath(`/calendario?v=${v}&d=${d}`), { scroll: false });
   const today = data?.today ?? todayDubai();
   const byDay = useMemo(() => {
-    const m = new Map<string, { contents: CalContent[]; tasks: CalTask[]; takes: number; session: boolean }>();
-    for (const d of range.days) m.set(d, { contents: [], tasks: [], takes: 0, session: false });
+    const m = new Map<string, { contents: CalContent[]; tasks: CalTask[]; reviews: CalReview[]; pubs: CalPublication[]; takes: number; session: boolean }>();
+    for (const d of range.days) m.set(d, { contents: [], tasks: [], reviews: [], pubs: [], takes: 0, session: false });
+    for (const r of data?.reviews ?? []) m.get(r.due_day)?.reviews.push(r);
+    for (const p of data?.publications ?? []) m.get(p.local_day)?.pubs.push(p);
     for (const c of data?.contents ?? []) m.get(c.date)?.contents.push(c);
     for (const t of data?.tasks ?? []) m.get(dayInTz(t.due_at, tz))?.tasks.push(t);
     for (const s of data?.sessions ?? []) { const x = m.get(s.date); if (x) { x.takes += s.takes; x.session = true; } }
@@ -152,7 +155,7 @@ function Calendario({ access }: { access: Access }) {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Calendário</h1>
-          <p className="text-sm text-muted-foreground">Guiões por dia com o estado de produção, tarefas pelo prazo e sessões de gravação. {data?.can.schedule ? "Arrasta para mudar de dia." : ""}</p>
+          <p className="text-sm text-muted-foreground">Guiões por dia com o estado de produção, tarefas pelo prazo e sessões de gravação{data?.layers?.reviews ? ", vídeos em revisão pelo prazo" : ""}{data?.layers?.publications ? ", publicações planeadas" : ""}. {data?.can.schedule ? "Arrasta para mudar de dia." : ""}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <ToggleGroup value={[view]} onValueChange={(v) => { const x = (v as string[])[0] as CalView | undefined; if (x) nav(x, anchor); }} variant="outline" size="sm">
@@ -169,6 +172,8 @@ function Calendario({ access }: { access: Access }) {
         <span className="font-medium first-letter:uppercase">{title}</span>
         <label className="inline-flex items-center gap-1.5"><input type="checkbox" checked={show.contents} onChange={(e) => setShow({ ...show, contents: e.target.checked })} /> Guiões</label>
         <label className="inline-flex items-center gap-1.5"><input type="checkbox" checked={show.tasks} onChange={(e) => setShow({ ...show, tasks: e.target.checked })} /> Tarefas</label>
+        {data?.layers?.reviews && <label className="inline-flex items-center gap-1.5"><input type="checkbox" checked={show.reviews} onChange={(e) => setShow({ ...show, reviews: e.target.checked })} /> Revisões</label>}
+        {data?.layers?.publications && <label className="inline-flex items-center gap-1.5"><input type="checkbox" checked={show.publications} onChange={(e) => setShow({ ...show, publications: e.target.checked })} /> Publicações</label>}
         {busy && <Loader2Icon className="size-4 animate-spin" aria-label="A guardar" />}
         <span className="ml-auto flex flex-wrap gap-2 text-xs text-muted-foreground">
           {(["scheduled", "recorded", "editing", "ready"] as const).map((s) => <span key={s} className={cn("rounded border px-1.5", PROD_CLASS[s])}>{PRODUCTION_LABEL[s]}</span>)}
@@ -195,7 +200,8 @@ function Calendario({ access }: { access: Access }) {
           {range.days.map((day) => {
             const x = byDay.get(day)!;
             const outside = view === "month" && day.slice(0, 7) !== anchor.slice(0, 7);
-            const empty = (!show.contents || x.contents.length === 0) && (!show.tasks || x.tasks.length === 0);
+            const empty = (!show.contents || x.contents.length === 0) && (!show.tasks || x.tasks.length === 0)
+              && (!show.reviews || x.reviews.length === 0) && (!show.publications || x.pubs.length === 0);
             return (
               <div key={day} role="gridcell" data-day={day} aria-label={dayTitle(day)}
                 className={cn("flex min-h-28 flex-col gap-1 bg-background p-1.5", outside && "bg-muted/40", day === today && "ring-2 ring-inset ring-primary",
@@ -232,6 +238,24 @@ function Calendario({ access }: { access: Access }) {
                     <ListTodoIcon className="size-3 shrink-0" />
                     <span className="tabular-nums">{toLocalInput(t.due_at, tz).slice(11)}</span>
                     <span className="truncate">{t.title}</span>
+                  </WsLink>
+                ))}
+                {show.reviews && x.reviews.map((r) => (
+                  <WsLink key={r.asset_id} href={`/revisao?ver=videos&asset=${r.asset_id}`} data-cal-review={r.asset_id}
+                    title={`Revisão: ${r.title}${r.due_source === "guiao" ? " (sem prazo próprio: dia do guião)" : r.assignee_email ? ` · ${r.assignee_email}` : ""}`}
+                    className={cn("flex items-center gap-1 truncate rounded px-1.5 py-0.5 text-xs hover:bg-muted", r.overdue && "text-destructive")}>
+                    <FilmIcon className="size-3 shrink-0" />
+                    {r.due_at && <span className="tabular-nums">{toLocalInput(r.due_at, tz).slice(11)}</span>}
+                    <span className="truncate">Rever {r.n}{r.variant !== "geral" ? ` · ${r.variant.replace("hook_", "hook ")}` : ""}{r.status === "changes_requested" ? " (alterações)" : ""}</span>
+                  </WsLink>
+                ))}
+                {show.publications && x.pubs.map((p) => (
+                  <WsLink key={p.id} href={`/calendario?l=pub&v=day&d=${p.local_day}`} data-cal-pub={p.id}
+                    title={`Publicação ${p.status} em ${p.platform}${p.account_handle ? ` @${p.account_handle}` : ""}`}
+                    className={cn("flex items-center gap-1 truncate rounded px-1.5 py-0.5 text-xs hover:bg-muted", p.overdue && "text-destructive")}>
+                    <SendIcon className="size-3 shrink-0" />
+                    <span className="tabular-nums">{p.local_time}</span>
+                    <span className="truncate">{p.status === "aprovada" ? "✓ " : ""}{p.platform} · guião {p.n}</span>
                   </WsLink>
                 ))}
               </div>
