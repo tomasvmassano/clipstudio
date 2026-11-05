@@ -53,7 +53,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-17-05 | P0 | parcial | verificação com sessão real (R-15) da equipa Numeiro | Transições configuráveis de workflow geram tarefas e notificações idempotentes,  |
 | FR-17-13 | P0 | parcial | verificação com conta real (R-15) | Auto-save com indicador persistido, proteção contra alterações concorrentes e re |
 | FR-17-14 | P0 | parcial | verificação com carga real (pacote e exports da sessão de 2026-11-06) | Jobs duráveis com idempotency key, retries exponenciais, timeout, dead-letter, c |
-| FR-17-15 | P0 | parcial | sem alertas nem dashboard de saúde | Observabilidade com logs estruturados, correlação por workspace/run/content, ale |
+| FR-17-15 | P0 | parcial | verificação com sessão real (R-15) do dono da agência; alertas só na app (sem email, FR-13-01 adiado); ver ADR-0058 sobre kinds do worker partilhado | Observabilidade com logs estruturados, correlação por workspace/run/content, ale |
 | FR-21-01 | P0 | parcial | OAuth (PLAT-02/03) | permissões e credenciais são por conta. |
 | FR-21-02 | P0 | parcial | publicador (PUB-01) tem de voltar a verificar ao publicar | não publicar sem aprovação humana do asset/versão e do destino. |
 | CAP-01 | P0 | parcial | registo sem descrição, dono, versão, ações e flag de disponibilidade | Registo central de capacidades |
@@ -546,7 +546,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 |---|---|---|---|---|
 | FR-17-13 | parcial | verificação com conta real (R-15) | autosave com indicador e lock_version (W2-02); rascunho local com recuperação e aviso ao sair (W2-09); e2e/drafts.spec.ts | — |
 | FR-17-14 | parcial | verificação com carga real (pacote e exports da sessão de 2026-11-06) | agent_jobs: idempotência, backoff, lease, dead-letter, cancelar; w4_agents 44/44, w4_worker 30/30; media_jobs (lease, heartbeat, backoff, dead, cancelar) e worker de agentes alojados no Railway desde 2026-11-05 | — |
-| FR-17-15 | parcial | sem alertas nem dashboard de saúde | correlation_id em audit/transições; agent_job_attempts; estado do worker na UI | — |
+| FR-17-15 | parcial | verificação com sessão real (R-15) do dono da agência; alertas só na app (sem email, FR-13-01 adiado); ver ADR-0058 sobre kinds do worker partilhado | correlation_id em audit/transições; agent_job_attempts; estado do worker na UI; PR W10-01 (painel /saude, ops_health, ops_health_tick pg_cron 5 min, system_health; supabase/tests/w10_saude.sql 38 casos; e2e/saude.spec.ts) | — |
 | FR-17-16 | parcial | OAuth real (PLAT-01..03); Drive, R2 e Resend por ligar | centro em /c/[ws]/definicoes/integracoes e /integracoes (ADR-0039); w8_integ 58; W8 (ramo w8-vaga3): SQL 1648/1648, E2E 143/143 no stack local; ainda não aplicado em produção | — |
 
 ## 21. Social accounts e publicação multi-canal
