@@ -31,14 +31,17 @@ const PHASE: Record<UploadProgress["phase"], string> = {
   a_confirmar: "a confirmar no servidor", a_verificar: "chegou, a verificar no servidor", pronta: "pronto", falhou: "falhou", cancelado: "cancelado",
 };
 
-export function MediaLibraryView({ access }: { access: Access }) {
+/** `asset` abre esse ativo (link da pesquisa global, W10); `onAsset` guarda no URL o ativo aberto, para o link se poder partilhar. */
+export function MediaLibraryView({ access, asset = null, onAsset }: { access: Access; asset?: string | null; onAsset?: (id: string | null) => void }) {
   const [view, setView] = useState<MediaView>("ativos");
   const [q, setQ] = useState("");
   const [qApplied, setQApplied] = useState("");
   const [filters, setFilters] = useState<MediaFilters>({});
   const key = JSON.stringify({ ws: access.ws, view, q: qApplied, filters });
   const lib = useLoad(() => fetchLibrary(access, { ...filters, view, q: qApplied }), key);
-  const [opened, setOpened] = useState<string | null>(null);
+  const [local, setLocal] = useState<string | null>(asset);
+  const opened = onAsset ? asset : local;
+  const setOpened = (id: string | null) => (onAsset ? onAsset(id) : setLocal(id));
   const [upOpen, setUpOpen] = useState(false);
   const [linkOpen, setLinkOpen] = useState(false);
   const [policyOpen, setPolicyOpen] = useState(false);

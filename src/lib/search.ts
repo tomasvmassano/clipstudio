@@ -1,7 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import { friendlyError, type Access } from "@/lib/access";
 import type { ExportRow, SearchItem } from "@/lib/search-format";
-export { searchHref, toCsv, type ExportRow, type SearchItem, type SearchKind } from "@/lib/search-format";
+export { fmtMoment, searchHref, toCsv, type ExportRow, type SearchItem, type SearchKind } from "@/lib/search-format";
 
 /*
  * Pesquisa global, paleta de comandos e operações em lote nos guiões (FR-16-01, FR-16-02, FR-01-05, FR-17-07; ADR-0035).
