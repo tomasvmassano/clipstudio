@@ -2,7 +2,7 @@ import { defineConfig, devices } from "@playwright/test";
 
 // E2E contra uma stack Supabase local (supabase start) e a app em modo produção (next start).
 // Nunca contra produção: e2e/env.ts recusa um URL do Supabase que não seja local.
-const PORT = 3123;
+const PORT = Number(process.env.E2E_PORT ?? 3123);
 export default defineConfig({
   testDir: "e2e",
   globalSetup: "./e2e/global-setup.ts",

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { MouseEvent } from "react";
 import { Button } from "@/components/ui/button";
 import {
 	Sidebar,
@@ -11,6 +12,7 @@ import {
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
+	useSidebar,
 } from "@/components/ui/sidebar";
 import { NavGroup } from "@/components/nav-group";
 import { agencyNavGroups, clientNavGroups, footerNavLinks } from "@/components/app-shared";
@@ -27,12 +29,15 @@ export function AppSidebar() {
 	const inClient = !!wsRequested;
 	const base = ws ? clientPath(ws.id) : "";
 	const groups = inClient ? clientNavGroups : agencyNavGroups;
+	// no telemóvel o menu é uma folha modal: escolher um destino fecha-a (senão a página nova fica tapada e inerte)
+	const { isMobile, setOpenMobile } = useSidebar();
+	const closeOnNav = (e: MouseEvent) => { if (isMobile && (e.target as HTMLElement).closest("a[href]")) setOpenMobile(false); };
 	return (
 		<Sidebar collapsible="icon" variant="inset">
 			<SidebarHeader className="h-14 justify-center">
 				{inClient ? <WorkspaceSwitcher /> : <AgencySwitcher />}
 			</SidebarHeader>
-			<SidebarContent>
+			<SidebarContent onClick={closeOnNav}>
 				{inClient && canOrg("dashboard.agency") && (
 					<SidebarGroup className="pb-0">
 						<SidebarMenu>
@@ -46,6 +51,7 @@ export function AppSidebar() {
 				)}
 				{inClient && (
 				<SidebarGroup>
+					<SidebarMenu>
 					<SidebarMenuItem className="flex items-center gap-2">
 						<SidebarMenuButton
 							className="min-w-8 bg-primary text-primary-foreground duration-200 ease-linear hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground"
@@ -56,7 +62,7 @@ export function AppSidebar() {
 							<span>Gravar agora</span>
 						</SidebarMenuButton>
 						{signed ? (
-							<span title={`Ligado: ${label}`} aria-label={`Ligado: ${label}`} className="flex size-8 items-center justify-center rounded-md border group-data-[collapsible=icon]:opacity-0">
+							<span role="img" title={`Ligado: ${label}`} aria-label={`Ligado: ${label}`} className="flex size-8 items-center justify-center rounded-md border group-data-[collapsible=icon]:opacity-0">
 								<CheckIcon className="size-4 text-emerald-500" />
 							</span>
 						) : (
@@ -65,6 +71,7 @@ export function AppSidebar() {
 							</Button>
 						)}
 					</SidebarMenuItem>
+					</SidebarMenu>
 				</SidebarGroup>
 				)}
 				{!signed && !inClient && (

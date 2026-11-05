@@ -29,8 +29,9 @@ export function NavUser() {
 	const sub = signed ? (ws ? `${ws.name} · ${ROLE_LABEL[ws.role] ?? ws.role}` : "Sem workspace") : "Entra para continuar";
 	return (
 		<DropdownMenu>
-			<DropdownMenuTrigger render={<button type="button" className="rounded-full focus-visible:outline-2 focus-visible:outline-ring" aria-label="Menu da conta" />}>
-				<Avatar className="size-8 cursor-pointer">
+			<DropdownMenuTrigger render={<button type="button" className="rounded-full focus-visible:outline-2 focus-visible:outline-ring" />}>
+				<span className="sr-only">Menu da conta</span>
+				<Avatar aria-hidden className="size-8 cursor-pointer">
 					{img && <AvatarImage src={img} alt="" />}<AvatarFallback className="text-xs">{signed ? initials(name) : "?"}</AvatarFallback>
 				</Avatar>
 			</DropdownMenuTrigger>

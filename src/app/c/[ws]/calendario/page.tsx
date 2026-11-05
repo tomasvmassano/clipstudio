@@ -193,9 +193,9 @@ function Calendario({ access }: { access: Access }) {
         <Skeleton className="h-96" />
       ) : (
         <div className={cn("grid gap-px overflow-hidden rounded-lg border bg-border",
-          view === "day" ? "grid-cols-1" : "grid-cols-1 md:grid-cols-7")} role="grid" aria-label={`Calendário: ${title}`}>
+          view === "day" ? "grid-cols-1" : "grid-cols-1 md:grid-cols-7")} role="group" aria-label={`Calendário: ${title}`}>
           {view !== "day" && ["seg", "ter", "qua", "qui", "sex", "sáb", "dom"].map((d) => (
-            <div key={d} className="hidden bg-muted px-2 py-1 text-xs font-medium uppercase text-muted-foreground md:block" role="columnheader">{d}</div>
+            <div key={d} className="hidden bg-muted px-2 py-1 text-xs font-medium uppercase text-muted-foreground md:block" aria-hidden="true">{d}</div>
           ))}
           {range.days.map((day) => {
             const x = byDay.get(day)!;
@@ -203,7 +203,7 @@ function Calendario({ access }: { access: Access }) {
             const empty = (!show.contents || x.contents.length === 0) && (!show.tasks || x.tasks.length === 0)
               && (!show.reviews || x.reviews.length === 0) && (!show.publications || x.pubs.length === 0);
             return (
-              <div key={day} role="gridcell" data-day={day} aria-label={dayTitle(day)}
+              <div key={day} role="group" data-day={day} aria-label={dayTitle(day)}
                 className={cn("flex min-h-28 flex-col gap-1 bg-background p-1.5", outside && "bg-muted/40", day === today && "ring-2 ring-inset ring-primary",
                   over === day && (canDrop(day) ? "bg-primary/10" : "bg-destructive/10"), view === "month" && empty && "max-md:hidden")}
                 onDragOver={(e) => { if (drag) { e.preventDefault(); setOver(day); } }}

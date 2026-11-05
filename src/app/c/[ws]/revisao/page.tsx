@@ -66,7 +66,7 @@ function RevisaoInner({ access }: { access: Access }) {
       <div className="flex flex-col gap-3 rounded-lg border p-3">
         <ToggleGroup multiple value={f.status ?? []} onValueChange={(v) => setF((p) => ({ ...p, status: v as string[] }))} variant="outline" size="sm" className="flex-wrap">
           {STATUS.map((s) => (
-            <ToggleGroupItem key={s.v} value={s.v} aria-label={s.l}>
+            <ToggleGroupItem key={s.v} value={s.v}>
               {s.l}{inbox?.counts?.[s.v] != null && <span className="ml-1 tabular-nums text-muted-foreground">{inbox.counts[s.v]}</span>}
             </ToggleGroupItem>
           ))}

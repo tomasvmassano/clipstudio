@@ -195,7 +195,7 @@ function GuioesInner({ access }: { access: Access }) {
         />
       )}
 
-      <ToggleGroup value={[filter]} onValueChange={(v) => setFilter(((v as string[])[0] as Filter) ?? "todos")} variant="outline" size="sm">
+      <ToggleGroup value={[filter]} onValueChange={(v) => setFilter(((v as string[])[0] as Filter) ?? "todos")} variant="outline" size="sm" className="flex-wrap">
         <ToggleGroupItem value="todos">Todos</ToggleGroupItem>
         <ToggleGroupItem value="rever">Por rever</ToggleGroupItem>
         <ToggleGroupItem value="aprovados">Aprovados</ToggleGroupItem>

@@ -61,12 +61,13 @@ export function AgencySwitcher() {
 	const router = useRouter();
 	return (
 		<DropdownMenu>
-			<DropdownMenuTrigger render={<SidebarMenuButton aria-label="Abrir um cliente" />}>
+			<DropdownMenuTrigger render={<SidebarMenuButton />}>
 				<LogoIcon />
 				<span className="flex min-w-0 flex-col leading-tight">
 					<span className="truncate font-medium">{agencyName ?? "ClipStudio"}</span>
 					<span className="truncate text-[11px] text-muted-foreground">Agência</span>
 				</span>
+				<span className="sr-only">: abrir um cliente</span>
 				<ChevronsUpDownIcon className="ml-auto size-4 opacity-60" />
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="start" className="w-64">
@@ -100,9 +101,10 @@ export function WorkspaceSwitcher() {
 
 	return (
 		<DropdownMenu>
-			<DropdownMenuTrigger render={<SidebarMenuButton aria-label="Trocar de cliente" />}>
+			<DropdownMenuTrigger render={<SidebarMenuButton />}>
 				<WsMark ws={ws} />
 				<span className="truncate font-medium">{title}</span>
+				<span className="sr-only">: trocar de cliente</span>
 				<ChevronsUpDownIcon className="ml-auto size-4 opacity-60" />
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="start" className="w-64">
