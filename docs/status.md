@@ -104,9 +104,9 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-05-03 | P1 | parcial | anotações desenhadas no vídeo; momento escrito à mão (o player da Drive não dá o tempo); verificação com vídeos registados e com conta de cliente | Revisão de vídeo com player, comentários por timestamp, anotações e histórico. |
 | FR-05-04 | P1 | parcial | notificações de guiões dependem de automação configurada; envio fora da app (email) por fazer | Aprovar, rejeitar ou pedir alterações com motivo e notificações. |
 | FR-05-05 | P1 | parcial | sem fluxos de aprovação configuráveis (só regras de tarefas por evento) | Fluxos configuráveis de aprovação por workspace/projeto; responsáveis e prazos. |
-| FR-06-03 | P1 | parcial | worker por alojar: nada corre em produção | Execução manual/agendada, progresso, logs, erros, retry e cancelamento. |
+| FR-06-03 | P1 | parcial | primeira corrida real dos agentes em produção (ainda sem execuções) | Execução manual/agendada, progresso, logs, erros, retry e cancelamento. |
 | FR-06-04 | P1 | parcial | sem teste antes de ativar; prompts no código do motor, não versionados na app | Versionamento de prompts/configurações, testes antes de ativar, rollback e audit |
-| FR-06-05 | P1 | parcial | sem latência e qualidade por execução; worker por alojar | Custos, tokens, latência e qualidade por execução/agente. |
+| FR-06-05 | P1 | parcial | sem latência e qualidade por execução | Custos, tokens, latência e qualidade por execução/agente. |
 | FR-07-03 | P1 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | Filtros, favoritos, coleções e pesquisa. |
 | FR-07-04 | P1 | parcial | só para reels recolhidos pelo motor; referências por link sem transcrição | Transcrição e análise de estrutura quando tecnicamente e legalmente permitido. |
 | FR-08-03 | P1 | parcial | partilha só da versão atual; verificação com sessão real | Pré-visualização, download, links temporários e permissões de partilha. |
@@ -201,7 +201,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FL-01 | — | parcial | convites sem email; fluxo completo com contas reais não testado | criar conta → verificar email → criar workspace → escolher timezone/moeda → conv |
 | FL-02 | — | parcial | sem comentários no guião | adicionar fonte → classificar → associar referência → criar guião → editar hooks |
 | FL-03 | — | parcial | sem associar media nem revisão de vídeo | guião aprovado → calendarizar → abrir fila → teleprompter → gravar múltiplos tak |
-| FL-05 | — | parcial | worker por alojar | fonte → agente gera proposta → revisão humana → criar versão de guião → registar |
+| FL-05 | — | parcial | primeira corrida real em produção (fonte → proposta → revisão) | fonte → agente gera proposta → revisão humana → criar versão de guião → registar |
 | FL-06 | — | parcial | pesquisa e ficheiros inexistentes; custos por cliente só nos agentes | membro de A e B alterna contexto → pesquisa, dashboard, notificações, ficheiros, |
 | FL-07 | — | parcial | sem revogação de sessões; uploads/downloads inexistentes | remover membro → revogar sessões/permissões → preservar autoria e audit log → bl |
 | FL-08 | — | parcial | sem recuperação de rascunho local após falha | falha de rede durante edição → estado de erro → recuperação do rascunho e retry  |
@@ -219,7 +219,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | QA-04 | — | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | Criar/editar/submeter/aprovar guião e editar após aprovação |
 | QA-06 | — | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | Teleprompter: troca de data, espelho, atalhos, sessão interrompida |
 | QA-07 | — | parcial | E2E de revisão com comentários por momento e várias versões | Revisão com comentários timestamp e múltiplas versões |
-| QA-11 | — | parcial | testado só em Postgres local e mock; worker por alojar | Agente IA falha ou excede orçamento |
+| QA-11 | — | parcial | falha/orçamento com o worker real em produção | Agente IA falha ou excede orçamento |
 | QA-13 | — | parcial | sem teste com sessão ativa real | Mudança de role durante sessão ativa |
 | QA-14 | — | parcial | sem auditoria de acessibilidade nem teclado nos fluxos principais | Utilização mobile/tablet e teclado |
 | QA-15 | — | parcial | RPO e RTO de produção UNVERIFIED (plano, backups, PITR no painel do Supabase); ensaio em staging; cópia fora do Supabase | Backup e restauro de amostra |
@@ -317,9 +317,9 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 |---|---|---|---|---|
 | FR-06-01 | parcial | prompt, versão por agente, permissões e limites não constam do catálogo | agent_definitions (etapa, modelo, ferramentas, lê/escreve); W4-01 | — |
 | FR-06-02 | feito |  | agent_config_versions com language, voice, guardrails, formats, news_beats, metas; w4_agents 44/44 | — |
-| FR-06-03 | parcial | worker por alojar: nada corre em produção | agent_jobs, cancel/retry, progresso; w4_worker 30/30; test_worker 19/19 | — |
+| FR-06-03 | parcial | primeira corrida real dos agentes em produção (ainda sem execuções) | agent_jobs, cancel/retry, progresso; w4_worker 30/30; test_worker 19/19; worker numeiro-engine alojado no Railway e ligado à produção (2026-11-05) | — |
 | FR-06-04 | parcial | sem teste antes de ativar; prompts no código do motor, não versionados na app | agent_config_save/activate (rollback), auditado; w4_agents 44/44 | — |
-| FR-06-05 | parcial | sem latência e qualidade por execução; worker por alojar | tokens e custo por chamada (W4-02, W4-02b); agent_tool_prices | — |
+| FR-06-05 | parcial | sem latência e qualidade por execução | tokens e custo por chamada (W4-02, W4-02b); agent_tool_prices; worker numeiro-engine alojado no Railway e ligado à produção (2026-11-05) | — |
 | FR-06-06 | parcial | aprovação não configurável; sem bloqueio de dados sensíveis | guiões do worker entram em revisão (worker_save_script); W4-02 | — |
 | FR-06-07 | parcial | sem biblioteca de templates de agentes | workspace_create copia formatos e regras sem voz nem dados (W1-06) | — |
 
@@ -462,7 +462,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FL-02 | parcial | sem comentários no guião | fontes, referências, guião, pedir alterações, versões, aprovar; W2-01..04 | — |
 | FL-03 | parcial | sem associar media nem revisão de vídeo | agendar, fila, teleprompter, takes; W2-05, W3-02 | — |
 | FL-04 | por começar | sem variantes, publicação nem sync por API | nada no código | — |
-| FL-05 | parcial | worker por alojar | worker_save_script em revisão, custo por execução; w4_worker 30/30 | — |
+| FL-05 | parcial | primeira corrida real em produção (fonte → proposta → revisão) | worker_save_script em revisão, custo por execução; w4_worker 30/30; worker numeiro-engine alojado no Railway e ligado à produção (2026-11-05) | — |
 | FL-06 | parcial | pesquisa e ficheiros inexistentes; custos por cliente só nos agentes | dashboard, caixa, desempenho por cliente; w1_dashboard | — |
 | FL-07 | parcial | sem revogação de sessões; uploads/downloads inexistentes | member_remove preserva autoria e audit; w1_clients | — |
 | FL-08 | parcial | sem recuperação de rascunho local após falha | autosave com conflito (lock_version), erro visível; W2-02 | — |
@@ -496,7 +496,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | QA-08 | por começar | sem upload de media | nada no código | — |
 | QA-09 | por começar | sem publicação | nada no código | — |
 | QA-10 | por começar | sem OAuth | nada no código | — |
-| QA-11 | parcial | testado só em Postgres local e mock; worker por alojar | w4_worker 30/30, test_worker 19/19 (limite de custo, falha definitiva); corre no CI em cada PR (job db, base descartável) | — |
+| QA-11 | parcial | falha/orçamento com o worker real em produção | w4_worker 30/30, test_worker 19/19 (limite de custo, falha definitiva); corre no CI em cada PR (job db, base descartável); worker numeiro-engine alojado no Railway e ligado à produção (2026-11-05) | — |
 | QA-12 | feito | — | w7_busca (termo, etiqueta e IDs exclusivos de B não aparecem para A; p_ws forçado dá 42501); e2e/busca.spec.ts QA-12 | — |
 | QA-13 | parcial | sem teste com sessão ativa real | authorize() por pedido; w1_permissions 35/35; corre no CI em cada PR (job db, base descartável) | — |
 | QA-14 | parcial | sem auditoria de acessibilidade nem teclado nos fluxos principais | E2E telemóvel/iPad no Início e teleprompter (W1-10, W2-05) | — |
