@@ -17,7 +17,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
     sb, "media_access", { p_ws: ws, p_version: id, p_purpose: purpose });
   if (r.error) return fail(r.error);
   try {
-    const url = await mediaStorage(sb).createSignedUrl(r.data.bucket, r.data.path,
+    const url = await mediaStorage(sb, r.data.bucket).createSignedUrl(r.data.bucket, r.data.path,
       { expiresIn: r.data.ttl_seconds, downloadName: purpose === "download" ? r.data.filename : undefined });
     return ok({ url, mime: r.data.mime, filename: r.data.filename, expires_at: new Date(Date.now() + r.data.ttl_seconds * 1000).toISOString() });
   } catch (e) {

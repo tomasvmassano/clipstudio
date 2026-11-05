@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-05 (vídeo no R2, imagem no editor, exportar)
+
+- **W5-07** vídeo no Cloudflare R2 por cliente (flag `media.r2`; ING-01, FR-08-01, EDL-08, EDL-11; ADR-0047): envio direto do browser com URLs pré-assinados, por partes acima de 256 MiB (até 50 GiB), SHA-256 incremental no browser; o worker confere tamanho e SHA-256, gera a versão leve (540 px) e só então a versão fica pronta. Fila `media_jobs` com lease, cancelamento e repetição. Editor: imagem no palco a partir das versões leves das gravações (uma por câmara, no tempo da sessão) e exportar a versão gravada para uma versão nova do vídeo na revisão. Worker: `engine/media_worker.py` e `engine/render_doc.py` (numeiro-engine). Testes `w5_media_r2` 39/39, suite SQL 1803, `sigv4` (exemplo oficial AWS), `sha256-incremental`, `edit-preview`, render local do guião 3.
+
 ## 2026-11-04 (editor de vídeo, fase 1)
 
 - **W5-06** editor de vídeo (EDL-07, EDL-09 parcial; CHG-007, ADR-0046): documento de edição versionado por vídeo, em tempo da fonte; página `/c/[ws]/editor?asset=` com palco, inspetor e linha do tempo (secções, cortes, câmara, legendas, visuais, som), desfazer/refazer e atalhos; gravar versão com conflito protegido; abre da revisão. Os 68 vídeos do Numeiro entram com a versão 1 tirada do plano do render. Sem imagem na pré-visualização nem exportar até haver R2 e worker (à vista na UI). Testes `w5_edit_doc` 21/21, suite SQL 1764, `edit-doc` 25/25.

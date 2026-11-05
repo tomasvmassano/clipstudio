@@ -232,3 +232,9 @@ Sem estados novos. O portal dispara as transições existentes: editorial `in_re
 ## Restauro de backup (W8, QA-15)
 
 Parar a escrita → restaurar → verificar (checksums, catálogo, RPCs e isolamento) → Storage → segredos → religar. Passo a passo em `docs/runbooks/restauro.md`; ensaio em `scripts/backup/drill.sh`.
+
+## Jobs de media (W5-07, ADR-0047)
+
+Upload R2: `pendente` → (browser conclui) `pendente` + a verificar (`upload_claimed_at`, job `ingest`) → `pronta` (worker confere SHA-256 e tamanho; versão leve `pronta`|`falhou`) | `falhou` (diferença ou desistência ao fim das tentativas).
+Job: `queued` → `running` (lease 15 min, heartbeat 30 s) → `done` | `queued` (erro repetível, espera 30 s × 2ⁿ) | `failed` (não repetível) | `dead` (tentativas esgotadas) | `cancelled` (pedido em `queued` ou entre passos). Lease perdida volta a `queued`.
+Exportar: `edit_export_request` (versão gravada) → job `export` → `done` cria a versão nova do vídeo (atual) e avisa quem pediu; falhou/cancelado permite pedir outra vez.

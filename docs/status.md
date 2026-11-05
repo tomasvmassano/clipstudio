@@ -11,9 +11,9 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | Estado | Requisitos |
 |---|---|
 | feito | 25 |
-| parcial | 198 |
+| parcial | 200 |
 | por começar | 49 |
-| bloqueado | 5 |
+| bloqueado | 3 |
 | adiado | 3 |
 | **total** | **280** |
 
@@ -21,8 +21,6 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | ID | P | Estado | O que falta | Título |
 |---|---|---|---|---|
-| EDL-08 | P0 | bloqueado | precisa de R2 (proxies), conta do Tomás; hoje o palco mostra cortes, legendas e hook sem imagem | Pré-visualização ao vivo |
-| EDL-11 | P0 | bloqueado | precisa do worker alojado e de R2, contas do Tomás; botão Exportar desativado com o motivo | Exportar |
 | PLAT-01 | P0 | bloqueado | precisa do Tomás: domínio próprio, Business Verification Meta, registo das apps; páginas públicas adiadas pelo Tomás a 2026-11-04 até haver domínio | Pré-requisitos, já |
 | PLAT-02 | P0 | bloqueado | depende de PLAT-01 e de ligar contas + métricas em produção (PERF-08) | Fase A, só leitura |
 | PLAT-03 | P0 | bloqueado | depende de PLAT-01 e do publicador (PUB-01) | Fase B, publicação |
@@ -35,7 +33,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-06-01 | P0 | parcial | prompt, versão por agente, permissões e limites não constam do catálogo | Catálogo de agentes com função, versão, modelo, prompt, ferramentas, permissões  |
 | FR-07-01 | P0 | parcial | sem upload nem captura | Guardar referências por URL, upload ou captura autorizada; metadados e autoria. |
 | FR-07-02 | P0 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | Classificação por formato, estilo, narrativa, hook, duração, idioma e tags. |
-| FR-08-01 | P0 | parcial | sem verificação com sessão real; ficheiros acima de 50 MiB (plano Supabase) e hash incremental por fazer | Upload de vídeo, áudio, imagens, thumbnails, legendas e documentos com progresso |
+| FR-08-01 | P0 | parcial | verificação com sessão real de um upload grande no R2 (depende do worker ligado) | Upload de vídeo, áudio, imagens, thumbnails, legendas e documentos com progresso |
 | FR-08-02 | P0 | parcial | pastas são filtros (campanha, formato, estado, tipo, etiqueta) e pesquisa; verificação com sessão real | Pastas/coleções lógicas por campanha, projeto, formato e estado; pesquisa e tags |
 | FR-09-02 | P0 | parcial | só views, likes, comentários, partilhas por scraping; sem alcance, retenção, seguidores, conversões | Métricas por conteúdo e período: views, alcance, interações, retenção, seguidore |
 | FR-10-01 | P0 | parcial | sem módulo Custos; worker por alojar | Consumo de IA por agente, modelo, execução e workspace. |
@@ -71,12 +69,14 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | BIZ-02 | P0 | parcial | 3 regras sem dados (saúde a cair, renovação com saúde, posts perto de zero) | Faixa "Precisa da tua atenção" |
 | BIZ-03 | P0 | parcial | AGI distinto do MRR (decisão); índice com fotografias por idade (PERF-03); sem contratos nem câmbio registados | KPIs e tabela por cliente |
 | BIZ-04 | P0 | parcial | verificação com conta real (R-15) | Dois níveis de acesso na mesma vista |
-| ING-01 | P0 | parcial | R2 por implementar (adaptador pronto); bruto do Drive só como link externo; sem proxies | Armazenamento fora da app (decisão) |
+| ING-01 | P0 | parcial | ligar media.r2 no Numeiro depois das chaves; carregar as gravações da sessão; bruto antigo do Drive continua como link | Armazenamento fora da app (decisão) |
 | ING-03 | P0 | parcial | sem ingestão do ficheiro da câmara, transcrição com tempos por palavra e sincronização pelo áudio | Um ficheiro longo por câmara por sessão |
 | EDL-01 | P0 | parcial | job do pacote de edição (precisa de ingestão ING-01..03, render e worker alojado) | Pacote de edição automático |
 | EDL-03 | P0 | parcial | ligar ao job do pacote e guardar o relatório por variante na app (EDL-02); calibrar limites no piloto | QC técnico em código antes de qualquer revisão por IA |
 | EDL-07 | P0 | parcial | versão 1 gerada pela IA no job do pacote (EDL-01); visuais e música ainda vazios | Documento de edição |
+| EDL-08 | P0 | parcial | ligar o palco na página do editor; carregar as gravações da sessão no R2; verificação com sessão real depois do worker ligado | Pré-visualização ao vivo |
 | EDL-09 | P0 | parcial | imagem na pré-visualização (EDL-08); render de visuais e música no export (EDL-11) | Linha do tempo (modo completo) |
+| EDL-11 | P0 | parcial | visuais (b-roll) no render; worker ligado no Railway; verificação com sessão real | Exportar |
 | PERF-01 | P0 | parcial | criador/marca é só um campo por conta; verificação com conta real (R-15) | Hierarquia |
 | PERF-02 | P0 | parcial | o publicador (PUB) tem de chamar perf_record_lineage | Etiquetas obrigatórias à publicação (R-18) |
 | PERF-03 | P0 | parcial | histórico só desde a primeira captura; 1 h quase nunca existe com scraping diário | Fotografias por idade |
@@ -334,7 +334,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
-| FR-08-01 | parcial | sem verificação com sessão real; ficheiros acima de 50 MiB (plano Supabase) e hash incremental por fazer | biblioteca /c/[ws]/biblioteca com upload, progresso e retentativa (ADR-0038); w8_media 117; W8 (ramo w8-vaga3): SQL 1648/1648, E2E 143/143 no stack local; ainda não aplicado em produção | — |
+| FR-08-01 | parcial | verificação com sessão real de um upload grande no R2 (depende do worker ligado) | biblioteca /c/[ws]/biblioteca com upload, progresso e retentativa (ADR-0038); w8_media 117; W8 (ramo w8-vaga3): SQL 1648/1648, E2E 143/143 no stack local; ainda não aplicado em produção; R2 por cliente com envio por partes até 50 GiB e SHA-256 incremental no browser, verificação pelo worker (W5-07, ADR-0047) | — |
 | FR-08-02 | parcial | pastas são filtros (campanha, formato, estado, tipo, etiqueta) e pesquisa; verificação com sessão real | filtros e pesquisa em media_library (ADR-0038); W8 (ramo w8-vaga3): SQL 1648/1648, E2E 143/143 no stack local; ainda não aplicado em produção | — |
 | FR-08-03 | parcial | partilha só da versão atual; verificação com sessão real | pré-visualização 5 min, descarga 2 min, links de partilha 1 h a 7 dias revogáveis e auditados; W8 (ramo w8-vaga3): SQL 1648/1648, E2E 143/143 no stack local; ainda não aplicado em produção | — |
 | FR-08-04 | parcial | verificação com sessão real | versões imutáveis, substituição, histórico, ligação a guião/take/publicação/campanha; W8 (ramo w8-vaga3): SQL 1648/1648, E2E 143/143 no stack local; ainda não aplicado em produção | — |
@@ -629,7 +629,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
-| ING-01 | parcial | R2 por implementar (adaptador pronto); bruto do Drive só como link externo; sem proxies | Supabase Storage (bucket privado media) atrás de src/lib/storage (ADR-0038); W8 (ramo w8-vaga3): SQL 1648/1648, E2E 143/143 no stack local; ainda não aplicado em produção; ; CHG-006: finais para revisão na Drive da agência, versão por link na biblioteca (W5-04) | — |
+| ING-01 | parcial | ligar media.r2 no Numeiro depois das chaves; carregar as gravações da sessão; bruto antigo do Drive continua como link | Supabase Storage (bucket privado media) atrás de src/lib/storage (ADR-0038); W8 (ramo w8-vaga3): SQL 1648/1648, E2E 143/143 no stack local; ainda não aplicado em produção; ; CHG-006: finais para revisão na Drive da agência, versão por link na biblioteca (W5-04); Cloudflare R2 implementado (sigv4, envio por partes, proxies pelo worker; W5-07, ADR-0047) | — |
 | ING-02 | por começar | sem ingestão da câmara | media.ingest planeada | — |
 | ING-03 | parcial | sem ingestão do ficheiro da câmara, transcrição com tempos por palavra e sincronização pelo áudio | recording_marks, recording_marks_add, recording_timeline (W5-01, ADR-0026); w5_recording_marks 17/17; e2e/recording-marks.spec.ts 2/2 | — |
 | ING-04 | por começar | sem upload pelo telemóvel | nada no código | — |
@@ -645,10 +645,10 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
 | EDL-07 | parcial | versão 1 gerada pela IA no job do pacote (EDL-01); visuais e música ainda vazios | edit_documents/edit_versions imutáveis, edit_doc_get/save com conflito, 68 vídeos importados do plano (W5-06, ADR-0046); w5_edit_doc 21/21; edit-doc 25/25; produção 04/11: 68 documentos com v1 importada do plano (13 866 palavras); produção 04/11: abrir, nota no cursor, gravar v2, v1 intacta, restaurar v1 como v3, 0 erros | 2026-11-04 (sessão real do dono da agência, produção) |
-| EDL-08 | bloqueado | precisa de R2 (proxies), conta do Tomás; hoje o palco mostra cortes, legendas e hook sem imagem |  | — |
+| EDL-08 | parcial | ligar o palco na página do editor; carregar as gravações da sessão no R2; verificação com sessão real depois do worker ligado | edit_preview_sources, media_proxy_access, /api/media/versions/:id/proxy, PreviewVideo (um vídeo por câmara no tempo da sessão), versão leve pelo worker (W5-07, ADR-0047); w5_media_r2 39/39; edit-preview 2/2 | — |
 | EDL-09 | parcial | imagem na pré-visualização (EDL-08); render de visuais e música no export (EDL-11) | /c/[ws]/editor: faixas, arrastar pontas e mover, dividir, tirar, reordenar, palavras e hook, visuais e música da biblioteca, volume por corte, notas por momento, desfazer/refazer, atalhos (W5-06); edit-doc 37/37; área principal cabe no ecrã com a barra lateral (min-w-0) | 2026-11-04 (sessão real do dono da agência, produção) |
 | EDL-10 | por começar |  |  | — |
-| EDL-11 | bloqueado | precisa do worker alojado e de R2, contas do Tomás; botão Exportar desativado com o motivo |  | — |
+| EDL-11 | parcial | visuais (b-roll) no render; worker ligado no Railway; verificação com sessão real | edit_export_request/list/cancel, media_jobs export, engine/render_doc.py (cortes, câmaras, janelas, zoom, legendas S14/S15, hook, volume, música, -14 LUFS), ExportPanel (W5-07); render local do guião 3: 60,4 s em ~2,5 min | — |
 | EDL-12 | por começar |  |  | — |
 | EDL-13 | por começar |  |  | — |
 

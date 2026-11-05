@@ -23,7 +23,7 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ token: str
   if (error || !data) return gone();
   const d = data as { bucket: string; path: string; ttl_seconds: number };
   try {
-    const url = await mediaStorage(sb).createSignedUrl(d.bucket, d.path, { expiresIn: d.ttl_seconds });
+    const url = await mediaStorage(sb, d.bucket).createSignedUrl(d.bucket, d.path, { expiresIn: d.ttl_seconds });
     return NextResponse.redirect(url, { status: 302, headers: { "Cache-Control": "no-store", "Referrer-Policy": "no-referrer" } });
   } catch {
     return gone();

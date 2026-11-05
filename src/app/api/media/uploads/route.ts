@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import { serverSupabase } from "@/lib/server/supabase";
 import { body, fail, ok, rpc, WS } from "@/lib/server/media";
-import { mediaStorage } from "@/lib/storage";
+import { mediaStorage, MULTIPART_FROM, r2Storage } from "@/lib/storage";
 
 /**
  * POST /api/media/uploads · regista uma versão pendente (media_upload_begin: capacidade, tipo, tamanho, quota, caminho
@@ -17,8 +17,13 @@ export async function POST(req: NextRequest) {
   if (r.error) return fail(r.error);
   try {
     const mime = String((b.file as { mime?: string } | undefined)?.mime ?? "").toLowerCase();
-    const upload = await mediaStorage(sb).createUploadTarget(r.data.bucket, r.data.path, mime);
-    return ok({ ...r.data, upload });
+    const size = Number((b.file as { size?: number } | undefined)?.size ?? 0);
+    // R2 e ficheiro grande: envio por partes (retoma por parte; o PUT simples do R2 vai só até 5 GiB)
+    if (r.data.bucket === "r2" && size >= MULTIPART_FROM) {
+      return ok({ ...r.data, upload: { kind: "multipart", ...(await r2Storage().createMultipart(r.data.path, mime, size)) } });
+    }
+    const upload = await mediaStorage(sb, r.data.bucket).createUploadTarget(r.data.bucket, r.data.path, mime);
+    return ok({ ...r.data, upload: { kind: "single", ...upload } });
   } catch (e) {
     return fail(e as Error);
   }

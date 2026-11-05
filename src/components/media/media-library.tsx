@@ -28,7 +28,7 @@ type QueueItem = {
 
 const PHASE: Record<UploadProgress["phase"], string> = {
   checksum: "a calcular o SHA-256", a_registar: "a registar", a_enviar: "a enviar", a_esperar: "à espera para tentar de novo",
-  a_confirmar: "a confirmar no servidor", pronta: "pronto", falhou: "falhou", cancelado: "cancelado",
+  a_confirmar: "a confirmar no servidor", a_verificar: "chegou, a verificar no servidor", pronta: "pronto", falhou: "falhou", cancelado: "cancelado",
 };
 
 export function MediaLibraryView({ access }: { access: Access }) {
@@ -262,13 +262,17 @@ function AssetGrid({ d, view, onOpen, onResume, access, onChanged }: {
             </button>
             {a.tags.length > 0 && <div className="flex flex-wrap gap-1">{a.tags.map((t) => <Badge key={t} variant="secondary">#{t}</Badge>)}</div>}
             {a.current && a.current.source === "upload" && (
-              <span className="text-xs text-muted-foreground">{a.current.checksum_verified ? "SHA-256 conferido no servidor" : "SHA-256 declarado pelo browser (não conferido)"}</span>
+              <span className="text-xs text-muted-foreground">
+                {a.current.checksum_verified ? "SHA-256 conferido no servidor" : "SHA-256 declarado pelo browser (não conferido)"}
+                {a.current.storage === "r2" && a.current.proxy_state === "pronta" ? " · versão leve pronta" : ""}
+                {a.current.storage === "r2" && a.current.proxy_state === "falhou" ? ` · versão leve falhou${a.current.proxy_error ? `: ${a.current.proxy_error}` : ""}` : ""}
+              </span>
             )}
             {view === "lixo" && <span className="text-xs text-muted-foreground">No lixo desde {fmtDateTime(a.trashed_at, d.timezone)}; recuperável até {fmtDateTime(a.purge_after, d.timezone)}.</span>}
             {!a.current && a.pending && (
               <div className="flex flex-wrap items-center gap-2 text-xs" data-pending={a.pending.id}>
-                <Badge variant="outline">{a.pending.expired ? "Upload expirado" : "Upload por concluir"}</Badge>
-                {a.pending.mine && !a.pending.expired && d.can.upload && (
+                <Badge variant="outline">{a.pending.expired ? "Upload expirado" : a.pending.verifying ? "Chegou · a verificar no servidor" : "Upload por concluir"}</Badge>
+                {a.pending.mine && !a.pending.expired && !a.pending.verifying && d.can.upload && (
                   <>
                     <Button size="xs" variant="outline" onClick={() => { setResumeFor(a); fileRef.current?.click(); }}>Retomar</Button>
                     <Button size="xs" variant="ghost" onClick={async () => {
