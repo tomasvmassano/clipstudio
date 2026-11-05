@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-06 (frases-persona)
+
+- **W5-14** lista de frases-persona por cliente (R-17, CHG-003; ADR-0053): Agentes → Frases-persona; cada gravação é uma versão nova e imutável, auditada com o que entrou e saiu; frases que envolvem outra pessoa exigem o consentimento registado; capacidade `persona.manage` (dono e admin do cliente). O worker recebe a lista em vigor e os agentes só usam essas frases (lista vazia: sem hipérbole de persona); a versão fica no log de cada chamada (numeiro-engine #14). Testes `w5_persona_phrases` 21/21, `persona-rules` 11/11, motor `test_persona` 4/4.
+
 ## 2026-11-05 (fluxo editorial)
 
 - **W9-01..04** (ADR-0051): eliminar guiões arquivados com confirmação e recuperação em 30 dias (FR-02-01, `scripts.purge`); aprovar em lote os guiões já gravados, presos à versão gravada (FR-02-05); calendário com revisões de vídeo e publicações (FR-11-02); pré-requisitos configuráveis nas transições de produção (FR-17-05). Testes `w9_*` 100/100.

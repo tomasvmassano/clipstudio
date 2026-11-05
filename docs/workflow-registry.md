@@ -247,6 +247,10 @@ Exportar: `edit_export_request` (versão gravada) → job `export` → `done` cr
 
 `edit_package_request` → job `package` (`queued` → `running` com passos: som, sincronização, transcrição, guião N) → documentos v1 (`ai`) um a um → `done` avisa quem pediu. Falhou/cancelado permite pedir outra vez.
 
+## Frases-persona (W5-14, ADR-0053)
+
+Versão 0 (sem lista: agentes sem hipérbole de persona) → gravar → versão N+1 (imutável; conflito se outra pessoa gravou a N entretanto) → próximas execuções dos agentes usam a versão em vigor no claim e registam-na no `agent_log`. Voltar atrás = gravar uma versão nova a partir da antiga.
+
 ## Guião eliminado e pré-requisitos (W9, ADR-0051)
 
 `archived` → eliminado (lápide, 30 dias recuperável para `archived`). Produção: avançar para agendado/gravado/edição/pronto verifica os pré-requisitos do cliente; recusa com `pre_requisito_em_falta` e a causa; recuar nunca é bloqueado.
