@@ -247,6 +247,10 @@ Exportar: `edit_export_request` (versão gravada) → job `export` → `done` cr
 
 `edit_package_request` → job `package` (`queued` → `running` com passos: som, sincronização, transcrição, guião N) → documentos v1 (`ai`) um a um → `done` avisa quem pediu. Falhou/cancelado permite pedir outra vez.
 
+## Revisão em lote (W5-12, ADR-0052)
+
+Pacote `done` → "Exportar todos" (`edit_package_export`) → um job `export` por vídeo (idempotente pela versão do documento; um que falhe não trava os outros) → `done`: versão nova do vídeo com QC em `media_info.qc` → `in_review` na Revisão → aprovar (preso a essa versão) / pedir alterações / rejeitar; "Aprovar e seguinte" abre o próximo por rever. O QC não bloqueia: é nota para quem decide.
+
 ## Guião eliminado e pré-requisitos (W9, ADR-0051)
 
 `archived` → eliminado (lápide, 30 dias recuperável para `archived`). Produção: avançar para agendado/gravado/edição/pronto verifica os pré-requisitos do cliente; recusa com `pre_requisito_em_falta` e a causa; recuar nunca é bloqueado.
