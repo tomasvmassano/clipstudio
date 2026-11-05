@@ -611,7 +611,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
 | R-16 | parcial | correspondência por impressão digital com os nossos renders | origem externo nas importadas, perf_origin_set com motivo e auditoria (W6, ADR-0033); w6_perf | — |
-| R-17 | parcial | verificação com sessão real (R-15); verificador de títulos fora da lista (VAR-04); lista do Numeiro por preencher | persona_lists versionada e imutável, persona_list_get/version/save com consentimento de terceiros, persona.manage, worker_claim.persona, aba Agentes → Frases-persona (W5-14, ADR-0053); w5_persona_phrases 21/21; persona-rules 11/11; numeiro-engine #14 test_persona 4/4 | — |
+| R-17 | parcial | verificação com sessão real (R-15); verificador de títulos fora da lista (VAR-04); lista do Numeiro por preencher | persona_lists versionada e imutável, persona_list_get/version/save com consentimento de terceiros, persona.manage, worker_claim.persona, aba Agentes → Frases-persona (W5-14, ADR-0053); w5_persona_phrases 21/21; persona-rules 11/11; numeiro-engine #14 test_persona 4/4; E2E persona-phrases 4/4 (admin grava v1/v2, outra pessoa sem consentimento bloqueada na UI e no servidor 22023, histórico, manager só leitura 42501, cliente B 42501; W5-15) | — |
 | R-18 | parcial | publicador por fazer (nada chama perf_record_lineage) | linhagem gravada imutável e idempotente; importadas inferidas e marcadas (W6, ADR-0033); w6_perf | — |
 | R-19 | adiado | decisão do Tomás 29/10: métricas passam a vir da API oficial no futuro; por agora continua o Apify (engine/scrape.py). Fecha com PERF-08/PLAT-02 | engine/scrape.py ApifyClient; ADR-0005 | — |
 
