@@ -226,6 +226,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | QA-16 | — | parcial | falta o mesmo com cada papel de cliente (viewer, reviewer) e telemóvel | Abrir cada rota com conta de agência, conta de cliente e código de equipa, com t |
 | R-15 | — | parcial | E2E com conta real no CI por fazer (ADR-0019 pendente) | Nenhuma página pode cair no erro genérico do browser ou do Next ("This page coul |
 | R-16 | — | parcial | correspondência por impressão digital com os nossos renders | Origem de cada publicação. |
+| R-17 | — | parcial | verificação com sessão real (R-15); verificador de títulos fora da lista (VAR-04); lista do Numeiro por preencher | Hipérbole de persona. |
 | R-18 | — | parcial | publicador por fazer (nada chama perf_record_lineage) | Linhagem gravada no momento. |
 
 <!-- resumo:fim -->
@@ -610,7 +611,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
 | R-16 | parcial | correspondência por impressão digital com os nossos renders | origem externo nas importadas, perf_origin_set com motivo e auditoria (W6, ADR-0033); w6_perf | — |
-| R-17 | por começar | lista de frases-persona versionada inexistente | persona.manage só planeada; AGENTS §7 | — |
+| R-17 | parcial | verificação com sessão real (R-15); verificador de títulos fora da lista (VAR-04); lista do Numeiro por preencher | persona_lists versionada e imutável, persona_list_get/version/save com consentimento de terceiros, persona.manage, worker_claim.persona, aba Agentes → Frases-persona (W5-14, ADR-0053); w5_persona_phrases 21/21; persona-rules 11/11; numeiro-engine #14 test_persona 4/4 | — |
 | R-18 | parcial | publicador por fazer (nada chama perf_record_lineage) | linhagem gravada imutável e idempotente; importadas inferidas e marcadas (W6, ADR-0033); w6_perf | — |
 | R-19 | adiado | decisão do Tomás 29/10: métricas passam a vir da API oficial no futuro; por agora continua o Apify (engine/scrape.py). Fecha com PERF-08/PLAT-02 | engine/scrape.py ApifyClient; ADR-0005 | — |
 

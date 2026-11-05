@@ -62,6 +62,7 @@ Um `agency_member` sem atribuição a um workspace **não vê nada** desse works
 | `edit.timeline` | ✓ | ✓ | ✓ | — | — | — |
 | `edit.guided` | ✓ | ✓ | ✓ | ✓ | ✓ | — |
 | `edit.export` | ✓ | ✓ | ✓ | — | — | — |
+| `persona.manage` (frases-persona, R-17) | ✓ | ✓ | — | — | — | — |
 | gravar no modo guiado (só `edit.guided`) | só palavras, hook, tirar/repor cortes, música da biblioteca do cliente, notas próprias; resto recusado no servidor (ADR-0049) |||||
 | `media.upload` / `download` | ✓ | ✓ | ✓ | ✓ | ✓ | — |
 | `media.share` | ✓ | ✓ | ✓ | — | — | — |
@@ -120,5 +121,6 @@ Portal do cliente (W8, ADR-0041): entrar com `scripts.read` (staff da agência s
 **W5-09 (ADR-0048):** pedir pacote exige `edit.timeline`; ver pacotes e documentos exige acesso ao editor; gravar documentos do pacote só `engine_worker`. Outro cliente: 42501.
 
 **W5-12 (ADR-0052):** exportar o pacote inteiro exige `edit.export` (revisor e outro cliente: 42501); ver na revisão os vídeos exportados e a versão leve: `media.read`; comentar `review.comment`; decidir `review.approve`. Outro cliente: 42501.
+**W5-14 (ADR-0053):** ler a lista de frases-persona: `agents.read`; gravar uma versão nova: `persona.manage` com sessão individual (código de equipa e manager: 42501). Versões imutáveis, tabela fechada à API. O worker recebe só os textos e o nome de quem está envolvido (o consentimento fica na app). Outro cliente: 42501.
 
 **W9 (ADR-0051):** eliminar e recuperar guiões: `scripts.purge` (workspace_owner e dono da agência); aprovar gravados em lote: `scripts.approve`; pré-requisitos: ler `scripts.read`, configurar `settings.manage`. Outro cliente: 42501.
