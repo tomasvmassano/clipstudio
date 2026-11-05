@@ -11,8 +11,8 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | Estado | Requisitos |
 |---|---|
 | feito | 25 |
-| parcial | 200 |
-| por começar | 49 |
+| parcial | 202 |
+| por começar | 47 |
 | bloqueado | 3 |
 | adiado | 3 |
 | **total** | **280** |
@@ -164,6 +164,8 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | BIZ-05 | P1 | parcial | verificação com conta real (R-15) | Contratos por cliente |
 | BIZ-06 | P1 | parcial | custo de IA só em EUR; verificação com conta real (R-15) | Custos e margem por cliente |
 | BIZ-08 | P1 | parcial | verificação com sessão real (convite com cargo) | Cargos como modelos de permissões |
+| EDL-10 | P1 | parcial | 2-3 alternativas por secção geradas pela IA (job do pacote, EDL-01); imagem no palco (EDL-08); verificação com sessão real de cliente (R-15) depois de aplicar a migração | Modo guiado |
+| EDL-13 | P1 | parcial | a IA usar o estilo na versão 1 (job do pacote, EDL-01); o render do export desenhar o aspeto (EDL-11); verificação com sessão real depois de aplicar a migração | Estilos guardados |
 | PERF-07 | P1 | parcial | o motor (Aprendiz/Estratega) ainda não lê as alavancas | Alavancas "o que replicar" |
 | FR-01-06 | P2 | parcial | filtros persistentes por utilizador por fazer | Estados vazios explicativos, loading, erro/retry, filtros persistentes por utili |
 | FR-02-06 | P2 | parcial | sem diff visual entre versões | Histórico de versões com diff e restauro, conflitos de edição e autoria. |
@@ -647,10 +649,10 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | EDL-07 | parcial | versão 1 gerada pela IA no job do pacote (EDL-01); visuais e música ainda vazios | edit_documents/edit_versions imutáveis, edit_doc_get/save com conflito, 68 vídeos importados do plano (W5-06, ADR-0046); w5_edit_doc 21/21; edit-doc 25/25; produção 04/11: 68 documentos com v1 importada do plano (13 866 palavras); produção 04/11: abrir, nota no cursor, gravar v2, v1 intacta, restaurar v1 como v3, 0 erros | 2026-11-04 (sessão real do dono da agência, produção) |
 | EDL-08 | parcial | ligar o palco na página do editor; carregar as gravações da sessão no R2; verificação com sessão real depois do worker ligado | edit_preview_sources, media_proxy_access, /api/media/versions/:id/proxy, PreviewVideo (um vídeo por câmara no tempo da sessão), versão leve pelo worker (W5-07, ADR-0047); w5_media_r2 39/39; edit-preview 2/2 | — |
 | EDL-09 | parcial | imagem na pré-visualização (EDL-08); render de visuais e música no export (EDL-11) | /c/[ws]/editor: faixas, arrastar pontas e mover, dividir, tirar, reordenar, palavras e hook, visuais e música da biblioteca, volume por corte, notas por momento, desfazer/refazer, atalhos (W5-06); edit-doc 37/37; área principal cabe no ecrã com a barra lateral (min-w-0) | 2026-11-04 (sessão real do dono da agência, produção) |
-| EDL-10 | por começar |  |  | — |
+| EDL-10 | parcial | 2-3 alternativas por secção geradas pela IA (job do pacote, EDL-01); imagem no palco (EDL-08); verificação com sessão real de cliente (R-15) depois de aplicar a migração | modo guiado /c/[ws]/editor (só edit.guided ou ?modo=guiado): passos Estilo, Corte, Hook, Visual e música, Legendas, Exportar; edit_doc_save valida a diferença no servidor (_edit_guided_problem, W5-10, ADR-0049); w5_edit_guided 38/38 (19 recusas entre modos, música de outro cliente, admin de B); edit-doc 61/61 | — |
 | EDL-11 | parcial | visuais (b-roll) no render; worker ligado no Railway; verificação com sessão real | edit_export_request/list/cancel, media_jobs export, engine/render_doc.py (cortes, câmaras, janelas, zoom, legendas S14/S15, hook, volume, música, -14 LUFS), ExportPanel (W5-07); render local do guião 3: 60,4 s em ~2,5 min | — |
 | EDL-12 | por começar |  |  | — |
-| EDL-13 | por começar |  |  | — |
+| EDL-13 | parcial | a IA usar o estilo na versão 1 (job do pacote, EDL-01); o render do export desenhar o aspeto (EDL-11); verificação com sessão real depois de aplicar a migração | Guardar como estilo no editor (aspeto, música, layout da versão gravada) no catálogo do VAR-02, versionado (edit_style_from_doc, coluna look); aplicar a outro vídeo cria versão nova, também no modo guiado (edit_style_apply) (W5-11, ADR-0050); w5_edit_saved_styles 24/24; edit-doc 63/63 | — |
 
 ## 40. Centro de desempenho (PERF)
 
