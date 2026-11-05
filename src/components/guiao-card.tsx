@@ -26,6 +26,7 @@ import { KIND_LABEL, PLATFORMS } from "@/lib/projects";
 import { MARKER } from "@/lib/recording";
 import { ReasonForm } from "@/components/guiao-reason-form";
 import { DeleteScriptDialog } from "@/components/guiao-delete";
+import { HookChecks, VerifierSummary, useVerification } from "@/components/guiao-verifier";
 
 const MECH = ["pergunta", "contra", "numero", "ego", "confissao", "segredo"];
 
@@ -86,6 +87,7 @@ export function GuiaoCard({ g, carried, caps, actions, onError, startInEdit, ope
     return () => clearTimeout(t);
   }, [g, mode]);
   const lists = useMetaLists(actions);
+  const verif = useVerification(g, actions);
   const names = metaNames(g, lists.projects, lists.owners);
 
   const st = g.editorial_status;
@@ -150,9 +152,11 @@ export function GuiaoCard({ g, carried, caps, actions, onError, startInEdit, ope
                     <span className="font-mono text-[11px] font-normal uppercase text-primary">Hook {i + 1}</span>
                     <span>{h.text}</span>
                     <span className="text-[10px] font-normal uppercase tracking-wide text-muted-foreground">{h.mecanismo}</span>
+                    <span className="col-span-2 col-start-2 empty:hidden"><HookChecks v={verif.v} text={h.text} /></span>
                   </li>
                 ))}
               </ol>
+              <VerifierSummary g={g} state={verif} />
               <div className={cn("whitespace-pre-line border-l-2 pl-3 text-sm leading-relaxed", !open && "line-clamp-3")}>
                 {g.corpo.split("\n").map((l, i) => {
                   const m = l.match(MARKER);

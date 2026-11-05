@@ -129,3 +129,7 @@ Por cliente (só a fase `all`): uploads novos para o Cloudflare R2, envio por pa
 ### Fluxo editorial (W9, ADR-0051)
 
 `scripts.purge` (novo): `content_delete`, `content_undelete`, `content_deleted_list`. `content_pending_approval` e `content_bulk(approve, recorded_only)`. `calendar_range` com revisões e publicações. `workflow_prereqs` (scripts.read) e `workflow_prereq_set` (settings.manage).
+
+### Verificador antes da revisão humana (W10-06, VAR-04, ADR-0054)
+
+Sem capacidade nova. Ler com `scripts.read` (`content_verifications`, sessão ou código de equipa do próprio cliente): marcas por hook no cartão do guião em Guiões e Revisão. Escrever só `engine_worker`/`service_role` (`worker_save_verification`, apenas guiões gravados pela própria execução com a lease). Tabela `script_verifications` fechada à API. O verificador não aprova nem rejeita: quem revê decide com `scripts.approve`/`scripts.reject` como antes.
