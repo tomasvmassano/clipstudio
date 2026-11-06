@@ -14,8 +14,10 @@ import { useSession } from "@/components/session-provider";
 import type { Access } from "@/lib/access";
 import { fetchGuioes, todayDubai } from "@/lib/data";
 import { EXPORT_STATUS, exportPackage, listEditDocs, listPackages, requestPackage, type PackageExportResult, type PackageJob } from "@/lib/edit-media";
+import { useFlags } from "@/lib/flags";
 import { fetchLibrary } from "@/lib/media";
 import { packageErrorText } from "@/lib/package-errors";
+import { clockText, packageWindows, windowRows } from "@/lib/package-windows";
 
 const STYLES = [{ id: "S15", label: "S15 · frases com destaque" }, { id: "S14", label: "S14 · uma palavra de cada vez" }];
 const pct = (x: number | null | undefined) => (x == null ? "?" : `${Math.round(x * 100)}%`);
@@ -32,6 +34,8 @@ export function AutoEditView({ access }: { access: Access }) {
   const jobs = useLoad(() => listPackages(access), `${access.ws}:p:${tick}`);
   const docs = useLoad(() => listEditDocs(access), `${access.ws}:d:${tick}`);
   const mayExport = can("edit.export");
+  // origem das janelas por guião (marcas do teleprompter ou transcrição): só com a flag edit.package_marks (ADR-0065)
+  const showWindows = useFlags(access.ws, access.token)?.has("edit.package_marks") ?? false;
   const active = (jobs.last ?? []).some((j) => j.status === "queued" || j.status === "running")
     || (docs.last ?? []).some((d) => d.export?.status === "queued" || d.export?.status === "running");
   useEffect(() => {
@@ -144,7 +148,7 @@ export function AutoEditView({ access }: { access: Access }) {
         <h2 id="pacotes" className="mb-2 font-medium">Pacotes</h2>
         <LoadState loading={!jobs.last && !jobs.error} error={jobs.error} reload={jobs.reload} label="os pacotes">
           {(jobs.last ?? []).length === 0 ? <p className="text-sm text-muted-foreground">Ainda não há pacotes.</p> : (
-            <div className="flex flex-col gap-2">{(jobs.last ?? []).map((j) => <PackageRow key={j.id} j={j} access={access} mayExport={mayExport} onRetry={mayRequest ? () => retryFrom(j) : undefined} onDone={() => setTick((n) => n + 1)} />)}</div>
+            <div className="flex flex-col gap-2">{(jobs.last ?? []).map((j) => <PackageRow key={j.id} j={j} access={access} mayExport={mayExport} showWindows={showWindows} onRetry={mayRequest ? () => retryFrom(j) : undefined} onDone={() => setTick((n) => n + 1)} />)}</div>
           )}
         </LoadState>
       </section>
@@ -177,7 +181,7 @@ export function AutoEditView({ access }: { access: Access }) {
   );
 }
 
-function PackageRow({ j, access, mayExport, onRetry, onDone }: { j: PackageJob; access: Access; mayExport: boolean; onRetry?: () => void; onDone: () => void }) {
+function PackageRow({ j, access, mayExport, showWindows, onRetry, onDone }: { j: PackageJob; access: Access; mayExport: boolean; showWindows: boolean; onRetry?: () => void; onDone: () => void }) {
   const ws = access.ws;
   const running = j.status === "running";
   const [busy, setBusy] = useState(false);
@@ -228,6 +232,36 @@ function PackageRow({ j, access, mayExport, onRetry, onDone }: { j: PackageJob; 
       {err && <p className="mt-1 text-xs text-destructive" role="alert">{err} <button type="button" className="underline" onClick={exportAll}>Tentar de novo</button></p>}
       {j.status === "done" && (j.result?.missing?.length ?? 0) > 0 && <p className="mt-1 text-xs text-amber-500">Não encontrei na gravação: {j.result!.missing!.join(", ")}.</p>}
       {j.status === "done" && j.result?.offset && <p className="mt-1 text-xs text-muted-foreground">Câmaras sincronizadas pelo som (desvio {j.result.offset.front.toFixed(2)} s, confiança {j.result.offset.confidence}).</p>}
+      {showWindows && j.status === "done" && <WindowsDetail j={j} />}
     </div>
+  );
+}
+
+/** De onde veio a janela de cada guião na gravação longa: marcas do teleprompter (afinadas pela transcrição) ou só a transcrição. */
+function WindowsDetail({ j }: { j: PackageJob }) {
+  const w = packageWindows(j.result);
+  if (!w) return <p className="mt-1 text-xs text-muted-foreground">Este pacote foi feito antes de o worker registar a origem das janelas por guião.</p>;
+  const rows = windowRows(w, j.guioes);
+  const marks = rows.filter((r) => r.source === "marcas do teleprompter").length;
+  return (
+    <details className="mt-2 rounded-md border p-2 text-xs">
+      <summary className="cursor-pointer select-none rounded focus-visible:outline-2 focus-visible:outline-ring">
+        Janelas por guião: {marks} de {rows.length} pelas marcas do teleprompter
+      </summary>
+      <p className={`mt-2 ${w.clock.ok ? "text-muted-foreground" : "text-amber-500"}`}>{clockText(w.clock)}</p>
+      {rows.length === 0 ? <p className="mt-1 text-muted-foreground">O worker não reportou guiões.</p> : (
+        <ul className="mt-2 flex flex-col gap-1">
+          {rows.map((r) => (
+            <li key={r.id} className="flex flex-wrap gap-x-2">
+              <span className="tabular-nums text-muted-foreground">{String(r.n).padStart(2, "0")}</span>
+              <span className="min-w-0 break-words">{r.tema ?? "sem tema"}</span>
+              <Badge variant={r.source === "transcrição" ? "secondary" : "outline"}>{r.source}</Badge>
+              {r.detail && <span className={r.warn ? "text-amber-500" : "text-muted-foreground"}>{r.detail}</span>}
+              <span className={`tabular-nums ${r.warn && !r.detail ? "text-amber-500" : "text-muted-foreground"}`}>{r.windows}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </details>
   );
 }

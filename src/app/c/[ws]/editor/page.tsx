@@ -20,8 +20,10 @@ import { useSession } from "@/components/session-provider";
 import {
   addNote, addOverlay, clearGain, deleteSegment, editWord, fmtT, historyOf, layout, moveSegment, notesOut, problem, push, redo,
   removeNote, removeOverlay, resizeOverlay, setGain, setHook, setMusic, setMusicDb, shiftOverlay, shiftWord, spanOut, splitSegment, toggleNote, trimSegment, undo,
-  wordsOut, type EditDoc, type History,
+  wordsOut, BOX_PRESETS, boxPreset, setOverlayBox, type EditDoc, type History,
 } from "@/lib/edit-doc";
+import { useFlags } from "@/lib/flags";
+import { AiVisualsPanel } from "@/components/edit/ai-visuals";
 import { variantLabel } from "@/lib/media-review";
 import { clientPath } from "@/lib/ws-path";
 import { cn } from "@/lib/utils";
@@ -83,6 +85,8 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
   const [drag, setDrag] = useState<Drag | null>(null);
   const doc = drag?.doc ?? h.present;      // enquanto se arrasta mostra o resultado; ao largar entra no histórico
   const { label: me } = useSession();
+  const flags = useFlags(access.ws, access.token);
+  const canPlace = !!flags?.has("edit.ai_visuals");   // posição por visual (ADR-0068), atrás da flag
   const [lib, setLib] = useState<MediaAsset[] | null>(null);
   const [newNote, setNewNote] = useState("");
   const noteRef = useRef<HTMLInputElement>(null);
@@ -253,6 +257,7 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
             <span className="font-medium">Hook no ecrã</span>
             <Input value={doc.hook.text} disabled={!canEdit} maxLength={200} onChange={(e) => apply(setHook(doc, e.target.value))} />
           </label>
+          <AiVisualsPanel doc={doc} lib={lib} onChange={canEdit ? apply : undefined} onSeek={(x) => setT(x)} />
           {selSeg && (
             <div className="flex flex-col gap-2" aria-label="Corte selecionado">
               <span className="font-medium">Corte {segs.indexOf(selSeg) + 1} · {selSeg.section === "hook" ? "hook" : "corpo"} · {fmtT(selSeg.dur)}</span>
@@ -290,6 +295,16 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
                 {[-0.5, 0.5].map((d) => <Button key={`e${d}`} size="sm" variant="outline" disabled={!canEdit} onClick={() => apply(resizeOverlay(doc, selOv.id, "e", selOv.e + d))}>Duração {d > 0 ? `+${d}` : d} s</Button>)}
                 <Button size="sm" variant="destructive" disabled={!canEdit} onClick={remove}><Trash2Icon /> Tirar visual</Button>
               </div>
+              {(canPlace || selOv.box) && (
+                <label className="flex flex-wrap items-center gap-2">
+                  <span className="text-muted-foreground">Posição</span>
+                  <select aria-label="Posição do visual" className="h-8 rounded-md border bg-background px-2 text-xs" disabled={!canEdit} value={boxPreset(selOv)}
+                    onChange={(e) => { const p = BOX_PRESETS.find((x) => x.key === e.target.value); if (p) apply(setOverlayBox(doc, selOv.id, p.box)); }}>
+                    {boxPreset(selOv) === "custom" && <option value="custom" disabled>Posição própria</option>}
+                    {BOX_PRESETS.map((p) => <option key={p.key} value={p.key}>{p.label}{p.key === "default" && selOv.kind === "broll" ? " (ecrã inteiro)" : ""}</option>)}
+                  </select>
+                </label>
+              )}
             </div>
           )}
           {!sel && <p className="text-muted-foreground">Clica num corte ou numa palavra na linha do tempo para a ajustar. Arrasta as pontas de um corte ou de um visual para aparar e uma palavra ou um visual para o mover. Atalhos: Espaço tocar, ←/→ 0,1 s (Shift 1 s), S dividir, N nota, Delete tirar, Cmd+Z desfazer.</p>}

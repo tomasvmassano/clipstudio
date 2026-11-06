@@ -8,7 +8,9 @@ export type Section = "hook" | "body";
 export type Seg = { id: string; in: number; out: number; section: Section };
 export type Word = { id: string; w: string; s: number; e: number };
 export type Cam = { s: number; e: number; cam: string; zoom: number; intro?: boolean };
-export type Overlay = { id: string; kind: "broll" | "graphic" | "text"; label: string; asset?: string | null; s: number; e: number };
+/** box (ADR-0068): posição própria em px de 1080×1920 [x, y, largura, altura]; sem box = a caixa de sempre (B-roll em ecrã inteiro). */
+export type Box = [number, number, number, number];
+export type Overlay = { id: string; kind: "broll" | "graphic" | "text"; label: string; asset?: string | null; s: number; e: number; box?: Box | null };
 export type Gain = { s: number; e: number; db: number };
 /** Nota num momento (tempo da fonte), para quem edita ou para o agente (EDL-12). Fica na versão. */
 export type Note = { id: string; s: number; text: string; by: string | null; done: boolean };
@@ -25,6 +27,8 @@ export type EditDoc = {
   audio: { music: { label: string; asset?: string | null; db: number } | null; sfx: { id: string; label: string; s: number }[]; gains: Gain[] };
   notes?: Note[];
   look?: Look | null;
+  /** Metadados da IA (EDL-01): só leitura no editor. visuals = o que a IA pôs na versão 1 e porquê (ADR-0068). */
+  ai?: { visuals?: AiVisuals | null; [k: string]: unknown } | null;
 };
 export type Placed = Seg & { at: number; dur: number };
 
@@ -309,4 +313,63 @@ export const redo = (h: History): History => (h.future.length ? { past: [...h.pa
 export function fmtT(t: number): string {
   const s = Math.max(0, t), m = Math.floor(s / 60), r = s - m * 60;
   return `${m}:${r.toFixed(1).padStart(4, "0")}`;
+}
+
+/* ---------- visuais e música da IA na versão 1 (EDL-07, ADR-0068; numeiro-engine package_visuals) ---------- */
+
+export type AiSlot = "imagem" | "frase" | "atencao" | "musica" | "visuais";
+export type AiPick = { slot: AiSlot; overlays: string[]; asset: string | null; label: string; why: string };
+export type AiVisuals = { version: number; recipe: string; picks: AiPick[]; empty: { slot: AiSlot; why: string }[]; persona_version?: number; phrase_options?: string[] };
+export const AI_SLOT_LABEL: Record<AiSlot, string> = { imagem: "Imagem", frase: "Frase-persona", atencao: "Vídeo de atenção", musica: "Música", visuais: "Visuais" };
+export const AI_RECIPE_LABEL: Record<string, string> = {
+  master: "Master (só fala, legendas e música)", imagem_frase: "Imagem + frase-persona", atencao_frase: "Vídeo de atenção + frase-persona",
+};
+
+/** As escolhas da IA guardadas no documento, ou null (documento sem visuais da IA: o editor fica como antes). */
+export function aiVisuals(doc: EditDoc): AiVisuals | null {
+  const v = doc.ai?.visuals;
+  if (!v || typeof v !== "object" || !Array.isArray(v.picks) || !Array.isArray(v.empty)) return null;
+  return { ...v, picks: v.picks.filter((p) => p && typeof p.slot === "string" && Array.isArray(p.overlays)), empty: v.empty.filter((e) => e && typeof e.why === "string") };
+}
+
+/** Estado de uma escolha da IA nesta versão: ainda como a IA a pôs, trocada por quem edita, ou tirada. */
+export function pickState(doc: EditDoc, p: AiPick): "em_uso" | "trocada" | "tirada" {
+  if (p.slot === "musica") {
+    const m = doc.audio.music;
+    return !m ? "tirada" : m.asset === p.asset ? "em_uso" : "trocada";
+  }
+  const os = doc.overlays.filter((o) => p.overlays.includes(o.id));
+  if (!os.length) return "tirada";
+  return os.every((o) => (o.asset ?? null) === p.asset && (p.slot !== "frase" || o.label === p.label)) ? "em_uso" : "trocada";
+}
+
+/** Tira os visuais indicados (todas as partes de uma escolha da IA de uma vez). */
+export const removeOverlays = (doc: EditDoc, ids: string[]): EditDoc => ({ ...doc, overlays: doc.overlays.filter((o) => !ids.includes(o.id)) });
+
+/** Troca o ativo (ou o texto, num visual de texto) dos visuais indicados, mantendo tempo e posição. */
+export function replaceOverlays(doc: EditDoc, ids: string[], next: { asset?: string | null; label: string }): EditDoc {
+  return { ...doc, overlays: doc.overlays.map((o) => (ids.includes(o.id)
+    ? { ...o, label: next.label.slice(0, o.kind === "text" ? 200 : 120), ...(o.kind === "text" ? {} : { asset: next.asset ?? null }) } : o)) };
+}
+
+/** Posições prontas para um visual (px de 1080×1920); "Caixa de sempre" tira a posição própria. O texto fica no retângulo seguro. */
+export const BOX_PRESETS: { key: string; label: string; box: Box | null }[] = [
+  { key: "default", label: "Caixa de sempre", box: null },
+  { key: "title", label: "Faixa do título", box: [120, 230, 840, 220] },
+  { key: "middle", label: "Ao meio", box: [108, 500, 864, 560] },
+  { key: "top", label: "Metade de cima", box: [0, 0, 1080, 960] },
+  { key: "bottom", label: "Metade de baixo", box: [0, 960, 1080, 960] },
+  { key: "lower", label: "Por cima das legendas", box: [120, 1100, 840, 200] },
+];
+export function boxPreset(o: Overlay): string {
+  if (!o.box) return "default";
+  return BOX_PRESETS.find((p) => p.box && p.box.every((v, i) => v === o.box![i]))?.key ?? "custom";
+}
+export function setOverlayBox(doc: EditDoc, id: string, box: Box | null): EditDoc {
+  return { ...doc, overlays: doc.overlays.map((o) => {
+    if (o.id !== id) return o;
+    const { box: _old, ...rest } = o;
+    void _old;
+    return box ? { ...rest, box: [...box] as Box } : rest;
+  }) };
 }
