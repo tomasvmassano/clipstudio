@@ -119,7 +119,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-10-04 | P1 | parcial | sem orçamentos, limite soft, alertas nem autorização para ultrapassar | Orçamentos, limites rígidos/soft, alertas e autorização para ultrapassar quota. |
 | FR-10-05 | P1 | parcial | custo por vídeo (sem custos de render) | Custo por guião, vídeo e publicação; tendência mensal e exportação. |
 | FR-11-03 | P1 | parcial | sem vistas por equipa, plataforma, campanha; sem deteção de conflitos | Vistas por equipa, plataforma, campanha e estado; conflitos e atrasos destacados |
-| FR-11-04 | P1 | parcial | sem notificações de prazo (só de atribuição) | Templates de produção, checklist por conteúdo e notificações. |
+| FR-11-04 | P1 | parcial | ligar a flag notifications.deadlines e verificar com sessão real (R-15) | Templates de produção, checklist por conteúdo e notificações. |
 | FR-11-05 | P1 | parcial | sem ficheiros, revisões nem publicações ligadas | Links para guiões, ficheiros, revisões e publicações. |
 | FR-13-03 | P1 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | Múltiplos workspaces por utilizador, papéis independentes e mudança de contexto  |
 | FR-13-04 | P1 | parcial | sem transferência de propriedade | Desativar membro, transferir propriedade, impedir remoção do último Owner. |
@@ -137,12 +137,12 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | TEAM-09 | P1 | parcial | sem etapas, aprovadores e SLA por tipo de conteúdo | Workflow adaptável por cliente |
 | TEAM-10 | P1 | parcial | diretor criativo tratado como lado da agência (decisão); verificação com conta real (R-15) | Aprovações sem conflito |
 | TEAM-11 | P1 | parcial | sem acesso limitado a projetos/tarefas para convidados | Freelancer/guest |
-| TEAM-12 | P1 | parcial | sem notificações de prazos e alterações | Notificações direcionadas |
+| TEAM-12 | P1 | parcial | ligar a flag notifications.deadlines e verificar com sessão real (R-15) | Notificações direcionadas |
 | TEAM-13 | P1 | parcial | sem definições da agência nem /perfil | Separação de settings |
 | TEAM-14 | P1 | parcial | sem ficheiros brutos, versões de edição, clips e entregas | Produção e edição |
 | TEAM-15 | P1 | parcial | sair da equipa não pede reatribuição | Transferência e offboarding |
 | FR-17-02 | P1 | parcial | sem feedback do cliente nem material entregue | Caixa de entrada por workspace com triagem de novas fontes, pedidos do talento,  |
-| FR-17-06 | P1 | parcial | sem SLA nem escalonamento; fila de exceções só com sem responsável e erro de automação | Regras de escalonamento por SLA e fila de exceções (sem responsável, atraso, err |
+| FR-17-06 | P1 | parcial | sem SLA nem escalonamento; fila de exceções com sem responsável, erro de automação e atrasos (W10-14); faltam erro de upload e publicação falhada | Regras de escalonamento por SLA e fila de exceções (sem responsável, atraso, err |
 | FR-17-07 | P1 | parcial | seleção só dentro de um dia; verificação com conta real (R-15) | Operações em lote: atribuir, categorizar, aprovar quando permitido, exportar e r |
 | FR-17-08 | P1 | parcial | sem disponibilidade, estimativas e redistribuição | Gestão de capacidade por pessoa e equipa: disponibilidade, estimativas, WIP limi |
 | FR-17-09 | P1 | parcial | sem projetos, campanhas e séries | Templates de projetos, campanhas, séries e checklists; clonagem segura sem copia |
@@ -375,7 +375,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-11-01 | parcial | arrastar não verificado em produção; verificação com conta de cliente (R-15); E2E citado não está versionado no repo | /calendario dia/semana/mês, arrastar com validação; content_reschedule; w3_calendar 39/39; produção 03/11: vistas semana e mês, navegação de mês, guiões e tarefas no dia | 2026-11-03 (sessão real do dono da agência, produção) |
 | FR-11-02 | parcial | verificação com sessão real (R-15) da equipa Numeiro | tarefas, gravações, dependências; W3-01, W3-02; calendário com revisões de vídeo e publicações planeadas (W9-03); w9_calendario 14/14; migração aplicada em produção 2026-11-06 | — |
 | FR-11-03 | parcial | sem vistas por equipa, plataforma, campanha; sem deteção de conflitos | atrasados a vermelho; limitações W3-02 | — |
-| FR-11-04 | parcial | sem notificações de prazo (só de atribuição) | template_apply, content_checklist; w3_templates 35/35; W3-03 | — |
+| FR-11-04 | parcial | ligar a flag notifications.deadlines e verificar com sessão real (R-15) | template_apply, content_checklist; w3_templates 35/35; W3-03; W10-14 (#83): avisos de prazo 24 h/atraso, guião por aprovar com gravação amanhã, revisão de vídeo atrasada, mudança de prazo; tick pg_cron 15 min; w10_prazos 39/39 | — |
 | FR-11-05 | parcial | sem ficheiros, revisões nem publicações ligadas | detalhe do guião com tarefas no calendário (W3-02) | — |
 
 ## M12 — Publicação
@@ -418,7 +418,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-15-02 | parcial | sem categorias, estados e regras de aprovação configuráveis | só gravar aprovados, templates/checklists; W1-07, W3-03 | — |
 | FR-15-03 | parcial | ligar e renovar indisponíveis sem OAuth; testar só recolha de métricas e motor | revogar real com motivo e purga do segredo; testar com histórico; W8 (ramo w8-vaga3): SQL 1648/1648, E2E 143/143 no stack local; ainda não aplicado em produção | — |
 | FR-15-04 | parcial | sem política de aprovação de IA nas definições | modelos e limites em /agentes/configuracao (W4-01) | — |
-| FR-15-05 | parcial | envio de email e resumo diário (FR-13-01 adiado); verificação com sessão real | catálogo de eventos, preferências por cliente com obrigatórias, _notify aplica no servidor (ADR-0040); w8_notif 72; W8 (ramo w8-vaga3): SQL 1648/1648, E2E 143/143 no stack local; ainda não aplicado em produção; W5-05: video_decision e video_comment no catálogo (13 tipos); w8_notif 72/72 | — |
+| FR-15-05 | parcial | envio de email e resumo diário (FR-13-01 adiado); verificação com sessão real | catálogo de eventos, preferências por cliente com obrigatórias, _notify aplica no servidor (ADR-0040); w8_notif 72; W8 (ramo w8-vaga3): SQL 1648/1648, E2E 143/143 no stack local; ainda não aplicado em produção; W5-05: video_decision e video_comment no catálogo (13 tipos); w8_notif 72/72; W10-14: 5 tipos de prazos no catálogo (grupo Prazos), preferências e obrigatório do cliente aplicam-se; w8_notif 72 | — |
 | FR-15-06 | parcial | sem MFA, políticas de sessão, exportação e retenção | /historico (logs) W1-09 | — |
 | FR-15-07 | parcial | sem importação/exportação nem política de eliminação | arquivo e recuperação de guiões e clientes | — |
 | FR-15-08 | parcial | sem transferir propriedade nem eliminar | workspace_archive com motivo e confirmação; w1_clients 55/55 | — |
@@ -429,7 +429,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 |---|---|---|---|---|
 | FR-16-01 | parcial | verificação com conta real (R-15) dos grupos media, comentários e notificações | search_global com acesso por cliente e entidade (W7, ADR-0035); w7_busca 71/71; e2e/busca.spec.ts; W10-02: media, comentários dos vídeos e notificações próprias na pesquisa (ADR-0054); w10_pesquisa 40/40 | — |
 | FR-16-02 | parcial | verificação com conta de cliente (R-15) | paleta Ctrl/Cmd+K com título, #etiqueta e ID, estado vazio (W7, ADR-0035); e2e/busca.spec.ts; produção 03/11: Cmd+K, pesquisa por título no corpo, abrir resultado; 0 erros na consola | 2026-11-03 (sessão real do dono da agência, produção) |
-| FR-16-03 | parcial | sem preferências de notificação; deep links não confirmados para todos os tipos | /caixa, notifications_read; W3-01 | — |
+| FR-16-03 | parcial | sem preferências de notificação; deep links não confirmados para todos os tipos | /caixa, notifications_read; W3-01; W10-14: tipos de prazos na caixa (alerta/tarefa) com deep link para tarefa, guião ou vídeo | — |
 | FR-16-04 | parcial | sem notificações de integrações | menções em task_comment, atribuições, automation_error; W3-01, W4-01 | — |
 | FR-16-05 | parcial | verificação com conta real (R-15); E2E da pesquisa com dois clientes para os tipos novos | _viewer_sees/inbox só clientes autorizados; w3_tasks 53/53; pesquisa sem vazamento entre clientes em todos os grupos, incluindo media, comentários e notificações (w7_busca 71/71, w10_pesquisa 40/40; ADR-0035, ADR-0054) | — |
 
@@ -448,7 +448,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | TEAM-09 | parcial | sem etapas, aprovadores e SLA por tipo de conteúdo | task_rules por cliente W3-01 | — |
 | TEAM-10 | parcial | diretor criativo tratado como lado da agência (decisão); verificação com conta real (R-15) | pub_approval_policies (agência, cliente, ambos, sem autoaprovação) (W7, ADR-0036); w7_pub | — |
 | TEAM-11 | parcial | sem acesso limitado a projetos/tarefas para convidados | expires_at em workspace_access e permission_grants | — |
-| TEAM-12 | parcial | sem notificações de prazos e alterações | _notify só a quem tem acesso; w3_tasks 53/53 | — |
+| TEAM-12 | parcial | ligar a flag notifications.deadlines e verificar com sessão real (R-15) | _notify só a quem tem acesso; w3_tasks 53/53; W10-14: prazos e mudanças de prazo só a quem tem acesso atual e a capacidade do caso; removido e outro cliente nada; w10_prazos 39/39 | — |
 | TEAM-13 | parcial | sem definições da agência nem /perfil | /c/[ws]/definicoes W1-07; /definicoes é só redirecionamento para o cliente | — |
 | TEAM-14 | parcial | sem ficheiros brutos, versões de edição, clips e entregas | recording_sessions e takes ligados ao guião (W2-05) | — |
 | TEAM-15 | parcial | sair da equipa não pede reatribuição | member_remove com reatribuição de tarefas W1-06; w1_clients 55/55 | — |
@@ -522,7 +522,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
 | FR-17-05 | parcial | verificação com sessão real (R-15) da equipa Numeiro | task_rules e domain_events_handoff idempotentes; w3_tasks 53/53; pré-requisitos configuráveis por transição de produção, verificados no servidor (W9-04); w9_prerequisitos 25/25; migração aplicada em produção 2026-11-06 | — |
-| FR-17-06 | parcial | sem SLA nem escalonamento; fila de exceções só com sem responsável e erro de automação | /caixa sem responsável; automation_error (W4-01) | — |
+| FR-17-06 | parcial | sem SLA nem escalonamento; fila de exceções com sem responsável, erro de automação e atrasos (W10-14); faltam erro de upload e publicação falhada | /caixa sem responsável; automation_error (W4-01); W10-14: tarefas e revisões atrasadas como alerta na caixa | — |
 
 ## 19.4 Operação de alto volume
 
