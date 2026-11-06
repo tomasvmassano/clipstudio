@@ -2,7 +2,7 @@
 
 ## 2026-11-06
 
-- **W10-04** referências por link (REF-01..04, FR-07-01, FR-07-04; ADR-0059): Referências → Colar link (Reel/TikTok; o mesmo vídeo em qualquer formato de link abre o que já existe); Dissecção pelo motor (hook e mecanismo, máquina, tese, inimigo, estrutura com tempos, ritmo, métricas públicas e índice face à mediana do autor, afirmações sobre terceiros), versionada com modelo e versões de prompt/agente, com caminho manual (transcrição colada); Gerar 3 guiões com 3 hooks cada, em revisão e marcados "via rápida", bloqueados se parecidos demais com o original. Capacidades `references.analyze` e `references.adapt`, flag `references.link` (equipa da agência). Migração aditiva `PENDING_w10_referencias_link.sql`; testes `w10_referencias_link` 65/65, `reference-link` 13/13; motor numeiro-engine#19 `test_reference` 15/15.
+- **W10-04** referências por link (REF-01..04, FR-07-01, FR-07-04; ADR-0059): Referências → Colar link (Reel/TikTok; o mesmo vídeo em qualquer formato de link abre o que já existe); Dissecção pelo motor (hook e mecanismo, máquina, tese, inimigo, estrutura com tempos, ritmo, métricas públicas e índice face à mediana do autor, afirmações sobre terceiros), versionada com modelo e versões de prompt/agente, com caminho manual (transcrição colada); Gerar 3 guiões com 3 hooks cada, em revisão e marcados "via rápida", bloqueados se parecidos demais com o original. Capacidades `references.analyze` e `references.adapt`, flag `references.link` (equipa da agência). Migração aditiva `20261106060744_w10_referencias_link.sql`; testes `w10_referencias_link` 65/65, `reference-link` 13/13; motor numeiro-engine#19 `test_reference` 15/15.
 
 ## 2026-11-06 (CHG-008 gravação, aprendizagem e cortes)
 

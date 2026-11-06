@@ -28,4 +28,4 @@
 
 ## Rollback
 
-Bloco no fim de `PENDING_w10_referencias_link.sql` (compatível primeiro; contract das tabelas, coluna e índice depois). O worker antigo ignora os tipos novos; o novo sem a migração não encontra execuções desses tipos e continua a correr as outras.
+Bloco no fim de `20261106060744_w10_referencias_link.sql` (compatível primeiro; contract das tabelas, coluna e índice depois). O worker antigo ignora os tipos novos; o novo sem a migração não encontra execuções desses tipos e continua a correr as outras.
