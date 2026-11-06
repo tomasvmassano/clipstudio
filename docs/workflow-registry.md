@@ -261,6 +261,8 @@ Exportar: `edit_export_request` (versão gravada; câmaras, música e visuais re
 `edit_package_request` → job `package` (`queued` → `running` com passos: som, sincronização, transcrição, guião N) → documentos v1 (`ai`) um a um → `done` avisa quem pediu. Falhou/cancelado permite pedir outra vez.
 Com um estilo guardado (W10-07, ADR-0055) o job leva `look` e `style_version` (chave `…:<estilo>:v<N>`) e a v1 sai com o aspeto e a música do estilo e com `doc.ai.alternatives`. Modo guiado, passo Corte: "Usar esta" (`edit_alternative_apply`) → versão N+1 (`user`) com os cortes e as legendas da alternativa; versão base antiga → conflito 40001 (recarregar); opção já em uso → devolve a atual sem versão nova.
 
+Com a flag `edit.ai_visuals` (W10-18, ADR-0068) o job leva `fill` (chave `…:ia1`) e cada v1 sai com os visuais e a música da receita do seu hook (preset do cliente) e `doc.ai.visuals` (escolhas e lugares vazios com motivo). No editor, trocar ou tirar uma escolha da IA, ou mudar a posição de um visual, é uma edição como outra qualquer: versão N+1 (`user`), a v1 fica intacta.
+
 Com a flag `edit.package_marks` para quem pede (W10-17, ADR-0065) o job leva `input.marks` da sessão do teleprompter com mais destes guiões; o worker acerta o relógio pela transcrição e usa as passagens de cada guião como janelas (origem `marks`), ou volta à transcrição por guião (`sem_marcas`, `fora_do_ficheiro`) ou para o pacote todo (`sem_sessao`, `pedido_sem_marcas`, `erro_marcas`, `relogio_sem_referencia`, `marcas_inconsistentes`); a origem fica em `result.windows` e em `doc.ai.window`.
 
 ## Revisão em lote (W5-12, ADR-0052)

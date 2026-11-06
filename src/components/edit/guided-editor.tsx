@@ -13,6 +13,7 @@ import { EditorStage } from "@/components/edit/editor-stage";
 import { ExportPanel } from "@/components/editor/export-panel";
 import { PreviewVideo } from "@/components/editor/preview-video";
 import { SavedStylesPanel } from "@/components/edit/style-tools";
+import { AiVisualsPanel } from "@/components/edit/ai-visuals";
 import type { Access } from "@/lib/access";
 import { EditRpcError, SOURCE_LABEL, applyAlternative, saveEdit, type EditState } from "@/lib/edit";
 import {
@@ -277,6 +278,7 @@ export function GuidedEditor({ access, st, onReload }: { access: Access; st: Edi
             </TabsContent>
 
             <TabsContent value="visual" className="flex flex-col gap-3 pt-2">
+              <AiVisualsPanel doc={doc} lib={lib} />
               <div className="flex flex-col gap-1">
                 <span className="font-medium">Visuais</span>
                 {doc.overlays.length === 0 ? <span className="text-muted-foreground">Sem visuais nesta versão.</span> : doc.overlays.map((o) => (

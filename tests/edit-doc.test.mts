@@ -1,4 +1,4 @@
-import { altSections, hookTexts, optionInDoc, guidedProblem, restoreSegment, restorable, wordsBySegment, lookProblem, setLook, toggleNote, setHook, addNote, addOverlay, captionAt, notesOut, resizeOverlay, setGain, setMusic, shiftOverlay, shiftWord, deleteSegment, editWord, historyOf, hookEnd, layout, moveSegment, outToSrc, problem, push, redo, splitSegment, srcToOut, trimSegment, undo, wordsOut, spanOut, type EditDoc } from "../src/lib/edit-doc.ts";
+import { altSections, hookTexts, optionInDoc, guidedProblem, restoreSegment, restorable, wordsBySegment, lookProblem, setLook, toggleNote, setHook, addNote, addOverlay, captionAt, notesOut, resizeOverlay, setGain, setMusic, shiftOverlay, shiftWord, deleteSegment, editWord, historyOf, hookEnd, layout, moveSegment, outToSrc, problem, push, redo, splitSegment, srcToOut, trimSegment, undo, wordsOut, spanOut, aiVisuals, pickState, removeOverlays, replaceOverlays, setOverlayBox, boxPreset, type EditDoc } from "../src/lib/edit-doc.ts";
 
 let bad = 0; let n = 0;
 const eq = (name: string, got: unknown, exp: unknown) => { n++; const g = JSON.stringify(got), e = JSON.stringify(exp); if (g !== e) { bad++; console.log("FAIL", name, g, "esperado", e); } };
@@ -99,5 +99,26 @@ eq("alternativa ainda não usada", optionInDoc(doc, opt), false);
 eq("alternativa em uso (cortes iguais)", optionInDoc({ ...doc, segments: [...opt.segments, ...doc.segments.slice(1)] }, opt), true);
 eq("alternativa aparada já não conta como em uso", optionInDoc({ ...doc, segments: [{ ...opt.segments[0], out: 51.5 }] }, opt), false);
 eq("opção sem cortes nunca está em uso", optionInDoc(doc, { segments: [] }), false);
+// visuais e música da IA (ADR-0068)
+const IMG = "11111111-1111-4111-8111-111111111111";
+const vdoc: EditDoc = { ...doc, audio: { music: { label: "Batida", asset: "m1", db: -18 }, sfx: [], gains: [] },
+  overlays: [{ id: "ai_img", kind: "graphic", label: "Ferrari", asset: IMG, s: 20, e: 23, box: [108, 500, 864, 560] },
+             { id: "ai_frase", kind: "text", label: "O rei do Dubai", asset: null, s: 20, e: 23, box: [120, 230, 840, 220] }],
+  ai: { visuals: { version: 1, recipe: "imagem_frase", empty: [{ slot: "musica", why: "x" }], phrase_options: ["O rei do Dubai", "Outra"],
+    picks: [{ slot: "imagem", overlays: ["ai_img"], asset: IMG, label: "Ferrari", why: "ferrari" },
+            { slot: "frase", overlays: ["ai_frase"], asset: null, label: "O rei do Dubai", why: "lista v3" },
+            { slot: "musica", overlays: [], asset: "m1", label: "Batida", why: "ia-musica" }] } } };
+const vp = aiVisuals(vdoc)!.picks;
+eq("documento antigo sem visuais da IA", aiVisuals(doc), null);
+eq("escolhas em uso", vp.map((p) => pickState(vdoc, p)), ["em_uso", "em_uso", "em_uso"]);
+eq("trocar a imagem mantém tempo e posição", replaceOverlays(vdoc, ["ai_img"], { asset: "other", label: "Praia" }).overlays[0], { id: "ai_img", kind: "graphic", label: "Praia", asset: "other", s: 20, e: 23, box: [108, 500, 864, 560] });
+eq("imagem trocada", pickState(replaceOverlays(vdoc, ["ai_img"], { asset: "other", label: "Praia" }), vp[0]), "trocada");
+eq("frase trocada só muda o texto", pickState(replaceOverlays(vdoc, ["ai_frase"], { label: "Outra" }), vp[1]), "trocada");
+eq("tirar", pickState(removeOverlays(vdoc, ["ai_img"]), vp[0]), "tirada");
+eq("música tirada", pickState(setMusic(vdoc, null), vp[2]), "tirada");
+eq("posição pronta reconhecida", boxPreset(vdoc.overlays[0]), "middle");
+eq("caixa de sempre tira a chave box", "box" in setOverlayBox(vdoc, "ai_img", null).overlays[0], false);
+eq("posição própria", boxPreset({ ...vdoc.overlays[0], box: [1, 2, 300, 300] }), "custom");
+eq("documento com visuais da IA é válido", problem(vdoc), null);
 console.log(`edit-doc: ${n - bad}/${n}`);
 if (bad) process.exit(1);

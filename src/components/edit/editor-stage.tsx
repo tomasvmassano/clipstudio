@@ -43,7 +43,13 @@ export function EditorStage({ doc, t, media, className }: { doc: EditDoc; t: num
           <span className="box-decoration-clone px-[0.2em]" style={hl.background ? { background: hl.background } : undefined}>{text(doc.hook.text, hl.upper)}</span>
         </div>
       )}
-      {ovNow.map((o) => (
+      {ovNow.map((o) => o.box ? (
+        // posição própria (ADR-0068): a caixa onde o render desenha o visual, à escala do palco
+        <div key={o.id} className="absolute flex items-center justify-center overflow-hidden rounded border border-white/30 bg-black/50 px-2 py-1 text-center text-[11px] text-white"
+          style={{ left: `${(o.box[0] / 1080) * 100}%`, top: top(o.box[1]), width: `${(o.box[2] / 1080) * 100}%`, height: `${(o.box[3] / 1920) * 100}%` }}>
+          {o.kind === "text" ? o.label : `${o.kind === "broll" ? "B-roll" : "Gráfico"}: ${o.label}`}
+        </div>
+      ) : (
         <div key={o.id} className="absolute inset-x-[10%] top-[38%] rounded border border-white/30 bg-black/50 px-2 py-1 text-center text-[11px] text-white">
           {o.kind === "broll" ? "B-roll" : o.kind === "graphic" ? "Gráfico" : "Texto"}: {o.label}
         </div>

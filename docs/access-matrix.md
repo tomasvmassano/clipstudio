@@ -137,6 +137,8 @@ Portal do cliente (W8, ADR-0041): entrar com `scripts.read` (staff da agência s
 
 **W10-07 (ADR-0055):** o pacote lê o aspeto só de estilos do próprio cliente (e a música só se for áudio ativo desse cliente); `edit_alternative_apply` exige acesso ao editor (`edit.timeline` ou `edit.guided`; leitor, anon e outro cliente: 42501), só usa alternativas guardadas no próprio documento (opção inexistente ou de outro documento: P0002; vídeo de outro cliente pelo seu: P0002) e conflito 40001 sobre versão antiga.
 
+**W10-18 (ADR-0068):** sem capacidades novas. O que a IA pode usar sai do servidor (`_edit_package_fill`, sem EXECUTE para `authenticated`/`anon`): só ativos do próprio cliente, ativos, prontos no R2 e etiquetados `ia-*`; nunca links nem Supabase Storage; frases da lista em vigor (texto e nome, sem o consentimento). Pedir o pacote: `edit.timeline` (contributor, outro cliente, código de equipa: recusado). Trocar/tirar/posicionar visuais: `edit.timeline` (o modo guiado só vê). Teste `supabase/tests/w10_v1_visuais_musica.sql`.
+
 **W5-12 (ADR-0052):** exportar o pacote inteiro exige `edit.export` (revisor e outro cliente: 42501); ver na revisão os vídeos exportados e a versão leve: `media.read`; comentar `review.comment`; decidir `review.approve`. Outro cliente: 42501.
 
 **W10-15 (ADR-0067):** desenhar no fotograma ao comentar um vídeo guardado exige `review.comment` (contributor, reviewer, manager, admin, dono); leitor vê os desenhos mas não desenha (42501); outro cliente 42501 (e P0002 com a versão de A no seu espaço); staff da agência só no cliente B não desenha em A; código de equipa recusado; desenho inválido, sem momento, em resposta ou em vídeo da Drive 22023; o desenho não se reescreve.
