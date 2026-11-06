@@ -158,7 +158,13 @@ export type Reference = {
   hook: string | null; formato: string | null; estilo: string | null; narrativa: string | null; duracao_s: number | null; idioma: string | null;
   tags: string[]; colecoes: string[]; notas: string | null; favorito: boolean; archived_at: string | null; created_label: string | null; created_at: string;
   metrics: RefMetrics | null; analysis: RefAnalysis | null; links: { content_id: string | null; source_id: number | null; label: string }[];
+  /* REF-01/02 (W10-04): identidade do vídeo, última dissecção, última execução do motor e guiões da via rápida */
+  ref_key?: string | null;
+  dissection?: { version: number; at: string; third_party_flags: number; tese: string | null; maquina: string | null } | null;
+  job?: { kind: "reference_analysis" | "reference_scripts"; status: RefJobStatus; at: string } | null;
+  scripts?: number;
 };
+export type RefJobStatus = "queued" | "running" | "succeeded" | "failed" | "cancelled" | "dead";
 export type DiscoverReel = {
   id: string; url: string | null; platform: string | null; creator: string; hook: string | null; caption: string | null; views: number | null;
   likes: number | null; comments: number | null; outlier: number | null; duration: number | null; collected_at: string | null; analysis: RefAnalysis | null;

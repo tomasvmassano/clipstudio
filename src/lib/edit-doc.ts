@@ -269,6 +269,33 @@ export function guidedProblem(base: EditDoc, next: EditDoc, pool: Seg[], label: 
 }
 
 /** Desfazer/refazer: pilha simples de documentos. */
+/* Alternativas da IA por secção (EDL-10; numeiro-engine package.alternatives). Só metadado: entram no vídeo pelo servidor
+   (edit_alternative_apply), nunca pelo browser. */
+export type AltSection = "hook" | "body" | "cta";
+export type AiOption = { id: string; segments: Seg[]; words: Word[]; text: string; duration: number; confidence: number | null; note: string };
+export type AiAlternatives = { hook_texts?: string[]; sections?: Partial<Record<AltSection, { replaces: string[]; options: AiOption[] }>> };
+export const ALT_SECTIONS: { key: AltSection; label: string }[] = [{ key: "hook", label: "Hook" }, { key: "body", label: "Corpo" }, { key: "cta", label: "CTA" }];
+
+/** A opção já está no documento: todos os seus cortes estão lá, iguais (a mesma regra do servidor). */
+export function optionInDoc(doc: EditDoc, o: Pick<AiOption, "segments">): boolean {
+  if (!o.segments?.length) return false;
+  const same = (a: Seg, b: Seg) => a.id === b.id && a.in === b.in && a.out === b.out && a.section === b.section;
+  return o.segments.every((s) => doc.segments.some((c) => same(c, s)));
+}
+
+/** Secções com opções válidas, pela ordem hook, corpo, CTA. */
+export function altSections(a: AiAlternatives | null | undefined): { key: AltSection; label: string; options: AiOption[] }[] {
+  const secs = a?.sections ?? {};
+  return ALT_SECTIONS.map((s) => ({ ...s, options: (secs[s.key]?.options ?? []).filter((o) => o && typeof o.id === "string" && Array.isArray(o.segments) && o.segments.length > 0) }))
+    .filter((s) => s.options.length > 0);
+}
+
+/** Textos alternativos do hook, sem repetir o atual nem vazios. */
+export function hookTexts(a: AiAlternatives | null | undefined, current: string): string[] {
+  const cur = current.trim();
+  return [...new Set((a?.hook_texts ?? []).filter((x): x is string => typeof x === "string").map((x) => x.trim()).filter((x) => x && x !== cur))];
+}
+
 export type History = { past: EditDoc[]; present: EditDoc; future: EditDoc[] };
 export const historyOf = (d: EditDoc): History => ({ past: [], present: d, future: [] });
 export function push(h: History, d: EditDoc): History {

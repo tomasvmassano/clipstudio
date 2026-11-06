@@ -12,6 +12,7 @@ import { useSession } from "@/components/session-provider";
 import { fetchOwners, fetchProjects, saveProject, setContentMeta, type MetaPatch, type Owner, type Project, type ProjectList } from "@/lib/projects";
 import { fetchReworkReasons, transitionReasoned, type ReworkReasonList } from "@/lib/learn";
 import { deleteContent } from "@/lib/content-delete";
+import { verificationLoader, type VerificationLookup } from "@/lib/verifier";
 
 /** O que o utilizador pode fazer aos guiões neste workspace (o servidor volta a verificar cada ação). */
 export type ScriptCaps = {
@@ -49,6 +50,8 @@ export type ScriptActions = {
   projects: (fresh?: boolean) => Promise<ProjectList>;
   saveProject: (id: string | null, fields: Partial<Pick<Project, "name" | "kind" | "status" | "starts_on" | "ends_on">>) => Promise<ProjectList>;
   owners: () => Promise<Owner[]>;
+  /** Resultado do verificador do motor (VAR-04), em lote; `fresh` ignora a cache; "off" com a flag desligada. */
+  verification: (id: string, fresh?: boolean) => Promise<VerificationLookup>;
 };
 
 /** Guiões de um dia (mais os de dias anteriores por gravar), ao vivo. */
@@ -114,6 +117,7 @@ export function useScriptCaps(): ScriptCaps {
 
 /** Ações sobre guiões; put recebe cada linha atualizada, reload recarrega a lista de quem as usa. */
 export function useScriptActions(access: Access, put: (g: Guiao) => Guiao, reload: () => Promise<void>): ScriptActions {
+  const verification = useMemo(() => verificationLoader(access), [access]);
   return useMemo<ScriptActions>(() => ({
     save: async (id, p, lock) => {
       try { return put(await saveContent(access, id, p, lock)); }
@@ -147,5 +151,6 @@ export function useScriptActions(access: Access, put: (g: Guiao) => Guiao, reloa
     references: () => fetchReferences(access),
     linkRef: async (id: string, refId: number, l: boolean) => { await linkReference(access, refId, { content: id }, l); return fetchContext(access, id); },
     reload,
-  }), [access, put, reload]);
+    verification,
+  }), [access, put, reload, verification]);
 }
