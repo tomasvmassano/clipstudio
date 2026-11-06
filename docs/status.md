@@ -87,7 +87,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | PERF-09 | P0 | parcial | só uma leitura por publicação; ligação ao conteúdo por inferência | Correções de dados imediatas |
 | VAR-01 | P0 | parcial | render das variantes | Receita de variante |
 | VAR-02 | P0 | parcial | layouts de S01 a S12 (equipa criativa); render real dos estilos no motor (hoje só no protótipo local); verificação com sessão real | Catálogo de estilos por workspace |
-| VAR-04 | P0 | parcial | verificação com sessão real (R-15) depois de aplicar a migração e do deploy do motor; afirmações do corpo não classificadas; idioma por conta de clips | Verificador antes da revisão humana |
+| VAR-04 | P0 | parcial | verificação com sessão real (R-15) depois do deploy do motor; afirmações do corpo não classificadas; idioma por conta de clips | Verificador antes da revisão humana |
 | PUB-02 | P0 | parcial | leitura dos limites em tempo real chega com o publicador | Limites das APIs como restrições do agendador |
 | PUB-04 | P0 | parcial | quotas de republicação só como aviso; verificação com conta real (R-15) | Calendário de publicações |
 | PUB-06 | P0 | parcial | notificações a quem aprova; verificação com conta real (R-15) | Quem aprova |
@@ -678,7 +678,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | VAR-01 | parcial | render das variantes | pub_variants com os 5 elementos e regra das irmãs (W7, ADR-0036); w7_pub; pub-rules 14/14 | — |
 | VAR-02 | parcial | layouts de S01 a S12 (equipa criativa); render real dos estilos no motor (hoje só no protótipo local); verificação com sessão real | edit_styles, edit_style_versions, edit_style_save/set_status (W5-02, ADR-0027); w5_edit_styles 34/34; e2e/edit-styles.spec.ts 3/3; pré-visualização fiel ao spec: letra, tamanho, caixas e destaque (W8-08, StylePreview) | — |
 | VAR-03 | por começar | sem motor frase-imagem | nada no código nem no motor | — |
-| VAR-04 | parcial | verificação com sessão real (R-15) depois de aplicar a migração e do deploy do motor; afirmações do corpo não classificadas; idioma por conta de clips | W10-06 (ADR-0054): script_verifications, worker_save_verification, content_verifications, flag scripts.verifier, marcas por hook no cartão do guião; w10_verificador 27/27; verifier-format 12/12; numeiro-engine #18 test_verifier 19/19 | — |
+| VAR-04 | parcial | verificação com sessão real (R-15) depois do deploy do motor; afirmações do corpo não classificadas; idioma por conta de clips | W10-06 (ADR-0054): script_verifications, worker_save_verification, content_verifications, flag scripts.verifier, marcas por hook no cartão do guião; w10_verificador 27/27; verifier-format 12/12; numeiro-engine #18 test_verifier 19/19 | — |
 | VAR-05 | por começar | sem republicação | publishing.republish.approve planeada | — |
 | VAR-06 | por começar | sem fontes longas no pacote | nada no código | — |
 | VAR-07 | por começar | sem distribuição por camadas | nada no código | — |

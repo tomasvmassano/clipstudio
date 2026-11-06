@@ -24,4 +24,4 @@ Uma chamada LLM a mais por guião aprovado (modelo `verifier` da configuração 
 
 ## Rollback
 
-Bloco no fim de `supabase/migrations/PENDING_w10_verificador.sql`. Motor: reverter o PR do numeiro-engine (ou deixar: sem a função na app só regista).
+Bloco no fim de `supabase/migrations/20261106064712_w10_verificador.sql`. Motor: reverter o PR do numeiro-engine (ou deixar: sem a função na app só regista).
