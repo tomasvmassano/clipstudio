@@ -4,6 +4,26 @@
 
 - **W10-04** referências por link (REF-01..04, FR-07-01, FR-07-04; ADR-0059): Referências → Colar link (Reel/TikTok; o mesmo vídeo em qualquer formato de link abre o que já existe); Dissecção pelo motor (hook e mecanismo, máquina, tese, inimigo, estrutura com tempos, ritmo, métricas públicas e índice face à mediana do autor, afirmações sobre terceiros), versionada com modelo e versões de prompt/agente, com caminho manual (transcrição colada); Gerar 3 guiões com 3 hooks cada, em revisão e marcados "via rápida", bloqueados se parecidos demais com o original. Capacidades `references.analyze` e `references.adapt`, flag `references.link` (equipa da agência). Migração aditiva `20261106060744_w10_referencias_link.sql`; testes `w10_referencias_link` 65/65, `reference-link` 13/13; motor numeiro-engine#19 `test_reference` 15/15.
 
+## 2026-11-06 (tentativas recusadas no histórico)
+
+- **W10-16** tentativas recusadas passam a ficar em `audit_events` (R-05, FR-13-05; ADR-0066). Como o 42501 desfaz a transação, quem recebe a recusa (browser ou rota `/api`, pelo `fetch` do cliente Supabase em `src/lib/denials.ts`) faz um segundo pedido a `audit_denied_record`, que grava com o ator da sessão (`auth.uid()`), tentativa, capacidade confirmada, afiliação, via, correlação e pseudónimos do dia de IP e browser; limite de 30 por pessoa por minuto; tentativas a um cliente sem acesso ficam fora do histórico desse cliente e só a agência as vê. Separador "Tentativas recusadas" em Histórico (`audit_denials_list`, `audit.read`). O RAISE LOG continua. Migração `20261106060524_w10_auditoria_negacoes.sql` (aditiva). Testes `w10_auditoria_negacoes` 35/35, `denials` 27/27.
+
+## 2026-11-06 (notificações de prazos)
+
+- **W10-14** notificações de prazos e alterações (FR-11-04, TEAM-12; FR-15-05, FR-16-03, FR-17-06; ADR-0061): tick SQL de 15 em 15 min (`deadline_notify_tick`, pg_cron `deadline-notify-tick`) avisa o responsável de tarefas com prazo nas próximas 24 h e atrasadas (uma vez por limiar e por valor do prazo; mudar o prazo volta a armar), o responsável e quem aprova de guiões por aprovar com gravação amanhã no fuso do cliente, e quem tem a tarefa/decide de revisões de vídeo atrasadas (regra do calendário W9-03); trigger `tasks_due_changed_notify` avisa o responsável quando o prazo muda. Tudo por `_notify` (acesso atual, preferências, obrigatório do cliente), com registo `notification_deadline_sent` para nunca repetir nem contar supressões duas vezes; flag `notifications.deadlines` (fase owner) por quem recebe. 5 tipos novos no grupo "Prazos" das preferências; na caixa são alertas (mudança de prazo = tarefa). Migração `supabase/migrations/20261106060451_w10_prazos.sql`; teste `supabase/tests/w10_prazos.sql` 39/39; `w8_notif` com 18 tipos.
+
+## 2026-11-06
+
+- W10-01 · Saúde do sistema (FR-17-15, ADR-0058): página /saude da agência (capacidade ops.health: dono e admin, admin só os clientes atribuídos) com workers, filas de agentes e de media, trabalhos a correr com o último sinal, falhas de 24 h e 7 dias com o erro sem segredos, por cliente e alertas enviados. Alertas automáticos (pg_cron, 5 min) aos donos da agência quando um worker deixa de contactar a base com trabalho à espera ou um trabalho esgota as tentativas, um por incidente (notificação system_health).
+
+- W10-02 · Pesquisa global: a paleta Ctrl/Cmd+K passa a encontrar media da biblioteca (título, etiquetas, nome do ficheiro), comentários da revisão de vídeos e as tuas notificações, sempre com as permissões de cada funcionalidade e sem nada de outros clientes. A biblioteca abre um ativo pelo link (?asset=). FR-16-01, FR-16-05, MIG-08; ADR-0054; migração 20261106060240_w10_pesquisa.sql.
+
+- W10-07 · Pacote com o estilo guardado e alternativas da IA (EDL-13, EDL-10, ADR-0055): o pacote automático manda ao worker o aspeto e a versão do estilo guardado (música só se ainda estiver na biblioteca; versão na chave de idempotência); o modo guiado mostra 2-3 alternativas da IA por secção no passo Corte ("Usar esta" cria uma versão nova montada no servidor, edit_alternative_apply) e os textos alternativos do hook. Migração 20261106060134_w10_pacote_estilo_alternativas.sql; teste SQL 37/37.
+
+## 2026-11-06 (QC: documento e variantes irmãs)
+
+- **W10-09** QC do documento antes de render (cortes, duração, câmaras, retângulo seguro com o aspeto, visuais em falta; casos fatais param o export com mensagem clara antes de gastar render) e comparação por pHash com os exports das variantes irmãs do mesmo guião (numeiro-engine #17). `edit_export_request` passa as irmãs (mesmo cliente, R2, até 8; `_edit_resolve_siblings`). Testes `w10_qc_irmas` 6/6.
+
 ## 2026-11-06 (CHG-008 gravação, aprendizagem e cortes)
 
 - **CHG-008** (só documentação; PRD §46). GAZE-01..06: teleprompter com coluna ligada à distância, linha de foco, modo frase, ritmo por pedal, hooks de memória, pontuação de olhar por take e piloto opcional de correção por IA. LRN-01..07: motivo em cada edição, agente "Editor de lições", lições aprovadas como versão da configuração em dois níveis (agência e cliente). CLIP-01..11: cortes de vídeos longos com o agente Clip Miner, com prioridade. STU-01..05: captura direta das câmaras com cópia no cartão, agente de estúdio e pacote de edição por guião. 5 capacidades planeadas. Sem alteração funcional.
