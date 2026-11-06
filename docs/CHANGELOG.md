@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-06
+
+- **W10-04** referências por link (REF-01..04, FR-07-01, FR-07-04; ADR-0059): Referências → Colar link (Reel/TikTok; o mesmo vídeo em qualquer formato de link abre o que já existe); Dissecção pelo motor (hook e mecanismo, máquina, tese, inimigo, estrutura com tempos, ritmo, métricas públicas e índice face à mediana do autor, afirmações sobre terceiros), versionada com modelo e versões de prompt/agente, com caminho manual (transcrição colada); Gerar 3 guiões com 3 hooks cada, em revisão e marcados "via rápida", bloqueados se parecidos demais com o original. Capacidades `references.analyze` e `references.adapt`, flag `references.link` (equipa da agência). Migração aditiva `20261106060744_w10_referencias_link.sql`; testes `w10_referencias_link` 65/65, `reference-link` 13/13; motor numeiro-engine#19 `test_reference` 15/15.
+
 ## 2026-11-06 (tentativas recusadas no histórico)
 
 - **W10-16** tentativas recusadas passam a ficar em `audit_events` (R-05, FR-13-05; ADR-0066). Como o 42501 desfaz a transação, quem recebe a recusa (browser ou rota `/api`, pelo `fetch` do cliente Supabase em `src/lib/denials.ts`) faz um segundo pedido a `audit_denied_record`, que grava com o ator da sessão (`auth.uid()`), tentativa, capacidade confirmada, afiliação, via, correlação e pseudónimos do dia de IP e browser; limite de 30 por pessoa por minuto; tentativas a um cliente sem acesso ficam fora do histórico desse cliente e só a agência as vê. Separador "Tentativas recusadas" em Histórico (`audit_denials_list`, `audit.read`). O RAISE LOG continua. Migração `20261106060524_w10_auditoria_negacoes.sql` (aditiva). Testes `w10_auditoria_negacoes` 35/35, `denials` 27/27.

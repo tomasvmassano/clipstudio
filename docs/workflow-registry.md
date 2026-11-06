@@ -263,6 +263,10 @@ Versão 0 (sem lista: agentes sem hipérbole de persona) → gravar → versão 
 
 `archived` → eliminado (lápide, 30 dias recuperável para `archived`). Produção: avançar para agendado/gravado/edição/pronto verifica os pré-requisitos do cliente; recusa com `pre_requisito_em_falta` e a causa; recuar nunca é bloqueado.
 
+## Referências por link (W10-04, REF-01..04, ADR-0059)
+
+Colar (`reference_paste`, `references.manage`, flag `references.link`): link de Reel/TikTok → identidade do vídeo (`ref_key`) → referência nova (evento `reference.created`, `via: paste`) ou a existente (`duplicate`, sem erro). Dissecção (`reference_analyze`, `references.analyze`): execução `reference_analysis` em `agent_jobs` (uma ativa por referência; repetir devolve a mesma) → worker recolhe transcrição e métricas (R-20) ou usa a transcrição colada → `reference_analyses` versão N+1, imutável (evento `reference.analyzed`, auditoria do motor com modelo e versão dos prompts). Falha de recolha sem token ou sem transcrição: execução `dead` sem repetir, com mensagem e caminho manual; falha do fornecedor: nova tentativa com espera. 3 guiões (`reference_adapt`, `references.adapt`, exige dissecção): execução `reference_scripts` → até 3 guiões `in_review`, `origem = via_rapida`, no dia de hoje do cliente, ligados à referência e à dissecção (`reference_script_outputs`, evento `reference.script_created`); guiões demasiado parecidos com o original são bloqueados (motor e servidor). A aprovação segue o fluxo editorial normal.
+
 ## Saúde do sistema e alertas (W10-01, ADR-0058)
 
 Sem estados novos nos trabalhos. Tick (pg_cron, 5 min) → para cada cliente e origem com trabalho pronto sem worker capaz visto em 10 min: incidente `worker_down` (chave: origem + cliente + último contacto do worker, ou "nunca") → se novo, `system_health` aos donos da agência; trabalho `dead` nas últimas 24 h: incidente `job_dead` (chave: origem + trabalho) → se novo, avisa os donos que ainda não receberam `automation_error` desse trabalho. Repetir o tick não cria nada (dedupe na tabela e em `_notify`). O worker voltar e cair outra vez é incidente novo.
