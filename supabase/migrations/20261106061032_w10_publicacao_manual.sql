@@ -500,10 +500,18 @@ begin
 end $$;
 
 -- ───────────── notificação (catálogo W8) e destino na caixa ─────────────
-alter table public.notifications drop constraint if exists notifications_kind_check;
-alter table public.notifications add constraint notifications_kind_check check (kind in
-  ('task_assigned','task_unassigned','task_mention','task_auto','task_blocked','task_done','automation_error','script_mention','script_comment',
-   'script_assigned','task_delegated','video_decision','video_comment','publication_published'));
+-- o check é refeito a partir da definição atual (outras migrações juntam tipos: system_health, prazos)
+do $$
+declare def text; kinds text[];
+begin
+  select pg_get_constraintdef(oid) into def from pg_constraint
+   where conrelid = 'public.notifications'::regclass and conname = 'notifications_kind_check';
+  if def is not null and position('''publication_published''' in def) > 0 then return; end if;
+  kinds := coalesce(array(select m[1] from regexp_matches(coalesce(def, ''), '''([a-z_]+)''', 'g') m), '{}') || array['publication_published'];
+  alter table public.notifications drop constraint if exists notifications_kind_check;
+  execute format('alter table public.notifications add constraint notifications_kind_check check (kind in (%s))',
+                 (select string_agg(quote_literal(k), ', ') from unnest(kinds) k));
+end $$;
 insert into public.notification_event_defs (kind, group_key, label, description, recipients, channels, default_channels, mandatory, mandatory_reason, sort) values
   ('publication_published', 'guioes', 'Publicação registada', 'Uma publicação que planeaste ou aprovaste, ou de um guião teu, foi registada como publicada, com o link.',
    'Quem planeou ou mudou a publicação, quem a aprovou e quem é responsável pelo guião', '{in_app,email,digest}', '{in_app}', false, null, 160)

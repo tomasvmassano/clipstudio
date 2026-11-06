@@ -34,4 +34,4 @@ Sem OAuth (PLAT-01..03 bloqueados) a equipa publica à mão na app de cada plata
 
 ## Rollback
 
-Bloco no fim de `PENDING_w10_publicacao_manual.sql`: repor as funções substituídas, apagar as novas, o tipo de notificação, o índice e as checks; a capacidade volta a W6. Compatível enquanto nenhuma publicação estiver `publicada`; se houver, exportar primeiro e decidir com o owner. As colunas saem num contract posterior.
+Bloco no fim de `20261106061032_w10_publicacao_manual.sql`: repor as funções substituídas, apagar as novas, o tipo de notificação, o índice e as checks; a capacidade volta a W6. Compatível enquanto nenhuma publicação estiver `publicada`; se houver, exportar primeiro e decidir com o owner. As colunas saem num contract posterior.
