@@ -15,6 +15,10 @@ const GID = `${WS_A}-2026-10-28-21`;
 const FLAGS = ["media.library", "edit.studio", "media.r2", "edit.package_script"];
 let savedFlags: string[] = [];
 const ids: Record<"front" | "side", string> = { front: "", side: "" };
+// a ficha pré-visualiza a versão R2 pronta; o R2 não está configurado na stack local/CI: o único erro esperado é esse 503,
+// e o ecrã mostra-o (mesmo padrão de e2e/review-stored.spec.ts)
+const R2_OFF = /O armazenamento de vídeo \(R2\) ainda não está configurado no servidor\./;
+const only503 = (errors: string[]) => errors.filter((e) => !/Failed to load resource: the server responded with a status of 503/.test(e));
 
 async function token(email: string) {
   const t = await fetch(`${API_URL}/auth/v1/token?grant_type=password`, {
@@ -86,8 +90,9 @@ as("clientA")("ficha do ficheiro mostra de que guião e câmara é a gravação"
   const sheet = page.getByRole("dialog");
   await expect(sheet.getByRole("heading", { name: "Gravação de um guião" })).toBeVisible();
   await expect(sheet.getByText(/Câmara lado \(com o som\) do guião ligado/)).toBeVisible();
+  await expect(sheet.getByText(R2_OFF)).toBeVisible();
   await expectNoCrash(page);
-  expect(errors).toEqual([]);
+  expect(only503(errors)).toEqual([]);
 });
 
 test("cliente B não liga gravações nem pede pacotes no cliente A", async () => {
