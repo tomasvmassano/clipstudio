@@ -1,4 +1,4 @@
-/** Utilitários puros dos cortes de vídeos longos (Clip Miner, CLIP-01..07, ADR-0060). Testados em tests/clips-format.test.mts. */
+/** Utilitários puros dos cortes de vídeos longos (Clip Miner, CLIP-01..07, ADR-0063). Testados em tests/clips-format.test.mts. */
 
 export type ClipMeta = {
   score: number; start: string; end: string; hook?: string; title: string; hooks?: string[]; thesis?: string; machine?: string; theme?: string;

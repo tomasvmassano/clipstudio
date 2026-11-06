@@ -607,7 +607,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 |---|---|---|---|---|
 | SCALE-01 | por começar | sem linhagem até publicação e métricas | nada além de guião → takes | — |
 | SCALE-02 | por começar | sem ingestão em lote | nada no código | — |
-| SCALE-03 | parcial | transcrição pesquisável e múltiplos formatos; ver CLIP-01..07 | W10-12 Clip Miner MVP (ADR-0060) | — |
+| SCALE-03 | parcial | transcrição pesquisável e múltiplos formatos; ver CLIP-01..07 | W10-12 Clip Miner MVP (ADR-0063) | — |
 | SCALE-04 | por começar | sem centro de publicação | nada no código | — |
 | SCALE-05 | parcial | sem guidelines de marca, verificação factual, áudio, direitos | checklist por cliente (W3-03); rubrica do Crítico no motor | — |
 | SCALE-06 | parcial | recomendações só de leitura; limiares por calibrar | learn_recommendations com evidência e limitações (W7, ADR-0037); w7_learn | — |
@@ -752,7 +752,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
-| CLIP-01 | parcial | verificação com sessão real (R-15) e um master real no R2; Drive do cliente como fonte não ligado | W10-12 (ADR-0060): clips_request só aceita versões R2 prontas do cliente; w10_clip_miner 38/38 | — |
+| CLIP-01 | parcial | verificação com sessão real (R-15) e um master real no R2; Drive do cliente como fonte não ligado | W10-12 (ADR-0063): clips_request só aceita versões R2 prontas do cliente; w10_clip_miner 38/38 | — |
 | CLIP-02 | parcial | separação de oradores: fornecedor por escolher depois do teste em PT-PT (UNVERIFIED); hoje só tempos por palavra (faster-whisper) | numeiro-engine clips.py (speakers_for), test_clips | — |
 | CLIP-03 | parcial | rubrica e máquinas testadas com episódios reais (piloto CLIP-11); crítica num segundo passo | clips.py + prompts/clip_miner.md (clip-miner-1): IDs de frase, tese, máquina, polémica, riscos, pontuação e justificação; test_clips | — |
 | CLIP-04 | parcial | regra final para afirmações sobre terceiros (§46.5, decisão do Tomás); pessoas identificadas só assinaladas | portão da dignidade no motor e no servidor (_clip_meta_problem); test_clips, w10_clip_miner | — |

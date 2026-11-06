@@ -1,4 +1,4 @@
-# ADR-0060 — Clip Miner: cortes de vídeos longos (W10-12)
+# ADR-0063 — Clip Miner: cortes de vídeos longos (W10-12)
 
 **Data:** 2026-11-06 · **Estado:** proposto (PR por rever) · **Requisitos:** PRD CLIP-01..07 (§46.3), SCALE-03, VAR-06, EDL-01/02/03/07/11; ADR-0046 (documento), ADR-0047 (R2 e jobs de media), ADR-0048 (pacote), ADR-0052 (revisão em lote); AGENTS §2, §6, §7, §8, §15.
 

@@ -4,7 +4,7 @@ import type { ExportJob, PackageExportResult } from "@/lib/edit-media";
 import type { ClipMeta } from "@/lib/clips-format";
 
 /**
- * Cortes de vídeos longos (Clip Miner, CLIP-01..07, ADR-0060): pedir, ver o job real e os cortes, exportar todos.
+ * Cortes de vídeos longos (Clip Miner, CLIP-01..07, ADR-0063): pedir, ver o job real e os cortes, exportar todos.
  * Tudo por RPC; o servidor decide (clips.mine, edit.export, flags clips.miner, edit.studio e media.r2).
  */
 export type ClipRow = {
