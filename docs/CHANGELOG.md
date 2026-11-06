@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-06 (testes SQL independentes da hora)
+
+- Correção de testes: `w10_referencias_link` e `w10_verificador` falhavam quando a suite corria depois das 18:00 em Dubai, porque o `worker_claim` corre a agenda diária (`agent_schedule_tick`) e enfileirava a corrida do dia do Numeiro, que o worker do teste apanhava. Os dois testes correm a agenda antes (idempotente por dia) e empurram essa corrida para amanhã. Só testes; sem migração nem mudança de comportamento. Suite SQL 2753/2753 às 18:30 de Dubai.
+
 ## 2026-11-06 (visuais e música da IA na versão 1)
 
 - **W10-18** a versão 1 do pacote traz visuais e música escolhidos pela IA (EDL-07, EDL-01, EDL-04, EDL-11, R-17; ADR-0068). Com a flag `edit.ai_visuals` (por cliente, `owner`), `edit_package_request` manda ao worker só o que o cliente autorizou: ativos próprios, prontos no R2, com as etiquetas `ia-imagem`, `ia-atencao` ou `ia-musica`, a lista de frases-persona em vigor e a receita por hook a partir do preset de edição do cliente (master, imagem + frase-persona, vídeo de atenção + frase diferente). O motor (numeiro-engine `edl07-visuais-musica`) escolhe dentro disso, nunca inventa nem descarrega media, e grava em `doc.ai.visuals` o que escolheu e porquê, e o que ficou vazio e porquê. Posição por visual (`overlays[].box`): o render desenha o B-roll só na sua caixa; o palco do editor desenha cada visual na sua caixa e o inspetor ganha "Posição". Editor: painel "Escolhas da IA na versão 1" com motivo, estado, Trocar (frase só da lista aprovada), Tirar e Ver; no modo guiado só leitura. Migração `20261106131703_w10_v1_visuais_musica.sql` (aditiva, por aplicar). Testes `w10_v1_visuais_musica` 23/23, suite SQL completa, `edit-doc` 81/81, motor `test_package_visuals` + `test_render_doc`, E2E `e2e/v1-visuais-musica.spec.ts`.

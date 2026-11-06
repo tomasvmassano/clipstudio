@@ -133,6 +133,10 @@ begin
   execute 'reset role';
 
   -- ── worker ──
+  -- a agenda diária corre dentro do worker_claim: depois da hora do cliente (18:00 no Numeiro) enfileiraria a corrida do dia
+  -- e o "worker antigo" apanhava-a. Corre-se já (idempotente por dia) e empurra-se para amanhã, para o teste não depender da hora.
+  perform agent_schedule_tick();
+  update agent_jobs set next_attempt_at = now() + interval '1 day' where status = 'queued' and id <> ja;
   execute 'grant engine_worker to current_user';
   execute 'set local role engine_worker';
   c := worker_claim('w-ref-1', array['daily_pipeline','scouts','analysis']);
