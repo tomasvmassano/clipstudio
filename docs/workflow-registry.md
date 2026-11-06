@@ -60,6 +60,19 @@ approved | rejected → archived   (regras)
 | approved → in_review | `scripts.approve` | retirar aprovação | `script.unapproved` |
 | * → archived, archived → (estado anterior) | `scripts.delete` | sem eliminação definitiva | `script.archived`, `script.restored` |
 
+## Lições do motor (LRN-01..04, W10-19, ADR-0069)
+
+Sinais (`lrn_edit_signals`, só de acrescentar): `edit` (motivo ao concluir uma edição, opcional), `approved` / `approved_unedited` / `changes_requested` / `rejected` (na decisão por `content_decide_learned`, mesmas regras das transições editoriais acima). Aprovar um guião do motor com mais de 30% do texto mudado exige um chip ou texto (22023). Eventos de audit: `lrn.edit_reason`, `lrn.decision_signal`.
+
+| De → para | Capacidade | Regra | Evento |
+| --- | --- | --- | --- |
+| (Editor de lições) → proposed | `engine_worker` (job `lesson_editor`) | idempotente por execução e posição; evidência refeita na base, só sinais deste cliente e desta janela | `lrn.lesson_proposed` |
+| proposed → approved | `learn.lessons.approve` (cliente) / `learn.lessons.agency` (agência) | texto editável só aqui; cria versão nova do conjunto e ativa-a | `lrn.lesson_approved`, `lrn.version_created`, `learn.lessons_version_activated` |
+| proposed → rejected | idem | nota opcional; não cria versão | `lrn.lesson_rejected` |
+| em vigor → retirada | idem | versão nova sem a lição | `lrn.version_created` |
+| versão N → versão nova = N | idem | voltar atrás; nada é apagado | `lrn.version_created` |
+| aprovada (cliente) → proposta da agência | `learn.lessons.agency` | copia só a regra e a categoria | `lrn.lesson_promoted` |
+
 ## Produção (por conteúdo, W3-02)
 
 `not_started → scheduled → recorded → editing → ready → published` (publicação no W6), `cancelled` a partir de qualquer estado menos publicado. `recording` fica reservado para a sessão aberta.
@@ -291,3 +304,8 @@ Colar (`reference_paste`, `references.manage`, flag `references.link`): link de 
 ## Saúde do sistema e alertas (W10-01, ADR-0058)
 
 Sem estados novos nos trabalhos. Tick (pg_cron, 5 min) → para cada cliente e origem com trabalho pronto sem worker capaz visto em 10 min: incidente `worker_down` (chave: origem + cliente + último contacto do worker, ou "nunca") → se novo, `system_health` aos donos da agência; trabalho `dead` nas últimas 24 h: incidente `job_dead` (chave: origem + trabalho) → se novo, avisa os donos que ainda não receberam `automation_error` desse trabalho. Repetir o tick não cria nada (dedupe na tabela e em `_notify`). O worker voltar e cair outra vez é incidente novo.
+
+## Pacote por guião (W10-20, ADR-0070)
+
+Gravação ligada a guião + câmara (`recording_clips`) → quando a frente e o lado desse guião estão prontas (verificadas pelo worker) e o automático está ligado, ou à mão ("Criar pacote deste guião") → job `package` com `mode = 'script'` (`queued` → `running` → `done`/`failed`/`dead`; idempotente por guião, versões das gravações e estilo; falhado permite pedir outra vez) → versões 1 por hook (`ai`) → `done` avisa quem pediu (ou quem ligou o automático) → se "exportar todos automático": um job `export` por vídeo → `in_review` na revisão em lote. Automático que não corre fica com o motivo em `package_script_status` (sem permissão, flag desligada, nome repetido, sem R2). Gravação nova (versão nova ou outro ficheiro) = pacote novo.
+

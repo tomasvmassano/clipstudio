@@ -10,6 +10,7 @@ Fonte: PRD v2.1 §3 (papéis), §5A (TEAM-01…16), CAP-03/05/08. **PROPOSTA de 
 | --- | --- | --- | --- | --- |
 | `workspaces.read` (lista `/clientes`) | todos, incluindo arquivados | só os atribuídos | — (troca pelos atribuídos no seletor) | — (idem) |
 | `workspaces.create` / `archive` | ✓ | — (delegar exige grants de âmbito org, por fazer) | — | — |
+| `learn.lessons.agency`: lições gerais da agência (W10-19, ADR-0069) | ✓ | ✓ | — | — |
 | `team.invite` (staff interno) | ✓ | se delegado | — | — |
 | `team.manage` (atribuir staff a clientes, `agency_staff_assign`) | ✓ | — (idem) | — | — |
 | `permissions.manage` (org) | ✓ | limitado | — | — |
@@ -48,6 +49,7 @@ Um `agency_member` sem atribuição a um workspace **não vê nada** desse works
 | `publishing.publish`: registar publicação manual (W10-03, ADR-0056) | ✓ | ✓ | ✓ | — (grant) | — (grant) | — |
 | `learn.read` (W7) | ✓ | ✓ | ✓ | — | ✓ | — |
 | `learn.manage` (W7) | ✓ | ✓ | ✓ | — | — | — |
+| `learn.lessons.approve`: aprovar/rejeitar lições do cliente (W10-19, ADR-0069) | ✓ | ✓ | ✓ | — | — | — |
 | `calendar.read` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `calendar.schedule` | ✓ | ✓ | ✓ | — | — | — |
 | `production.update` | ✓ | ✓ | ✓ | ✓ (own) | — | — |
@@ -69,6 +71,7 @@ Um `agency_member` sem atribuição a um workspace **não vê nada** desse works
 | `edit.export` | ✓ | ✓ | ✓ | — | — | — |
 | `persona.manage` (frases-persona, R-17) | ✓ | ✓ | — | — | — | — |
 | `clips.mine` (Clip Miner, W10-12) | ✓ | ✓ | ✓ | — | — | — |
+| pacote por guião (W10-20): ligar gravação (`media.upload`), pedir (`edit.timeline`), definições do automático (`styles.manage`; exportar automático + `edit.export`) | ✓ | ✓ | ✓ | só ligar | — | — |
 | gravar no modo guiado (só `edit.guided`) | só palavras, hook, tirar/repor cortes, música da biblioteca do cliente, notas próprias; resto recusado no servidor (ADR-0049) |||||
 | `media.upload` / `download` | ✓ | ✓ | ✓ | ✓ | ✓ | — |
 | `media.share` | ✓ | ✓ | ✓ | — | — | — |
@@ -153,5 +156,7 @@ Portal do cliente (W8, ADR-0041): entrar com `scripts.read` (staff da agência s
 **W9 (ADR-0051):** eliminar e recuperar guiões: `scripts.purge` (workspace_owner e dono da agência); aprovar gravados em lote: `scripts.approve`; pré-requisitos: ler `scripts.read`, configurar `settings.manage`. Outro cliente: 42501.
 
 **W10-01 (ADR-0058):** `ops_health` exige `ops.health` (dono e admin da agência); gestor e membro da agência, equipa do cliente A ou B e sem sessão: 42501/28000. Por cliente: só os visíveis (dono todos, admin os atribuídos como staff ativo); parte dos agentes com `agents.read`, de media com `media.read` (negação explícita retira-a). Atribuição suspensa: o cliente desaparece; admin suspenso: 42501. `ops_health_tick` só service_role/pg_cron (browser 42501). Alertas `system_health` só para os donos da agência. Tabelas `ops_health_alerts` e `ops_health_runs` fechadas à API.
+
+**W10-20 (ADR-0070):** pacote por guião atrás da flag `edit.package_script` (desligada: 55000 mesmo com a capacidade). Ligar uma gravação a um guião e câmara: `media.upload` (contributor também; revisor 42501). Pedir o pacote de um guião: `edit.timeline` + `edit.studio` + R2. Ver a lista: acesso ao editor (`edit.timeline` ou `edit.guided`). Definições do automático: `styles.manage`, e `edit.export` para ligar o exportar automático. O automático corre em nome de quem gravou as definições e volta a verificar `edit.timeline`/`edit.export`, `media.read` e as flags dessa pessoa a cada disparo: suspensa, removida ou sem flag = não corre (motivo guardado). Outro cliente: 42501 (ativo de outro cliente no próprio espaço: P0002); staff da agência só noutro cliente: 42501; código de equipa: recusado. Tabelas `recording_clips`, `package_script_settings`, `package_script_status` fechadas à API. Teste `supabase/tests/w10_pacote_por_guiao.sql`.
 
 **W10-17 (ADR-0065):** sem capacidades novas. As marcas só entram em jobs de pacote pedidos por quem já passou `edit_package_request` (`edit.timeline`, R2, guiões do próprio cliente) e com a flag `edit.package_marks` para essa pessoa; `_package_marks` e o trigger são internos (anon/authenticated 42501) e só leem marcas, sessões e takes do `workspace_id` do job (guião de outro cliente: `sem_sessao`). A origem das janelas vem em `edit_package_list` (acesso ao editor; outro cliente 42501). Teste `supabase/tests/w10_marcas_janelas.sql`.

@@ -110,8 +110,10 @@ Estado: **ativo** (existe e é verificado no servidor por `authorize()`; também
 | `references.dissect` | Referências por link: dissecar e adaptar (REF-01..04) | M | ws, org | W4 (CHG-005) | — |
 | `styles.library.manage` | Biblioteca de estilos da agência (REF-05..07) | M | org | W5 (CHG-005) | — |
 | `styles.import` | Importar estilo da agência para um cliente (REF-08) | M | org, ws | W5 (CHG-005) | — |
-| `lessons.read` | Aprendizagem: lições propostas e aprovadas (LRN-02..04) | B | ws, org | W7 (CHG-008) | — |
-| `lessons.manage` | Aprovar, editar e rejeitar lições (LRN-03/04) | A | ws, org | W7 (CHG-008) | — |
+| `learn.read` (lições) | Aprendizagem: lições propostas, em vigor e versões (LRN-02..04) | B | ws | ativo (W10-19, ADR-0069; substitui `lessons.read` planeada) | `/c/[ws]/aprendizagem/licoes` (flag `learn.lessons`, `lrn_lessons_list`); secção da agência só para equipa da agência |
+| `learn.lessons.approve` | Aprovar (com ou sem editar), rejeitar e retirar lições do cliente; voltar a uma versão; "Propor lições agora" (LRN-02/03) | A | ws | ativo (W10-19, ADR-0069; substitui `lessons.manage` planeada) | `lrn_lesson_decide`, `lrn_lesson_retire`, `lrn_version_restore`, `lrn_lessons_run` (sessão individual); cada aprovação cria uma versão imutável em `lrn_lesson_versions` |
+| `learn.lessons.agency` | Lições gerais da agência, herdadas por todos os clientes (LRN-04) | A | org | ativo (W10-19, ADR-0069) | "Propor à agência" a partir de uma lição aprovada (`lrn_lesson_promote`, só a regra), aprovar/rejeitar/retirar e voltar atrás no nível da agência; nunca dada à equipa de um cliente |
+| — (edição e decisão de guiões) | Motivo em cada edição (LRN-01) | M | ws | ativo (W10-19, flag `learn.edits`) | Chips de um toque ao concluir uma edição (`content_edit_reason`, `scripts.edit`) e ao aprovar/pedir alterações/rejeitar (`content_decide_learned`, `scripts.approve`/`scripts.reject`); obrigatório ao aprovar acima de 30% de texto mudado; worker `worker_lesson_pairs`/`worker_lesson_save`/`worker_lessons` só `engine_worker` |
 | `clips.mine` | Correr o Clip Miner num vídeo longo (CLIP-01..07) | M | ws | ativo (W10-12, ADR-0063) | `/c/[ws]/cortes` (flags `clips.miner` + `edit.studio`, R2): pedir cortes de um vídeo longo da Biblioteca (`clips_request`); ver pedidos e cortes com pontuação, justificação, etiquetas e riscos (`clips_list`, acesso ao editor); exportar todos (`clips_export`, com `edit.export`); worker grava cada corte (`media_worker_clips_save`, só `engine_worker`) |
 | `studio.capture` | Começar e parar sessão no agente de estúdio (STU-02) | M | ws | W5 (CHG-008) | — |
 | `gaze.correct` | Correção do olhar por IA (GAZE-05) | A | ws | W5 (CHG-008) | — |
@@ -151,6 +153,10 @@ Flag `edit.package_marks` (por cliente, fase inicial `owner`, avaliada para quem
 ### Revisão dos exportados e revisão em lote (W5-12, ADR-0052)
 
 `edit_package_export` (edit.export + R2, por vídeo as regras de `edit_export_request`): botão "Exportar todos" no pacote. `media_review_list/detail` passam a incluir ficheiros de vídeo guardados (export, upload) com player da app (`media_proxy_access`, media.read) e as notas do QC (`media_info.qc`, worker). Sem capacidades novas.
+
+### Pacote por guião (W10-20, ADR-0070)
+
+Flag `edit.package_script` (por cliente, fase inicial `owner`; precisa também de `edit.studio` e `media.r2`). `media_clip_link` / `media_clip_unlink` (`media.upload`) e `media_clip_get` (`media.read`): de que guião e de que câmara é uma gravação. `edit_package_script_request` (`edit.timeline` + R2): pacote de um guião a partir das gravações ligadas, idempotente. `edit_package_script_list` (acesso ao editor). `package_script_settings_set` (`styles.manage`; exportar automático também `edit.export`). Triggers: pacote automático quando as duas gravações ficam prontas e exportar todos automático quando o pacote por guião acaba. Na app: secção "Pacote por guião" na Edição automática, guião + câmara no envio da Biblioteca, secção "Gravação de um guião" na ficha do ficheiro. Sem capacidades novas.
 
 ### Cortes de vídeos longos (W10-12, ADR-0063)
 

@@ -20,10 +20,16 @@ import {
   type MediaAsset, type MediaFilters, type MediaLibrary, type MediaView, type UploadProgress,
 } from "@/lib/media";
 import { FORMATS, KIND_LABEL, STATUS_LABEL, bytes, kindForMime, mimeOf, pctOf, precheck, splitTags, type MediaKind } from "@/lib/media-format";
+import { useSession } from "@/components/session-provider";
+import { fetchGuioes, todayDubai } from "@/lib/data";
+import { useFlags } from "@/lib/flags";
+import { CAMERA_LABEL, cameraProblem, linkClip, type Camera } from "@/lib/package-script";
 
 type QueueItem = {
   key: string; file: File; progress: UploadProgress; error?: string; controller: AbortController;
   assetId?: string | null; versionId?: string; fields?: Record<string, unknown>;
+  /** pacote por guião (STU-03): ligar este ficheiro a um guião e a uma câmara assim que o servidor o regista */
+  clip?: { guiao: string; camera: Camera }; clipLinked?: boolean;
 };
 
 const PHASE: Record<UploadProgress["phase"], string> = {
@@ -54,7 +60,17 @@ export function MediaLibraryView({ access, asset = null, onAsset }: { access: Ac
 
   const patch = (k: string, p: Partial<QueueItem>) => setQueue((xs) => xs.map((x) => (x.key === k ? { ...x, ...p } : x)));
   const run = async (item: QueueItem, resume?: { versionId: string; assetId: string }) => {
-    const onProgress = (p: UploadProgress) => patch(item.key, { progress: p, versionId: p.versionId ?? item.versionId, assetId: p.assetId ?? item.assetId });
+    let linking = !!item.clipLinked;
+    const onProgress = (p: UploadProgress) => {
+      patch(item.key, { progress: p, versionId: p.versionId ?? item.versionId, assetId: p.assetId ?? item.assetId });
+      // liga ao guião logo que o ativo existe: se o envio cair a meio, a ligação já está feita e a retoma completa-o
+      if (item.clip && p.assetId && !linking) {
+        linking = true;
+        linkClip(access, p.assetId, item.clip.guiao, item.clip.camera, "upload")
+          .then(() => patch(item.key, { clipLinked: true }))
+          .catch((e: Error) => { linking = false; patch(item.key, { error: `Não liguei ao guião (liga-o na ficha do ficheiro): ${e.message}` }); });
+      }
+    };
     try {
       if (resume) await resumeUpload(access, resume.versionId, resume.assetId, item.file, onProgress, item.controller.signal);
       else await uploadFile(access, item.file, { assetId: item.assetId ?? null, fields: item.fields }, onProgress, item.controller.signal);
@@ -65,9 +81,10 @@ export function MediaLibraryView({ access, asset = null, onAsset }: { access: Ac
         progress: { ...item.progress, phase: aborted ? "cancelado" : "falhou" } });
     }
   };
-  const enqueue = (files: File[], opts: { assetId?: string | null; fields?: Record<string, unknown> }) => {
-    const items = files.map((file): QueueItem => ({
+  const enqueue = (files: File[], opts: { assetId?: string | null; fields?: Record<string, unknown>; clips?: ({ guiao: string; camera: Camera } | null)[] }) => {
+    const items = files.map((file, idx): QueueItem => ({
       key: `${file.name}-${file.size}-${Date.now()}-${Math.random()}`, file, controller: new AbortController(), assetId: opts.assetId ?? null, fields: opts.fields,
+      clip: opts.clips?.[idx] ?? undefined,
       progress: { phase: "checksum", loaded: 0, total: file.size, attempt: 0 },
     }));
     setQueue((xs) => [...items, ...xs]);
@@ -138,7 +155,7 @@ export function MediaLibraryView({ access, asset = null, onAsset }: { access: Ac
           )}
         </>
       )}
-      {d && upOpen && <UploadDialog d={d} onClose={() => setUpOpen(false)} onStart={(files, fields) => { setUpOpen(false); enqueue(files, { fields }); }} />}
+      {d && upOpen && <UploadDialog access={access} d={d} onClose={() => setUpOpen(false)} onStart={(files, fields, clips) => { setUpOpen(false); enqueue(files, { fields, clips }); }} />}
       {d && linkOpen && <LinkDialog access={access} d={d} onClose={() => setLinkOpen(false)} onDone={() => { setLinkOpen(false); lib.reload(); }} />}
       {d && policyOpen && <MediaPolicySheet access={access} d={d} onClose={() => setPolicyOpen(false)} onChanged={lib.reload} />}
       {(d ?? lib.last) && opened && (
@@ -333,8 +350,13 @@ function UploadQueue({ items, onRetry, onCancel, onGiveUp, onClear }: {
   );
 }
 
-function UploadDialog({ d, onClose, onStart }: { d: MediaLibrary; onClose: () => void; onStart: (files: File[], fields: Record<string, unknown>) => void }) {
+function UploadDialog({ access, d, onClose, onStart }: {
+  access: Access; d: MediaLibrary; onClose: () => void;
+  onStart: (files: File[], fields: Record<string, unknown>, clips: ({ guiao: string; camera: Camera } | null)[]) => void;
+}) {
   const [files, setFiles] = useState<File[]>([]);
+  const [guiao, setGuiao] = useState("");
+  const [cams, setCams] = useState<(Camera | "")[]>([]);
   const [kind, setKind] = useState<"" | MediaKind>("");
   const [project, setProject] = useState("");
   const [format, setFormat] = useState("");
@@ -344,7 +366,11 @@ function UploadDialog({ d, onClose, onStart }: { d: MediaLibrary; onClose: () =>
     const err = precheck(f, d.policy, { stored_bytes: d.usage.stored_bytes, reserved_bytes: acc.reserved }, kind || undefined);
     return { errs: [...acc.errs, err], reserved: err ? acc.reserved : acc.reserved + f.size };
   }, { errs: [], reserved: d.usage.reserved_bytes }).errs, [files, kind, d]);
-  const okFiles = files.filter((_, i) => !checks[i]);
+  const okIdx = files.map((_, i) => i).filter((i) => !checks[i]);
+  const okFiles = okIdx.map((i) => files[i]);
+  const clipOn = useClipFlag(access);
+  const camErr = guiao ? cameraProblem(okIdx.map((i) => cams[i] ?? "")) : null;
+  const noCam = !!guiao && okIdx.every((i) => !cams[i]);
   return (
     <Dialog open onOpenChange={(v) => { if (!v) onClose(); }}>
       <DialogContent className="sm:max-w-lg">
@@ -355,13 +381,20 @@ function UploadDialog({ d, onClose, onStart }: { d: MediaLibrary; onClose: () =>
         <label className="flex flex-col gap-1 text-sm">Ficheiros
           <input type="file" multiple accept={d.policy.allowed_mime.join(",") + ",.srt,.vtt"} aria-label="Ficheiros"
             className="text-sm file:mr-2 file:rounded-md file:border file:bg-background file:px-2 file:py-1"
-            onChange={(e) => setFiles(Array.from(e.target.files ?? []))} />
+            onChange={(e) => { setFiles(Array.from(e.target.files ?? [])); setCams([]); }} />
         </label>
         {files.length > 0 && (
           <ul className="flex max-h-40 flex-col gap-1 overflow-auto text-xs">
             {files.map((f, i) => (
               <li key={i} className={checks[i] ? "text-destructive" : "text-muted-foreground"}>
                 {f.name} · {bytes(f.size)} · {KIND_LABEL[kind || kindForMime(mimeOf(f.name, f.type))]}{checks[i] ? ` · ${checks[i]}` : ""}
+                {clipOn && guiao && !checks[i] && kindForMime(mimeOf(f.name, f.type)) === "video" && (
+                  <select className={`${selectCls} ml-2 h-7 text-xs`} aria-label={`Câmara de ${f.name}`} value={cams[i] ?? ""}
+                    onChange={(e) => setCams((xs) => { const n = [...xs]; n[i] = e.target.value as Camera | ""; return n; })}>
+                    <option value="">Sem câmara</option>
+                    {(Object.keys(CAMERA_LABEL) as Camera[]).map((c) => <option key={c} value={c}>{CAMERA_LABEL[c]}</option>)}
+                  </select>
+                )}
               </li>
             ))}
           </ul>
@@ -388,12 +421,17 @@ function UploadDialog({ d, onClose, onStart }: { d: MediaLibrary; onClose: () =>
           <label className="flex flex-col gap-1 text-sm">Etiquetas
             <Input value={tags} onChange={(e) => setTags(e.target.value)} placeholder="final dubai" />
           </label>
+          {clipOn && <ClipGuiaoSelect access={access} value={guiao} onChange={setGuiao} />}
         </div>
+        {clipOn && guiao && <p className="text-xs text-muted-foreground">Escolhe a câmara de cada vídeo acima (frente e lado). Com as duas, o pacote deste guião pode começar logo que cheguem.</p>}
+        {camErr && <p className="text-xs text-destructive" role="alert">{camErr}</p>}
+        {noCam && <p className="text-xs text-amber-500">Escolheste o guião mas nenhuma câmara: os ficheiros ficam só ligados ao guião, sem pacote por guião.</p>}
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>Cancelar</Button>
-          <Button disabled={okFiles.length === 0} onClick={() => onStart(okFiles, {
+          <Button disabled={okFiles.length === 0 || !!camErr} onClick={() => onStart(okFiles, {
             ...(kind ? { kind } : {}), ...(project ? { project_id: project } : {}), ...(format ? { format } : {}), ...(tags.trim() ? { tags: splitTags(tags) } : {}),
-          })}><UploadIcon /> Carregar {okFiles.length || ""}</Button>
+            ...(clipOn && guiao ? { content_id: guiao } : {}),
+          }, okIdx.map((i) => (clipOn && guiao && cams[i] ? { guiao, camera: cams[i] as Camera } : null)))}><UploadIcon /> Carregar {okFiles.length || ""}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -481,5 +519,29 @@ function Orphans({ access, d, onDone }: { access: Access; d: MediaLibrary; onDon
           onDone();
         }} />
     </section>
+  );
+}
+
+/** Flag do pacote por guião (STU-03): sem ela o envio fica como antes. */
+function useClipFlag(access: Access) {
+  const { mode } = useSession();
+  const flags = useFlags(access.ws, access.token ?? null, mode !== "loading");
+  return !!flags?.has("edit.package_script");
+}
+
+function ClipGuiaoSelect({ access, value, onChange }: { access: Access; value: string; onChange: (v: string) => void }) {
+  const g = useLoad(() => fetchGuioes(access, todayDubai(), 10), `${access.ws}:up-g`);
+  const list = useMemo(() => [...(g.data ?? [])].filter((x) => x.editorial_status !== "archived" && x.editorial_status !== "rejected")
+    .sort((a, b) => (a.date === b.date ? a.n - b.n : a.date < b.date ? 1 : -1)), [g.data]);
+  return (
+    <label className="flex flex-col gap-1 text-sm sm:col-span-2">Gravação do guião (pacote por guião)
+      {g.error ? <span className="text-xs text-destructive" role="alert">Não consegui carregar os guiões. <button type="button" className="underline" onClick={g.reload}>Tentar de novo</button></span>
+        : !g.data ? <Skeleton className="h-9" /> : (
+        <select className={selectCls} value={value} onChange={(e) => onChange(e.target.value)}>
+          <option value="">Nenhum</option>
+          {list.map((x) => <option key={x.id} value={x.id}>{x.date.slice(8, 10)}/{x.date.slice(5, 7)} · {String(x.n).padStart(2, "0")} {x.tema ?? "sem tema"}</option>)}
+        </select>
+      )}
+    </label>
   );
 }
