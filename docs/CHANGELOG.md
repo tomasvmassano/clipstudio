@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-06 (QC: documento e variantes irmãs)
+
+- **W10-09** QC do documento antes de render (cortes, duração, câmaras, retângulo seguro com o aspeto, visuais em falta; casos fatais param o export com mensagem clara antes de gastar render) e comparação por pHash com os exports das variantes irmãs do mesmo guião (numeiro-engine #17). `edit_export_request` passa as irmãs (mesmo cliente, R2, até 8; `_edit_resolve_siblings`). Testes `w10_qc_irmas` 6/6.
+
 ## 2026-11-06 (CHG-008 gravação, aprendizagem e cortes)
 
 - **CHG-008** (só documentação; PRD §46). GAZE-01..06: teleprompter com coluna ligada à distância, linha de foco, modo frase, ritmo por pedal, hooks de memória, pontuação de olhar por take e piloto opcional de correção por IA. LRN-01..07: motivo em cada edição, agente "Editor de lições", lições aprovadas como versão da configuração em dois níveis (agência e cliente). CLIP-01..11: cortes de vídeos longos com o agente Clip Miner, com prioridade. STU-01..05: captura direta das câmaras com cópia no cartão, agente de estúdio e pacote de edição por guião. 5 capacidades planeadas. Sem alteração funcional.
