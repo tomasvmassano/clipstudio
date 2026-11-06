@@ -26,6 +26,7 @@ import { KIND_LABEL, PLATFORMS } from "@/lib/projects";
 import { MARKER } from "@/lib/recording";
 import { ReasonForm } from "@/components/guiao-reason-form";
 import { DeleteScriptDialog } from "@/components/guiao-delete";
+import { HookChecks, VerifierSummary, useVerification } from "@/components/guiao-verifier";
 
 const MECH = ["pergunta", "contra", "numero", "ego", "confissao", "segredo"];
 
@@ -86,6 +87,7 @@ export function GuiaoCard({ g, carried, caps, actions, onError, startInEdit, ope
     return () => clearTimeout(t);
   }, [g, mode]);
   const lists = useMetaLists(actions);
+  const verif = useVerification(g, actions);
   const names = metaNames(g, lists.projects, lists.owners);
 
   const st = g.editorial_status;
@@ -118,7 +120,8 @@ export function GuiaoCard({ g, carried, caps, actions, onError, startInEdit, ope
       {names.project && <Badge variant="outline" data-meta="project">{KIND_LABEL[names.project.kind]}: {names.project.name}</Badge>}
       {g.owner_id && <Badge variant="outline" data-meta="owner"><UserIcon />{names.owner ?? "responsável"}</Badge>}
       {(g.platforms ?? []).map((p) => <Badge key={p} variant="outline">{PLATFORMS.find((x) => x.v === p)?.l ?? p}</Badge>)}
-      {(g.tags ?? []).map((t) => <span key={t} className="text-muted-foreground">#{t}</span>)}
+      {g.origem === "via_rapida" && <Badge variant="outline" className="border-sky-500/50 text-sky-600 dark:text-sky-400" data-meta="fast-track" title="Adaptado de uma referência colada (REF-04); a ligação ao vídeo original está nas notas e nas referências do guião">via rápida</Badge>}
+      {(g.tags ?? []).filter((t) => !(g.origem === "via_rapida" && t === "via rápida")).map((t) => <span key={t} className="text-muted-foreground">#{t}</span>)}
       {carried && <Badge variant="outline" className="border-amber-500/50 text-amber-600 dark:text-amber-400">por gravar de {g.date}</Badge>}
       {st === "draft" && g.approved_version_id && <span className="text-muted-foreground">tem uma versão anterior aprovada</span>}
       {hasLocal && mode === "view" && caps.edit && st !== "archived" && (
@@ -150,9 +153,11 @@ export function GuiaoCard({ g, carried, caps, actions, onError, startInEdit, ope
                     <span className="font-mono text-[11px] font-normal uppercase text-primary">Hook {i + 1}</span>
                     <span>{h.text}</span>
                     <span className="text-[10px] font-normal uppercase tracking-wide text-muted-foreground">{h.mecanismo}</span>
+                    <span className="col-span-2 col-start-2 empty:hidden"><HookChecks v={verif.v} text={h.text} /></span>
                   </li>
                 ))}
               </ol>
+              <VerifierSummary g={g} state={verif} />
               <div className={cn("whitespace-pre-line border-l-2 pl-3 text-sm leading-relaxed", !open && "line-clamp-3")}>
                 {g.corpo.split("\n").map((l, i) => {
                   const m = l.match(MARKER);

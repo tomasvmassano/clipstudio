@@ -20,7 +20,7 @@ Envio (W1-14, ADR-0023): `invitation_issue_link` gera um token novo (só o hash 
 
 ## Revisão de vídeo (W5-04, CHG-006)
 
-Por versão de um ativo da biblioteca: `por rever → alterações pedidas | rejeitado | aprovado` (`media_review_decide`; motivo obrigatório exceto aprovar). Só a versão atual se decide; aprovado é final. Uma versão nova no mesmo ativo (`media_link_add`) fica `por rever`; a anterior guarda estado, comentários e decisões. Comentários `aberto ⇄ resolvido`. Eventos: `media.commented`, `media.decided`; auditoria `media.review.decided`. Notificações (W5-05, ADR-0044): `video_decision` a quem registou o ativo/versão e ao responsável do guião; `video_comment` a quem registou e, numa resposta, ao autor do comentário; idempotentes por decisão/comentário e pessoa.
+Por versão de um ativo da biblioteca: `por rever → alterações pedidas | rejeitado | aprovado` (`media_review_decide`; motivo obrigatório exceto aprovar). Só a versão atual se decide; aprovado é final. Uma versão nova no mesmo ativo (`media_link_add`) fica `por rever`; a anterior guarda estado, comentários e decisões. Comentários `aberto ⇄ resolvido`; um comentário de topo com momento, num vídeo guardado, pode levar um desenho no fotograma (W10-15, ADR-0067), imutável como o texto. Eventos: `media.commented` (com `annotated` e `shapes`), `media.decided`; auditoria `media.review.decided`. Notificações (W5-05, ADR-0044): `video_decision` a quem registou o ativo/versão e ao responsável do guião; `video_comment` a quem registou e, numa resposta, ao autor do comentário; idempotentes por decisão/comentário e pessoa.
 
 ## Edição de vídeo (W5-06, CHG-007)
 
@@ -213,6 +213,15 @@ Escolher guiões, ação, pré-visualização (o servidor corre e desfaz; mostra
 
 `planeada` → `aprovada` (só por `pub_approve`, com a política do cliente cumprida para a revisão atual e a versão aprovada do guião) → (PUB-01: a publicar, publicada, falhou); `cancelada` com motivo. Mudar versão, variante, conta, hora, legenda, hashtags ou origem cria revisão nova, volta a `planeada` e invalida as aprovações. Limites das APIs recusam o planeamento acima do limite. Variante nova muda pelo menos 2 de 5 elementos; irmã na mesma plataforma com menos de 2 diferenças é bloqueada. Nada publica.
 
+### Registo da publicação manual (W10-03, FR-12-02, ADR-0056)
+
+`aprovada` → `publicada` só por `pub_record_published` (`publishing.publish`, sessão individual), com: a política de aprovação cumprida para a revisão atual, a versão do guião ainda aprovada, o vídeo = versão atual de um ativo do guião com `media_reviews.status = approved`, link do post válido para a plataforma da conta (e da mesma conta, se o link a trouxer), hora não futura e não anterior à aprovação. No mesmo passo grava a linhagem (`_perf_record_lineage`, `correlation_id = pub:<id>`) e liga-a (`_pub_link_lineage`). `publicada` é final: não se muda, não se cancela, não se volta a ligar. O mesmo registo repetido não faz nada (`replayed`); o mesmo post noutra publicação é recusado; mudar link, hora ou vídeo só por correção com motivo (atualiza a mesma linhagem, audita antes/depois).
+
+| Transição | Capacidade | Guarda | Evento / auditoria |
+| --- | --- | --- | --- |
+| aprovada → publicada | `publishing.publish` | ver acima | `publication.published` / `pub.published_recorded`, `perf.lineage_recorded`; notificação `publication_published` |
+| publicada → publicada (correção) | `publishing.publish` | motivo 3 a 500 | `publication.published_corrected` / `pub.published_corrected` (antes/depois, motivo) |
+
 ## Aprendizagem (W7, FR-17-10/11/12)
 
 Rejeitar ou pedir alterações com categoria (`content_transition_reasoned` chama `content_transition` e liga a categoria; texto obrigatório). Experiência: rascunho → a decorrer (regras fechadas) → concluída (confirmada só com critério cumprido, fotografia guardada) ou cancelada. Repetir vencedor: guião em rascunho ligado à publicação, aprovação editorial normal. Convite com cargo: ao aceitar aplica cargo e exceções em nome de quem convidou, se ainda as puder dar. Pedido de eliminação: pendente → tratado ou recusado pelo dono da agência; nada se apaga sozinho.
@@ -228,6 +237,10 @@ Conta social: `por_ligar` → (serviço de OAuth futuro) `ligada` → `expirada`
 ## Notificações (W8, FR-15-05)
 
 Evento → `_notify` → sem acesso, quem age ou já existe: nada → obrigatória: cria → desligada no cliente, cliente silenciado ou desligada pela pessoa: não cria e soma ao contador diário (`notification_suppressions`) → senão cria. As preferências só valem com a flag `notifications.prefs` ligada para quem recebe. Email e resumo diário: preferência guardada, sem envio.
+
+## Notificações de prazos (W10-14, FR-11-04, TEAM-12)
+
+Tick (`deadline_notify_tick`, pg_cron de 15 em 15 min, lock consultivo contra ticks sobrepostos) → para cada limiar: flag `notifications.deadlines` para quem recebe → acesso atual (`tasks.read`) e a capacidade do caso → registo `notification_deadline_sent (user_id, dedup_key)`: já existe = nada → `_notify` (preferências, obrigatório no cliente, dedup). Limiares e chaves: tarefa aberta com prazo em ≤ 24 h `task_due_soon:<tarefa>:<epoch do due_at>`; atrasada (até 7 dias) `task_overdue:<tarefa>:<epoch>`; guião `draft`/`in_review`/`changes_requested` por gravar (`not_started`/`scheduled`) com data = amanhã no fuso do cliente `script_unapproved_recording:<guião>:<data>`; vídeo `in_review`/`changes_requested` com o dia do prazo (regra do calendário W9-03) passado há ≤ 7 dias `video_review_overdue:<versão>:<dia>`. Mudar `due_at` ou a data muda a chave e volta a armar o aviso. Trigger `tasks_due_changed_notify` (depois de mudar `due_at`, mesmo responsável, tarefa aberta) → `task_due_changed` ao responsável, chave `due_changed:<tarefa>:<lock_version>`. Mudança de responsável: `task_assigned` ao novo e `task_unassigned` ao antigo (já existente). Registo limpo ao fim de 45 dias.
 
 ## Portal do cliente (W8, SCALE-08)
 
@@ -246,14 +259,31 @@ Exportar: `edit_export_request` (versão gravada; câmaras, música e visuais re
 ## Pacote de edição (W5-09)
 
 `edit_package_request` → job `package` (`queued` → `running` com passos: som, sincronização, transcrição, guião N) → documentos v1 (`ai`) um a um → `done` avisa quem pediu. Falhou/cancelado permite pedir outra vez.
+Com um estilo guardado (W10-07, ADR-0055) o job leva `look` e `style_version` (chave `…:<estilo>:v<N>`) e a v1 sai com o aspeto e a música do estilo e com `doc.ai.alternatives`. Modo guiado, passo Corte: "Usar esta" (`edit_alternative_apply`) → versão N+1 (`user`) com os cortes e as legendas da alternativa; versão base antiga → conflito 40001 (recarregar); opção já em uso → devolve a atual sem versão nova.
 
 ## Revisão em lote (W5-12, ADR-0052)
 
 Pacote `done` → "Exportar todos" (`edit_package_export`) → um job `export` por vídeo (idempotente pela versão do documento; um que falhe não trava os outros) → `done`: versão nova do vídeo com QC em `media_info.qc` → `in_review` na Revisão → aprovar (preso a essa versão) / pedir alterações / rejeitar; "Aprovar e seguinte" abre o próximo por rever. O QC não bloqueia: é nota para quem decide.
+## Cortes de vídeos longos (W10-12, ADR-0063)
+
+`clips_request` → job `clips` (`queued` → `running` com passos: som, transcrição, silêncios, procura por blocos, gravar corte N) → cortes gravados um a um como documento v1 (`ai`, ativo `corte`, `media_job_clips` com os metadados) → `done` avisa quem pediu. Candidatos bloqueados pelo portão da dignidade nunca viram corte (ficam no relatório do job). Falhou/cancelado permite pedir outra vez (nova chave). Depois: "Exportar todos" (`clips_export`) → um job `export` por corte → `in_review` na revisão em lote (decisão presa à versão). Master no lixo: o worker não grava mais cortes desse pedido.
+
 ## Frases-persona (W5-14, ADR-0053)
 
 Versão 0 (sem lista: agentes sem hipérbole de persona) → gravar → versão N+1 (imutável; conflito se outra pessoa gravou a N entretanto) → próximas execuções dos agentes usam a versão em vigor no claim e registam-na no `agent_log`. Voltar atrás = gravar uma versão nova a partir da antiga.
 
+## Verificador antes da revisão humana (W10-06, VAR-04, ADR-0057)
+
+Sem estados editoriais novos. Motor: Crítico → Editor → Verificador (classifica cada hook: persona, opinião, facto, terceiro identificado, validade; PT-PT) → `worker_save_script` (guião entra em revisão como antes) → `worker_save_verification` (idempotente por execução e guião, evento `script.verified`). Marcas: `ok` < `atencao` < `rever` < `juridico` < `bloqueado`. Nenhuma marca muda o estado do guião: quem revê aprova, pede alterações ou rejeita. Editar o hook deixa a marca desse hook como "verificado noutro texto".
+
 ## Guião eliminado e pré-requisitos (W9, ADR-0051)
 
 `archived` → eliminado (lápide, 30 dias recuperável para `archived`). Produção: avançar para agendado/gravado/edição/pronto verifica os pré-requisitos do cliente; recusa com `pre_requisito_em_falta` e a causa; recuar nunca é bloqueado.
+
+## Referências por link (W10-04, REF-01..04, ADR-0059)
+
+Colar (`reference_paste`, `references.manage`, flag `references.link`): link de Reel/TikTok → identidade do vídeo (`ref_key`) → referência nova (evento `reference.created`, `via: paste`) ou a existente (`duplicate`, sem erro). Dissecção (`reference_analyze`, `references.analyze`): execução `reference_analysis` em `agent_jobs` (uma ativa por referência; repetir devolve a mesma) → worker recolhe transcrição e métricas (R-20) ou usa a transcrição colada → `reference_analyses` versão N+1, imutável (evento `reference.analyzed`, auditoria do motor com modelo e versão dos prompts). Falha de recolha sem token ou sem transcrição: execução `dead` sem repetir, com mensagem e caminho manual; falha do fornecedor: nova tentativa com espera. 3 guiões (`reference_adapt`, `references.adapt`, exige dissecção): execução `reference_scripts` → até 3 guiões `in_review`, `origem = via_rapida`, no dia de hoje do cliente, ligados à referência e à dissecção (`reference_script_outputs`, evento `reference.script_created`); guiões demasiado parecidos com o original são bloqueados (motor e servidor). A aprovação segue o fluxo editorial normal.
+
+## Saúde do sistema e alertas (W10-01, ADR-0058)
+
+Sem estados novos nos trabalhos. Tick (pg_cron, 5 min) → para cada cliente e origem com trabalho pronto sem worker capaz visto em 10 min: incidente `worker_down` (chave: origem + cliente + último contacto do worker, ou "nunca") → se novo, `system_health` aos donos da agência; trabalho `dead` nas últimas 24 h: incidente `job_dead` (chave: origem + trabalho) → se novo, avisa os donos que ainda não receberam `automation_error` desse trabalho. Repetir o tick não cria nada (dedupe na tabela e em `_notify`). O worker voltar e cair outra vez é incidente novo.

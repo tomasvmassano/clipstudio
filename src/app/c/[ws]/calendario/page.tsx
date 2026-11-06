@@ -78,7 +78,7 @@ function CalendarLayers({ access }: { access: Access }) {
         ))}
       </div>
       {layer === "pub"
-        ? <PubCalendar access={access} view={view} anchor={anchor} today={todayDubai()} onNav={(v, d) => go("pub", v, d)} />
+        ? <PubCalendar access={access} view={view} anchor={anchor} today={todayDubai()} onNav={(v, d) => go("pub", v, d)} initialOpen={params.get("pub")} />
         : <Calendario access={access} />}
     </div>
   );
@@ -255,7 +255,7 @@ function Calendario({ access }: { access: Access }) {
                     className={cn("flex items-center gap-1 truncate rounded px-1.5 py-0.5 text-xs hover:bg-muted", p.overdue && "text-destructive")}>
                     <SendIcon className="size-3 shrink-0" />
                     <span className="tabular-nums">{p.local_time}</span>
-                    <span className="truncate">{p.status === "aprovada" ? "✓ " : ""}{p.platform} · guião {p.n}</span>
+                    <span className="truncate">{p.status === "publicada" ? "Publicada · " : p.status === "aprovada" ? "✓ " : ""}{p.platform} · guião {p.n}</span>
                   </WsLink>
                 ))}
               </div>

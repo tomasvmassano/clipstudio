@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { AlertTriangleIcon, CheckIcon, ChevronRightIcon, ExternalLinkIcon, MessagesSquareIcon, RotateCwIcon, SearchIcon, ShieldCheckIcon, TimerIcon, Undo2Icon } from "lucide-react";
+import { AlertTriangleIcon, CheckIcon, ChevronRightIcon, ExternalLinkIcon, MessagesSquareIcon, PencilIcon, RotateCwIcon, SearchIcon, SendIcon, ShieldCheckIcon, TimerIcon, Trash2Icon, Undo2Icon } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,9 +17,13 @@ import {
 } from "@/lib/media-review";
 import { proxyUrl } from "@/lib/edit-media";
 import { driveLinks, fmtMoment, parseMoment } from "@/lib/media-time";
+import { COLORS, SHOW_WINDOW_MS, activeAnnotations, contentRect, normalize, parseAnnotation, type Rect, type Shape, type ShapeType } from "@/lib/annotation";
+import { AnnotationLayer, AnnotationToolbar, DrawSurface, VideoTimeline } from "@/components/video-annotator";
 import Link from "next/link";
 import { useFlags } from "@/lib/flags";
 import { clientPath } from "@/lib/ws-path";
+import { fetchRecordOptions, type RecordOptions } from "@/lib/pub";
+import { RecordPublicationDialog } from "@/components/pub/pub-record";
 
 const tone = (s: ReviewStatus): "default" | "secondary" | "destructive" | "outline" =>
   s === "approved" ? "default" : s === "changes_requested" ? "destructive" : s === "rejected" ? "secondary" : "outline";
@@ -126,24 +130,72 @@ function VideoSheet({ access, assetId, onClose, onChanged, next, onNext }: {
   const [reason, setReason] = useState("");
   const [asking, setAsking] = useState<"changes_requested" | "rejected" | null>(null);
   const flags = useFlags(access.ws, access.token);
+  const [recOpts, setRecOpts] = useState<RecordOptions | null>(null);
+  const [recording, setRecording] = useState(false);
+  const [recMsg, setRecMsg] = useState("");
+  // W10-15: tempo do player, desenho em curso (preso ao momento em que se pausou) e comentário em foco
+  const [nowMs, setNowMs] = useState(0);
+  const [durMs, setDurMs] = useState(0);
+  const [drawing, setDrawing] = useState(false);
+  const [tool, setTool] = useState<ShapeType>("pen");
+  const [color, setColor] = useState(COLORS[0].v);
+  const [draft, setDraft] = useState<Shape[]>([]);
+  const [draftMs, setDraftMs] = useState<number | null>(null);
+  const [focusId, setFocusId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try { setD(await fetchReview(access, assetId, ver)); setErr(""); } catch (e) { setErr((e as Error).message); }
   }, [access, assetId, ver]);
   useEffect(() => { const t = setTimeout(() => void load(), 0); return () => clearTimeout(t); }, [load]);
-  const pick = (v: string) => { setD(null); setAsking(null); setReason(""); setVer(v); };
+  const discardDraft = () => { setDraft([]); setDraftMs(null); setDrawing(false); };
+  const pick = (v: string) => { setD(null); setAsking(null); setReason(""); discardDraft(); setNowMs(0); setDurMs(0); setVer(v); };
 
   const run = async (f: () => Promise<unknown>, after?: () => void) => {
     setBusy(true); setErr("");
     try { await f(); after?.(); await load(); onChanged(); } catch (e) { setErr((e as Error).message); } finally { setBusy(false); }
   };
-  const tMs = moment.trim() ? parseMoment(moment) : null;
-  const badMoment = moment.trim() !== "" && tMs == null;
+  const hasDraft = draft.length > 0 && draftMs != null;
+  const tMs = hasDraft ? draftMs : moment.trim() ? parseMoment(moment) : null;
+  const badMoment = !hasDraft && moment.trim() !== "" && tMs == null;
   const v = d?.version;
   const links = v?.drive_file_id && v.player !== "ficheiro" ? driveLinks(v.drive_file_id) : null; // sem `player` (antes da W5-12) é Drive
   const stored = v?.player === "ficheiro";
   const seek = (ms: number) => { const el = video.current; if (el) { el.currentTime = ms / 1000; void el.play().catch(() => {}); } };
+  // ir ao momento de um comentário: com desenho, pausa nesse fotograma para o desenho ficar à vista
+  const seekTo = (ms: number, id: string) => {
+    const el = video.current; if (!el) return;
+    const c = d?.comments.find((x) => x.id === id);
+    setFocusId(id); setNowMs(ms);
+    if (c && parseAnnotation(c.annotation)) { el.pause(); el.currentTime = ms / 1000; } else seek(ms);
+    document.getElementById(`comentario-${id}`)?.scrollIntoView({ block: "nearest" });
+  };
+  const startDrawing = () => {
+    const el = video.current; if (!el) return;
+    el.pause();
+    if (hasDraft) el.currentTime = draftMs! / 1000;
+    else { const ms = Math.round(el.currentTime * 1000); setDraftMs(ms); setNowMs(ms); }
+    setDrawing(true);
+  };
   const roots = d?.comments.filter((c) => !c.parent_id) ?? [];
+  // FR-12-02: vídeo aprovado e atual → pode registar-se a publicação feita à mão (se houver publicação aprovada e a capacidade)
+  const recordable = !!v && v.status === "approved" && v.current && !!flags?.has("pub.planning");
+  const recVersion = recordable ? v!.id : null;
+  const [recTick, setRecTick] = useState(0);
+  useEffect(() => {
+    if (!recVersion) return;
+    let alive = true;
+    fetchRecordOptions(access, { version: recVersion })
+      .then((o) => { if (alive) setRecOpts(o); })
+      .catch(() => { if (alive) setRecOpts(null); });   // sem registo possível: a secção não aparece; a revisão continua a funcionar
+    return () => { alive = false; };
+  }, [access, recVersion, recTick]);
+  const recPublished = recOpts?.publications.filter((p) => p.published?.media_version_id === recVersion) ?? [];
+  const active = activeAnnotations(d?.comments ?? [], nowMs);
+  const shown: Shape[] = drawing ? [] : [
+    ...(hasDraft && Math.abs(nowMs - draftMs!) <= SHOW_WINDOW_MS ? draft : []),
+    ...active.flatMap((c) => parseAnnotation(c.annotation)?.shapes ?? []),
+  ];
+  const shownLabel = active.length ? `Desenho do comentário aos ${fmtMoment(active[0].t_ms!)}: ${active[0].body.slice(0, 120)}` : "Desenho por enviar";
 
   return (
     <Sheet open onOpenChange={(o) => { if (!o) onClose(); }}>
@@ -159,7 +211,13 @@ function VideoSheet({ access, assetId, onClose, onChanged, next, onNext }: {
             <>
               {stored ? (
                 <div className="flex flex-col items-center gap-2">
-                  <StoredVideo access={access} versionId={v.id} proxy={v.proxy} title={d.item.title} videoRef={video} />
+                  <StoredVideo access={access} versionId={v.id} proxy={v.proxy} title={d.item.title} videoRef={video}
+                    onTime={setNowMs} onDuration={setDurMs}
+                    overlay={(r) => drawing
+                      ? <DrawSurface rect={r} tool={tool} color={color} shapes={draft} onShapes={setDraft} onDone={() => setDrawing(false)} />
+                      : <AnnotationLayer shapes={shown} rect={r} label={shownLabel} />} />
+                  {drawing && <AnnotationToolbar tool={tool} onTool={setTool} color={color} onColor={setColor} shapes={draft} onShapes={setDraft} onDone={() => setDrawing(false)} />}
+                  <VideoTimeline comments={d.comments} durationMs={durMs || (v.duration ?? 0) * 1000} nowMs={nowMs} onSeek={seekTo} />
                   <div className="flex flex-wrap items-center justify-center gap-2 text-xs text-muted-foreground">
                     {flags?.has("edit.studio") && (
                       <Link href={clientPath(access.ws, `/editor?asset=${assetId}`)} className="inline-flex items-center gap-1 font-medium text-foreground underline underline-offset-2">
@@ -226,19 +284,43 @@ function VideoSheet({ access, assetId, onClose, onChanged, next, onNext }: {
                 </div>
               )}
               {!v.current && <Alert><AlertDescription>Esta é uma versão antiga. As decisões fazem-se na mais recente.</AlertDescription></Alert>}
+              {recordable && recOpts && recOpts.video?.version_id === v.id && (recOpts.can_record || recPublished.length > 0) && (
+                <section className="flex flex-col gap-2 rounded-md border p-3 text-sm" aria-label="Publicação">
+                  {recPublished.map((p) => (
+                    <p key={p.id} className="flex flex-wrap items-center gap-1">
+                      <SendIcon className="size-3.5" /> Publicado em @{p.account_handle} · {p.published!.local_day.split("-").reverse().join("/")} {p.published!.local_time}
+                      <a href={p.published!.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 underline underline-offset-2">
+                        <ExternalLinkIcon className="size-3" /> ver post</a>
+                    </p>
+                  ))}
+                  {recMsg && <p role="status" className="text-emerald-600 dark:text-emerald-400">{recMsg}</p>}
+                  {recOpts.can_record && (recOpts.publications.some((p) => p.status === "aprovada") ? (
+                    <Button size="sm" variant="outline" className="self-start" onClick={() => setRecording(true)}><SendIcon /> Registar publicação</Button>
+                  ) : recPublished.length === 0 && (
+                    <p className="text-muted-foreground">
+                      Para registar a publicação, planeia e aprova-a no <Link href={clientPath(access.ws, "/calendario?l=pub")} className="underline underline-offset-2">calendário de publicações</Link>.
+                    </p>
+                  ))}
+                </section>
+              )}
               {stored && <QcPanel qc={v.qc} onSeek={seek} />}
 
               <section className="flex flex-col gap-2" aria-label="Comentários">
                 <h3 className="text-sm font-semibold">Comentários</h3>
                 {roots.length === 0 && <p className="text-sm text-muted-foreground">Ainda sem comentários.</p>}
                 {roots.map((c) => (
-                  <div key={c.id} className={`flex flex-col gap-1 rounded-md border p-2 text-sm ${c.resolved_at ? "opacity-60" : ""}`}>
+                  <div key={c.id} id={`comentario-${c.id}`} data-testid="review-comment"
+                    className={`flex flex-col gap-1 rounded-md border p-2 text-sm ${c.resolved_at ? "opacity-60" : ""} ${focusId === c.id || active.some((x) => x.id === c.id) ? "border-amber-400" : ""}`}>
                     <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                       {c.t_ms != null && stored && (
-                        <button type="button" onClick={() => seek(c.t_ms!)} title="Ir a este momento"
+                        <button type="button" onClick={() => seekTo(c.t_ms!, c.id)} title="Ir a este momento"
+                          aria-label={`Ir a ${fmtMoment(c.t_ms)}${parseAnnotation(c.annotation) ? " e ver o desenho" : ""}`}
                           className="rounded bg-muted px-1.5 py-0.5 font-mono font-medium text-foreground tabular-nums hover:underline">
                           {fmtMoment(c.t_ms)}
                         </button>
+                      )}
+                      {parseAnnotation(c.annotation) && (
+                        <span className="inline-flex items-center gap-1 text-amber-400"><PencilIcon className="size-3" aria-hidden /> com desenho</span>
                       )}
                       {c.t_ms != null && !stored && v.drive_file_id && (
                         <a href={driveLinks(v.drive_file_id, c.t_ms).view} target="_blank" rel="noopener noreferrer"
@@ -268,18 +350,31 @@ function VideoSheet({ access, assetId, onClose, onChanged, next, onNext }: {
                   <form className="flex flex-col gap-2 rounded-md border p-2" onSubmit={(e) => {
                     e.preventDefault();
                     if (!body.trim() || badMoment) return;
-                    void run(() => addReviewComment(access, v.id, body.trim(), tMs), () => { setBody(""); setMoment(""); });
+                    void run(() => addReviewComment(access, v.id, body.trim(), tMs, null, hasDraft ? normalize({ v: 1, shapes: draft }) : null),
+                      () => { setBody(""); setMoment(""); discardDraft(); });
                   }}>
                     <div className="flex items-center gap-2">
                       <label className="text-xs text-muted-foreground" htmlFor="momento">Momento</label>
-                      <Input id="momento" className="h-8 w-24 font-mono" placeholder="0:23" value={moment} onChange={(e) => setMoment(e.target.value)} aria-invalid={badMoment} />
-                      {stored && (
+                      <Input id="momento" className="h-8 w-24 font-mono" placeholder="0:23" value={hasDraft ? fmtMoment(draftMs!) : moment} disabled={hasDraft}
+                        onChange={(e) => setMoment(e.target.value)} aria-invalid={badMoment} />
+                      {stored && !hasDraft && (
                         <Button type="button" size="xs" variant="outline" onClick={() => { const el = video.current; if (el) { el.pause(); setMoment(fmtMoment(el.currentTime * 1000)); } }}>
                           <TimerIcon /> Agora
                         </Button>
                       )}
-                      <span className="text-xs text-muted-foreground">{badMoment ? "Escreve como 0:23." : stored ? "Opcional. \"Agora\" pausa e usa o momento do vídeo." : "Opcional. Vê o tempo no player da Drive."}</span>
+                      {stored && !drawing && (
+                        <Button type="button" size="xs" variant="outline" onClick={startDrawing} aria-label={hasDraft ? "Editar o desenho" : "Desenhar no fotograma"}>
+                          <PencilIcon /> {hasDraft ? "Editar desenho" : "Desenhar"}
+                        </Button>
+                      )}
+                      <span className="text-xs text-muted-foreground">{badMoment ? "Escreve como 0:23." : hasDraft ? "Momento do desenho." : stored ? "Opcional. \"Agora\" pausa e usa o momento do vídeo; \"Desenhar\" pausa e deixa marcar o fotograma." : "Opcional. Vê o tempo no player da Drive."}</span>
                     </div>
+                    {hasDraft && !drawing && (
+                      <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground" aria-live="polite">
+                        <PencilIcon className="size-3 text-amber-400" aria-hidden /> Desenho com {draft.length} {draft.length === 1 ? "forma" : "formas"} aos {fmtMoment(draftMs!)}, vai com o comentário.
+                        <Button type="button" size="xs" variant="ghost" onClick={discardDraft}><Trash2Icon /> Descartar desenho</Button>
+                      </div>
+                    )}
                     <Textarea aria-label="Comentário" value={body} maxLength={4000} onChange={(e) => setBody(e.target.value)} placeholder="O que viste neste momento?" />
                     <Button type="submit" size="sm" className="self-end" disabled={busy || !body.trim() || badMoment}>Comentar</Button>
                   </form>
@@ -300,17 +395,24 @@ function VideoSheet({ access, assetId, onClose, onChanged, next, onNext }: {
           )}
         </div>
       </SheetContent>
+      {recording && v && (
+        <RecordPublicationDialog access={access} versionId={v.id} onClose={() => setRecording(false)}
+          onDone={(m) => { setRecMsg(m); setRecTick((n) => n + 1); }} />
+      )}
     </Sheet>
   );
 }
 
-/** Player da app para vídeos guardados (export do editor, upload): a versão leve assinada, ou o original se não houver. */
-function StoredVideo({ access, versionId, proxy, title, videoRef }: {
+/** Player da app para vídeos guardados (export do editor, upload): a versão leve assinada, ou o original se não houver.
+ *  `overlay` desenha por cima do fotograma visível (W10-15): recebe o retângulo do fotograma dentro da caixa do player. */
+function StoredVideo({ access, versionId, proxy, title, videoRef, onTime, onDuration, overlay }: {
   access: Access; versionId: string; proxy: boolean; title: string; videoRef: React.RefObject<HTMLVideoElement | null>;
+  onTime?: (ms: number) => void; onDuration?: (ms: number) => void; overlay?: (r: Rect) => React.ReactNode;
 }) {
   const [src, setSrc] = useState<string | null>(null);
   const [err, setErr] = useState("");
   const [n, setN] = useState(0);
+  const [rect, setRect] = useState<Rect>({ x: 0, y: 0, w: 0, h: 0 });
   useEffect(() => {
     let alive = true;
     (async () => {
@@ -328,14 +430,35 @@ function StoredVideo({ access, versionId, proxy, title, videoRef }: {
     })();
     return () => { alive = false; };
   }, [access, versionId, proxy, n]);
+  // retângulo do fotograma (object-fit: contain) relativo à caixa que embrulha o vídeo; muda com o tamanho do ecrã
+  const measure = useCallback(() => {
+    const el = videoRef.current; if (!el) return;
+    const r = contentRect(el.clientWidth, el.clientHeight, el.videoWidth, el.videoHeight);
+    setRect({ x: el.offsetLeft + el.clientLeft + r.x, y: el.offsetTop + el.clientTop + r.y, w: r.w, h: r.h });
+  }, [videoRef]);
+  useEffect(() => {
+    const el = videoRef.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(() => measure());
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [src, measure, videoRef]);
   if (err) return (
     <Alert variant="destructive" className="max-w-xs"><AlertDescription>{err} <Button size="sm" variant="link" onClick={() => { setErr(""); setN((x) => x + 1); }}>Tentar de novo</Button></AlertDescription></Alert>
   );
   if (!src) return <Skeleton className="aspect-[9/16] w-full max-w-xs" />;
   // o link assinado expira (1 h): se o vídeo falhar a carregar, pede outro
-  return <video ref={videoRef} key={src} src={src} controls playsInline preload="metadata" aria-label={title}
-    onError={() => setErr("O vídeo deixou de carregar (o link pode ter expirado).")}
-    className="aspect-[9/16] w-full max-w-xs rounded-md border bg-black" />;
+  return (
+    <div className="relative w-full max-w-xs">
+      <video ref={videoRef} key={src} src={src} controls playsInline preload="metadata" aria-label={title}
+        onError={() => setErr("O vídeo deixou de carregar (o link pode ter expirado).")}
+        onLoadedMetadata={(e) => { measure(); const dur = e.currentTarget.duration; if (Number.isFinite(dur)) onDuration?.(Math.round(dur * 1000)); }}
+        onTimeUpdate={(e) => onTime?.(Math.round(e.currentTarget.currentTime * 1000))}
+        onSeeked={(e) => onTime?.(Math.round(e.currentTarget.currentTime * 1000))}
+        className="aspect-[9/16] w-full rounded-md border bg-black" />
+      {overlay?.(rect)}
+    </div>
+  );
 }
 
 function QcBadge({ qc }: { qc: QcSummary | null }) {

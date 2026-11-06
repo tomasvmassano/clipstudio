@@ -25,9 +25,9 @@ export type CalReview = {
   tema: string | null; due_day: string; due_at: string | null; due_source: "tarefa" | "guiao"; task_id: string | null; assignee_email: string | null;
   overdue: boolean; open_comments: number;
 };
-/** Publicação planeada ou aprovada no dia local. W9-03, FR-11-02. */
+/** Publicação planeada, aprovada ou publicada no dia local. W9-03, FR-11-02; FR-12-02. */
 export type CalPublication = {
-  id: string; status: "planeada" | "aprovada"; platform: string; kind: string; account_handle: string | null; scheduled_at: string;
+  id: string; status: "planeada" | "aprovada" | "publicada"; platform: string; kind: string; account_handle: string | null; scheduled_at: string;
   local_day: string; local_time: string; content_id: string; n: number; tema: string | null; overdue: boolean;
 };
 export type CalendarData = {

@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import { friendlyError } from "@/lib/access";
+import type { SessionRow } from "@/lib/session-format";
 
 /** Perfil da própria pessoa (W1-15, FR-14-01). O servidor valida cada campo. */
 export type ProfilePatch = Partial<{ display_name: string | null; avatar_path: string | null; timezone: string | null; theme: "system" | "light" | "dark"; preferred_workspace: string | null }>;
@@ -12,8 +13,13 @@ async function rpc<T>(fn: string, args: Record<string, unknown>): Promise<T> {
 
 export const updateProfile = (patch: ProfilePatch) => rpc<Record<string, unknown>>("profile_update", { p_patch: patch });
 export const securityLog = () => rpc<{ at: string; action: string }[]>("my_security_log", { p_limit: 30 });
-export const securityEvent = (action: "security.password_changed" | "security.mfa_enabled" | "security.mfa_disabled" | "security.signed_out_everywhere") =>
+export const securityEvent = (action: "security.password_changed" | "security.mfa_enabled" | "security.mfa_disabled" | "security.signed_out_everywhere" | "security.signed_out_here") =>
   rpc<void>("security_event", { p_action: action }).catch(() => undefined); // o histórico nunca impede a ação
+
+/** Sessões e dispositivos da própria pessoa (W10-08, FR-14-03). O servidor só devolve e só apaga as do próprio. */
+export const mySessions = () => rpc<SessionRow[]>("my_sessions", {});
+export const terminateSession = (id: string) => rpc<{ id: string; current: boolean }>("session_terminate", { p_session: id });
+export const terminateOtherSessions = () => rpc<number>("sessions_terminate_others", {});
 
 export const AVATAR_TYPES = ["image/png", "image/jpeg", "image/webp"];
 export const AVATAR_MAX = 1024 * 1024;
@@ -44,4 +50,7 @@ export const SECURITY_LABEL: Record<string, string> = {
   "security.mfa_disabled": "Verificação em dois passos desligada",
   "security.signed_out_everywhere": "Sessão terminada em todos os dispositivos",
   "invitation.accepted": "Convite aceite",
+  "security.session_terminated": "Sessão terminada num dispositivo",
+  "security.sessions_terminated_others": "Sessões terminadas nos outros dispositivos",
+  "security.signed_out_here": "Saída desta sessão",
 };

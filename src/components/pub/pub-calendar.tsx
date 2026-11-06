@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { AlertTriangleIcon, CheckCircle2Icon, ChevronLeftIcon, ChevronRightIcon, Loader2Icon, PlusIcon, RotateCwIcon, Settings2Icon } from "lucide-react";
+import { AlertTriangleIcon, CheckCircle2Icon, ChevronLeftIcon, ChevronRightIcon, Loader2Icon, PlusIcon, RotateCwIcon, SendIcon, Settings2Icon } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -24,13 +24,16 @@ import { PubRulesSheet } from "@/components/pub/pub-rules";
 const STATUS_CLASS: Record<string, string> = {
   planeada: "border-amber-500/60 bg-amber-500/10",
   aprovada: "border-emerald-500/60 bg-emerald-500/15",
+  publicada: "border-sky-500/60 bg-sky-500/15",
   cancelada: "border-border bg-muted text-muted-foreground line-through",
 };
 const selectCls = "h-8 rounded-md border bg-background px-2 text-sm";
 
-type Props = { access: Access; view: CalView; anchor: string; today: string; onNav: (v: CalView, d: string) => void };
+type Props = { access: Access; view: CalView; anchor: string; today: string; onNav: (v: CalView, d: string) => void;
+  /** Abre esta publicação ao carregar (link da caixa: publicação registada, FR-12-02). */
+  initialOpen?: string | null };
 
-export function PubCalendar({ access, view, anchor, today: todayGuess, onNav }: Props) {
+export function PubCalendar({ access, view, anchor, today: todayGuess, onNav, initialOpen = null }: Props) {
   const range = useMemo(() => rangeFor(view, anchor), [view, anchor]);
   const [data, setData] = useState<PubCalendarData | null>(null);
   const [err, setErr] = useState("");
@@ -43,7 +46,7 @@ export function PubCalendar({ access, view, anchor, today: todayGuess, onNav }: 
   const [showCancelled, setShowCancelled] = useState(false);
   const [drag, setDrag] = useState<Publication | null>(null);
   const [over, setOver] = useState<string | null>(null);
-  const [open, setOpen] = useState<string | "new" | null>(null);
+  const [open, setOpen] = useState<string | "new" | null>(initialOpen && /^[0-9a-f-]{36}$/.test(initialOpen) ? initialOpen : null);
   const [newDay, setNewDay] = useState<string | null>(null);
   const [rules, setRules] = useState(false);
   const [confirmMove, setConfirmMove] = useState<{ p: Publication; day: string } | null>(null);
@@ -85,7 +88,7 @@ export function PubCalendar({ access, view, anchor, today: todayGuess, onNav }: 
   const canDrop = (day: string) => !!drag && day >= today;
   const drop = (day: string) => {
     const p = drag; setDrag(null); setOver(null);
-    if (!p || !canDrop(day) || p.local_day === day) return;
+    if (!p || !canDrop(day) || p.local_day === day || p.status === "publicada") return;
     if (p.status === "aprovada") setConfirmMove({ p, day }); else move(p, day);
   };
   const runBatch = async () => {
@@ -135,7 +138,8 @@ export function PubCalendar({ access, view, anchor, today: todayGuess, onNav }: 
 
       <Alert>
         <AlertDescription>
-          <b>{data?.publish_unavailable_reason ?? PUBLISH_UNAVAILABLE}</b> Aqui planeia-se e aprova-se a versão e o destino de cada publicação; nada é publicado.
+          <b>{data?.publish_unavailable_reason ?? PUBLISH_UNAVAILABLE}</b> Aqui planeia-se e aprova-se a versão e o destino de cada publicação; a app não publica nada.
+          {data?.can.record ? " Depois de publicares à mão, abre a publicação aprovada e usa \"Registar publicação\" com o link do post." : ""}
         </AlertDescription>
       </Alert>
 
@@ -201,7 +205,7 @@ export function PubCalendar({ access, view, anchor, today: todayGuess, onNav }: 
                     const warns = p.conflicts.length > 0;
                     return (
                       <button key={p.id} type="button" data-pub={p.id}
-                        draggable={data.can.schedule && p.status !== "cancelada"}
+                        draggable={data.can.schedule && p.status !== "cancelada" && p.status !== "publicada"}
                         onDragStart={() => setDrag(p)} onDragEnd={() => { setDrag(null); setOver(null); }}
                         onClick={() => setOpen(p.id)}
                         aria-label={`${p.local_time} ${PLATFORM_LABEL[p.platform]} @${p.account_handle}, guião ${p.content_n}, ${STATUS_LABEL[p.status]}${blocks ? ", com conflito" : ""}`}
@@ -210,6 +214,7 @@ export function PubCalendar({ access, view, anchor, today: todayGuess, onNav }: 
                         <span className="font-semibold">{PLATFORM_SHORT[p.platform]}</span>
                         <span className="truncate">@{p.account_handle} · {p.content_n}{p.variant ? ` · ${p.variant.label}` : ""}</span>
                         {p.status === "aprovada" && <CheckCircle2Icon className="ml-auto size-3 shrink-0 text-emerald-500" aria-hidden />}
+                        {p.status === "publicada" && <SendIcon className="ml-auto size-3 shrink-0 text-sky-500" aria-hidden />}
                         {warns && <AlertTriangleIcon className={cn("ml-auto size-3 shrink-0", blocks ? "text-destructive" : "text-amber-500")} aria-hidden />}
                       </button>
                     );
@@ -251,7 +256,7 @@ export function PubCalendar({ access, view, anchor, today: todayGuess, onNav }: 
         </>
       )}
 
-      {data && open && (
+      {data && open && (open === "new" || opened) && (
         <PubSheet access={access} data={data} pub={opened} defaultDay={newDay ?? (today > anchor ? today : anchor)}
           onClose={() => setOpen(null)} onChanged={(text) => { if (text) setMsg({ text, bad: false }); refresh(); }} />
       )}
