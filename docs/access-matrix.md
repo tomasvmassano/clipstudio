@@ -67,6 +67,7 @@ Um `agency_member` sem atribuição a um workspace **não vê nada** desse works
 | `edit.guided` | ✓ | ✓ | ✓ | ✓ | ✓ | — |
 | `edit.export` | ✓ | ✓ | ✓ | — | — | — |
 | `persona.manage` (frases-persona, R-17) | ✓ | ✓ | — | — | — | — |
+| `clips.mine` (Clip Miner, W10-12) | ✓ | ✓ | ✓ | — | — | — |
 | gravar no modo guiado (só `edit.guided`) | só palavras, hook, tirar/repor cortes, música da biblioteca do cliente, notas próprias; resto recusado no servidor (ADR-0049) |||||
 | `media.upload` / `download` | ✓ | ✓ | ✓ | ✓ | ✓ | — |
 | `media.share` | ✓ | ✓ | ✓ | — | — | — |
@@ -135,6 +136,8 @@ Portal do cliente (W8, ADR-0041): entrar com `scripts.read` (staff da agência s
 **W10-07 (ADR-0055):** o pacote lê o aspeto só de estilos do próprio cliente (e a música só se for áudio ativo desse cliente); `edit_alternative_apply` exige acesso ao editor (`edit.timeline` ou `edit.guided`; leitor, anon e outro cliente: 42501), só usa alternativas guardadas no próprio documento (opção inexistente ou de outro documento: P0002; vídeo de outro cliente pelo seu: P0002) e conflito 40001 sobre versão antiga.
 
 **W5-12 (ADR-0052):** exportar o pacote inteiro exige `edit.export` (revisor e outro cliente: 42501); ver na revisão os vídeos exportados e a versão leve: `media.read`; comentar `review.comment`; decidir `review.approve`. Outro cliente: 42501.
+
+**W10-12 (ADR-0063):** pedir cortes de um vídeo longo exige `clips.mine` (dono, admin, gestor; outros por grant individual; negação explícita prevalece), flags `clips.miner` e `edit.studio` e R2; ver pedidos e cortes exige acesso ao editor (`edit.timeline` ou `edit.guided`); exportar todos exige `edit.export`; gravar cortes só `engine_worker` (browser 42501). Outro cliente: 42501; flag desligada: 55000 mesmo com a capacidade. `media_job_clips` fechada a `authenticated`. Teste `supabase/tests/w10_clip_miner.sql`.
 **W5-14 (ADR-0053):** ler a lista de frases-persona: `agents.read`; gravar uma versão nova: `persona.manage` com sessão individual (código de equipa e manager: 42501). Versões imutáveis, tabela fechada à API. O worker recebe só os textos e o nome de quem está envolvido (o consentimento fica na app). Outro cliente: 42501.
 
 **W10-06 (ADR-0057, VAR-04):** ver o resultado do verificador do motor: `scripts.read` (`content_verifications`; código de equipa só do seu cliente). Gravar: só o worker, para guiões da própria execução. Tabela fechada à API; outro cliente ou cliente inexistente: 42501; ids de outro cliente no pedido ficam de fora.

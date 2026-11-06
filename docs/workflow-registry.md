@@ -255,6 +255,10 @@ Com um estilo guardado (W10-07, ADR-0055) o job leva `look` e `style_version` (c
 ## Revisão em lote (W5-12, ADR-0052)
 
 Pacote `done` → "Exportar todos" (`edit_package_export`) → um job `export` por vídeo (idempotente pela versão do documento; um que falhe não trava os outros) → `done`: versão nova do vídeo com QC em `media_info.qc` → `in_review` na Revisão → aprovar (preso a essa versão) / pedir alterações / rejeitar; "Aprovar e seguinte" abre o próximo por rever. O QC não bloqueia: é nota para quem decide.
+## Cortes de vídeos longos (W10-12, ADR-0063)
+
+`clips_request` → job `clips` (`queued` → `running` com passos: som, transcrição, silêncios, procura por blocos, gravar corte N) → cortes gravados um a um como documento v1 (`ai`, ativo `corte`, `media_job_clips` com os metadados) → `done` avisa quem pediu. Candidatos bloqueados pelo portão da dignidade nunca viram corte (ficam no relatório do job). Falhou/cancelado permite pedir outra vez (nova chave). Depois: "Exportar todos" (`clips_export`) → um job `export` por corte → `in_review` na revisão em lote (decisão presa à versão). Master no lixo: o worker não grava mais cortes desse pedido.
+
 ## Frases-persona (W5-14, ADR-0053)
 
 Versão 0 (sem lista: agentes sem hipérbole de persona) → gravar → versão N+1 (imutável; conflito se outra pessoa gravou a N entretanto) → próximas execuções dos agentes usam a versão em vigor no claim e registam-na no `agent_log`. Voltar atrás = gravar uma versão nova a partir da antiga.
