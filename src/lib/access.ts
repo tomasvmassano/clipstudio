@@ -79,6 +79,10 @@ export function friendlyError(msg: string): string {
   if (msg.includes("versao_antiga")) return "Há uma versão mais recente deste vídeo. Decide sobre essa.";
   if (msg.includes("ja_aprovado")) return "Este vídeo já foi aprovado. Para mudar, junta uma versão nova na biblioteca.";
   if (msg.includes("momento_invalido")) return "Esse momento fica fora do vídeo.";
+  if (msg.includes("anotacao_invalida")) return "O desenho não é válido (demasiadas formas ou pontos, ou fora do vídeo). Desfaz parte e tenta de novo.";
+  if (msg.includes("anotacao_sem_momento")) return "O desenho precisa do momento do vídeo.";
+  if (msg.includes("anotacao_em_resposta")) return "As respostas não levam desenho.";
+  if (msg.includes("anotacao_so_em_ficheiro")) return "Só se desenha em vídeos guardados na app (não nos da Drive).";
   if (msg.includes("media_nao_encontrado")) return "Este vídeo já não existe ou não tens acesso.";
   if (msg.includes("transicao_invalida")) return "Esta ação já não se aplica ao estado atual do guião. Recarrega.";
   if (msg.includes("nao_elegivel")) return "Guiões rejeitados ou arquivados não se gravam.";

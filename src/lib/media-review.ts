@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import { friendlyError, type Access } from "@/lib/access";
+import type { Annotation } from "@/lib/annotation";
 
 /** Revisão de vídeo (W5-04, FR-05-03, CHG-006; W5-12, EDL-02) por cima da biblioteca de media: ativo ligado ao guião, versão
  *  atual num link da Google Drive ou num ficheiro guardado (export do editor, upload), variante e estilo nas etiquetas (hook_N, Sxx),
@@ -20,6 +21,8 @@ export type ReviewList = { items: ReviewItem[]; counts: Partial<Record<ReviewSta
 export type ReviewComment = {
   id: string; parent_id: string | null; t_ms: number | null; body: string; author: string; author_id: string | null;
   at: string; resolved_at: string | null; resolved_by: string | null;
+  /** desenho no fotograma (W10-15), só em vídeos guardados; null nos outros */
+  annotation?: Annotation | null;
 };
 export type ReviewDetail = {
   item: ReviewItem;
@@ -43,8 +46,12 @@ export const fetchReviewList = (access: Access, f: { status?: ReviewStatus[]; q?
   rpc<ReviewList>("media_review_list", { p_ws: access.ws, p_filters: Object.fromEntries(Object.entries(f).filter(([, v]) => v != null && v !== "")), p_token: access.token });
 export const fetchReview = (access: Access, assetId: string, versionId?: string | null) =>
   rpc<ReviewDetail>("media_review_detail", { p_ws: access.ws, p_asset: assetId, p_version: versionId ?? null, p_token: access.token });
-export const addReviewComment = (access: Access, versionId: string, body: string, tMs: number | null, parent?: string | null) =>
-  rpc<ReviewComment>("media_review_comment", { p_ws: access.ws, p_version: versionId, p_body: body, p_t_ms: tMs, p_parent: parent ?? null, p_token: access.token });
+/** `annotation` só vai quando há desenho: sem ele a chamada é igual à de antes da W10-15. */
+export const addReviewComment = (access: Access, versionId: string, body: string, tMs: number | null, parent?: string | null, annotation?: Annotation | null) =>
+  rpc<ReviewComment>("media_review_comment", {
+    p_ws: access.ws, p_version: versionId, p_body: body, p_t_ms: tMs, p_parent: parent ?? null, p_token: access.token,
+    ...(annotation ? { p_annotation: annotation } : {}),
+  });
 export const resolveReviewComment = (access: Access, commentId: string, resolved: boolean) =>
   rpc<ReviewComment>("media_review_comment_resolve", { p_ws: access.ws, p_comment: commentId, p_resolved: resolved, p_token: access.token });
 export const decideReview = (access: Access, versionId: string, status: Exclude<ReviewStatus, "in_review">, reason?: string) =>
