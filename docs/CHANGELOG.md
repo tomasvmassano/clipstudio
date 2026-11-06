@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-06 (comparar versões de guiões)
+
+- **W10-13** comparar versões de um guião (FR-02-06, FR-05-06, FR-05-07): no Histórico, separador Comparar com duas versões à escolha (ou a cópia de trabalho), diff por palavra em hooks, corpo, CTA, formato e tema, lado a lado ou em linha; o que saiu aparece riscado com "−" e o que entrou sublinhado com "+", com texto para leitores de ecrã (a cor não é o único sinal). As versões aprovada, gravada (a mesma regra de W9-02) e em vigor ficam marcadas, e cada versão mostra quem, quando e porquê (transições com motivo e restauros). "Restaurar esta versão" pede confirmação e usa o caminho de sempre (`content_restore_version` → `content_save`: `scripts.edit`, conflito PT409, guião aprovado volta a rascunho e a aprovação fica na versão antiga); o restauro passa a ficar no audit (`script.version_restored`). Migração aditiva `supabase/migrations/20261106065128_w10_diff_versoes.sql` (por aplicar em produção; a UI funciona sem ela, sem formato e tema no diff). Testes `w10_diff_versoes` 25/25, `version-diff` 22/22, `e2e/diff-versoes.spec.ts`.
+
 ## 2026-11-06 (Clip Miner)
 
 - **W10-12** Clip Miner MVP, cortes de vídeos longos (CLIP-01..07, SCALE-03, VAR-06; ADR-0063): job `clips` no worker (numeiro-engine #20: transcrição com tempos por palavra, silêncios, frases numeradas, candidatos da IA em IDs de frase com tese, máquina, polémica, riscos, pontuação e justificação, portão da dignidade, diversidade, 25-60 s com cortes limpos, documento v1 por corte com gancho no 0:00, título, 3 hooks, contexto e CTA), capacidade `clips.mine`, flag `clips.miner`, página `/c/[ws]/cortes` com progresso real, cortes e "Exportar todos", cortes na revisão em lote. Migração `20261106065110_w10_clip_miner.sql` por aplicar. Oradores UNVERIFIED; reframe por orador ativo por fazer (corte ao centro). Testes `w10_clip_miner` 38/38, `clips-format` 8/8, motor `test_clips` 21/21.
