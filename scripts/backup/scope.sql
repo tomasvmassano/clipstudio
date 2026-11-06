@@ -17,7 +17,7 @@ declare
   -- catálogos globais: sem dados de clientes
   global_t text[] := array['agent_definitions','agent_models','agent_tool_prices','agent_workers','biz_metrics','capabilities',
                            'dashboard_widgets','feature_flag_defs','integration_types','notification_channel_defs',
-                           'notification_event_defs','role_capabilities'];
+                           'notification_event_defs','ops_health_runs','role_capabilities'];
   -- dados da agência (organização), não de outro cliente
   org_t text[] := array['agency_memberships','fx_rates','pub_platform_limits'];
   -- dados por pessoa: só as pessoas ligadas ao cliente
