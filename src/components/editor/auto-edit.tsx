@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ClapperboardIcon, Loader2Icon, RotateCwIcon, SparklesIcon } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -15,9 +15,12 @@ import type { Access } from "@/lib/access";
 import { fetchGuioes, todayDubai } from "@/lib/data";
 import { EXPORT_STATUS, exportPackage, listEditDocs, listPackages, requestPackage, type PackageExportResult, type PackageJob } from "@/lib/edit-media";
 import { fetchLibrary } from "@/lib/media";
+import { packageErrorText } from "@/lib/package-errors";
 
 const STYLES = [{ id: "S15", label: "S15 · frases com destaque" }, { id: "S14", label: "S14 · uma palavra de cada vez" }];
 const pct = (x: number | null | undefined) => (x == null ? "?" : `${Math.round(x * 100)}%`);
+
+const FAILED = new Set(["failed", "dead", "cancelled"]);
 
 /** Edição automática: pedir o pacote de uma sessão, ver o progresso real do job e abrir os vídeos no editor. */
 export function AutoEditView({ access }: { access: Access }) {
@@ -45,6 +48,8 @@ export function AutoEditView({ access }: { access: Access }) {
   const [style, setStyle] = useState("S15");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+  const formRef = useRef<HTMLElement>(null);
   const guioes = useMemo(() => [...(gui.last ?? [])].filter((g) => g.editorial_status !== "archived" && g.editorial_status !== "rejected")
     .sort((a, b) => (a.date === b.date ? a.n - b.n : a.date < b.date ? 1 : -1)), [gui.last]);
   const sel = picked ?? new Set(guioes.filter((g) => g.date === todayDubai()).map((g) => g.id));
@@ -57,6 +62,19 @@ export function AutoEditView({ access }: { access: Access }) {
       await requestPackage(access, front, side, ordered, style);
       setTick((n) => n + 1);
     } catch (e) { setErr((e as Error).message); } finally { setBusy(false); }
+  };
+  // "Tentar de novo" num pacote que falhou: volta a preencher o formulário com as mesmas câmaras e guiões; a pessoa confirma.
+  const retryFrom = (j: PackageJob) => {
+    const sideRec = recordings.find((a) => a.current!.id === j.version_id) ?? recordings.find((a) => (a.current!.original_name ?? a.title) === j.side_name);
+    const frontRec = recordings.find((a) => (a.current!.original_name ?? a.title) === j.front_name && a.current!.id !== sideRec?.current!.id);
+    setSide(sideRec?.current!.id ?? ""); setFront(frontRec?.current!.id ?? "");
+    const ids = (j.guioes ?? []).filter((g) => !g.deleted).map((g) => g.id);
+    const shown = new Set(guioes.map((g) => g.id));
+    setPicked(new Set(ids.filter((id) => shown.has(id))));
+    const missing = [!sideRec || !frontRec ? "uma das gravações já não está na Biblioteca (escolhe-a outra vez)" : null,
+      ids.some((id) => !shown.has(id)) ? "há guiões com mais de 10 dias que não aparecem na lista" : null].filter(Boolean);
+    setNotice(`Preenchi o pacote com as mesmas câmaras e guiões${missing.length ? `, mas ${missing.join(" e ")}` : ""}. Revê e carrega em Criar pacote.`);
+    formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
   const reason = !mayRequest ? "Sem permissão para pedir pacotes (precisa de editar na linha do tempo)."
     : !front || !side ? "Escolhe as duas gravações." : front === side ? "As duas câmaras têm de ser gravações diferentes."
@@ -73,7 +91,7 @@ export function AutoEditView({ access }: { access: Access }) {
       </div>
 
       {mayRequest && (
-        <section className="rounded-xl border p-4" aria-labelledby="novo-pacote">
+        <section ref={formRef} className="rounded-xl border p-4" aria-labelledby="novo-pacote">
           <h2 id="novo-pacote" className="mb-3 font-medium">Novo pacote</h2>
           {lib.error ? <LoadState loading={false} error={lib.error} reload={lib.reload} label="as gravações">{null}</LoadState> : !lib.last ? <Skeleton className="h-24" /> : recordings.length < 2 ? (
             <Alert><AlertDescription>Carrega primeiro na <Link className="underline" href={`/c/${access.ws}/biblioteca`}>Biblioteca</Link> as duas gravações da sessão (câmara da frente e câmara do lado, com o som). Precisam de estar prontas (verificadas no servidor).</AlertDescription></Alert>
@@ -118,6 +136,7 @@ export function AutoEditView({ access }: { access: Access }) {
             {reason && <span className="text-xs text-muted-foreground">{reason}</span>}
           </div>
           {err && <p className="mt-2 text-sm text-destructive" role="alert">{err}</p>}
+          {notice && <p className="mt-2 text-sm text-muted-foreground" role="status">{notice}</p>}
         </section>
       )}
 
@@ -125,7 +144,7 @@ export function AutoEditView({ access }: { access: Access }) {
         <h2 id="pacotes" className="mb-2 font-medium">Pacotes</h2>
         <LoadState loading={!jobs.last && !jobs.error} error={jobs.error} reload={jobs.reload} label="os pacotes">
           {(jobs.last ?? []).length === 0 ? <p className="text-sm text-muted-foreground">Ainda não há pacotes.</p> : (
-            <div className="flex flex-col gap-2">{(jobs.last ?? []).map((j) => <PackageRow key={j.id} j={j} access={access} mayExport={mayExport} onDone={() => setTick((n) => n + 1)} />)}</div>
+            <div className="flex flex-col gap-2">{(jobs.last ?? []).map((j) => <PackageRow key={j.id} j={j} access={access} mayExport={mayExport} onRetry={mayRequest ? () => retryFrom(j) : undefined} onDone={() => setTick((n) => n + 1)} />)}</div>
           )}
         </LoadState>
       </section>
@@ -158,7 +177,7 @@ export function AutoEditView({ access }: { access: Access }) {
   );
 }
 
-function PackageRow({ j, access, mayExport, onDone }: { j: PackageJob; access: Access; mayExport: boolean; onDone: () => void }) {
+function PackageRow({ j, access, mayExport, onRetry, onDone }: { j: PackageJob; access: Access; mayExport: boolean; onRetry?: () => void; onDone: () => void }) {
   const ws = access.ws;
   const running = j.status === "running";
   const [busy, setBusy] = useState(false);
@@ -176,7 +195,14 @@ function PackageRow({ j, access, mayExport, onDone }: { j: PackageJob; access: A
       </div>
       {running && <div className="mt-2 flex items-center gap-2"><Progress value={j.progress?.pct ?? 0} className="h-2 flex-1" /><span className="text-xs tabular-nums">{Math.round(j.progress?.pct ?? 0)}% · {j.progress?.step ?? ""}</span></div>}
       {j.status === "queued" && !j.worker_seen && <p className="mt-1 text-xs text-muted-foreground">O worker não está ligado agora: o pedido fica na fila e começa quando ele voltar.</p>}
-      {j.last_error && j.status !== "done" && <p className="mt-1 text-xs text-destructive">{j.last_error}</p>}
+      {FAILED.has(j.status) && (
+        <div className="mt-2 flex flex-col gap-1" role="alert">
+          <p className="text-sm text-destructive">{packageErrorText(j.last_error)}</p>
+          {j.last_error && <details className="text-xs text-muted-foreground"><summary className="cursor-pointer">Detalhe técnico</summary><code className="break-all">{j.last_error}</code></details>}
+          {onRetry && <div><Button size="sm" variant="outline" onClick={onRetry}><RotateCwIcon /> Tentar de novo</Button></div>}
+        </div>
+      )}
+      {j.last_error && !FAILED.has(j.status) && j.status !== "done" && <p className="mt-1 text-xs text-muted-foreground">Tentativa anterior falhou ({packageErrorText(j.last_error)}). O worker volta a tentar sozinho.</p>}
       {j.outputs.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-1">
           {j.outputs.map((o) => <Link key={o.asset_id} className="rounded border px-2 py-0.5 text-xs hover:bg-muted" href={`/c/${ws}/editor?asset=${o.asset_id}`}>{o.title}</Link>)}
