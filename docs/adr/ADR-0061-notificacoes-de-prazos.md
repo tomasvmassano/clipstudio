@@ -26,4 +26,4 @@
 
 ## Rollback
 
-Bloco no fim de `PENDING_w10_prazos.sql` (unschedule, drop trigger/funções/tabela, apagar tipos e repor os checks a partir da definição atual). A app não depende de nada novo: os tipos desconhecidos caem em "Outras"/"Aviso".
+Bloco no fim de `20261106060451_w10_prazos.sql` (unschedule, drop trigger/funções/tabela, apagar tipos e repor os checks a partir da definição atual). A app não depende de nada novo: os tipos desconhecidos caem em "Outras"/"Aviso".

@@ -119,7 +119,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-10-04 | P1 | parcial | sem orçamentos, limite soft, alertas nem autorização para ultrapassar | Orçamentos, limites rígidos/soft, alertas e autorização para ultrapassar quota. |
 | FR-10-05 | P1 | parcial | custo por vídeo (sem custos de render) | Custo por guião, vídeo e publicação; tendência mensal e exportação. |
 | FR-11-03 | P1 | parcial | sem vistas por equipa, plataforma, campanha; sem deteção de conflitos | Vistas por equipa, plataforma, campanha e estado; conflitos e atrasos destacados |
-| FR-11-04 | P1 | parcial | aplicar PENDING_w10_prazos em produção, ligar a flag notifications.deadlines e verificar com sessão real (R-15) | Templates de produção, checklist por conteúdo e notificações. |
+| FR-11-04 | P1 | parcial | aplicar 20261106060451_w10_prazos em produção, ligar a flag notifications.deadlines e verificar com sessão real (R-15) | Templates de produção, checklist por conteúdo e notificações. |
 | FR-11-05 | P1 | parcial | sem ficheiros, revisões nem publicações ligadas | Links para guiões, ficheiros, revisões e publicações. |
 | FR-13-03 | P1 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | Múltiplos workspaces por utilizador, papéis independentes e mudança de contexto  |
 | FR-13-04 | P1 | parcial | sem transferência de propriedade | Desativar membro, transferir propriedade, impedir remoção do último Owner. |
@@ -137,7 +137,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | TEAM-09 | P1 | parcial | sem etapas, aprovadores e SLA por tipo de conteúdo | Workflow adaptável por cliente |
 | TEAM-10 | P1 | parcial | diretor criativo tratado como lado da agência (decisão); verificação com conta real (R-15) | Aprovações sem conflito |
 | TEAM-11 | P1 | parcial | sem acesso limitado a projetos/tarefas para convidados | Freelancer/guest |
-| TEAM-12 | P1 | parcial | aplicar PENDING_w10_prazos em produção, ligar a flag notifications.deadlines e verificar com sessão real (R-15) | Notificações direcionadas |
+| TEAM-12 | P1 | parcial | aplicar 20261106060451_w10_prazos em produção, ligar a flag notifications.deadlines e verificar com sessão real (R-15) | Notificações direcionadas |
 | TEAM-13 | P1 | parcial | sem definições da agência nem /perfil | Separação de settings |
 | TEAM-14 | P1 | parcial | sem ficheiros brutos, versões de edição, clips e entregas | Produção e edição |
 | TEAM-15 | P1 | parcial | sair da equipa não pede reatribuição | Transferência e offboarding |
@@ -375,7 +375,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-11-01 | parcial | arrastar não verificado em produção; verificação com conta de cliente (R-15); E2E citado não está versionado no repo | /calendario dia/semana/mês, arrastar com validação; content_reschedule; w3_calendar 39/39; produção 03/11: vistas semana e mês, navegação de mês, guiões e tarefas no dia | 2026-11-03 (sessão real do dono da agência, produção) |
 | FR-11-02 | parcial | verificação com sessão real (R-15) da equipa Numeiro | tarefas, gravações, dependências; W3-01, W3-02; calendário com revisões de vídeo e publicações planeadas (W9-03); w9_calendario 14/14; migração aplicada em produção 2026-11-06 | — |
 | FR-11-03 | parcial | sem vistas por equipa, plataforma, campanha; sem deteção de conflitos | atrasados a vermelho; limitações W3-02 | — |
-| FR-11-04 | parcial | aplicar PENDING_w10_prazos em produção, ligar a flag notifications.deadlines e verificar com sessão real (R-15) | template_apply, content_checklist; w3_templates 35/35; W3-03; W10-14 (#83): avisos de prazo 24 h/atraso, guião por aprovar com gravação amanhã, revisão de vídeo atrasada, mudança de prazo; tick pg_cron 15 min; w10_prazos 39/39 | — |
+| FR-11-04 | parcial | aplicar 20261106060451_w10_prazos em produção, ligar a flag notifications.deadlines e verificar com sessão real (R-15) | template_apply, content_checklist; w3_templates 35/35; W3-03; W10-14 (#83): avisos de prazo 24 h/atraso, guião por aprovar com gravação amanhã, revisão de vídeo atrasada, mudança de prazo; tick pg_cron 15 min; w10_prazos 39/39 | — |
 | FR-11-05 | parcial | sem ficheiros, revisões nem publicações ligadas | detalhe do guião com tarefas no calendário (W3-02) | — |
 
 ## M12 — Publicação
@@ -448,7 +448,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | TEAM-09 | parcial | sem etapas, aprovadores e SLA por tipo de conteúdo | task_rules por cliente W3-01 | — |
 | TEAM-10 | parcial | diretor criativo tratado como lado da agência (decisão); verificação com conta real (R-15) | pub_approval_policies (agência, cliente, ambos, sem autoaprovação) (W7, ADR-0036); w7_pub | — |
 | TEAM-11 | parcial | sem acesso limitado a projetos/tarefas para convidados | expires_at em workspace_access e permission_grants | — |
-| TEAM-12 | parcial | aplicar PENDING_w10_prazos em produção, ligar a flag notifications.deadlines e verificar com sessão real (R-15) | _notify só a quem tem acesso; w3_tasks 53/53; W10-14: prazos e mudanças de prazo só a quem tem acesso atual e a capacidade do caso; removido e outro cliente nada; w10_prazos 39/39 | — |
+| TEAM-12 | parcial | aplicar 20261106060451_w10_prazos em produção, ligar a flag notifications.deadlines e verificar com sessão real (R-15) | _notify só a quem tem acesso; w3_tasks 53/53; W10-14: prazos e mudanças de prazo só a quem tem acesso atual e a capacidade do caso; removido e outro cliente nada; w10_prazos 39/39 | — |
 | TEAM-13 | parcial | sem definições da agência nem /perfil | /c/[ws]/definicoes W1-07; /definicoes é só redirecionamento para o cliente | — |
 | TEAM-14 | parcial | sem ficheiros brutos, versões de edição, clips e entregas | recording_sessions e takes ligados ao guião (W2-05) | — |
 | TEAM-15 | parcial | sair da equipa não pede reatribuição | member_remove com reatribuição de tarefas W1-06; w1_clients 55/55 | — |
