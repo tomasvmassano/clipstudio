@@ -287,3 +287,8 @@ Colar (`reference_paste`, `references.manage`, flag `references.link`): link de 
 ## Saúde do sistema e alertas (W10-01, ADR-0058)
 
 Sem estados novos nos trabalhos. Tick (pg_cron, 5 min) → para cada cliente e origem com trabalho pronto sem worker capaz visto em 10 min: incidente `worker_down` (chave: origem + cliente + último contacto do worker, ou "nunca") → se novo, `system_health` aos donos da agência; trabalho `dead` nas últimas 24 h: incidente `job_dead` (chave: origem + trabalho) → se novo, avisa os donos que ainda não receberam `automation_error` desse trabalho. Repetir o tick não cria nada (dedupe na tabela e em `_notify`). O worker voltar e cair outra vez é incidente novo.
+
+## Pacote por guião (W10-20, ADR-0070)
+
+Gravação ligada a guião + câmara (`recording_clips`) → quando a frente e o lado desse guião estão prontas (verificadas pelo worker) e o automático está ligado, ou à mão ("Criar pacote deste guião") → job `package` com `mode = 'script'` (`queued` → `running` → `done`/`failed`/`dead`; idempotente por guião, versões das gravações e estilo; falhado permite pedir outra vez) → versões 1 por hook (`ai`) → `done` avisa quem pediu (ou quem ligou o automático) → se "exportar todos automático": um job `export` por vídeo → `in_review` na revisão em lote. Automático que não corre fica com o motivo em `package_script_status` (sem permissão, flag desligada, nome repetido, sem R2). Gravação nova (versão nova ou outro ficheiro) = pacote novo.
+
