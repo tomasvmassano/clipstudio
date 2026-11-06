@@ -2,7 +2,7 @@
 
 ## 2026-11-06 (tentativas recusadas no histórico)
 
-- **W10-16** tentativas recusadas passam a ficar em `audit_events` (R-05, FR-13-05; ADR-0066). Como o 42501 desfaz a transação, quem recebe a recusa (browser ou rota `/api`, pelo `fetch` do cliente Supabase em `src/lib/denials.ts`) faz um segundo pedido a `audit_denied_record`, que grava com o ator da sessão (`auth.uid()`), tentativa, capacidade confirmada, afiliação, via, correlação e pseudónimos do dia de IP e browser; limite de 30 por pessoa por minuto; tentativas a um cliente sem acesso ficam fora do histórico desse cliente e só a agência as vê. Separador "Tentativas recusadas" em Histórico (`audit_denials_list`, `audit.read`). O RAISE LOG continua. Migração `PENDING_w10_auditoria_negacoes.sql` (aditiva). Testes `w10_auditoria_negacoes` 35/35, `denials` 27/27.
+- **W10-16** tentativas recusadas passam a ficar em `audit_events` (R-05, FR-13-05; ADR-0066). Como o 42501 desfaz a transação, quem recebe a recusa (browser ou rota `/api`, pelo `fetch` do cliente Supabase em `src/lib/denials.ts`) faz um segundo pedido a `audit_denied_record`, que grava com o ator da sessão (`auth.uid()`), tentativa, capacidade confirmada, afiliação, via, correlação e pseudónimos do dia de IP e browser; limite de 30 por pessoa por minuto; tentativas a um cliente sem acesso ficam fora do histórico desse cliente e só a agência as vê. Separador "Tentativas recusadas" em Histórico (`audit_denials_list`, `audit.read`). O RAISE LOG continua. Migração `20261106060524_w10_auditoria_negacoes.sql` (aditiva). Testes `w10_auditoria_negacoes` 35/35, `denials` 27/27.
 
 ## 2026-11-06 (CHG-008 gravação, aprendizagem e cortes)
 

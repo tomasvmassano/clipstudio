@@ -36,4 +36,4 @@ As RPCs recusam com `raise exception … errcode '42501'`. O RAISE desfaz a tran
 
 ## Rollback
 
-Bloco no topo de `PENDING_w10_auditoria_negacoes.sql` (drop das duas funções e dos três índices). As linhas já gravadas ficam (append-only). Sem a função, o wrapper recebe 404 no segundo pedido e ignora (melhor-esforço).
+Bloco no topo de `20261106060524_w10_auditoria_negacoes.sql` (drop das duas funções e dos três índices). As linhas já gravadas ficam (append-only). Sem a função, o wrapper recebe 404 no segundo pedido e ignora (melhor-esforço).
