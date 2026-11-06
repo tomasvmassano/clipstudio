@@ -60,6 +60,19 @@ approved | rejected → archived   (regras)
 | approved → in_review | `scripts.approve` | retirar aprovação | `script.unapproved` |
 | * → archived, archived → (estado anterior) | `scripts.delete` | sem eliminação definitiva | `script.archived`, `script.restored` |
 
+## Lições do motor (LRN-01..04, W10-19, ADR-0069)
+
+Sinais (`lrn_edit_signals`, só de acrescentar): `edit` (motivo ao concluir uma edição, opcional), `approved` / `approved_unedited` / `changes_requested` / `rejected` (na decisão por `content_decide_learned`, mesmas regras das transições editoriais acima). Aprovar um guião do motor com mais de 30% do texto mudado exige um chip ou texto (22023). Eventos de audit: `lrn.edit_reason`, `lrn.decision_signal`.
+
+| De → para | Capacidade | Regra | Evento |
+| --- | --- | --- | --- |
+| (Editor de lições) → proposed | `engine_worker` (job `lesson_editor`) | idempotente por execução e posição; evidência refeita na base, só sinais deste cliente e desta janela | `lrn.lesson_proposed` |
+| proposed → approved | `learn.lessons.approve` (cliente) / `learn.lessons.agency` (agência) | texto editável só aqui; cria versão nova do conjunto e ativa-a | `lrn.lesson_approved`, `lrn.version_created`, `learn.lessons_version_activated` |
+| proposed → rejected | idem | nota opcional; não cria versão | `lrn.lesson_rejected` |
+| em vigor → retirada | idem | versão nova sem a lição | `lrn.version_created` |
+| versão N → versão nova = N | idem | voltar atrás; nada é apagado | `lrn.version_created` |
+| aprovada (cliente) → proposta da agência | `learn.lessons.agency` | copia só a regra e a categoria | `lrn.lesson_promoted` |
+
 ## Produção (por conteúdo, W3-02)
 
 `not_started → scheduled → recorded → editing → ready → published` (publicação no W6), `cancelled` a partir de qualquer estado menos publicado. `recording` fica reservado para a sessão aberta.

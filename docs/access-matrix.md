@@ -10,6 +10,7 @@ Fonte: PRD v2.1 §3 (papéis), §5A (TEAM-01…16), CAP-03/05/08. **PROPOSTA de 
 | --- | --- | --- | --- | --- |
 | `workspaces.read` (lista `/clientes`) | todos, incluindo arquivados | só os atribuídos | — (troca pelos atribuídos no seletor) | — (idem) |
 | `workspaces.create` / `archive` | ✓ | — (delegar exige grants de âmbito org, por fazer) | — | — |
+| `learn.lessons.agency`: lições gerais da agência (W10-19, ADR-0069) | ✓ | ✓ | — | — |
 | `team.invite` (staff interno) | ✓ | se delegado | — | — |
 | `team.manage` (atribuir staff a clientes, `agency_staff_assign`) | ✓ | — (idem) | — | — |
 | `permissions.manage` (org) | ✓ | limitado | — | — |
@@ -48,6 +49,7 @@ Um `agency_member` sem atribuição a um workspace **não vê nada** desse works
 | `publishing.publish`: registar publicação manual (W10-03, ADR-0056) | ✓ | ✓ | ✓ | — (grant) | — (grant) | — |
 | `learn.read` (W7) | ✓ | ✓ | ✓ | — | ✓ | — |
 | `learn.manage` (W7) | ✓ | ✓ | ✓ | — | — | — |
+| `learn.lessons.approve`: aprovar/rejeitar lições do cliente (W10-19, ADR-0069) | ✓ | ✓ | ✓ | — | — | — |
 | `calendar.read` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `calendar.schedule` | ✓ | ✓ | ✓ | — | — | — |
 | `production.update` | ✓ | ✓ | ✓ | ✓ (own) | — | — |
