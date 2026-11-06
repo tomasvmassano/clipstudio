@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-06 (verificador antes da revisão humana)
+
+- **W10-06** verificador do motor antes da revisão humana (VAR-04, R-17; ADR-0054): o motor classifica cada hook depois do Crítico e do Editor (persona só da lista aprovada, opinião atribuída, facto com fonte datada e nunca dado como verificado, terceiro identificado com marca jurídica, afirmação com validade e data de expiração, PT-PT) e a revisão mostra as marcas por hook com o porquê e as versões (verificador, modelo, prompts, lista). Não aprova nem rejeita: quem revê decide. Migração aditiva `script_verifications` (fechada à API) + `worker_save_verification` (só o worker, guiões da própria execução, idempotente) + `content_verifications` (`scripts.read`); flag `scripts.verifier` ligada para todos. numeiro-engine #18. Testes `w10_verificador` 27/27, `verifier-format` 12/12, motor `test_verifier` 19/19; suite SQL 2168 casos.
+
 ## 2026-11-06 (CHG-008 gravação, aprendizagem e cortes)
 
 - **CHG-008** (só documentação; PRD §46). GAZE-01..06: teleprompter com coluna ligada à distância, linha de foco, modo frase, ritmo por pedal, hooks de memória, pontuação de olhar por take e piloto opcional de correção por IA. LRN-01..07: motivo em cada edição, agente "Editor de lições", lições aprovadas como versão da configuração em dois níveis (agência e cliente). CLIP-01..11: cortes de vídeos longos com o agente Clip Miner, com prioridade. STU-01..05: captura direta das câmaras com cópia no cartão, agente de estúdio e pacote de edição por guião. 5 capacidades planeadas. Sem alteração funcional.
