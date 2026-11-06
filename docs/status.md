@@ -384,7 +384,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
 | FR-12-01 | por começar | sem módulo de publicação | publishing.* planeadas (W6) | — |
-| FR-12-02 | parcial | agendamento por API (PLAT-03/PUB-01); verificação com sessão real (R-15); E2E | registo manual de URL, hora e vídeo aprovado (pub_record_published, W10-03, ADR-0054); w10_publicacao_manual 53/53 | — |
+| FR-12-02 | parcial | agendamento por API (PLAT-03/PUB-01); verificação com sessão real (R-15); E2E | registo manual de URL, hora e vídeo aprovado (pub_record_published, W10-03, ADR-0056); w10_publicacao_manual 53/53 | — |
 | FR-12-03 | por começar | sem fila de publicação | nada no código | — |
 | FR-12-04 | por começar | sem publicação | nada no código | — |
 | FR-12-05 | por começar | sem publicação | nada no código | — |
@@ -613,7 +613,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 |---|---|---|---|---|
 | R-16 | parcial | correspondência por impressão digital com os nossos renders | origem externo nas importadas, perf_origin_set com motivo e auditoria (W6, ADR-0033); w6_perf | — |
 | R-17 | parcial | verificação com sessão real (R-15); verificador de títulos fora da lista (VAR-04); lista do Numeiro por preencher | persona_lists versionada e imutável, persona_list_get/version/save com consentimento de terceiros, persona.manage, worker_claim.persona, aba Agentes → Frases-persona (W5-14, ADR-0053); w5_persona_phrases 21/21; persona-rules 11/11; numeiro-engine #14 test_persona 4/4; E2E persona-phrases 4/4 (admin grava v1/v2, outra pessoa sem consentimento bloqueada na UI e no servidor 22023, histórico, manager só leitura 42501, cliente B 42501; W5-15); aba verificada em produção com a conta do Tomás (2026-11-06) | — |
-| R-18 | parcial | publicador por API (PUB-01); formato de reels.id no TikTok/YouTube por confirmar | linhagem gravada imutável e idempotente; importadas inferidas e marcadas (W6, ADR-0033); w6_perf; registo manual grava a linhagem no momento (W10-03, ADR-0054) | — |
+| R-18 | parcial | publicador por API (PUB-01); formato de reels.id no TikTok/YouTube por confirmar | linhagem gravada imutável e idempotente; importadas inferidas e marcadas (W6, ADR-0033); w6_perf; registo manual grava a linhagem no momento (W10-03, ADR-0056) | — |
 | R-19 | adiado | decisão do Tomás 29/10: métricas passam a vir da API oficial no futuro; por agora continua o Apify (engine/scrape.py). Fecha com PERF-08/PLAT-02 | engine/scrape.py ApifyClient; ADR-0005 | — |
 
 ## 38. Vista de negócio da agência (BIZ)

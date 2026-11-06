@@ -1,5 +1,5 @@
 -- supabase/tests/w10_publicacao_manual.sql : registo da publicação manual (FR-12-02; FR-21-02, FR-21-04; R-16, R-18, PERF-02;
--- ADR-0054). Vídeo aprovado vs por aprovar vs versão antiga, publicação por aprovar, idempotência, correção com motivo,
+-- ADR-0056). Vídeo aprovado vs por aprovar vs versão antiga, publicação por aprovar, idempotência, correção com motivo,
 -- validação do URL por plataforma, linhagem gravada e ligada ao publication_id, isolamento (cliente B, revisor sem a
 -- capacidade, código de equipa, membro removido), auditoria, eventos e notificação. Rollback no fim (raise).
 do $$

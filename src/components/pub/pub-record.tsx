@@ -30,7 +30,7 @@ type Props = {
 };
 
 /**
- * Registar uma publicação feita à mão (FR-12-02, ADR-0054): link do post, hora, vídeo aprovado e conta da publicação aprovada.
+ * Registar uma publicação feita à mão (FR-12-02, ADR-0056): link do post, hora, vídeo aprovado e conta da publicação aprovada.
  * A app não publica nada. O servidor volta a verificar tudo (aprovação, versão atual aprovada, URL da plataforma, duplicados)
  * e grava a linhagem para as métricas ficarem nesta publicação. Corrigir um registo exige motivo.
  */

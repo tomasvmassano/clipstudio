@@ -1,4 +1,4 @@
-/* Registo da publicação manual (FR-12-02, ADR-0054): link público do post por plataforma. Regra pura, igual a
+/* Registo da publicação manual (FR-12-02, ADR-0056): link público do post por plataforma. Regra pura, igual a
  * public._pub_post_url no servidor (que é quem decide); aqui só avisa enquanto se escreve. Sem dependências, testável em node. */
 
 export type PostPlatform = "instagram" | "tiktok" | "youtube";

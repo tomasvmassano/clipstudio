@@ -1,4 +1,4 @@
-# ADR-0054 — Registo da publicação manual (W10-03)
+# ADR-0056 — Registo da publicação manual (W10-03)
 
 **Data:** 2026-11-06 · **Estado:** proposta (aguarda aprovação do owner: "ainda não, mas deixa na fila") · **Requisitos:** PRD FR-12-02, FR-21-02, FR-21-04, R-16, R-18, PERF-02, PUB-04, PUB-06; AGENTS §2.6, §2.7, §6, §8.
 

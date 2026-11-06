@@ -43,7 +43,7 @@ Um `agency_member` sem atribuição a um workspace **não vê nada** desse works
 | `publishing.schedule` (W7) | ✓ | ✓ | ✓ | — | — | — |
 | `publishing.approve` (W7) | ✓ | ✓ | ✓ | — | — | — |
 | `publishing.republish.approve` / `publishing.policy.manage` / `social_accounts.manage` (W7) | ✓ | ✓ | — | — | — | — |
-| `publishing.publish`: registar publicação manual (W10-03, ADR-0054) | ✓ | ✓ | ✓ | — (grant) | — (grant) | — |
+| `publishing.publish`: registar publicação manual (W10-03, ADR-0056) | ✓ | ✓ | ✓ | — (grant) | — (grant) | — |
 | `learn.read` (W7) | ✓ | ✓ | ✓ | — | ✓ | — |
 | `learn.manage` (W7) | ✓ | ✓ | ✓ | — | — | — |
 | `calendar.read` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |

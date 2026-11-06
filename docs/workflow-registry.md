@@ -213,7 +213,7 @@ Escolher guiões, ação, pré-visualização (o servidor corre e desfaz; mostra
 
 `planeada` → `aprovada` (só por `pub_approve`, com a política do cliente cumprida para a revisão atual e a versão aprovada do guião) → (PUB-01: a publicar, publicada, falhou); `cancelada` com motivo. Mudar versão, variante, conta, hora, legenda, hashtags ou origem cria revisão nova, volta a `planeada` e invalida as aprovações. Limites das APIs recusam o planeamento acima do limite. Variante nova muda pelo menos 2 de 5 elementos; irmã na mesma plataforma com menos de 2 diferenças é bloqueada. Nada publica.
 
-### Registo da publicação manual (W10-03, FR-12-02, ADR-0054)
+### Registo da publicação manual (W10-03, FR-12-02, ADR-0056)
 
 `aprovada` → `publicada` só por `pub_record_published` (`publishing.publish`, sessão individual), com: a política de aprovação cumprida para a revisão atual, a versão do guião ainda aprovada, o vídeo = versão atual de um ativo do guião com `media_reviews.status = approved`, link do post válido para a plataforma da conta (e da mesma conta, se o link a trouxer), hora não futura e não anterior à aprovação. No mesmo passo grava a linhagem (`_perf_record_lineage`, `correlation_id = pub:<id>`) e liga-a (`_pub_link_lineage`). `publicada` é final: não se muda, não se cancela, não se volta a ligar. O mesmo registo repetido não faz nada (`replayed`); o mesmo post noutra publicação é recusado; mudar link, hora ou vídeo só por correção com motivo (atualiza a mesma linhagem, audita antes/depois).
 
