@@ -26,4 +26,4 @@ O que o Supabase permite por SQL (verificado na imagem `supabase/postgres:17.11`
 - Realtime: os canais privados autorizam pelas políticas no momento de entrar; um canal já aberto pode continuar a receber até o Realtime voltar a verificar ou o token expirar. URLs assinados já emitidos valem até ao fim do prazo (R-11: precisa de proxy ou rotação; fora deste ADR).
 - O proxy da app (`getClaims`) valida o JWT localmente e não vê sessões terminadas; a barreira é a base de dados, e a app sai no primeiro `my_context` recusado ou no refresh falhado.
 - O código de equipa partilhado (MIG-04) não usa sessões do Auth; continua com as suas regras até ser retirado.
-- A migração vai como `PENDING_w10_sessoes.sql`: o `supabase` CLI só a aplica (e o E2E `e2e/sessions.spec.ts` só corre) depois de ganhar o nome com data. Rollback no fim da migração (testado na stack local).
+- A migração vai como `20261106064909_w10_sessoes.sql`: o `supabase` CLI só a aplica (e o E2E `e2e/sessions.spec.ts` só corre) depois de ganhar o nome com data. Rollback no fim da migração (testado na stack local).

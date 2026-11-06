@@ -124,7 +124,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-13-03 | P1 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | Múltiplos workspaces por utilizador, papéis independentes e mudança de contexto  |
 | FR-13-04 | P1 | parcial | sem transferência de propriedade | Desativar membro, transferir propriedade, impedir remoção do último Owner. |
 | FR-13-05 | P1 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | Auditoria de convites, alterações de papéis e ações críticas. |
-| FR-14-03 | P1 | parcial | verificação com sessão real (R-15) em produção depois de aplicar PENDING_w10_sessoes | Sessões/dispositivos ativos, terminar sessões e histórico de segurança. |
+| FR-14-03 | P1 | parcial | verificação com sessão real (R-15) em produção | Sessões/dispositivos ativos, terminar sessões e histórico de segurança. |
 | FR-14-05 | P1 | parcial | política de eliminação | Exportação dos próprios dados e pedido de eliminação conforme política. |
 | FR-15-03 | P1 | parcial | ligar e renovar indisponíveis sem OAuth; testar só recolha de métricas e motor | Integrações: conectar, testar, renovar, revogar e ver saúde de cada integração. |
 | FR-15-04 | P1 | parcial | sem política de aprovação de IA nas definições | IA: prompts, modelos, limites, permissões e política de aprovação. |
@@ -406,7 +406,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 |---|---|---|---|---|
 | FR-14-01 | parcial | recuperação por email depende do SMTP do Supabase (limitado) até haver domínio (FR-13-01 adiado); verificação com a conta real do Tomás em produção | W1-15 /perfil: nome, fotografia, email verificado, mudar e recuperar palavra-passe, MFA TOTP aplicado no servidor (_mfa_ok); w1_profile_mfa 24/24; e2e/profile.spec.ts 3/3; ADR-0024 | 2026-10-29 (E2E) |
 | FR-14-02 | parcial | idioma só PT-PT; email e resumo pessoais guardados mas sem envio; verificação com sessão real | preferências do teleprompter e theme-switcher; fuso e tema no perfil (W1-15); W8: preferências pessoais de notificações e silêncio por cliente no perfil (ADR-0040) | — |
-| FR-14-03 | parcial | verificação com sessão real (R-15) em produção depois de aplicar PENDING_w10_sessoes | terminar sessão em todos os dispositivos e histórico de segurança (W1-15, my_security_log); W10-08: /perfil sessões e dispositivos (my_sessions, session_terminate, sessions_terminate_others, terminar esta sessão); w10_sessoes 44/44; e2e/sessions.spec.ts; ADR-0061 | — |
+| FR-14-03 | parcial | verificação com sessão real (R-15) em produção | terminar sessão em todos os dispositivos e histórico de segurança (W1-15, my_security_log); W10-08: /perfil sessões e dispositivos (my_sessions, session_terminate, sessions_terminate_others, terminar esta sessão); w10_sessoes 44/44; e2e/sessions.spec.ts; ADR-0061 | — |
 | FR-14-04 | feito |  | workspace-switcher; my_context; cliente preferido no perfil, usado ao entrar (W1-15); e2e/profile.spec.ts | 2026-10-29 (E2E) |
 | FR-14-05 | parcial | política de eliminação | exportar os meus dados em JSON e pedido de eliminação (W7, ADR-0037); w7_learn; e2e/learn.spec.ts | — |
 
