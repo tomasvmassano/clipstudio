@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-06 (verificador antes da revisão humana)
+
+- **W10-06** verificador do motor antes da revisão humana (VAR-04, R-17; ADR-0057): o motor classifica cada hook depois do Crítico e do Editor (persona só da lista aprovada, opinião atribuída, facto com fonte datada e nunca dado como verificado, terceiro identificado com marca jurídica, afirmação com validade e data de expiração, PT-PT) e a revisão mostra as marcas por hook com o porquê e as versões (verificador, modelo, prompts, lista). Não aprova nem rejeita: quem revê decide. Migração aditiva `script_verifications` (fechada à API) + `worker_save_verification` (só o worker, guiões da própria execução, idempotente) + `content_verifications` (`scripts.read`); flag `scripts.verifier` ligada para todos. numeiro-engine #18. Testes `w10_verificador` 27/27, `verifier-format` 12/12, motor `test_verifier` 19/19; suite SQL 2168 casos.
+
 ## 2026-11-06
 
 - **W10-04** referências por link (REF-01..04, FR-07-01, FR-07-04; ADR-0059): Referências → Colar link (Reel/TikTok; o mesmo vídeo em qualquer formato de link abre o que já existe); Dissecção pelo motor (hook e mecanismo, máquina, tese, inimigo, estrutura com tempos, ritmo, métricas públicas e índice face à mediana do autor, afirmações sobre terceiros), versionada com modelo e versões de prompt/agente, com caminho manual (transcrição colada); Gerar 3 guiões com 3 hooks cada, em revisão e marcados "via rápida", bloqueados se parecidos demais com o original. Capacidades `references.analyze` e `references.adapt`, flag `references.link` (equipa da agência). Migração aditiva `20261106060744_w10_referencias_link.sql`; testes `w10_referencias_link` 65/65, `reference-link` 13/13; motor numeiro-engine#19 `test_reference` 15/15.

@@ -11,8 +11,8 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | Estado | Requisitos |
 |---|---|
 | feito | 25 |
-| parcial | 208 |
-| por começar | 70 |
+| parcial | 209 |
+| por começar | 69 |
 | bloqueado | 3 |
 | adiado | 3 |
 | **total** | **309** |
@@ -87,6 +87,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | PERF-09 | P0 | parcial | só uma leitura por publicação; ligação ao conteúdo por inferência | Correções de dados imediatas |
 | VAR-01 | P0 | parcial | render das variantes | Receita de variante |
 | VAR-02 | P0 | parcial | layouts de S01 a S12 (equipa criativa); render real dos estilos no motor (hoje só no protótipo local); verificação com sessão real | Catálogo de estilos por workspace |
+| VAR-04 | P0 | parcial | verificação com sessão real (R-15) depois do deploy do motor; afirmações do corpo não classificadas; idioma por conta de clips | Verificador antes da revisão humana |
 | PUB-02 | P0 | parcial | leitura dos limites em tempo real chega com o publicador | Limites das APIs como restrições do agendador |
 | PUB-04 | P0 | parcial | quotas de republicação só como aviso; verificação com conta real (R-15) | Calendário de publicações |
 | PUB-06 | P0 | parcial | notificações a quem aprova; verificação com conta real (R-15) | Quem aprova |
@@ -160,7 +161,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | OPS-07 | P1 | parcial | sem timestamps, comparação de versões e acesso externo | Colaboração e revisão |
 | OPS-08 | P1 | parcial | sem relatórios de throughput, lead/cycle time e retrabalho | Auditoria de operações |
 | OPS-10 | P1 | parcial | Realtime Presence track e Broadcast para colaboração (decisão); verificação com conta real (R-15) | Presença segura |
-| SCALE-05 | P1 | parcial | sem guidelines de marca, verificação factual, áudio, direitos | Quality gates: |
+| SCALE-05 | P1 | parcial | sem guidelines de marca, áudio, direitos; verificação factual só marca (VAR-04), não confirma na fonte | Quality gates: |
 | SCALE-06 | P1 | parcial | recomendações só de leitura; limiares por calibrar | Learning loop: |
 | BIZ-05 | P1 | parcial | verificação com conta real (R-15) | Contratos por cliente |
 | BIZ-06 | P1 | parcial | custo de IA só em EUR; verificação com conta real (R-15) | Custos e margem por cliente |
@@ -230,7 +231,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | QA-16 | — | parcial | falta o mesmo com cada papel de cliente (viewer, reviewer) e telemóvel | Abrir cada rota com conta de agência, conta de cliente e código de equipa, com t |
 | R-15 | — | parcial | E2E com conta real no CI por fazer (ADR-0019 pendente) | Nenhuma página pode cair no erro genérico do browser ou do Next ("This page coul |
 | R-16 | — | parcial | correspondência por impressão digital com os nossos renders | Origem de cada publicação. |
-| R-17 | — | parcial | verificação com sessão real (R-15); verificador de títulos fora da lista (VAR-04); lista do Numeiro por preencher | Hipérbole de persona. |
+| R-17 | — | parcial | verificação com sessão real (R-15); lista do Numeiro por preencher | Hipérbole de persona. |
 | R-18 | — | parcial | publicador por fazer (nada chama perf_record_lineage) | Linhagem gravada no momento. |
 
 <!-- resumo:fim -->
@@ -605,7 +606,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | SCALE-02 | por começar | sem ingestão em lote | nada no código | — |
 | SCALE-03 | por começar | sem clip factory | nada no código | — |
 | SCALE-04 | por começar | sem centro de publicação | nada no código | — |
-| SCALE-05 | parcial | sem guidelines de marca, verificação factual, áudio, direitos | checklist por cliente (W3-03); rubrica do Crítico no motor | — |
+| SCALE-05 | parcial | sem guidelines de marca, áudio, direitos; verificação factual só marca (VAR-04), não confirma na fonte | checklist por cliente (W3-03); rubrica do Crítico no motor; verificador VAR-04 (W10-06) | — |
 | SCALE-06 | parcial | recomendações só de leitura; limiares por calibrar | learn_recommendations com evidência e limitações (W7, ADR-0037); w7_learn | — |
 | SCALE-07 | parcial | papéis não copiados | workspace_create com estrutura de outro cliente, template_clone (W1-06, W3-03) | — |
 | SCALE-08 | parcial | revisão de vídeos pelo cliente; relatórios para enviar; notificar o cliente do que espera por ele; escolher outro mês nas entregas; verificação com sessão real | portal /c/[ws]/portal: aprovações pelas RPCs existentes, entregas sem valores, desempenho, pedidos (ADR-0041); w8_portal 46; W8 (ramo w8-vaga3): SQL 1648/1648, E2E 143/143 no stack local; ainda não aplicado em produção | — |
@@ -615,7 +616,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
 | R-16 | parcial | correspondência por impressão digital com os nossos renders | origem externo nas importadas, perf_origin_set com motivo e auditoria (W6, ADR-0033); w6_perf | — |
-| R-17 | parcial | verificação com sessão real (R-15); verificador de títulos fora da lista (VAR-04); lista do Numeiro por preencher | persona_lists versionada e imutável, persona_list_get/version/save com consentimento de terceiros, persona.manage, worker_claim.persona, aba Agentes → Frases-persona (W5-14, ADR-0053); w5_persona_phrases 21/21; persona-rules 11/11; numeiro-engine #14 test_persona 4/4; E2E persona-phrases 4/4 (admin grava v1/v2, outra pessoa sem consentimento bloqueada na UI e no servidor 22023, histórico, manager só leitura 42501, cliente B 42501; W5-15); aba verificada em produção com a conta do Tomás (2026-11-06) | — |
+| R-17 | parcial | verificação com sessão real (R-15); lista do Numeiro por preencher | persona_lists versionada e imutável, persona_list_get/version/save com consentimento de terceiros, persona.manage, worker_claim.persona, aba Agentes → Frases-persona (W5-14, ADR-0053); w5_persona_phrases 21/21; persona-rules 11/11; numeiro-engine #14 test_persona 4/4; E2E persona-phrases 4/4 (admin grava v1/v2, outra pessoa sem consentimento bloqueada na UI e no servidor 22023, histórico, manager só leitura 42501, cliente B 42501; W5-15); aba verificada em produção com a conta do Tomás (2026-11-06); verificador de títulos fora da lista (VAR-04, W10-06) | — |
 | R-18 | parcial | publicador por fazer (nada chama perf_record_lineage) | linhagem gravada imutável e idempotente; importadas inferidas e marcadas (W6, ADR-0033); w6_perf | — |
 | R-19 | adiado | decisão do Tomás 29/10: métricas passam a vir da API oficial no futuro; por agora continua o Apify (engine/scrape.py). Fecha com PERF-08/PLAT-02 | engine/scrape.py ApifyClient; ADR-0005 | — |
 
@@ -681,7 +682,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | VAR-01 | parcial | render das variantes | pub_variants com os 5 elementos e regra das irmãs (W7, ADR-0036); w7_pub; pub-rules 14/14 | — |
 | VAR-02 | parcial | layouts de S01 a S12 (equipa criativa); render real dos estilos no motor (hoje só no protótipo local); verificação com sessão real | edit_styles, edit_style_versions, edit_style_save/set_status (W5-02, ADR-0027); w5_edit_styles 34/34; e2e/edit-styles.spec.ts 3/3; pré-visualização fiel ao spec: letra, tamanho, caixas e destaque (W8-08, StylePreview) | — |
 | VAR-03 | por começar | sem motor frase-imagem | nada no código nem no motor | — |
-| VAR-04 | por começar | sem verificador de títulos | nada no código | — |
+| VAR-04 | parcial | verificação com sessão real (R-15) depois do deploy do motor; afirmações do corpo não classificadas; idioma por conta de clips | W10-06 (ADR-0057): script_verifications, worker_save_verification, content_verifications, flag scripts.verifier, marcas por hook no cartão do guião; w10_verificador 27/27; verifier-format 12/12; numeiro-engine #18 test_verifier 19/19 | — |
 | VAR-05 | por começar | sem republicação | publishing.republish.approve planeada | — |
 | VAR-06 | por começar | sem fontes longas no pacote | nada no código | — |
 | VAR-07 | por começar | sem distribuição por camadas | nada no código | — |
