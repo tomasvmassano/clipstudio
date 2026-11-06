@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-06 (anotações desenhadas no vídeo)
+
+- **W10-15** desenhar no fotograma ao rever um vídeo guardado (FR-05-03, OPS-07, QA-07; ADR-0067). Na revisão, "Desenhar" pausa o vídeo e abre caneta, seta, retângulo e círculo, 5 cores, Desfazer (e Ctrl+Z), Limpar e Concluir; funciona com rato, caneta e toque no iPad. O desenho vai com o comentário nesse momento, guardado como vetores normalizados (0..1 do fotograma visível) em `media_comments.annotation`, validado no servidor (`_review_annotation`: tipos, cor, espessura, 50 formas, 500 pontos por traço, 2000 ao todo, coordenadas 0..1) e imutável. A ±0,5 s do momento, ou ao clicar no tempo do comentário, o desenho aparece por cima do vídeo; linha do tempo com uma marca por comentário (âmbar com desenho). `media_review_comment` ganha `p_annotation` opcional no fim: chamadas antigas iguais. Vídeos da Drive continuam sem desenho. Migração `PENDING_w10_anotacoes.sql` (aditiva, rollback no fim). Testes `w10_anotacoes` 49/49, `annotation` 57/57, E2E `review-stored` 6/6 (desenhar, desfazer, gravar, sobreposição no momento e na marca, iPad, API 22023/42501).
+
 ## 2026-11-06 (CHG-008 gravação, aprendizagem e cortes)
 
 - **CHG-008** (só documentação; PRD §46). GAZE-01..06: teleprompter com coluna ligada à distância, linha de foco, modo frase, ritmo por pedal, hooks de memória, pontuação de olhar por take e piloto opcional de correção por IA. LRN-01..07: motivo em cada edição, agente "Editor de lições", lições aprovadas como versão da configuração em dois níveis (agência e cliente). CLIP-01..11: cortes de vídeos longos com o agente Clip Miner, com prioridade. STU-01..05: captura direta das câmaras com cópia no cartão, agente de estúdio e pacote de edição por guião. 5 capacidades planeadas. Sem alteração funcional.

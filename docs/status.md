@@ -101,7 +101,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-04-03 | P1 | parcial | sem filtros por categoria, tema, idioma e data; pesquisa simples, não full-text | Filtros por categoria, tema, fonte, idioma, data, estado e pesquisa full-text. |
 | FR-04-04 | P1 | parcial | sem favoritos | Estados nova, triagem, selecionada, utilizada, descartada; favoritos, duplicados |
 | FR-04-05 | P1 | parcial | sem resumo, relevância e ângulos para fontes adicionadas na app; motor (Repórter) por alojar | Resumo por IA com referências à fonte, classificação de relevância e ângulos sug |
-| FR-05-03 | P1 | parcial | anotações desenhadas no vídeo; momento escrito à mão (o player da Drive não dá o tempo); verificação com vídeos registados e com conta de cliente | Revisão de vídeo com player, comentários por timestamp, anotações e histórico. |
+| FR-05-03 | P1 | parcial | verificação com sessão real (R-15) num vídeo guardado e com conta de cliente; vídeos da Drive continuam com o momento escrito à mão e sem desenho (o player da Drive não dá o tempo nem o fotograma) | Revisão de vídeo com player, comentários por timestamp, anotações e histórico. |
 | FR-05-04 | P1 | parcial | notificações de guiões dependem de automação configurada; envio fora da app (email) por fazer | Aprovar, rejeitar ou pedir alterações com motivo e notificações. |
 | FR-05-05 | P1 | parcial | sem fluxos de aprovação configuráveis (só regras de tarefas por evento) | Fluxos configuráveis de aprovação por workspace/projeto; responsáveis e prazos. |
 | FR-06-03 | P1 | parcial | primeira corrida real dos agentes em produção (ainda sem execuções) | Execução manual/agendada, progresso, logs, erros, retry e cancelamento. |
@@ -157,7 +157,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | OPS-04 | P1 | parcial | verificação com conta real (R-15) | Quem trabalha em quê |
 | OPS-05 | P1 | parcial | sem disponibilidade, férias, capacidade semanal e previsão | Capacidade e workload |
 | OPS-06 | P1 | parcial | sem SLA, escalonamento e substitutos | Planeamento e handoffs |
-| OPS-07 | P1 | parcial | sem timestamps, comparação de versões e acesso externo | Colaboração e revisão |
+| OPS-07 | P1 | parcial | comparação de versões e acesso externo restrito por recurso | Colaboração e revisão |
 | OPS-08 | P1 | parcial | sem relatórios de throughput, lead/cycle time e retrabalho | Auditoria de operações |
 | OPS-10 | P1 | parcial | Realtime Presence track e Broadcast para colaboração (decisão); verificação com conta real (R-15) | Presença segura |
 | SCALE-05 | P1 | parcial | sem guidelines de marca, verificação factual, áudio, direitos | Quality gates: |
@@ -218,7 +218,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | QA-03 | — | parcial | sessão revogada não testada | Convite expirado, sessão revogada, membro removido |
 | QA-04 | — | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | Criar/editar/submeter/aprovar guião e editar após aprovação |
 | QA-06 | — | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | Teleprompter: troca de data, espelho, atalhos, sessão interrompida |
-| QA-07 | — | parcial | E2E de revisão com comentários por momento e várias versões | Revisão com comentários timestamp e múltiplas versões |
+| QA-07 | — | parcial | E2E com várias versões do mesmo vídeo (comentários e desenhos presos a cada versão) | Revisão com comentários timestamp e múltiplas versões |
 | QA-11 | — | parcial | falha/orçamento com o worker real em produção | Agente IA falha ou excede orçamento |
 | QA-13 | — | parcial | sem teste com sessão ativa real | Mudança de role durante sessão ativa |
 | QA-14 | — | parcial | sem auditoria de acessibilidade nem teclado nos fluxos principais | Utilização mobile/tablet e teclado |
@@ -305,7 +305,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 |---|---|---|---|---|
 | FR-05-01 | feito |  | review_inbox: filtros por estado, responsável, prioridade, prazo e texto (o tipo é só guião até haver media, FR-05-03); W2-06 content_comments (bloco, frase citada, versão, respostas, resolver), /c/[ws]/revisao; w2_review_comments 33/33; e2e/review.spec.ts 3/3; ADR-0025 | 2026-10-29 (E2E) |
 | FR-05-02 | feito |  | decisões versionadas em content_transitions; w2_content 47/47; W2-06 content_comments (bloco, frase citada, versão, respostas, resolver), /c/[ws]/revisao; w2_review_comments 33/33; e2e/review.spec.ts 3/3; ADR-0025 | 2026-10-29 (E2E) |
-| FR-05-03 | parcial | anotações desenhadas no vídeo; momento escrito à mão (o player da Drive não dá o tempo); verificação com vídeos registados e com conta de cliente | W5-04 sobre a biblioteca (W8): media_review_list/detail/comment (t_ms)/decide, /c/[ws]/revisao?ver=videos com player da Drive; w5_media_review 31/31; media-time 18/18; ADR-0043, CHG-006; produção 03/11: separador Vídeos com estado vazio, flag media.library em all no Numeiro | 2026-11-03 (sessão real do dono da agência, produção) |
+| FR-05-03 | parcial | verificação com sessão real (R-15) num vídeo guardado e com conta de cliente; vídeos da Drive continuam com o momento escrito à mão e sem desenho (o player da Drive não dá o tempo nem o fotograma) | W5-04 sobre a biblioteca (W8): media_review_list/detail/comment (t_ms)/decide, /c/[ws]/revisao?ver=videos com player da Drive; w5_media_review 31/31; media-time 18/18; ADR-0043, CHG-006; produção 03/11: separador Vídeos com estado vazio, flag media.library em all no Numeiro; W10-15 desenho no fotograma (caneta, seta, retângulo, círculo, cor, desfazer; rato, caneta e toque) preso ao comentário, vetores normalizados em media_comments.annotation validados em _review_annotation, sobreposição a ±0,5 s e ao clicar, marcas na linha do tempo; w10_anotacoes 49/49; annotation 57/57; E2E review-stored 6/6; ADR-0067 | 2026-11-03 (sessão real do dono da agência, produção) |
 | FR-05-04 | parcial | notificações de guiões dependem de automação configurada; envio fora da app (email) por fazer | content_transition com motivo; task_rules W3-01; ; vídeo: media_review_decide com motivo obrigatório (W5-04); vídeo: notificações video_decision/video_comment por trigger, idempotentes, com preferências (W5-05, ADR-0044); w5_media_review_notif 16/16; produção 03/11 (sessão real do dono): preferências mostram os dois tipos novos; link ?asset= abre o painel e mostra erro com Tentar de novo para vídeo inexistente; 0 erros na consola | 2026-11-03 (sessão real do dono da agência, produção) |
 | FR-05-05 | parcial | sem fluxos de aprovação configuráveis (só regras de tarefas por evento) | task_rule_save W3-01 | — |
 | FR-05-06 | parcial | sem comparação entre versões; bloqueio de publicação sem publicação | content_history; approved_version_id | — |
@@ -492,7 +492,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | QA-04 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | w2_content 47/47; E2E de escrita 23/23 (W2) | — |
 | QA-05 | feito |  | dedup por url_normalized e URL inválido em w2_sources 41/41; corre no CI em cada PR (job db, base descartável) | — |
 | QA-06 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | w2_teleprompter 52/52; E2E 28/28 (offline, dois dispositivos, iPad) | — |
-| QA-07 | parcial | E2E de revisão com comentários por momento e várias versões | w5_media_review 31/31: decisões presas à versão, versão antiga recusada (W5-04) | — |
+| QA-07 | parcial | E2E com várias versões do mesmo vídeo (comentários e desenhos presos a cada versão) | w5_media_review 31/31: decisões presas à versão, versão antiga recusada (W5-04); W10-15: E2E review-stored com comentário por momento, desenho, marca na linha do tempo e sobreposição; cliente B 42501 com e sem desenho | — |
 | QA-08 | por começar | sem upload de media | nada no código | — |
 | QA-09 | por começar | sem publicação | nada no código | — |
 | QA-10 | por começar | sem OAuth | nada no código | — |
@@ -588,7 +588,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | OPS-04 | parcial | verificação com conta real (R-15) | /c/[ws]/quem-trabalha, só do cliente aberto (W6, ADR-0034); w6_ops | — |
 | OPS-05 | parcial | sem disponibilidade, férias, capacidade semanal e previsão | workload e WIP (W3-03) | — |
 | OPS-06 | parcial | sem SLA, escalonamento e substitutos | templates, checklists, dependências (W3-03) | — |
-| OPS-07 | parcial | sem timestamps, comparação de versões e acesso externo | comentários com menções nas tarefas (W3-01) | — |
+| OPS-07 | parcial | comparação de versões e acesso externo restrito por recurso | comentários com menções nas tarefas (W3-01); comentários de vídeo com momento e desenho no fotograma (W5-04, W5-12, W10-15) | — |
 | OPS-08 | parcial | sem relatórios de throughput, lead/cycle time e retrabalho | /historico (W1-09) | — |
 | OPS-09 | por começar | sem automação inteligente | nada no código | — |
 | OPS-10 | parcial | Realtime Presence track e Broadcast para colaboração (decisão); verificação com conta real (R-15) | heartbeat no servidor, canal presence:<cliente> só de leitura, isolamento testado (W6, ADR-0034); w6_ops | — |
