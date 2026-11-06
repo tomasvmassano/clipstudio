@@ -13,6 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSession } from "@/components/session-provider";
 import { MyDataCard } from "@/components/my-data-card";
+import { SessionsCard } from "@/components/profile-sessions";
+import { WidgetBoundary } from "@/components/widget-boundary";
 import { MyNotifCard } from "@/components/notif/my-notif-card";
 import { supabase } from "@/lib/supabase";
 import { avatarUrl, AVATAR_MAX, AVATAR_TYPES, SECURITY_LABEL, securityEvent, securityLog, updateProfile, uploadAvatar } from "@/lib/profile";
@@ -30,6 +32,7 @@ function NoteLine({ note }: { note: Note }) {
 /** /perfil (W1-15): identidade, palavra-passe, verificação em dois passos, preferências e segurança da própria pessoa. */
 export function ProfilePage() {
   const { mode, profile, workspaces } = useSession();
+  const [logKey, setLogKey] = useState(0);   // o histórico recarrega depois de terminar sessões
   if (mode === "loading") return <div className="flex flex-col gap-4"><Skeleton className="h-8 w-40" /><Skeleton className="h-48" /><Skeleton className="h-48" /></div>;
   if (mode !== "user" || !profile) {
     return (
@@ -47,7 +50,8 @@ export function ProfilePage() {
       <Mfa />
       <Preferences workspaces={workspaces.map((w) => ({ id: w.id, name: w.name }))} />
       <MyNotifCard />
-      <Security />
+      <WidgetBoundary label="Sessões e dispositivos"><SessionsCard onChanged={() => setLogKey((k) => k + 1)} /></WidgetBoundary>
+      <Security key={logKey} />
       <MyDataCard />
     </div>
   );

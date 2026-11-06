@@ -21,7 +21,8 @@ export function useTpPrefs(server: boolean) {
     if (!server) return;
     let alive = true;
     fetchServerPrefs(deviceId())
-      .then((p) => { if (alive && p && !dirty.current) { const c = clampPrefs(p); setPrefs(c); writeLocalPrefs(c); } })
+      // o que o servidor não tem (ex.: chaves do olhar antes da migração) fica como está neste dispositivo
+      .then((p) => { if (alive && p && !dirty.current) { const c = clampPrefs({ ...readLocalPrefs(), ...p }); setPrefs(c); writeLocalPrefs(c); } })
       .catch((e: Error) => { if (alive) setSyncError(e.message); });
     return () => { alive = false; };
   }, [server]);
@@ -34,7 +35,9 @@ export function useTpPrefs(server: boolean) {
       if (server) {
         if (timer.current) clearTimeout(timer.current);
         timer.current = setTimeout(() => {
-          saveServerPrefs(deviceId(), next).then(() => setSyncError("")).catch((e: Error) => setSyncError(e.message));
+          saveServerPrefs(deviceId(), next)
+            .then((r) => setSyncError(r.gazeLocalOnly ? "a distância, o ecrã, a linha de foco e o modo frase ainda não se guardam na conta" : ""))
+            .catch((e: Error) => setSyncError(e.message));
         }, 800);
       }
       return next;
