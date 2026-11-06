@@ -10,8 +10,8 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | Estado | Requisitos |
 |---|---|
-| feito | 30 |
-| parcial | 220 |
+| feito | 36 |
+| parcial | 214 |
 | por começar | 53 |
 | bloqueado | 3 |
 | adiado | 3 |
@@ -44,7 +44,6 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-15-01 | P0 | parcial | sem idioma configurável (só PT-PT) | Geral: nome, logótipo, idioma, timezone, moeda e branding. |
 | FR-15-02 | P0 | parcial | sem categorias, estados e regras de aprovação configuráveis | Conteúdo: categorias, formatos, estados, templates, regras de aprovação e checkl |
 | FR-16-01 | P0 | parcial | verificação com conta real (R-15) dos grupos media, comentários e notificações | Pesquisa global com controlo de acesso em todas as entidades, sugestões e result |
-| FR-16-02 | P0 | parcial | ligar a flag para a equipa do cliente (hoje em teste só para o dono) e verificar com a conta de cliente (R-15) | Atalho de teclado, pesquisa por título/tag/ID e estado vazio. |
 | TEAM-05 | P0 | parcial | âmbitos projeto e assigned_only não aplicados; sem modelos por profissão | Matriz de permissões configurável |
 | TEAM-06 | P0 | parcial | tarefa sem projeto (não existem projetos) | Tarefas e responsáveis |
 | TEAM-16 | P0 | parcial | faltam exportação, storage de media, pesquisa e realtime com contas reais | Segurança e testes de autorização |
@@ -64,7 +63,6 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | CAP-06 | P0 | parcial | sem revisões periódicas de acessos | Gestão de ciclo de vida |
 | OPS-01 | P0 | parcial | sem contadores online, disponíveis, em tarefa, ausentes; sem equipa e projeto | Diretório e contadores |
 | OPS-02 | P0 | parcial | estado a partir de calendário autorizado; verificação com conta real (R-15) | Estados distintos |
-| OPS-03 | P0 | parcial | ligar a flag para a equipa do cliente (hoje em teste só para o dono) e verificar com a conta de cliente (R-15) | Minha área de trabalho |
 | BIZ-01 | P0 | parcial | filtro de origem (R-16) no cálculo; prazo por vídeo é pressuposto; sem contrato registado no Numeiro | Métrica norte: atingimento de entrega |
 | BIZ-02 | P0 | parcial | 3 regras sem dados (saúde a cair, renovação com saúde, posts perto de zero) | Faixa "Precisa da tua atenção" |
 | BIZ-03 | P0 | parcial | AGI distinto do MRR (decisão); índice com fotografias por idade (PERF-03); sem contratos nem câmbio registados | KPIs e tabela por cliente |
@@ -103,9 +101,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | CLIP-06 | P0 | parcial | vista lado a lado original/reordenado no editor (dados em ai.clip); verificação com sessão real | Preparação do corte |
 | CLIP-07 | P0 | parcial | reframe 9:16 com orador ativo (hoje corte ao centro), fontes multi-câmara, verificação com sessão real | Vertical, legendas, estilo e revisão |
 | STU-03 | P0 | parcial | ligar edit.package_script e verificar com sessão real (cortes curtos por guião → pacote em minutos → exportar → rever); disparo pelo agente de estúdio (STU-02); notificação por guião (30 por sessão) por decidir | Pacote de edição por guião |
-| FR-01-03 | P1 | parcial | ligar a flag para a equipa do cliente (hoje em teste só para o dono) e verificar com a conta de cliente (R-15) | Minha fila: tarefas, aprovações, gravações, prazos e alertas; clique abre objeto |
 | FR-01-04 | P1 | parcial | sem calendário compacto no Início | Calendário editorial compacto e atividade recente com ator e timestamp. |
-| FR-01-05 | P1 | parcial | ligar a flag para a equipa do cliente (hoje em teste só para o dono) e verificar com a conta de cliente (R-15) | Ações rápidas criar fonte, guião, projeto e tarefa; cada ação respeita permissõe |
 | FR-02-03 | P1 | parcial | título próprio (usa o tema); verificação com conta real (R-15) | Campos: título, cliente/workspace, campanha, tema, formato, plataforma, responsá |
 | FR-02-05 | P1 | parcial | verificação com sessão real (R-15) da equipa Numeiro | Enviar para revisão, aprovar/rejeitar/pedir alterações com comentário obrigatóri |
 | FR-03-03 | P1 | parcial | verificação com conta de cliente (R-15); E2E citado não está versionado no repo | Espelhamento horizontal e vertical independentes; velocidade, fonte, line-height |
@@ -167,7 +163,6 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-21-04 | P1 | parcial | publicador por API (PUB-01) chama _pub_link_lineage; verificação com sessão real | atribuição de métricas por publication_id, janela e origem. |
 | CAP-07 | P1 | parcial | sem preview de impacto, segunda aprovação nem alertas de grants excessivos | Controlo de mudanças sensíveis |
 | CAP-08 | P1 | parcial | convidados com acesso a uma peça por fazer | Interface multi-cliente |
-| OPS-04 | P1 | parcial | ligar a flag para a equipa do cliente (hoje em teste só para o dono) e verificar com a conta de cliente (R-15) | Quem trabalha em quê |
 | OPS-05 | P1 | parcial | sem disponibilidade, férias, capacidade semanal e previsão | Capacidade e workload |
 | OPS-06 | P1 | parcial | sem SLA, escalonamento e substitutos | Planeamento e handoffs |
 | OPS-07 | P1 | parcial | comparação de versões e acesso externo restrito por recurso | Colaboração e revisão |
@@ -227,7 +222,6 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | MIG-05 | — | parcial | sem entidade content_item separada (guioes continua tabela principal) | Migrar Guiao para content_item + content_versions, mantendo compatibilidade de l |
 | MIG-06 | — | parcial | ideas não migrada para sources; take_numeiro mantido, sem editorial_angle | Migrar Idea para sources, removendo take_numeiro em favor de editorial_angle gen |
 | MIG-07 | — | parcial | faltam /perfil e /publicacoes | Criar rotas reais para módulos existentes no menu e novas páginas /fontes, /equi |
-| MIG-08 | — | parcial | ligar a flag para a equipa do cliente (hoje em teste só para o dono) e verificar com a conta de cliente (R-15) | Implementar pesquisa real em app-search.tsx, corrigir links #, perfil demo, load |
 | MIG-09 | — | parcial | dual-read e plano de rollback testado por módulo; verificação com conta real (R-15) | Introduzir feature flags por workspace para migração progressiva, dual-read limi |
 | MIG-10 | — | parcial | RPCs e token legado (studio_whoami, legacy_can, studio_tokens) ainda ativos | Remover RPCs e credenciais legadas só depois de validação e reconciliação de dad |
 | QA-02 | — | parcial | storage de media e realtime por cliente sem E2E dedicado | User A tentar ler/alterar workspace B por URL/API/RPC/realtime/storage |
@@ -273,9 +267,9 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 |---|---|---|---|---|
 | FR-01-01 | feito |  | W1-10 _dashboard_kpis; w1_dashboard 38/38; E2E 16/16; sessão real em /c/numeiro | 2026-10-29 |
 | FR-01-02 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | dashboard_widgets/dashboard_layouts, Personalizar, ⓘ; w1_dashboard 38/38; W1-10 | — |
-| FR-01-03 | parcial | ligar a flag para a equipa do cliente (hoje em teste só para o dono) e verificar com a conta de cliente (R-15) | A minha fila no Início (my_queue, W6, ADR-0034); w6_ops 77/77; e2e/ops.spec.ts; produção 06/11: A minha fila no Início com dados reais (23 aprovações = 23 guiões em revisão na base), 0 erros na consola | 2026-11-06 (agência, produção) |
+| FR-01-03 | feito | — | A minha fila no Início (my_queue, W6, ADR-0034); w6_ops 77/77; e2e/ops.spec.ts; produção 06/11: A minha fila no Início com dados reais (23 aprovações = 23 guiões em revisão na base), 0 erros na consola; produção 06/11 com conta de cliente (flags ops.workspace, busca.global e ops.team_presence ligadas só para o Numeiro (all) a 06/11 19:33 com autorização do Tomás, auditado): A minha fila no Início com zeros corretos para um contributor, 0 erros | 2026-11-06 (agência e cliente, produção) |
 | FR-01-04 | parcial | sem calendário compacto no Início | panel.activity no Início (W1-10); calendário só em /calendario | — |
-| FR-01-05 | parcial | ligar a flag para a equipa do cliente (hoje em teste só para o dono) e verificar com a conta de cliente (R-15) | ações rápidas na paleta conforme as capacidades (W7, ADR-0035); e2e/busca.spec.ts; produção 06/11: ações rápidas na paleta (Novo guião criado e aberto) | 2026-11-06 (agência, produção) |
+| FR-01-05 | feito | — | ações rápidas na paleta conforme as capacidades (W7, ADR-0035); e2e/busca.spec.ts; produção 06/11: ações rápidas na paleta (Novo guião criado e aberto); produção 06/11 com conta de cliente (contributor): ações rápidas só Novo guião e Nova fonte (sem campanha nem tarefa, que o dono tem), sem seletor de clientes | 2026-11-06 (agência e cliente, produção) |
 | FR-01-06 | parcial | filtros persistentes por utilizador por fazer | W1-10 indica FR-01-06 parcial; route-error, widget-boundary, dashboard-skeleton | — |
 
 ## M02 — Guiões
@@ -444,7 +438,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
 | FR-16-01 | parcial | verificação com conta real (R-15) dos grupos media, comentários e notificações | search_global com acesso por cliente e entidade (W7, ADR-0035); w7_busca 71/71; e2e/busca.spec.ts; W10-02: media, comentários dos vídeos e notificações próprias na pesquisa (ADR-0054); w10_pesquisa 40/40 | — |
-| FR-16-02 | parcial | ligar a flag para a equipa do cliente (hoje em teste só para o dono) e verificar com a conta de cliente (R-15) | paleta Ctrl/Cmd+K com título, #etiqueta e ID, estado vazio (W7, ADR-0035); e2e/busca.spec.ts; produção 03/11: Cmd+K, pesquisa por título no corpo, abrir resultado; 0 erros na consola | 2026-11-03 (sessão real do dono da agência, produção) |
+| FR-16-02 | feito | — | paleta Ctrl/Cmd+K com título, #etiqueta e ID, estado vazio (W7, ADR-0035); e2e/busca.spec.ts; produção 03/11: Cmd+K, pesquisa por título no corpo, abrir resultado; 0 erros na consola; produção 06/11 com conta de cliente: pesquisa por título e abrir resultado, 0 erros | 2026-11-06 (agência e cliente, produção) |
 | FR-16-03 | parcial | sem preferências de notificação; deep links não confirmados para todos os tipos | /caixa, notifications_read; W3-01; W10-14: tipos de prazos na caixa (alerta/tarefa) com deep link para tarefa, guião ou vídeo | — |
 | FR-16-04 | parcial | sem notificações de integrações | menções em task_comment, atribuições, automation_error; W3-01, W4-01 | — |
 | FR-16-05 | parcial | verificação com conta real (R-15); E2E da pesquisa com dois clientes para os tipos novos | _viewer_sees/inbox só clientes autorizados; w3_tasks 53/53; pesquisa sem vazamento entre clientes em todos os grupos, incluindo media, comentários e notificações (w7_busca 71/71, w10_pesquisa 40/40; ADR-0035, ADR-0054) | — |
@@ -494,7 +488,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | MIG-05 | parcial | sem entidade content_item separada (guioes continua tabela principal) | content_versions + guiao_update compatível; w2_content 47/47 | — |
 | MIG-06 | parcial | ideas não migrada para sources; take_numeiro mantido, sem editorial_angle | ideas + workspace e RLS; w2_sources 41/41 | — |
 | MIG-07 | parcial | faltam /perfil e /publicacoes | /fontes, /equipa, /definicoes, /calendario; /ideias → /fontes (next.config.ts) | — |
-| MIG-08 | parcial | ligar a flag para a equipa do cliente (hoje em teste só para o dono) e verificar com a conta de cliente (R-15) | links # removidos, perfil demo removido, erros do teleprompter (W0, W2-02); pesquisa real na paleta Ctrl/Cmd+K (command-palette.tsx, substitui app-search.tsx) com todas as entidades; W7 e W10-02; produção 06/11: Cmd+K pesquisa guiões reais, Enter abre o guião certo no dia certo, ações rápidas criam guião | 2026-11-06 (agência, produção) |
+| MIG-08 | feito | — | links # removidos, perfil demo removido, erros do teleprompter (W0, W2-02); pesquisa real na paleta Ctrl/Cmd+K (command-palette.tsx, substitui app-search.tsx) com todas as entidades; W7 e W10-02; produção 06/11: Cmd+K pesquisa guiões reais, Enter abre o guião certo no dia certo, ações rápidas criam guião; produção 06/11 com conta de cliente: Cmd+K encontra o guião 22 e Enter abre-o | 2026-11-06 (agência e cliente, produção) |
 | MIG-09 | parcial | dual-read e plano de rollback testado por módulo; verificação com conta real (R-15) | feature_flag_defs, feature_flags, my_flags, flag_set, /funcionalidades (W0, ADR-0031); w0_feature_flags 20/20 | — |
 | MIG-10 | parcial | RPCs e token legado (studio_whoami, legacy_can, studio_tokens) ainda ativos | tmp_import removida (20261029101111_w1_drop_tmp_import) | — |
 
@@ -600,8 +594,8 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 |---|---|---|---|---|
 | OPS-01 | parcial | sem contadores online, disponíveis, em tarefa, ausentes; sem equipa e projeto | /equipa-agencia com estado, último acesso, tarefas abertas (W1-13) | — |
 | OPS-02 | parcial | estado a partir de calendário autorizado; verificação com conta real (R-15) | online, ativo com consentimento, a trabalhar, disponível separados (W6, ADR-0034); w6_ops | — |
-| OPS-03 | parcial | ligar a flag para a equipa do cliente (hoje em teste só para o dono) e verificar com a conta de cliente (R-15) | ver, adiar, mostrar já, passar, começar, concluir, idempotentes e auditados (W6, ADR-0034); w6_ops; e2e/ops.spec.ts; produção 06/11: adiar 1 h e mostrar já na Caixa de entrada gravados e auditados (inbox.snooze/inbox.unsnooze) | 2026-11-06 (agência, produção) |
-| OPS-04 | parcial | ligar a flag para a equipa do cliente (hoje em teste só para o dono) e verificar com a conta de cliente (R-15) | /c/[ws]/quem-trabalha, só do cliente aberto (W6, ADR-0034); w6_ops; produção 06/11: Quem trabalha em quê mostra só a equipa do Numeiro com estados reais | 2026-11-06 (agência, produção) |
+| OPS-03 | feito | — | ver, adiar, mostrar já, passar, começar, concluir, idempotentes e auditados (W6, ADR-0034); w6_ops; e2e/ops.spec.ts; produção 06/11: adiar 1 h e mostrar já na Caixa de entrada gravados e auditados (inbox.snooze/inbox.unsnooze); produção 06/11 com conta de cliente: Minha área de trabalho com estado vazio correto; ações adiar/mostrar já verificadas com o dono | 2026-11-06 (agência e cliente, produção) |
+| OPS-04 | feito | — | /c/[ws]/quem-trabalha, só do cliente aberto (W6, ADR-0034); w6_ops; produção 06/11: Quem trabalha em quê mostra só a equipa do Numeiro com estados reais; produção 06/11 com conta de cliente: Quem trabalha em quê só com as 4 pessoas do Numeiro, a própria online (tu), sem staff da agência nem outros clientes | 2026-11-06 (agência e cliente, produção) |
 | OPS-05 | parcial | sem disponibilidade, férias, capacidade semanal e previsão | workload e WIP (W3-03) | — |
 | OPS-06 | parcial | sem SLA, escalonamento e substitutos | templates, checklists, dependências (W3-03) | — |
 | OPS-07 | parcial | comparação de versões e acesso externo restrito por recurso | comentários com menções nas tarefas (W3-01); comentários de vídeo com momento e desenho no fotograma (W5-04, W5-12, W10-15) | — |
