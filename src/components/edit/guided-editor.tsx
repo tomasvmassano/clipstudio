@@ -14,10 +14,10 @@ import { ExportPanel } from "@/components/editor/export-panel";
 import { PreviewVideo } from "@/components/editor/preview-video";
 import { SavedStylesPanel } from "@/components/edit/style-tools";
 import type { Access } from "@/lib/access";
-import { SOURCE_LABEL, saveEdit, type EditState } from "@/lib/edit";
+import { EditRpcError, SOURCE_LABEL, applyAlternative, saveEdit, type EditState } from "@/lib/edit";
 import {
-  addNote, deleteSegment, editWord, fmtT, guidedProblem, historyOf, layout, notesOut, problem, push, redo, restorable, restoreSegment, setHook, setMusic,
-  toggleNote, undo, wordsBySegment, type EditDoc, type History,
+  addNote, altSections, deleteSegment, editWord, fmtT, guidedProblem, historyOf, hookTexts, layout, notesOut, optionInDoc, problem, push, redo, restorable,
+  restoreSegment, setHook, setMusic, toggleNote, undo, wordsBySegment, type AltSection, type EditDoc, type History,
 } from "@/lib/edit-doc";
 import { fetchLibrary, type MediaAsset } from "@/lib/media";
 import { variantLabel } from "@/lib/media-review";
@@ -28,6 +28,7 @@ import { cn } from "@/lib/utils";
  * Modo guiado (EDL-10, ADR-0049): a mesma edição, sem linha do tempo. Passos Estilo → Corte → Hook → Visual e música →
  * Legendas → Exportar, cada um com a escolha da IA, as alternativas que existem e uma nota no momento.
  * Só produz mudanças que o servidor aceita no modo guiado (_edit_guided_problem); guidedProblem avisa antes de gravar.
+ * As alternativas da IA por secção (passo Corte) entram pelo servidor (edit_alternative_apply, ADR-0055): o browser só diz qual.
  */
 type Step = "estilo" | "corte" | "hook" | "visual" | "legendas" | "exportar";
 const STEPS: { key: Step; label: string }[] = [
@@ -54,6 +55,7 @@ export function GuidedEditor({ access, st, onReload }: { access: Access; st: Edi
   const [vnote, setVnote] = useState("");
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
+  const [alt, setAlt] = useState<{ busy: string | null; err: { text: string; conflict: boolean; retry: { section: AltSection; id: string } } | null }>({ busy: null, err: null });
   const idSeq = useRef(0);
   const { segs, duration } = useMemo(() => layout(doc), [doc]);
   const t = Math.min(tRaw, duration);
@@ -104,6 +106,17 @@ export function GuidedEditor({ access, st, onReload }: { access: Access; st: Edi
     try { await saveEdit(access, st.asset.id, st.document?.current_version_id ?? null, doc, vnote.trim() || undefined); setVnote(""); await onReload(); }
     catch (e) { setMsg({ kind: "err", text: (e as Error).message }); setSaving(false); }
   };
+  // alternativa da IA: versão nova feita no servidor a partir da versão gravada (as alterações por gravar perder-se-iam)
+  const pickAlternative = async (section: AltSection, id: string) => {
+    const cur = st.document?.current_version_id;
+    if (!cur || !canEdit || dirty) return;
+    setAlt({ busy: id, err: null }); setMsg(null);
+    try { await applyAlternative(access, st.asset.id, cur, section, id); await onReload(); }
+    catch (e) {
+      const conflict = e instanceof EditRpcError && e.code === "40001";
+      setAlt({ busy: null, err: { text: (e as Error).message || "Não consegui usar esta alternativa.", conflict, retry: { section, id } } });
+    }
+  };
   const seek = (x: number) => { setPlaying(false); setT(Math.max(0, Math.min(duration, x))); };
   const nextId = (p: string) => { idSeq.current += 1; return `${p}${Date.now().toString(36)}${idSeq.current}`; };
 
@@ -113,7 +126,9 @@ export function GuidedEditor({ access, st, onReload }: { access: Access; st: Edi
   const back = clientPath(access.ws, `/revisao?ver=videos&asset=${st.asset.id}`);
   const canRestore = restorable(doc, base, pool);
   const selWord = word ? doc.captions.words.find((w) => w.id === word) ?? null : null;
-  const hookAlts = [...new Set([ai?.hook ?? "", ...(st.guiao?.hooks ?? [])].map((x) => x.trim()).filter((x) => x && x !== doc.hook.text))].slice(0, 4);
+  const aiHookTexts = hookTexts(st.ai_alternatives, doc.hook.text);
+  const hookAlts = [...new Set([ai?.hook ?? "", ...aiHookTexts, ...(st.guiao?.hooks ?? [])].map((x) => x.trim()).filter((x) => x && x !== doc.hook.text))].slice(0, 7);
+  const altSecs = altSections(st.ai_alternatives);
   const aiSegsOk = ai && JSON.stringify(ai.segments) !== JSON.stringify(doc.segments) && (st.can.timeline || !guidedProblem(base, { ...doc, segments: ai.segments }, poolSegs, me));
 
   const noteBox = (
@@ -198,6 +213,46 @@ export function GuidedEditor({ access, st, onReload }: { access: Access; st: Edi
                   ))}
                 </div>
               )}
+              {altSecs.length > 0 && (
+                <div className="flex flex-col gap-2" aria-label="Alternativas da IA">
+                  <span className="font-medium">Alternativas da IA</span>
+                  {dirty && canEdit && <span className="text-xs text-muted-foreground">Grava ou descarta as alterações antes de usar uma alternativa.</span>}
+                  {alt.err && (
+                    <Alert variant="destructive">
+                      <AlertDescription className="flex flex-wrap items-center gap-2">
+                        <span>{alt.err.conflict ? "Alguém gravou uma versão deste vídeo entretanto. Recarrega para veres a versão mais recente e escolhe de novo." : alt.err.text}</span>
+                        {alt.err.conflict
+                          ? <Button size="sm" variant="outline" onClick={() => void onReload()}>Recarregar</Button>
+                          : <Button size="sm" variant="outline" disabled={!!alt.busy || dirty} onClick={() => void pickAlternative(alt.err!.retry.section, alt.err!.retry.id)}>Tentar de novo</Button>}
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                  {altSecs.map((sec) => (
+                    <div key={sec.key} className="flex flex-col gap-1" aria-label={`Alternativas: ${sec.label}`}>
+                      <span className="text-xs font-medium uppercase text-muted-foreground">{sec.label}</span>
+                      {sec.options.map((o, i) => {
+                        const inUse = optionInDoc(doc, o);
+                        return (
+                          <div key={o.id} className={cn("flex items-start gap-2 rounded border px-2 py-1", inUse && "border-primary")}>
+                            <span className="min-w-0 flex-1">
+                              <span className="text-xs text-muted-foreground">
+                                Opção {i + 1} · {fmtT(o.duration)}{typeof o.confidence === "number" ? ` · confiança ${Math.round(o.confidence * 100)}%` : ""}
+                              </span>
+                              <span className="block">{o.text || <span className="text-muted-foreground">sem fala</span>}</span>
+                              {o.note && <span className="block text-xs text-muted-foreground">{o.note}</span>}
+                            </span>
+                            {inUse ? <Badge variant="outline">Em uso</Badge> : (
+                              <Button size="sm" variant="outline" disabled={!canEdit || dirty || !!alt.busy} onClick={() => void pickAlternative(sec.key, o.id)}>
+                                {alt.busy === o.id ? <Loader2Icon className="animate-spin" /> : null} Usar esta
+                              </Button>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ))}
+                </div>
+              )}
               <p className="text-muted-foreground">Para aparar ou mudar a ordem, deixa uma nota no momento.</p>
               {noteBox}
             </TabsContent>
@@ -211,7 +266,8 @@ export function GuidedEditor({ access, st, onReload }: { access: Access; st: Edi
                   <span className="text-muted-foreground">Alternativas</span>
                   {hookAlts.map((x) => (
                     <div key={x} className="flex items-center gap-2 rounded border px-2 py-1">
-                      <span className="min-w-0 flex-1">{x}{x === ai?.hook?.trim() && <Badge variant="outline" className="ml-2">escolha da IA</Badge>}</span>
+                      <span className="min-w-0 flex-1">{x}{x === ai?.hook?.trim() ? <Badge variant="outline" className="ml-2">escolha da IA</Badge>
+                        : aiHookTexts.includes(x) ? <Badge variant="outline" className="ml-2">alternativa da IA</Badge> : null}</span>
                       <Button size="sm" variant="outline" disabled={!canEdit} onClick={() => apply(setHook(doc, x))}>Usar</Button>
                     </div>
                   ))}
