@@ -41,8 +41,8 @@ function Delta({
 					className={cn(
 						"gap-1 border-none tabular-nums [&_svg]:size-4 [&_svg]:shrink-0",
 						value > 0
-							? "bg-emerald-500/10 text-emerald-500"
-							: "bg-red-500/10 text-red-500",
+							? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+							: "bg-red-500/10 text-red-600 dark:text-red-400",
 						className
 					)}
 					data-slot="delta"

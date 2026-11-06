@@ -186,8 +186,8 @@ function Sala({ access }: { access: Access }) {
                     </li>
                   );
                 })}
-                <div ref={logEnd} />
               </ol>
+              <div ref={logEnd} />
             </CardContent>
           </Card>
 

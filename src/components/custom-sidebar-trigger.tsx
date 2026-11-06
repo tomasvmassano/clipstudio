@@ -11,7 +11,7 @@ export function CustomSidebarTrigger() {
 		<Tooltip>
 			<TooltipTrigger delay={1000} render={<SidebarTrigger />} />
 			<TooltipContent className="px-2 py-1" side="right">
-				Toggle Sidebar{" "}
+				Mostrar ou esconder o menu{" "}
 				<KbdGroup>
 					<Kbd>⌘</Kbd>
 					<Kbd>b</Kbd>

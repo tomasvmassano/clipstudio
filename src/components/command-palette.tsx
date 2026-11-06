@@ -103,10 +103,10 @@ export function CommandPalette() {
   const wsEnabled = !!wsId && scope.enabled.some((w) => w.id === wsId);
   return (
     <>
-      <Button variant="outline" size="sm" onClick={() => setOpen(true)} aria-label={isMac ? "Pesquisar (Cmd+K)" : "Pesquisar (Ctrl+K)"} className="gap-2 text-muted-foreground">
+      <Button variant="outline" size="sm" onClick={() => setOpen(true)} aria-keyshortcuts={isMac ? "Meta+K" : "Control+K"} title={isMac ? "Pesquisar (Cmd+K)" : "Pesquisar (Ctrl+K)"} className="gap-2 text-muted-foreground">
         <SearchIcon />
-        <span className="hidden sm:inline">Pesquisar</span>
-        <Kbd className="hidden md:inline-flex">{isMac ? "⌘K" : "Ctrl K"}</Kbd>
+        <span className="sr-only sm:not-sr-only">Pesquisar</span>
+        <Kbd aria-hidden className="hidden md:inline-flex">{isMac ? "⌘K" : "Ctrl K"}</Kbd>
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="gap-0 p-0 sm:max-w-xl" showCloseButton={false}>

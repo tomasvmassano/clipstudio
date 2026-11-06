@@ -253,7 +253,7 @@ function AssetGrid({ d, view, onOpen, onResume, access, onChanged }: {
       <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3" aria-label="Ativos">
         {d.assets.map((a) => (
           <li key={a.id} data-asset={a.id} className="flex min-w-0 flex-col gap-2 rounded-lg border p-3">
-            <button type="button" className="flex min-w-0 items-start gap-3 text-left" onClick={() => onOpen(a.id)} aria-label={`Abrir ${a.title}`}>
+            <button type="button" className="flex min-w-0 items-start gap-3 text-left" onClick={() => onOpen(a.id)}>
               <span className="mt-0.5 rounded-md bg-muted p-2"><KindIcon kind={a.kind} /></span>
               <span className="flex min-w-0 flex-col gap-0.5">
                 <span className="truncate font-medium">{a.title}</span>

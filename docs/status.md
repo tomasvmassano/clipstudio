@@ -10,8 +10,8 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | Estado | Requisitos |
 |---|---|
-| feito | 25 |
-| parcial | 220 |
+| feito | 26 |
+| parcial | 219 |
 | por começar | 58 |
 | bloqueado | 3 |
 | adiado | 3 |
@@ -229,7 +229,6 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | MIG-08 | — | parcial | verificação com conta real (R-15) da pesquisa na paleta | Implementar pesquisa real em app-search.tsx, corrigir links #, perfil demo, load |
 | MIG-09 | — | parcial | dual-read e plano de rollback testado por módulo; verificação com conta real (R-15) | Introduzir feature flags por workspace para migração progressiva, dual-read limi |
 | MIG-10 | — | parcial | RPCs e token legado (studio_whoami, legacy_can, studio_tokens) ainda ativos | Remover RPCs e credenciais legadas só depois de validação e reconciliação de dad |
-| QA-01 | — | parcial | E2E versionados cobrem rotas por URL direta e refresh; falta abrir cada rota pelo menu | Abrir cada rota por menu, URL direta e refresh |
 | QA-02 | — | parcial | storage de media e realtime por cliente sem E2E dedicado | User A tentar ler/alterar workspace B por URL/API/RPC/realtime/storage |
 | QA-03 | — | parcial | verificação com conta real (R-15) em produção | Convite expirado, sessão revogada, membro removido |
 | QA-04 | — | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | Criar/editar/submeter/aprovar guião e editar após aprovação |
@@ -237,10 +236,10 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | QA-07 | — | parcial | E2E com várias versões do mesmo vídeo (comentários e desenhos presos a cada versão) | Revisão com comentários timestamp e múltiplas versões |
 | QA-11 | — | parcial | falha/orçamento com o worker real em produção | Agente IA falha ou excede orçamento |
 | QA-13 | — | parcial | teste com sessão ativa real em produção | Mudança de role durante sessão ativa |
-| QA-14 | — | parcial | sem auditoria de acessibilidade nem teclado nos fluxos principais | Utilização mobile/tablet e teclado |
+| QA-14 | — | parcial | axe só no estado inicial das rotas (folhas, diálogos e teleprompter a gravar por analisar); moderate/minor e tema claro por auditar; verificação manual em iPad real | Utilização mobile/tablet e teclado |
 | QA-15 | — | parcial | RPO e RTO de produção UNVERIFIED (plano, backups, PITR no painel do Supabase); ensaio em staging; cópia fora do Supabase | Backup e restauro de amostra |
-| QA-16 | — | parcial | falta o mesmo com cada papel de cliente (viewer, reviewer) e telemóvel | Abrir cada rota com conta de agência, conta de cliente e código de equipa, com t |
-| R-15 | — | parcial | E2E com conta real no CI por fazer (ADR-0019 pendente) | Nenhuma página pode cair no erro genérico do browser ou do Next ("This page coul |
+| QA-16 | — | parcial | papéis viewer/reviewer do cliente e código de equipa na mesma matriz; forçar falha de widget e de pedido com conta | Abrir cada rota com conta de agência, conta de cliente e código de equipa, com t |
+| R-15 | — | parcial | verificação com sessão real (agência e cliente) no preview/produção das mudanças de navegação do W10-05 (folha do menu no telemóvel); E2E com conta real já corre no CI (job e2e) | Nenhuma página pode cair no erro genérico do browser ou do Next ("This page coul |
 | R-16 | — | parcial | correspondência por impressão digital com os nossos renders | Origem de cada publicação. |
 | R-17 | — | parcial | verificação com sessão real (R-15); lista do Numeiro por preencher | Hipérbole de persona. |
 | R-18 | — | parcial | publicador por API (PUB-01); formato de reels.id no TikTok/YouTube por confirmar | Linhagem gravada no momento. |
@@ -502,7 +501,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
-| QA-01 | parcial | E2E versionados cobrem rotas por URL direta e refresh; falta abrir cada rota pelo menu | E2E estrutura 15/15 (CHANGELOG W1-11); e2e/routes.spec.ts no CI (ADR-0022) | 2026-10-29 (E2E) |
+| QA-01 | feito | — | E2E estrutura 15/15 (CHANGELOG W1-11); e2e/routes.spec.ts no CI (ADR-0022); e2e/menu.spec.ts: cada entrada do menu (cliente: dono e cliente A; agência: dono) abre pelo menu e com refresh, menu esperado = config + my_context + my_flags, entradas em breve sem link (W10-05, PR #86) | 2026-11-06 (E2E com conta real) |
 | QA-02 | parcial | storage de media e realtime por cliente sem E2E dedicado | w1_isolation 38/38, w4_engine_isolation 23/23, w1_settings (bucket); e2e/isolation.spec.ts: UI, REST e RPC de A contra B; corre no CI em cada PR (job db, base descartável) | 2026-10-29 (E2E) |
 | QA-03 | parcial | verificação com conta real (R-15) em produção | convite expirado e membro removido em w1_team, w1_clients; corre no CI em cada PR (job db, base descartável); W10-08: sessão revogada e membro removido dão 42501 com o mesmo JWT (w10_sessoes, e2e/sessions.spec.ts) | — |
 | QA-04 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | w2_content 47/47; E2E de escrita 23/23 (W2) | — |
@@ -515,9 +514,9 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | QA-11 | parcial | falha/orçamento com o worker real em produção | w4_worker 30/30, test_worker 19/19 (limite de custo, falha definitiva); corre no CI em cada PR (job db, base descartável); worker numeiro-engine alojado no Railway e ligado à produção (2026-11-05) | — |
 | QA-12 | feito | — | w7_busca (termo, etiqueta e IDs exclusivos de B não aparecem para A; p_ws forçado dá 42501); e2e/busca.spec.ts QA-12 | — |
 | QA-13 | parcial | teste com sessão ativa real em produção | authorize() por pedido; w1_permissions 35/35; corre no CI em cada PR (job db, base descartável); W10-08: papel reduzido durante a sessão, nova autorização no pedido seguinte (w10_sessoes) | — |
-| QA-14 | parcial | sem auditoria de acessibilidade nem teclado nos fluxos principais | E2E telemóvel/iPad no Início e teleprompter (W1-10, W2-05) | — |
+| QA-14 | parcial | axe só no estado inicial das rotas (folhas, diálogos e teleprompter a gravar por analisar); moderate/minor e tema claro por auditar; verificação manual em iPad real | E2E telemóvel/iPad no Início e teleprompter (W1-10, W2-05); e2e/a11y.spec.ts (axe WCAG 2.2 AA, 9 rotas, dono e cliente A, zero serious/critical; teclado no menu, folha de revisão e diálogo) e e2e/viewport.spec.ts (390px e 820px sem scroll horizontal, menu recolhe) (W10-05, PR #86) | 2026-11-06 (E2E com conta real) |
 | QA-15 | parcial | RPO e RTO de produção UNVERIFIED (plano, backups, PITR no painel do Supabase); ensaio em staging; cópia fora do Supabase | scripts/backup/drill.sh, job backup no CI, docs/qa/backup-drill-2026-10-30.md (1 006 237 linhas iguais, RTO do ensaio 33,8 s), runbook docs/runbooks/restauro.md (ADR-0042) | — |
-| QA-16 | parcial | falta o mesmo com cada papel de cliente (viewer, reviewer) e telemóvel | quality.yml (guardas); W1-12; ADR-0019; e2e/routes.spec.ts: 19 rotas, dono e cliente, zero erros na consola (CI) | 2026-10-29 (E2E) |
+| QA-16 | parcial | papéis viewer/reviewer do cliente e código de equipa na mesma matriz; forçar falha de widget e de pedido com conta | quality.yml (guardas); W1-12; ADR-0019; e2e/routes.spec.ts: 19 rotas, dono e cliente, zero erros na consola (CI); W10-05: menu.spec, a11y.spec, viewport.spec (dono e cliente A, telemóvel e iPad, zero erros na consola) | 2026-11-06 (E2E com conta real) |
 
 ## 19.1 Inbox universal e triagem
 
@@ -578,7 +577,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
-| R-15 | parcial | E2E com conta real no CI por fazer (ADR-0019 pendente) | error.tsx app, c/[ws], global-error, widget-boundary; realtime-hub 9/9; quality.yml; W1-12; produção 03/11: 51 rotas (cliente e agência) sem página de erro genérica nem erros na consola, sessão real do dono | 2026-11-03 (sessão real do dono da agência, produção) |
+| R-15 | parcial | verificação com sessão real (agência e cliente) no preview/produção das mudanças de navegação do W10-05 (folha do menu no telemóvel); E2E com conta real já corre no CI (job e2e) | error.tsx app, c/[ws], global-error, widget-boundary; realtime-hub 9/9; quality.yml; W1-12; produção 03/11: 51 rotas (cliente e agência) sem página de erro genérica nem erros na consola, sessão real do dono; W10-05: E2E com conta real no CI abre cada entrada do menu com refresh (agência e cliente), telemóvel e iPad, zero erros na consola | 2026-11-06 (E2E com conta real) |
 
 ## 30. Centro de Acessos e Permissões (CAP)
 

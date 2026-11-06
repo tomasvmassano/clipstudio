@@ -81,7 +81,7 @@ function Tarefas({ access }: { access: Access }) {
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <ToggleGroup value={[tab]} onValueChange={(v) => { const t = (v as string[])[0] as Tab | undefined; if (t) { setList(null); setTab(t); } }} variant="outline" size="sm">
+        <ToggleGroup value={[tab]} onValueChange={(v) => { const t = (v as string[])[0] as Tab | undefined; if (t) { setList(null); setTab(t); } }} variant="outline" size="sm" className="flex-wrap">
           {mode === "user" && can("tasks.work") && <ToggleGroupItem value="mine">As minhas</ToggleGroupItem>}
           <ToggleGroupItem value="open">Abertas</ToggleGroupItem>
           {manage && <ToggleGroupItem value="unassigned"><UserXIcon /> Sem responsável</ToggleGroupItem>}
@@ -142,7 +142,7 @@ function emptyText(tab: Tab, manage: boolean) {
   return manage ? "Ainda não há tarefas abertas. Cria uma ou liga uma automação." : "Não há tarefas abertas.";
 }
 
-const PRIO_CLASS: Record<string, string> = { urgent: "bg-destructive text-white", high: "bg-amber-500/15 text-amber-700 dark:text-amber-300", normal: "", low: "text-muted-foreground" };
+const PRIO_CLASS: Record<string, string> = { urgent: "bg-destructive text-white dark:bg-red-700", high: "bg-amber-500/15 text-amber-700 dark:text-amber-300", normal: "", low: "text-muted-foreground" };
 
 function TaskRow({ t, tz, onOpen }: { t: Task; tz: string; onOpen: () => void }) {
   return (
