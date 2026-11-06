@@ -28,4 +28,4 @@ O motor (numeiro-engine #16) já sabe (a) receber `input.look` e `input.style_ve
 
 ## Rollback
 
-Bloco no fim de `supabase/migrations/PENDING_w10_pacote_estilo_alternativas.sql` (drop de `edit_alternative_apply`; repor `edit_doc_get` e `edit_package_request` de `20261105215624_w5_auditoria_fix.sql`). Sem mudanças de tabelas.
+Bloco no fim de `supabase/migrations/20261106060134_w10_pacote_estilo_alternativas.sql` (drop de `edit_alternative_apply`; repor `edit_doc_get` e `edit_package_request` de `20261105215624_w5_auditoria_fix.sql`). Sem mudanças de tabelas.

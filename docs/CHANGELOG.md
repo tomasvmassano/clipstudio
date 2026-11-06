@@ -2,7 +2,7 @@
 
 ## 2026-11-06
 
-- W10-07 · Pacote com o estilo guardado e alternativas da IA (EDL-13, EDL-10, ADR-0055): o pacote automático manda ao worker o aspeto e a versão do estilo guardado (música só se ainda estiver na biblioteca; versão na chave de idempotência); o modo guiado mostra 2-3 alternativas da IA por secção no passo Corte ("Usar esta" cria uma versão nova montada no servidor, edit_alternative_apply) e os textos alternativos do hook. Migração PENDING_w10_pacote_estilo_alternativas.sql; teste SQL 37/37.
+- W10-07 · Pacote com o estilo guardado e alternativas da IA (EDL-13, EDL-10, ADR-0055): o pacote automático manda ao worker o aspeto e a versão do estilo guardado (música só se ainda estiver na biblioteca; versão na chave de idempotência); o modo guiado mostra 2-3 alternativas da IA por secção no passo Corte ("Usar esta" cria uma versão nova montada no servidor, edit_alternative_apply) e os textos alternativos do hook. Migração 20261106060134_w10_pacote_estilo_alternativas.sql; teste SQL 37/37.
 ```
 
 ---
