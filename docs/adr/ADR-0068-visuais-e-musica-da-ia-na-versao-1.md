@@ -38,7 +38,7 @@ O job `package` (ADR-0048, ADR-0055) escreve a versão 1 de cada documento com c
 
 ## Ordem de deploy
 
-1. Dono aplica a migração (`PENDING_w10_v1_visuais_musica.sql`): sem efeito com a flag desligada; com ela ligada, um worker antigo ignora `fill` (v1 como hoje).
+1. Dono aplica a migração (`20261106131703_w10_v1_visuais_musica.sql`): sem efeito com a flag desligada; com ela ligada, um worker antigo ignora `fill` (v1 como hoje).
 2. Merge do numeiro-engine (`edl07-visuais-musica`) → Railway faz o deploy do worker.
 3. Merge desta PR (UI).
 4. Ligar `edit.ai_visuals` para o Numeiro (fase `owner` primeiro), etiquetar na Biblioteca as imagens, loops e músicas autorizadas, pedir um pacote.
