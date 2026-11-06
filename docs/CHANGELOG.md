@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-06 (teleprompter: olhar na câmara)
+
+- **W10-11** teleprompter com olhar na câmara (GAZE-01, GAZE-02; estende FR-03-03 e FR-03-05; ADR-0060): distância à câmara e diagonal do ecrã por dispositivo; a coluna fica com a largura que cabe em ±3° (2·d·tan 3°, 10,5 cm a 1 m), convertida para px pela diagonal e pelo devicePixelRatio; o topo mostra o ângulo da linha mais larga desenhada, âmbar acima de ±3° e aviso acima de ±4,5°; sem diagonal fica a coluna antiga e a app pede o tamanho do ecrã. Linha de foco à altura da lente (20 % por defeito, configurável), usada também para bloco atual, retoma e salto. Modo frase: 2 a 4 palavras por linha, quebras nas pausas, por bloco. Corrigido: o painel de Definições aberto a partir do ecrã de leitura ficava por baixo dele. Migração aditiva `20261106064730_w10_teleprompter_olhar.sql` (5 chaves novas nas preferências, validadas). Testes `gaze` 34/34, `w10_teleprompter_olhar` 15/15, `w2_teleprompter` 52/52, `e2e/teleprompter-gaze.spec.ts`.
+
 ## 2026-11-06 (verificador antes da revisão humana)
 
 - **W10-06** verificador do motor antes da revisão humana (VAR-04, R-17; ADR-0057): o motor classifica cada hook depois do Crítico e do Editor (persona só da lista aprovada, opinião atribuída, facto com fonte datada e nunca dado como verificado, terceiro identificado com marca jurídica, afirmação com validade e data de expiração, PT-PT) e a revisão mostra as marcas por hook com o porquê e as versões (verificador, modelo, prompts, lista). Não aprova nem rejeita: quem revê decide. Migração aditiva `script_verifications` (fechada à API) + `worker_save_verification` (só o worker, guiões da própria execução, idempotente) + `content_verifications` (`scripts.read`); flag `scripts.verifier` ligada para todos. numeiro-engine #18. Testes `w10_verificador` 27/27, `verifier-format` 12/12, motor `test_verifier` 19/19; suite SQL 2168 casos.

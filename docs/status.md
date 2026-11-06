@@ -11,8 +11,8 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | Estado | Requisitos |
 |---|---|
 | feito | 25 |
-| parcial | 209 |
-| por começar | 69 |
+| parcial | 211 |
+| por começar | 67 |
 | bloqueado | 3 |
 | adiado | 3 |
 | **total** | **309** |
@@ -91,6 +91,8 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | PUB-02 | P0 | parcial | leitura dos limites em tempo real chega com o publicador | Limites das APIs como restrições do agendador |
 | PUB-04 | P0 | parcial | quotas de republicação só como aviso; verificação com conta real (R-15) | Calendário de publicações |
 | PUB-06 | P0 | parcial | notificações a quem aprova; verificação com conta real (R-15) | Quem aprova |
+| GAZE-01 | P0 | parcial | verificação com sessão real no estúdio (iPad a ~2,5 m, R-15) | Coluna do teleprompter ligada à distância |
+| GAZE-02 | P0 | parcial | verificação com sessão real no estúdio (R-15) | Linha de foco e modo frase |
 | FR-01-03 | P1 | parcial | verificação com conta real (R-15) | Minha fila: tarefas, aprovações, gravações, prazos e alertas; clique abre objeto |
 | FR-01-04 | P1 | parcial | sem calendário compacto no Início | Calendário editorial compacto e atividade recente com ator e timestamp. |
 | FR-01-05 | P1 | parcial | verificação com conta real (R-15) | Ações rápidas criar fonte, guião, projeto e tarefa; cada ação respeita permissõe |
@@ -288,7 +290,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-03-02 | parcial | verificação com conta real (R-15) | blocos Hook/Body/CTA e takes (take_create/update); w2_teleprompter 52/52; blocos personalizados ## no corpo (W2-08, ADR-0030); w2_custom_blocks 12/12; e2e/custom-blocks.spec.ts | — |
 | FR-03-03 | parcial | verificação com conta de cliente (R-15); E2E citado não está versionado no repo | espelho H/V, velocidade, letra, entrelinha, margens, contraste; W2-05; E2E 28/28 (não versionado); produção 03/11: espelho horizontal ligado sem mexer no vertical | 2026-11-03 (sessão real do dono da agência, produção) |
 | FR-03-04 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | play/pause, scroll, ecrã inteiro por duplo toque, atalhos BT; teleprompter/prompter.tsx; W2-05 | — |
-| FR-03-05 | parcial | verificação com conta de cliente (R-15); E2E citado não está versionado no repo | teleprompter_prefs por utilizador e dispositivo, wakeLock; tp_prefs_get/set; w2_teleprompter; produção 03/11: espelho guardado na conta e mantido depois de recarregar (reposto a seguir) | 2026-11-03 (sessão real do dono da agência, produção) |
+| FR-03-05 | parcial | verificação com conta de cliente (R-15); E2E citado não está versionado no repo | teleprompter_prefs por utilizador e dispositivo, wakeLock; tp_prefs_get/set; w2_teleprompter; produção 03/11: espelho guardado na conta e mantido depois de recarregar (reposto a seguir); chaves do olhar (distance_m, screen_in, column_fit, focus_pct, phrase_mode) validadas em _tp_prefs_clean; w10_teleprompter_olhar 15/15; e2e/teleprompter-gaze.spec.ts guarda e recarrega (W10-11) | 2026-11-03 (sessão real do dono da agência, produção) |
 | FR-03-06 | parcial | sem anexar ficheiro ao take | takes com notas sem mudar estado editorial; W2-05; limitação W2 | — |
 | FR-03-07 | parcial | não abre sem rede | aviso de wake lock, takes offline, retoma noutro dispositivo; W2-05 | — |
 
@@ -726,8 +728,8 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
-| GAZE-01 | por começar |  |  | — |
-| GAZE-02 | por começar |  |  | — |
+| GAZE-01 | parcial | verificação com sessão real no estúdio (iPad a ~2,5 m, R-15) | src/lib/gaze.ts (2·d·tan 3°, px/cm pela diagonal e dpr); ângulo medido no topo com aviso acima de ±4,5°; tests/gaze.test.mts 34/34; w10_teleprompter_olhar 15/15; e2e/teleprompter-gaze.spec.ts; ADR-0060; W10-11 | — |
+| GAZE-02 | parcial | verificação com sessão real no estúdio (R-15) | linha de foco focus_pct (bloco atual, retoma e salto pela mesma linha); modo frase phraseLines 2-4 palavras por bloco; tests/gaze.test.mts 34/34; e2e/teleprompter-gaze.spec.ts; ADR-0060; W10-11 | — |
 | GAZE-03 | por começar |  |  | — |
 | GAZE-04 | por começar |  |  | — |
 | GAZE-05 | por começar |  |  | — |
