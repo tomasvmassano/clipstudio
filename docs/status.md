@@ -90,8 +90,8 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | PUB-02 | P0 | parcial | leitura dos limites em tempo real chega com o publicador | Limites das APIs como restrições do agendador |
 | PUB-04 | P0 | parcial | quotas de republicação só como aviso; verificação com conta real (R-15) | Calendário de publicações |
 | PUB-06 | P0 | parcial | notificações a quem aprova; verificação com conta real (R-15) | Quem aprova |
-| GAZE-01 | P0 | parcial | verificação com sessão real no estúdio (iPad a ~2,5 m, R-15); migração PENDING_w10_teleprompter_olhar.sql por aplicar em produção | Coluna do teleprompter ligada à distância |
-| GAZE-02 | P0 | parcial | verificação com sessão real no estúdio (R-15); migração PENDING_w10_teleprompter_olhar.sql por aplicar em produção | Linha de foco e modo frase |
+| GAZE-01 | P0 | parcial | verificação com sessão real no estúdio (iPad a ~2,5 m, R-15) | Coluna do teleprompter ligada à distância |
+| GAZE-02 | P0 | parcial | verificação com sessão real no estúdio (R-15) | Linha de foco e modo frase |
 | FR-01-03 | P1 | parcial | verificação com conta real (R-15) | Minha fila: tarefas, aprovações, gravações, prazos e alertas; clique abre objeto |
 | FR-01-04 | P1 | parcial | sem calendário compacto no Início | Calendário editorial compacto e atividade recente com ator e timestamp. |
 | FR-01-05 | P1 | parcial | verificação com conta real (R-15) | Ações rápidas criar fonte, guião, projeto e tarefa; cada ação respeita permissõe |
@@ -723,8 +723,8 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
-| GAZE-01 | parcial | verificação com sessão real no estúdio (iPad a ~2,5 m, R-15); migração PENDING_w10_teleprompter_olhar.sql por aplicar em produção | src/lib/gaze.ts (2·d·tan 3°, px/cm pela diagonal e dpr); ângulo medido no topo com aviso acima de ±4,5°; tests/gaze.test.mts 34/34; w10_teleprompter_olhar 15/15; e2e/teleprompter-gaze.spec.ts; ADR-0060; W10-11 | — |
-| GAZE-02 | parcial | verificação com sessão real no estúdio (R-15); migração PENDING_w10_teleprompter_olhar.sql por aplicar em produção | linha de foco focus_pct (bloco atual, retoma e salto pela mesma linha); modo frase phraseLines 2-4 palavras por bloco; tests/gaze.test.mts 34/34; e2e/teleprompter-gaze.spec.ts; ADR-0060; W10-11 | — |
+| GAZE-01 | parcial | verificação com sessão real no estúdio (iPad a ~2,5 m, R-15) | src/lib/gaze.ts (2·d·tan 3°, px/cm pela diagonal e dpr); ângulo medido no topo com aviso acima de ±4,5°; tests/gaze.test.mts 34/34; w10_teleprompter_olhar 15/15; e2e/teleprompter-gaze.spec.ts; ADR-0060; W10-11 | — |
+| GAZE-02 | parcial | verificação com sessão real no estúdio (R-15) | linha de foco focus_pct (bloco atual, retoma e salto pela mesma linha); modo frase phraseLines 2-4 palavras por bloco; tests/gaze.test.mts 34/34; e2e/teleprompter-gaze.spec.ts; ADR-0060; W10-11 | — |
 | GAZE-03 | por começar |  |  | — |
 | GAZE-04 | por começar |  |  | — |
 | GAZE-05 | por começar |  |  | — |

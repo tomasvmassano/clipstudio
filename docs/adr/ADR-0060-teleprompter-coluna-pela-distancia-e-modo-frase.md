@@ -9,7 +9,7 @@
 3. **Sem diagonal, não se adivinha.** Sem tamanho do ecrã a coluna fica como estava (até 1100 px) e a app pede a diagonal. Não se usa a polegada CSS (96 px) como estimativa: num iPad engana em cerca de 45%.
 4. **Linha de foco configurável** (`focus_pct`, 5 a 60 %, 20 % por defeito: a lente fica em cima). É a mesma linha que decide o bloco atual, a retoma por bloco e o salto entre blocos; fica dentro do espelho, por isso continua no sítio certo com espelho vertical.
 5. **Modo frase como função pura** (`phraseLines`): partição ótima (programação dinâmica) de cada parágrafo em linhas de 2 a 4 palavras, com custo baixo para quebrar no fim de frase, na vírgula e antes de conjunções, e custo alto para fechar a linha num artigo ou preposição. Aplica-se por bloco: Hook, Body, CTA e blocos personalizados mantêm a identidade, os takes e a retoma.
-6. **Preferências por utilizador e dispositivo, no mecanismo que já existe** (`teleprompter_prefs`, `tp_prefs_get/set`). Cinco chaves novas no jsonb (`distance_m`, `screen_in`, `column_fit`, `focus_pct`, `phrase_mode`), validadas em `_tp_prefs_clean` (migração aditiva `PENDING_w10_teleprompter_olhar.sql`). Se o servidor ainda não as conhecer, o cliente guarda as restantes e avisa que estas ficam só no dispositivo.
+6. **Preferências por utilizador e dispositivo, no mecanismo que já existe** (`teleprompter_prefs`, `tp_prefs_get/set`). Cinco chaves novas no jsonb (`distance_m`, `screen_in`, `column_fit`, `focus_pct`, `phrase_mode`), validadas em `_tp_prefs_clean` (migração aditiva `20261106064730_w10_teleprompter_olhar.sql`). Se o servidor ainda não as conhecer, o cliente guarda as restantes e avisa que estas ficam só no dispositivo.
 
 ## Alternativas rejeitadas
 
@@ -25,4 +25,4 @@
 
 ## Rollback
 
-Bloco no fim de `PENDING_w10_teleprompter_olhar.sql` (repõe `_tp_prefs_clean`; as chaves já guardadas ficam no jsonb e o código anterior ignora-as). Reverter o PR volta à coluna de 1100 px e à linha a 34 %.
+Bloco no fim de `20261106064730_w10_teleprompter_olhar.sql` (repõe `_tp_prefs_clean`; as chaves já guardadas ficam no jsonb e o código anterior ignora-as). Reverter o PR volta à coluna de 1100 px e à linha a 34 %.
