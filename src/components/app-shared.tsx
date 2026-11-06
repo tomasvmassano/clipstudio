@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import {
 	Building2Icon, GaugeIcon, KeyRoundIcon, ScrollIcon, SettingsIcon, SlidersHorizontalIcon,
 	LayoutGridIcon, ScrollTextIcon, MonitorPlayIcon, LightbulbIcon, BarChart3Icon, BotIcon,
-	BriefcaseBusinessIcon, ClapperboardIcon, FlaskRoundIcon, RotateCcwIcon, FilmIcon, ReceiptIcon, FlaskConicalIcon, LibraryIcon, ShieldCheckIcon, UsersIcon, UsersRoundIcon, WalletIcon, FileTextIcon, DoorOpenIcon, HistoryIcon, PlugIcon, InboxIcon, ListTodoIcon, CalendarDaysIcon, WandSparklesIcon } from "lucide-react";
+	BriefcaseBusinessIcon, ClapperboardIcon, FlaskRoundIcon, RotateCcwIcon, FilmIcon, ReceiptIcon, FlaskConicalIcon, LibraryIcon, ShieldCheckIcon, UsersIcon, UsersRoundIcon, WalletIcon, FileTextIcon, DoorOpenIcon, HistoryIcon, PlugIcon, InboxIcon, ListTodoIcon, CalendarDaysIcon, WandSparklesIcon, ActivityIcon } from "lucide-react";
 
 export type SidebarNavItem = {
 	title: string;
@@ -39,6 +39,7 @@ export const agencyNavGroups: SidebarNavGroup[] = [
 			{ title: "Caixa de entrada", path: "/caixa", icon: <InboxIcon />, orgCap: "dashboard.agency" },
 			{ title: "Equipa da agência", path: "/equipa-agencia", icon: <UsersRoundIcon />, orgCap: "team.read" },
 			{ title: "Integrações", path: "/integracoes", icon: <PlugIcon />, orgCap: "integrations.agency.read" },
+			{ title: "Saúde do sistema", path: "/saude", icon: <ActivityIcon />, orgCap: "ops.health" },
 			{ title: "Funcionalidades em teste", path: "/funcionalidades", icon: <FlaskConicalIcon />, orgCap: "flags.manage" },
 		],
 	},

@@ -21,6 +21,7 @@ Fonte: PRD v2.1 §3 (papéis), §5A (TEAM-01…16), CAP-03/05/08. **PROPOSTA de 
 | `contracts.manage` | ✓ | — | — | — |
 | `publishing.limits.manage` (W7) | ✓ | — | — | — |
 | `privacy.manage` (W7) | ✓ | — | — | — |
+| `ops.health` (saúde do sistema, `/saude`; W10-01) | ✓ (todos os clientes) | ✓ (só os atribuídos) | — | — |
 
 Um `agency_member` sem atribuição a um workspace **não vê nada** desse workspace (R-03, TEAM-03).
 
@@ -36,6 +37,7 @@ Um `agency_member` sem atribuição a um workspace **não vê nada** desse works
 | `recording.use` / `confirm` | ✓ | ✓ | ✓ | ✓ (own) | — | — |
 | `styles.manage` (W5-02) | ✓ | ✓ | ✓ | — | — | — |
 | aplicar estilo guardado no editor (W5-08) | quem tem `edit.timeline` ou `edit.guided` no cliente; guardar como estilo só com `styles.manage` |||||
+| usar uma alternativa da IA no editor (W10-07) | quem tem `edit.timeline` ou `edit.guided` no cliente; o servidor monta a versão a partir das alternativas do documento |||||
 | `projects.manage` (W2-07) | ✓ | ✓ | ✓ | — | — | — |
 | `analytics.manage` (W6, centro de desempenho) | ✓ | ✓ | ✓ | — | — | — |
 | `tasks.delegate` (W6) | ✓ | ✓ | ✓ | ✓ (as suas) | ✓ (as suas) | — |
@@ -85,6 +87,7 @@ Um `agency_member` sem atribuição a um workspace **não vê nada** desse works
 | Comentários em guiões (W2-06) | ler: `scripts.read`; comentar: `review.comment` (contributor, reviewer, manager, admin, dono, código do Numeiro); resolver: autor ou quem edita/aprova; leitor só lê; outro cliente 42501; não se apagam nem se reescrevem |||||
 | Revisão de vídeo (W5-04) | ler: `media.read` com a biblioteca ligada (todos os papéis do cliente); registar/trocar o link: `media.upload` (biblioteca); comentar com momento: `review.comment`; decidir: `review.approve` (reviewer, manager, admin, dono); leitor só vê; sessão individual (código de equipa recusado); outro cliente 42501 na lista e P0002 por ID; comentários e decisões não se apagam |||||
 | Notificações da revisão de vídeo (W5-05) | só quem tem acesso atual ao cliente (`tasks.read`) e é dono do ativo/versão, responsável do guião ou autor do comentário respondido; quem age não se avisa; outro cliente nunca recebe; preferências do cliente e da pessoa aplicam-se no servidor |||||
+| Notificações de prazos (W10-14) | tarefas: só o responsável com acesso atual (`tasks.read`); guião por aprovar com gravação amanhã: o responsável do guião (`scripts.read`) e membros ativos com `scripts.approve`; revisão de vídeo atrasada: responsável da tarefa de revisão e, em revisão, membros com `review.approve`, com alterações pedidas, quem registou o ativo/versão (todos com `media.read` e a flag `media.library`); tudo verificado no momento do envio; membro removido ou de outro cliente nunca recebe; quem muda o prazo não se avisa |||||
 | Navegar como papel/pessoa (W1-17, BIZ-07) | começar: `permissions.manage` no cliente; pessoa alvo tem de ter acesso a esse cliente; durante a pré-visualização a própria sessão só lê o que tem e o alvo tem; nenhuma escrita; outro cliente e outras pessoas não mudam; sair sempre permitido |||||
 | Perfil (W1-15) | cada pessoa só lê e muda o seu (RPCs com `auth.uid()`; tabela fechada); avatar só na pasta `<uid>/`; cliente preferido só entre os seus; com MFA ligado, sessão sem código (aal1) não passa em `_authorize` nem `_org_can` |||||
 | Enviar/reenviar convite (W1-14) | quem tem `team.invite` no espaço do convite (cliente) ou na agência (convites da agência); dono da agência em todos; outro cliente 42501/403; anónimo 42501 |||||
@@ -110,6 +113,8 @@ O código de equipa `studio_tokens(role='creator')` do Numeiro corresponde a um 
 
 Pesquisa global (W7): o dono da agência pesquisa todos os clientes da organização; staff só os atribuídos; equipa do cliente só o seu; código de equipa só o cliente do código e nunca pessoas. Cada grupo exige a leitura da entidade nesse cliente e a negação explícita retira o grupo.
 
+Pesquisa global, W10 (ADR-0054): media da biblioteca com `media.read` e a flag `media.library` (só ativos, nunca lixo nem eliminados); comentários dos vídeos com sessão individual, `media.read`, a flag `media.library` e `scripts.read`, só de vídeos que a revisão mostra (guião não eliminado); notificações só as da própria pessoa, nos clientes onde tem `tasks.read` e acesso ativo, e nunca as de um guião eliminado. Código de equipa: nenhum dos três. Negar `media.read` retira media e comentários; negar `scripts.read` retira comentários; suspender o acesso retira tudo desse cliente, incluindo as notificações antigas.
+
 Biblioteca de media (W8, ADR-0038): ver e pré-visualizar `media.read` (todos os papéis do cliente); carregar, versão nova, editar, lixo e recuperar, links externos `media.upload`; descarregar `media.download`; partilhar e revogar `media.share`; órfãos e eliminação definitiva `media.manage`; tipos, tamanho, quota e lixo do cliente `media.policy.manage` (só o dono da agência). Código de equipa: nada. Link de partilha: quem tiver o token, só aquela versão, até expirar ou ser revogado. O bucket `media` repete a decisão nas políticas de `storage.objects`: inserir só no caminho pendente da própria pessoa, ler só com autorização de 60 s criada pelas RPCs, apagar só órfãos e eliminação pedida com `media.manage`.
 
 Centro de integrações (W8, ADR-0039): ver as do cliente `integrations.read` (dono, admin e gestor do cliente); testar e revogar `integrations.manage` (dono e admin do cliente); vista da agência `integrations.agency.read` (dono da agência). Colaborador, revisor, leitor, staff sem atribuição e código de equipa: nada. Nunca se expõem tokens nem referências do Vault.
@@ -122,7 +127,11 @@ Portal do cliente (W8, ADR-0041): entrar com `scripts.read` (staff da agência s
 
 **W5-09 (ADR-0048):** pedir pacote exige `edit.timeline`; ver pacotes e documentos exige acesso ao editor; gravar documentos do pacote só `engine_worker`. Outro cliente: 42501.
 
+**W10-07 (ADR-0055):** o pacote lê o aspeto só de estilos do próprio cliente (e a música só se for áudio ativo desse cliente); `edit_alternative_apply` exige acesso ao editor (`edit.timeline` ou `edit.guided`; leitor, anon e outro cliente: 42501), só usa alternativas guardadas no próprio documento (opção inexistente ou de outro documento: P0002; vídeo de outro cliente pelo seu: P0002) e conflito 40001 sobre versão antiga.
+
 **W5-12 (ADR-0052):** exportar o pacote inteiro exige `edit.export` (revisor e outro cliente: 42501); ver na revisão os vídeos exportados e a versão leve: `media.read`; comentar `review.comment`; decidir `review.approve`. Outro cliente: 42501.
 **W5-14 (ADR-0053):** ler a lista de frases-persona: `agents.read`; gravar uma versão nova: `persona.manage` com sessão individual (código de equipa e manager: 42501). Versões imutáveis, tabela fechada à API. O worker recebe só os textos e o nome de quem está envolvido (o consentimento fica na app). Outro cliente: 42501.
 
 **W9 (ADR-0051):** eliminar e recuperar guiões: `scripts.purge` (workspace_owner e dono da agência); aprovar gravados em lote: `scripts.approve`; pré-requisitos: ler `scripts.read`, configurar `settings.manage`. Outro cliente: 42501.
+
+**W10-01 (ADR-0058):** `ops_health` exige `ops.health` (dono e admin da agência); gestor e membro da agência, equipa do cliente A ou B e sem sessão: 42501/28000. Por cliente: só os visíveis (dono todos, admin os atribuídos como staff ativo); parte dos agentes com `agents.read`, de media com `media.read` (negação explícita retira-a). Atribuição suspensa: o cliente desaparece; admin suspenso: 42501. `ops_health_tick` só service_role/pg_cron (browser 42501). Alertas `system_health` só para os donos da agência. Tabelas `ops_health_alerts` e `ops_health_runs` fechadas à API.

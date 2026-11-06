@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  ArrowLeftIcon, BookmarkIcon, CalendarRangeIcon, CheckSquareIcon, FileTextIcon, HashIcon, Loader2Icon, NewspaperIcon, PaletteIcon, PlusIcon,
-  SearchIcon, UserIcon,
+  ArrowLeftIcon, BellIcon, BookmarkIcon, CalendarRangeIcon, CheckSquareIcon, FileTextIcon, FilmIcon, HashIcon, Loader2Icon, MessageSquareIcon,
+  NewspaperIcon, PaletteIcon, PlusIcon, SearchIcon, UserIcon,
 } from "lucide-react";
 import { useSession } from "@/components/session-provider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -20,7 +20,7 @@ import { saveProject } from "@/lib/projects";
 import { createSource, duplicateOf } from "@/lib/sources";
 import { createTask, STATUS_LABEL as TASK_STATUS } from "@/lib/tasks";
 import { EDITORIAL_LABEL, SOURCE_STATUS_LABEL, type EditorialStatus, type SourceStatus } from "@/lib/types";
-import { fetchSearchScope, searchGlobal, searchHref, type QuickActions, type SearchItem, type SearchResult, type SearchScope } from "@/lib/search";
+import { fetchSearchScope, fmtMoment, searchGlobal, searchHref, type QuickActions, type SearchItem, type SearchResult, type SearchScope } from "@/lib/search";
 import { clientPath } from "@/lib/ws-path";
 
 /*
@@ -36,7 +36,13 @@ const CREATE_FIELD: Record<Create, string> = { source: "Título da fonte", scrip
 const CREATE_ICON: Record<Create, typeof PlusIcon> = { source: NewspaperIcon, script: FileTextIcon, project: CalendarRangeIcon, task: CheckSquareIcon };
 const KIND_ICON: Record<string, typeof PlusIcon> = {
   script: FileTextIcon, source: NewspaperIcon, reference: BookmarkIcon, task: CheckSquareIcon, project: CalendarRangeIcon, person: UserIcon, style: PaletteIcon, tag: HashIcon,
+  media: FilmIcon, comment: MessageSquareIcon, notification: BellIcon,
 };
+const MEDIA_KIND_LABEL: Record<string, string> = {
+  video: "Vídeo", audio: "Áudio", imagem: "Imagem", thumbnail: "Thumbnail", legenda: "Legenda", documento: "Documento", link_externo: "Link externo",
+};
+const MEDIA_STATUS_LABEL: Record<string, string> = { em_trabalho: "em trabalho", final: "final", arquivado: "arquivado" };
+const shortDate = (iso: string | undefined) => (iso ? new Date(iso).toLocaleDateString("pt-PT", { day: "2-digit", month: "short" }) : null);
 
 type Option =
   | { type: "item"; key: string; item: SearchItem; group: string }
@@ -53,6 +59,11 @@ function subtitle(it: SearchItem): string {
     case "person": return [it.email !== it.title ? it.email : null, it.job_title, it.role ? ROLE_LABEL[it.role] ?? it.role : null].filter(Boolean).join(" · ");
     case "style": return [it.status, it.version ? `versão ${it.version}` : null].filter(Boolean).join(" · ");
     case "tag": return `${it.count ?? 0} com esta etiqueta`;
+    case "media": return [it.media_kind ? MEDIA_KIND_LABEL[it.media_kind] ?? it.media_kind : "Media", it.status ? MEDIA_STATUS_LABEL[it.status] ?? it.status : null,
+      it.file_name ?? null].filter(Boolean).join(" · ");
+    case "comment": return [it.author, it.asset_title ? `em ${it.asset_title}` : null, it.version ? `v${it.version}` : null, fmtMoment(it.t_ms),
+      it.resolved ? "resolvido" : "por resolver"].filter(Boolean).join(" · ");
+    case "notification": return [it.read ? "lida" : "por ler", shortDate(it.created_at), it.body ?? null].filter(Boolean).join(" · ");
   }
 }
 
@@ -179,7 +190,7 @@ function Palette({ wsId, wsName, multi, token, actions, access, onGo }: {
   return (
     <div className="flex flex-col">
       <DialogTitle className="sr-only">Pesquisar</DialogTitle>
-      <DialogDescription className="sr-only">Pesquisa guiões, fontes, referências, tarefas, campanhas, pessoas e estilos. Setas para escolher, Enter para abrir.</DialogDescription>
+      <DialogDescription className="sr-only">Pesquisa guiões, fontes, referências, tarefas, campanhas, pessoas, estilos, media, comentários nos vídeos e as tuas notificações. Setas para escolher, Enter para abrir.</DialogDescription>
       <div className="flex items-center gap-2 border-b px-3">
         <SearchIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden />
         <input
@@ -224,7 +235,7 @@ function Palette({ wsId, wsName, multi, token, actions, access, onGo }: {
               </div>
             )}
             {res.mode === "suggestions" && res.groups.every((g) => g.items.length === 0) && creates.length === 0 && (
-              <p className="px-3 py-6 text-center text-sm text-muted-foreground">Escreve para pesquisar em guiões, fontes, referências, tarefas, campanhas, pessoas e estilos.</p>
+              <p className="px-3 py-6 text-center text-sm text-muted-foreground">Escreve para pesquisar em guiões, fontes, referências, tarefas, campanhas, pessoas, estilos, media, comentários nos vídeos e nas tuas notificações.</p>
             )}
             {options.map((o, i) => {
               const head = o.group !== lastGroup ? o.group : null;

@@ -1,6 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import { friendlyError, type Access } from "@/lib/access";
-import type { EditDoc, PoolSeg, Seg, TextLook } from "@/lib/edit-doc";
+import type { AiAlternatives, AltSection, EditDoc, PoolSeg, Seg, TextLook } from "@/lib/edit-doc";
 
 /** Editor de vídeo (EDL-07/09, ADR-0046): leitura e gravação de versões do documento de edição. O servidor decide tudo. */
 export type EditVersionMeta = { id: string; version_no: number; base_version_id: string | null; source: "import" | "ai" | "user" | "agent"; note: string | null; created_label: string | null; created_at: string };
@@ -14,6 +14,8 @@ export type EditState = {
   ai_choice?: { version_no: number; hook: string | null; music: EditDoc["audio"]["music"]; segments: Seg[] } | null;
   /** Cortes de versões anteriores que não estão nesta (para repor no modo guiado). */
   cut_pool?: PoolSeg[];
+  /** Alternativas da IA guardadas pelo pacote (doc.ai.alternatives da última versão ai/import; EDL-10). null = não há. */
+  ai_alternatives?: AiAlternatives | null;
   can: { timeline: boolean; guided: boolean; export: boolean; styles?: boolean };
 };
 
@@ -45,5 +47,17 @@ export const saveStyleFromDoc = (a: Access, asset: string, version: string, key:
 /** Aplica um estilo guardado ao vídeo: versão nova do documento a partir da atual. */
 export const applyStyle = (a: Access, asset: string, base: string, key: string) =>
   rpcD<EditState>("edit_style_apply", { p_ws: a.ws, p_asset: asset, p_base_version: base, p_key: key, p_token: a.token });
+
+/** Erro de uma RPC do editor com o SQLSTATE (40001 = conflito de versão, 42501 = sem permissão), para a UI escolher a recuperação. */
+export class EditRpcError extends Error {
+  constructor(message: string, readonly code: string | null) { super(message); this.name = "EditRpcError"; }
+}
+/** Usa uma alternativa da IA (EDL-10): o servidor monta a versão nova a partir das alternativas guardadas neste documento. */
+export async function applyAlternative(a: Access, asset: string, base: string, section: AltSection, option: string): Promise<EditState> {
+  const { data, error } = await supabase().rpc("edit_alternative_apply",
+    { p_ws: a.ws, p_asset: asset, p_base_version: base, p_section: section, p_option_id: option, p_token: a.token });
+  if (error) throw new EditRpcError(error.details || friendlyError(error.message), error.code ?? null);
+  return data as EditState;
+}
 
 export const SOURCE_LABEL: Record<EditVersionMeta["source"], string> = { import: "primeira versão (IA)", ai: "IA", user: "editada", agent: "proposta do agente" };
