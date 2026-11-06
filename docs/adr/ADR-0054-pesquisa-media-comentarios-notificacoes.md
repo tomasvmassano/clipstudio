@@ -26,4 +26,4 @@ Uma pessoa com acesso suspenso ou removido deixa de encontrar também as suas no
 
 ## Rollback
 
-Bloco no fim de `supabase/migrations/PENDING_w10_pesquisa.sql`: repor `search_global` de `20261105202033_w9_guioes_eliminar.sql` e apagar o índice e `_sdoc_media`. Compatível com o código: o browser deixa de receber os tipos novos.
+Bloco no fim de `supabase/migrations/20261106060240_w10_pesquisa.sql`: repor `search_global` de `20261105202033_w9_guioes_eliminar.sql` e apagar o índice e `_sdoc_media`. Compatível com o código: o browser deixa de receber os tipos novos.
