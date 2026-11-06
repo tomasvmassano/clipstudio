@@ -263,6 +263,8 @@ Com um estilo guardado (W10-07, ADR-0055) o job leva `look` e `style_version` (c
 
 Com a flag `edit.ai_visuals` (W10-18, ADR-0068) o job leva `fill` (chave `…:ia1`) e cada v1 sai com os visuais e a música da receita do seu hook (preset do cliente) e `doc.ai.visuals` (escolhas e lugares vazios com motivo). No editor, trocar ou tirar uma escolha da IA, ou mudar a posição de um visual, é uma edição como outra qualquer: versão N+1 (`user`), a v1 fica intacta.
 
+Com a flag `edit.package_marks` para quem pede (W10-17, ADR-0065) o job leva `input.marks` da sessão do teleprompter com mais destes guiões; o worker acerta o relógio pela transcrição e usa as passagens de cada guião como janelas (origem `marks`), ou volta à transcrição por guião (`sem_marcas`, `fora_do_ficheiro`) ou para o pacote todo (`sem_sessao`, `pedido_sem_marcas`, `erro_marcas`, `relogio_sem_referencia`, `marcas_inconsistentes`); a origem fica em `result.windows` e em `doc.ai.window`.
+
 ## Revisão em lote (W5-12, ADR-0052)
 
 Pacote `done` → "Exportar todos" (`edit_package_export`) → um job `export` por vídeo (idempotente pela versão do documento; um que falhe não trava os outros) → `done`: versão nova do vídeo com QC em `media_info.qc` → `in_review` na Revisão → aprovar (preso a essa versão) / pedir alterações / rejeitar; "Aprovar e seguinte" abre o próximo por rever. O QC não bloqueia: é nota para quem decide.
