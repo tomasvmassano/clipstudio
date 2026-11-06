@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-06 (Clip Miner)
+
+- **W10-12** Clip Miner MVP, cortes de vídeos longos (CLIP-01..07, SCALE-03, VAR-06; ADR-0060): job `clips` no worker (numeiro-engine #20: transcrição com tempos por palavra, silêncios, frases numeradas, candidatos da IA em IDs de frase com tese, máquina, polémica, riscos, pontuação e justificação, portão da dignidade, diversidade, 25-60 s com cortes limpos, documento v1 por corte com gancho no 0:00, título, 3 hooks, contexto e CTA), capacidade `clips.mine`, flag `clips.miner`, página `/c/[ws]/cortes` com progresso real, cortes e "Exportar todos", cortes na revisão em lote. Migração `PENDING_w10_clip_miner.sql` por aplicar. Oradores UNVERIFIED; reframe por orador ativo por fazer (corte ao centro). Testes `w10_clip_miner` 38/38, `clips-format` 8/8, motor `test_clips` 21/21.
+
 ## 2026-11-06 (CHG-008 gravação, aprendizagem e cortes)
 
 - **CHG-008** (só documentação; PRD §46). GAZE-01..06: teleprompter com coluna ligada à distância, linha de foco, modo frase, ritmo por pedal, hooks de memória, pontuação de olhar por take e piloto opcional de correção por IA. LRN-01..07: motivo em cada edição, agente "Editor de lições", lições aprovadas como versão da configuração em dois níveis (agência e cliente). CLIP-01..11: cortes de vídeos longos com o agente Clip Miner, com prioridade. STU-01..05: captura direta das câmaras com cópia no cartão, agente de estúdio e pacote de edição por guião. 5 capacidades planeadas. Sem alteração funcional.

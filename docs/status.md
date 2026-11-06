@@ -11,8 +11,8 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | Estado | Requisitos |
 |---|---|
 | feito | 25 |
-| parcial | 204 |
-| por começar | 74 |
+| parcial | 212 |
+| por começar | 66 |
 | bloqueado | 3 |
 | adiado | 3 |
 | **total** | **309** |
@@ -90,6 +90,13 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | PUB-02 | P0 | parcial | leitura dos limites em tempo real chega com o publicador | Limites das APIs como restrições do agendador |
 | PUB-04 | P0 | parcial | quotas de republicação só como aviso; verificação com conta real (R-15) | Calendário de publicações |
 | PUB-06 | P0 | parcial | notificações a quem aprova; verificação com conta real (R-15) | Quem aprova |
+| CLIP-01 | P0 | parcial | verificação com sessão real (R-15) e um master real no R2; Drive do cliente como fonte não ligado | Fonte = ficheiro master original |
+| CLIP-02 | P0 | parcial | separação de oradores: fornecedor por escolher depois do teste em PT-PT (UNVERIFIED); hoje só tempos por palavra (faster-whisper) | Transcrição com oradores |
+| CLIP-03 | P0 | parcial | rubrica e máquinas testadas com episódios reais (piloto CLIP-11); crítica num segundo passo | Agente "Clip Miner": candidatos e ranking |
+| CLIP-04 | P0 | parcial | regra final para afirmações sobre terceiros (§46.5, decisão do Tomás); pessoas identificadas só assinaladas | Etiquetas de polémica e portão da dignidade |
+| CLIP-05 | P0 | parcial | medir com vídeos reais (contexto perdido, ≤ 30 min por hora de fonte) | Diversidade e cortes limpos |
+| CLIP-06 | P0 | parcial | vista lado a lado original/reordenado no editor (dados em ai.clip); verificação com sessão real | Preparação do corte |
+| CLIP-07 | P0 | parcial | reframe 9:16 com orador ativo (hoje corte ao centro), fontes multi-câmara, verificação com sessão real | Vertical, legendas, estilo e revisão |
 | FR-01-03 | P1 | parcial | verificação com conta real (R-15) | Minha fila: tarefas, aprovações, gravações, prazos e alertas; clique abre objeto |
 | FR-01-04 | P1 | parcial | sem calendário compacto no Início | Calendário editorial compacto e atividade recente com ator e timestamp. |
 | FR-01-05 | P1 | parcial | verificação com conta real (R-15) | Ações rápidas criar fonte, guião, projeto e tarefa; cada ação respeita permissõe |
@@ -160,6 +167,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | OPS-07 | P1 | parcial | sem timestamps, comparação de versões e acesso externo | Colaboração e revisão |
 | OPS-08 | P1 | parcial | sem relatórios de throughput, lead/cycle time e retrabalho | Auditoria de operações |
 | OPS-10 | P1 | parcial | Realtime Presence track e Broadcast para colaboração (decisão); verificação com conta real (R-15) | Presença segura |
+| SCALE-03 | P1 | parcial | transcrição pesquisável e múltiplos formatos; ver CLIP-01..07 | Clip factory: |
 | SCALE-05 | P1 | parcial | sem guidelines de marca, verificação factual, áudio, direitos | Quality gates: |
 | SCALE-06 | P1 | parcial | recomendações só de leitura; limiares por calibrar | Learning loop: |
 | BIZ-05 | P1 | parcial | verificação com conta real (R-15) | Contratos por cliente |
@@ -599,7 +607,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 |---|---|---|---|---|
 | SCALE-01 | por começar | sem linhagem até publicação e métricas | nada além de guião → takes | — |
 | SCALE-02 | por começar | sem ingestão em lote | nada no código | — |
-| SCALE-03 | por começar | sem clip factory | nada no código | — |
+| SCALE-03 | parcial | transcrição pesquisável e múltiplos formatos; ver CLIP-01..07 | W10-12 Clip Miner MVP (ADR-0060) | — |
 | SCALE-04 | por começar | sem centro de publicação | nada no código | — |
 | SCALE-05 | parcial | sem guidelines de marca, verificação factual, áudio, direitos | checklist por cliente (W3-03); rubrica do Crítico no motor | — |
 | SCALE-06 | parcial | recomendações só de leitura; limiares por calibrar | learn_recommendations com evidência e limitações (W7, ADR-0037); w7_learn | — |
@@ -744,13 +752,13 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
-| CLIP-01 | por começar |  |  | — |
-| CLIP-02 | por começar |  |  | — |
-| CLIP-03 | por começar |  |  | — |
-| CLIP-04 | por começar |  |  | — |
-| CLIP-05 | por começar |  |  | — |
-| CLIP-06 | por começar |  |  | — |
-| CLIP-07 | por começar |  |  | — |
+| CLIP-01 | parcial | verificação com sessão real (R-15) e um master real no R2; Drive do cliente como fonte não ligado | W10-12 (ADR-0060): clips_request só aceita versões R2 prontas do cliente; w10_clip_miner 38/38 | — |
+| CLIP-02 | parcial | separação de oradores: fornecedor por escolher depois do teste em PT-PT (UNVERIFIED); hoje só tempos por palavra (faster-whisper) | numeiro-engine clips.py (speakers_for), test_clips | — |
+| CLIP-03 | parcial | rubrica e máquinas testadas com episódios reais (piloto CLIP-11); crítica num segundo passo | clips.py + prompts/clip_miner.md (clip-miner-1): IDs de frase, tese, máquina, polémica, riscos, pontuação e justificação; test_clips | — |
+| CLIP-04 | parcial | regra final para afirmações sobre terceiros (§46.5, decisão do Tomás); pessoas identificadas só assinaladas | portão da dignidade no motor e no servidor (_clip_meta_problem); test_clips, w10_clip_miner | — |
+| CLIP-05 | parcial | medir com vídeos reais (contexto perdido, ≤ 30 min por hora de fonte) | diversidade, 25-60 s, cortes em fins de frase e silêncios em código; test_clips | — |
+| CLIP-06 | parcial | vista lado a lado original/reordenado no editor (dados em ai.clip); verificação com sessão real | documento v1: gancho no 0:00 com ≤ 3 trechos de frases inteiras, título ≤ 8 palavras, 3 hooks, contexto, CTA; test_clips | — |
+| CLIP-07 | parcial | reframe 9:16 com orador ativo (hoje corte ao centro), fontes multi-câmara, verificação com sessão real | cortes no editor, export (EDL-11, QC) e revisão em lote (media_review_list); w10_clip_miner | — |
 | CLIP-08 | por começar |  |  | — |
 | CLIP-09 | por começar |  |  | — |
 | CLIP-10 | por começar |  |  | — |
