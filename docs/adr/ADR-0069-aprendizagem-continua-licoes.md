@@ -32,4 +32,4 @@ O motor escreve guiões; a equipa edita, aprova ou rejeita. Até aqui só a reje
 
 ## Rollback
 
-Bloco no fim de `supabase/migrations/PENDING_w10_aprendizagem.sql`: tirar o cron e as funções, apagar flags e grants; as tabelas e o tipo `lesson_editor` só num contract posterior, depois de exportar os dados. O código em main não usa nada disto.
+Bloco no fim de `supabase/migrations/20261106132216_w10_aprendizagem.sql`: tirar o cron e as funções, apagar flags e grants; as tabelas e o tipo `lesson_editor` só num contract posterior, depois de exportar os dados. O código em main não usa nada disto.
