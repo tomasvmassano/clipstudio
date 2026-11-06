@@ -16,11 +16,14 @@ Estado: **ativo** (existe e é verificado no servidor por `authorize()`; também
 | `team.manage` | Equipa | A | org, ws | ativo | `/equipa`: mudar papel, suspender, reativar, remover com reatribuição de tarefas (`member_update`, `member_remove`); dono da agência atribui staff (`agency_staff_assign`) |
 | `permissions.manage` | CAP | A | org, ws | ativo | `/permissoes`: por pessoa (o que tem, porquê, permitir/negar com motivo e prazo), por papel, exceções ativas (`permissions_matrix`, `grant_set`, `grant_revoke`, `access_explain`); papéis personalizados por fazer |
 | navegar como papel/pessoa (`access_preview_start`/`stop`/`mine`) | Permissões | A | ws | ativo (W1-17) | Começar exige `permissions.manage`; durante 30 min `_authorize` da própria sessão só dá leitura que a pessoa e o alvo têm (ADR-0045); faixa fixa com "Sair"; auditado |
+| `audit.read` | CAP | M | org, ws | ativo | `/historico` (`audit_list`): quem fez o quê, com antes e depois, filtros por ação, pessoa e período; vista de agência (todos os clientes) por fazer |
+| `scripts.read` | Guiões (M02) | B | ws, proj, own | ativo | `/guioes`, `/`, teleprompter; histórico e comparar versões (`content_history`, W10-13) |
+
 | `audit.read` | CAP | M | org, ws | ativo | `/historico` (`audit_list`): quem fez o quê, com antes e depois, filtros por ação, pessoa e período; separador Tentativas recusadas (`audit_denials_list`, W10-16, ADR-0066): no cliente as recusas de quem lá tem acesso, com `audit.read` da organização também as tentativas de fora; vista de agência (todos os clientes) por fazer |
 | registar a própria recusa (`audit_denied_record`) | CAP | — | identidade | ativo (W10-16) | Sem capacidade: só sessão individual, só em nome próprio (`auth.uid()`), 30/min; chamado pelo `fetch` do cliente Supabase ao receber 42501 (ADR-0066). Anónimo e código de equipa recusados |
 | `scripts.read` | Guiões (M02) | B | ws, proj, own | ativo | `/guioes`, `/`, teleprompter |
 | `scripts.create` | Guiões | M | ws, proj | ativo | Novo guião, Duplicar (`content_create`, `content_duplicate`); o motor insere direto |
-| `scripts.edit` | Guiões | M | ws, proj, own | ativo | Editor por blocos com autosave, restaurar versão (`content_save`, `content_restore_version`) |
+| `scripts.edit` | Guiões | M | ws, proj, own | ativo | Editor por blocos com autosave, restaurar versão (`content_save`, `content_restore_version`, auditado como `script.version_restored`, W10-13) |
 | `scripts.submit` | Guiões | M | ws, proj, own | ativo | Enviar para revisão (`content_transition` → `in_review`) |
 | `scripts.approve` | Guiões | A | ws, proj | ativo | Validar |
 | `scripts.reject` | Guiões | M | ws, proj | ativo | Rejeitar |
@@ -34,6 +37,8 @@ Estado: **ativo** (existe e é verificado no servidor por `authorize()`; também
 | `requests.create` | Fontes | B | ws | ativo | Pedir um tema (`talent_request_create`); também no código de equipa |
 | `references.read` | Referências (M07) | B | ws | ativo | `/referencias` Biblioteca e Descobrir (`references_list`, `references_discover`); referências no painel do guião; também no código de equipa |
 | `references.manage` | Referências | M | ws | ativo | Guardar reel, adicionar por link, classificar, favorito, coleções, arquivar, ligar a fontes (`reference_create`, `reference_update`, `reference_link`) |
+| `review.comment` | Revisão (M05) | M | ws, proj | ativo (guiões, W2-06) | Comentar e responder em guiões (`content_comment_add`); ler com `scripts.read` (`content_comments`, `review_inbox` em `/c/[ws]/revisao`); resolver: autor, `scripts.edit` ou `scripts.approve` (`content_comment_resolve`). Vídeo (W5-04, CHG-006): `media_review_comment` com momento e `media_review_comment_resolve` (autor ou `review.approve`), sessão individual e biblioteca ligada. Desenho no fotograma (W10-15, ADR-0067): `p_annotation` opcional em `media_review_comment`, só em vídeos guardados, com momento e sem respostas; validado em `_review_annotation`; sem capacidade própria |
+
 | `references.analyze` | Referências: dissecção pelo motor (REF-02, FR-07-04) | M | ws | ativo (W10-04, ADR-0059; flag `references.link`) | Colar link (`reference_paste`, com `references.manage`), Dissecar / colar a transcrição à mão (`reference_analyze`), detalhe com versões e proveniência (`reference_analysis_get`, `references.read`); worker `reference_analysis` (`worker_reference_context`, `worker_reference_save`) |
 | `references.adapt` | Referências: 3 guiões com 3 hooks a partir da dissecção, via rápida (REF-03/04) | M | ws | ativo (W10-04, ADR-0059; flag `references.link`) | Gerar 3 guiões (`reference_adapt`); worker `reference_scripts` (`worker_reference_save_script`); guiões em revisão com origem `via_rapida` |
 | `review.comment` | Revisão (M05) | M | ws, proj | ativo (guiões, W2-06) | Comentar e responder em guiões (`content_comment_add`); ler com `scripts.read` (`content_comments`, `review_inbox` em `/c/[ws]/revisao`); resolver: autor, `scripts.edit` ou `scripts.approve` (`content_comment_resolve`). Vídeo (W5-04, CHG-006): `media_review_comment` com momento e `media_review_comment_resolve` (autor ou `review.approve`), sessão individual e biblioteca ligada |
@@ -61,8 +66,9 @@ Estado: **ativo** (existe e é verificado no servidor por `authorize()`; também
 | `dashboard.configure` | Início (M01) | M | ws | ativo | `/` Personalizar: widgets e ordem por função no cliente (`dashboard_layouts_get`, `dashboard_layout_set`, `dashboard_layout_reset`), auditado |
 | `dashboard.agency` | Agência | B | org | ativo | `/` (Painel, entrada da equipa da agência; ADR-0018): clientes a que a pessoa tem acesso lado a lado, com totais e comparação (`agency_dashboard`); menu próprio do espaço da agência, com `/clientes` e `/caixa` de todos os clientes |
 | `team.read` (org) · `team.invite` (org) · `team.manage` (org) | Equipa da agência | M/A | org | ativo | `/equipa-agencia` (W1-13, ADR-0020): `agency_team`, `agency_invite`, `agency_invite_revoke`, `agency_member_update`; atribuir e tirar de clientes com `agency_staff_assign` e `member_remove` |
-| `costs.read` | Custos (M10) | M | ws | ativo (parcial) | custo e tokens por execução e gasto do dia em `/agentes/configuracao`, limite diário na configuração; módulo Custos completo mais tarde |
-| `costs.read_agency` | Custos | A | org | W4 | — |
+| `costs.read` | Custos (M10) | M | ws | ativo (parcial) | custo e tokens por execução e gasto do dia em `/agentes/configuracao`, limite diário na configuração; `/c/[ws]/custos` (flag `costs.content`): consumo de IA por agente, modelo e execução com tendência (`costs_ai_usage`, W10-10, ADR-0062) e custo por guião e publicação (`content_costs`) |
+| `costs.export` | Custos (M10) | M | ws | ativo (W10-10, ADR-0062) | `costs_ai_usage_export`: CSV da tabela visível (cliente, agente, modelo, execuções), auditado `costs.ai_exported`; na vista da agência exige `costs.export` em todos os clientes da resposta (senão recusa inteira) |
+| `costs.read_agency` | Custos | A | org | ativo (W10-10, flag `costs.agency`) | `/custos` (espaço da agência): `costs_ai_usage` com `p_ws` nulo; só os clientes ativos em que a pessoa também tem `costs.read` (uma negação explícita tira o cliente) |
 | `agents.read` | Agentes (M06) | B | ws | ativo | `/agentes`, `/agentes/configuracao` (catálogo, versão ativa, estado do worker, execuções sem custo) |
 | `agents.rehearse` | Agentes | M | ws | ativo | Ensaiar a sala |
 | `agents.run` | Agentes | A | ws | ativo | `agent_job_enqueue` (Correr agora, idempotente por tipo e dia), `agent_job_cancel`, `agent_job_retry`; executado pelo worker do motor (W4-02), que grava guiões em revisão; dados de pesquisa do motor por cliente (W4-03, ADR-0016) |
@@ -94,7 +100,8 @@ Estado: **ativo** (existe e é verificado no servidor por `authorize()`; também
 | `learn.read` / `learn.manage` | Retrabalho, experiências, vencedores e recomendações (FR-17-10/11/12, SCALE-06) | M | ws | ativo (W7, flags `learn.rework`, `learn.experiments`) | `/c/[ws]/aprendizagem/retrabalho` e `/experiencias`; categoria ao rejeitar por `content_transition_reasoned` |
 | `privacy.manage` | Pedidos de eliminação de dados (FR-14-05) | A | org | ativo (W7, flag `profile.data_export`) | tratar pedidos em `/equipa-agencia`; exportar os próprios dados com `profile.export` |
 | `team.job_titles` (flag) | Cargos no convite (BIZ-08) | — | ws | ativo (W7, flag) | `invite_member_with_title`: cargo pré-seleciona papel e exceções sugeridas; o cargo não dá acesso |
-| `costs.content` (flag) | Custos por guião e publicação (FR-10-05) | — | ws | ativo (W7, flag) | `/c/[ws]/custos` com `costs.read`; CSV auditado |
+| `costs.content` (flag) | Custos do cliente: consumo de IA (FR-10-01) e custo por guião e publicação (FR-10-05) | — | ws | ativo (W7, W10-10, flag) | `/c/[ws]/custos` com `costs.read`; CSV auditado |
+| `costs.agency` (flag) | Custos da agência (FR-10-01) | — | org | ativo (W10-10, flag, dono da agência por defeito) | `/custos` com `costs.read_agency` |
 | `projects.manage` | Campanhas e séries (FR-02-03) | M | ws | ativo (W2-07) | Criar, renomear e arquivar campanhas e séries (`project_save`); ler com `scripts.read` (`projects_list`). Campanha, responsável, plataformas e etiquetas do guião com `scripts.edit` (`content_meta_set`, `content_owners`); filtros da fila do teleprompter |
 | `performance.read` | Centro de desempenho (PERF) | B | ws, org | W6 (CHG-003) | — |
 | `performance.origin.override` | Corrigir origem sistema/externo (R-16) | M | ws | W6 (CHG-003) | — |
@@ -105,7 +112,7 @@ Estado: **ativo** (existe e é verificado no servidor por `authorize()`; também
 | `styles.import` | Importar estilo da agência para um cliente (REF-08) | M | org, ws | W5 (CHG-005) | — |
 | `lessons.read` | Aprendizagem: lições propostas e aprovadas (LRN-02..04) | B | ws, org | W7 (CHG-008) | — |
 | `lessons.manage` | Aprovar, editar e rejeitar lições (LRN-03/04) | A | ws, org | W7 (CHG-008) | — |
-| `clips.mine` | Correr o Clip Miner num vídeo longo (CLIP-01..07) | M | ws | W5 (CHG-008) | — |
+| `clips.mine` | Correr o Clip Miner num vídeo longo (CLIP-01..07) | M | ws | ativo (W10-12, ADR-0063) | `/c/[ws]/cortes` (flags `clips.miner` + `edit.studio`, R2): pedir cortes de um vídeo longo da Biblioteca (`clips_request`); ver pedidos e cortes com pontuação, justificação, etiquetas e riscos (`clips_list`, acesso ao editor); exportar todos (`clips_export`, com `edit.export`); worker grava cada corte (`media_worker_clips_save`, só `engine_worker`) |
 | `studio.capture` | Começar e parar sessão no agente de estúdio (STU-02) | M | ws | W5 (CHG-008) | — |
 | `gaze.correct` | Correção do olhar por IA (GAZE-05) | A | ws | W5 (CHG-008) | — |
 | `integrations.manage` | Settings (M15) | A | ws | ativo (W8) | Testar recolha e motor (`integrations_test`), revogar conta social com motivo e purga do segredo (`integrations_social_revoke`); ligar/renovar indisponíveis sem OAuth |
@@ -113,6 +120,7 @@ Estado: **ativo** (existe e é verificado no servidor por `authorize()`; também
 | `integrations.agency.read` | Settings (M15) | B | org | ativo (W8) | `/integracoes` (`integrations_agency`): Drive, R2, Resend, limites das APIs, workers e estado por cliente |
 | `ops.health` | Saúde do sistema (FR-17-15) | M | org | ativo (W10-01, ADR-0058) | `/saude` (`ops_health`): workers, filas de agentes e de media, a correr com último sinal, falhas 24 h/7 dias com erro sem segredos, por cliente (dono: todos; admin: só os atribuídos; agentes com `agents.read`, media com `media.read`) e alertas enviados. Alertas `ops_health_tick` (pg_cron 5 min, só service_role/cron) para os donos da agência |
 | — (própria pessoa) | Perfil (M14) | todos com conta | user | ativo (W1-15) | `/perfil` e `/c/[ws]/perfil`: nome, fotografia, palavra-passe, verificação em dois passos, fuso, tema, cliente preferido, terminar sessões, histórico de segurança (`profile_update`, `my_security_log`, `security_event`); sem capacidade: cada pessoa só mexe no que é seu |
+| — (própria pessoa) | Sessões e dispositivos (FR-14-03) | A | user | ativo (W10-08) | `/perfil` → Sessões e dispositivos: lista das próprias sessões com dispositivo, IP e última atividade, a atual marcada; Terminar uma, Terminar todas as outras, Terminar esta sessão (`my_sessions`, `session_terminate`, `sessions_terminate_others`, `security_event('security.signed_out_here')`); sem capacidade: só as sessões de `auth.uid()`; sessão terminada recusada em todas as RPCs no pedido seguinte (ADR-0064) |
 | `settings.manage` | Settings | A | ws | ativo (parcial) | `/definicoes`: nome, @, fuso, moeda, logótipo (bucket privado `branding`), cor da marca, só gravar aprovados (`workspace_update`, `workspace_settings`); limite de tarefas por pessoa com `tasks.manage`; integrações, notificações, segurança e dados do M15 por fazer; notificações por evento em `/definicoes/notificacoes` (flag `notifications.prefs`, `notif_settings`/`notif_settings_set`: ligar/desligar por tipo e canal, obrigatórias; W8, ADR-0040) |
 | — (quem recebe) | Notificações (FR-14-02) | B | ws, own | ativo (W8) | Preferências pessoais no perfil e silêncio por cliente (`my_notif_workspaces`, `my_notif_prefs`, `my_notif_pref_set`, `my_notif_mute`; flag `notifications.prefs`), dentro do que o cliente permite |
 | — (sistema; quem recebe) | Notificações de prazos (FR-11-04, TEAM-12) | B | ws, own | W10-14 | Tick SQL `deadline_notify_tick` de 15 em 15 min (pg_cron `deadline-notify-tick`) e trigger `tasks_due_changed_notify`; flag `notifications.deadlines` verificada para quem recebe; sem capacidade nova: destinatários por `tasks.read`, `scripts.read`, `scripts.approve`, `media.read`, `review.approve` no momento do envio; 5 tipos no grupo "Prazos" das preferências (ADR-0061) |
@@ -135,6 +143,10 @@ Por cliente (só a fase `all`): uploads novos para o Cloudflare R2, envio por pa
 ### Revisão dos exportados e revisão em lote (W5-12, ADR-0052)
 
 `edit_package_export` (edit.export + R2, por vídeo as regras de `edit_export_request`): botão "Exportar todos" no pacote. `media_review_list/detail` passam a incluir ficheiros de vídeo guardados (export, upload) com player da app (`media_proxy_access`, media.read) e as notas do QC (`media_info.qc`, worker). Sem capacidades novas.
+
+### Cortes de vídeos longos (W10-12, ADR-0063)
+
+Flag `clips.miner` (por cliente, fase inicial `owner`; precisa também de `edit.studio` e `media.r2`). `clips_request` (clips.mine + R2; versão de vídeo R2 pronta do cliente, 2 min a 4 h, 5-10 cortes; idempotente), `clips_list` (acesso ao editor), `clips_export` (edit.export, por corte as regras de `edit_export_request`), `media_worker_clips_save` (só engine_worker; documento válido, só o vídeo do pedido, metadados válidos, nunca um corte bloqueado pelo portão da dignidade, master ativo). Tabela `media_job_clips` fechada à API. `media_review_list` inclui os cortes exportados (sem guião). Página `/c/[ws]/cortes`; menu "Cortes de vídeos longos".
 
 ### Fluxo editorial (W9, ADR-0051)
 

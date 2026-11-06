@@ -1,5 +1,5 @@
 import { test, type Page } from "@playwright/test";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { ANON_KEY, API_URL, PASSWORD, WS_A, WS_B, sql, users } from "./env";
 import { NO_ACCESS, as, expect, expectNoCrash } from "./helpers";
 
@@ -109,6 +109,15 @@ test.beforeAll(async () => {
   sql(`insert into media_job_outputs (job_id, workspace_id, guiao_id, hook, asset_id) values
          ('${job}', '${WS_A}', '${GID}', 1, '${h1}'), ('${job}', '${WS_A}', '${GID}', 2, '${h2}')`);
   ids = { h1, h2, v1, v2, job };
+
+  // W10-15: a migração das anotações ainda tem nome PENDING_ (ganha o carimbo ao ser aplicada), e o `supabase start` só aplica
+  // ficheiros com carimbo. Enquanto for assim, aplica-a aqui (é aditiva e idempotente) e pede ao PostgREST para recarregar.
+  const pending = "supabase/migrations/PENDING_w10_anotacoes.sql";
+  if (existsSync(pending) && sql(`select count(*) from information_schema.columns where table_schema = 'public'
+                                    and table_name = 'media_comments' and column_name = 'annotation'`)[0] === "0") {
+    sql(readFileSync(pending, "utf8"));
+    sql(`notify pgrst, 'reload schema'`);
+  }
 });
 
 test.afterAll(() => {
@@ -207,6 +216,101 @@ as("clientA")("player da app: Agora preenche o momento, o tempo do comentário s
   expect(errors).toEqual([]);
 });
 
+as("clientA")("desenhar no fotograma: caneta, retângulo, desfazer; o desenho vai com o comentário e aparece no momento e na linha do tempo", async ({ page, errors }) => {
+  // o PostgREST pode demorar a ver p_annotation depois de recarregar o esquema (só na primeira corrida)
+  const h = await token(users.clientA);
+  await expect.poll(async () => (await (await rpc(h, "media_review_comment", { p_ws: WS_A, p_version: ids.v2, p_body: "x", p_t_ms: 1,
+    p_annotation: { v: 1, shapes: [] } })).json()).code, { timeout: 20_000 }).toBe("22023");
+  await page.route("**/api/media/versions/*/proxy?*", (route) =>
+    route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ url: CLIP, mime: "video/webm", expires_at: new Date(Date.now() + 3600e3).toISOString() }) }));
+  await page.goto(`/c/${WS_A}/revisao?ver=videos&asset=${ids.h2}`);
+  const sheet = page.getByRole("dialog");
+  await expect(sheet.getByRole("heading", { name: "Hook 2 · S15 · v1" })).toBeVisible();
+  const video = sheet.locator("video");
+  await expect.poll(() => video.evaluate((v: HTMLVideoElement) => v.readyState)).toBeGreaterThanOrEqual(1);
+  await video.evaluate((v: HTMLVideoElement) => { v.currentTime = 2.2; });
+  await expect.poll(() => video.evaluate((v: HTMLVideoElement) => v.currentTime)).toBeGreaterThan(2);
+
+  // pausar e desenhar: retângulo, traço de caneta e uma seta que se desfaz
+  await sheet.getByRole("button", { name: "Desenhar no fotograma" }).click();
+  expect(await video.evaluate((v: HTMLVideoElement) => v.paused)).toBe(true);
+  const surface = sheet.getByTestId("draw-surface");
+  await expect(surface).toBeFocused();
+  const tools = sheet.getByRole("toolbar", { name: "Ferramentas de desenho" });
+  const b = (await surface.boundingBox())!;
+  const drag = async (pts: [number, number][]) => {
+    await page.mouse.move(b.x + b.width * pts[0][0], b.y + b.height * pts[0][1]);
+    await page.mouse.down();
+    for (const p of pts.slice(1)) await page.mouse.move(b.x + b.width * p[0], b.y + b.height * p[1], { steps: 4 });
+    await page.mouse.up();
+  };
+  await tools.getByRole("button", { name: "Retângulo" }).click();
+  await drag([[0.2, 0.2], [0.6, 0.5]]);
+  await tools.getByRole("button", { name: "Caneta" }).click();
+  await tools.getByRole("radio", { name: "Amarelo" }).click();
+  await drag([[0.1, 0.8], [0.3, 0.7], [0.5, 0.85], [0.7, 0.75]]);
+  await tools.getByRole("button", { name: "Seta" }).click();
+  await drag([[0.8, 0.1], [0.5, 0.3]]);
+  await expect(tools).toContainText("3 formas");
+  await tools.getByRole("button", { name: "Desfazer" }).click();
+  await expect(tools).toContainText("2 formas");
+  await surface.focus();
+  await page.keyboard.press("Control+z");
+  await expect(tools).toContainText("1 forma");
+  await drag([[0.1, 0.8], [0.3, 0.7], [0.5, 0.85]]); // a seta continua escolhida
+  await tools.getByRole("button", { name: "Concluir" }).click();
+  await expect(sheet.getByTestId("draw-surface")).toHaveCount(0);
+  await expect(sheet.getByLabel("Momento")).toHaveValue("0:02");
+  await expect(sheet.getByLabel("Momento")).toBeDisabled();
+  await expect(sheet.getByText(/Desenho com 2 formas aos 0:02/)).toBeVisible();
+
+  const body = `Este canto tem de sair ${tag}`;
+  await sheet.getByRole("textbox", { name: "Comentário", exact: true }).fill(body);
+  await sheet.getByRole("button", { name: "Comentar", exact: true }).click();
+  const comment = sheet.getByTestId("review-comment").filter({ hasText: body });
+  await expect(comment).toContainText("com desenho");
+  await expect(sheet.getByLabel("Momento")).toHaveValue("");
+  const saved = JSON.parse(sql(`select json_build_object('t', t_ms, 'a', annotation) from media_comments where version_id = '${ids.v2}' and body = '${body}'`)[0]);
+  expect(saved.t).toBe(2200);
+  expect(saved.a.shapes.map((x: { type: string }) => x.type)).toEqual(["rect", "arrow"]);
+  expect(saved.a.shapes[0].points.flat().every((n: number) => n >= 0 && n <= 1)).toBe(true);
+  expect(saved.a.shapes[0].points[0][0]).toBeCloseTo(0.2, 1);
+  expect(saved.a.shapes[0].color).toBe("#ff3b30");
+
+  // no momento (±0,5 s) o desenho aparece por cima do fotograma; longe dele desaparece
+  const layer = sheet.getByTestId("annotation-layer");
+  await expect(layer).toHaveAttribute("aria-label", new RegExp(`aos 0:02: ${body}`));
+  await expect(layer.locator("rect, path, g")).toHaveCount(2);
+  const vb = (await video.boundingBox())!; const lb = (await layer.boundingBox())!;
+  expect(lb.x).toBeGreaterThanOrEqual(vb.x - 1); expect(lb.x + lb.width).toBeLessThanOrEqual(vb.x + vb.width + 1);
+  await video.evaluate((v: HTMLVideoElement) => { v.currentTime = 6; });
+  await expect(layer).toHaveCount(0);
+
+  // marca na linha do tempo (QA-07): leva ao momento, pausa e mostra o desenho
+  const marker = sheet.getByRole("button", { name: new RegExp(`Ir a 0:02: ${body}.*com desenho`) });
+  await marker.click();
+  await expect.poll(() => video.evaluate((v: HTMLVideoElement) => v.currentTime)).toBeCloseTo(2.2, 1);
+  expect(await video.evaluate((v: HTMLVideoElement) => v.paused)).toBe(true);
+  await expect(layer).toBeVisible();
+  await expect(comment).toHaveClass(/border-amber-400/);
+
+  // noutro tamanho de ecrã (iPad ao alto) o desenho escala com o vídeo
+  await page.setViewportSize({ width: 820, height: 1180 });
+  await expect.poll(async () => { const v = (await video.boundingBox())!; const l = (await layer.boundingBox())!; return l.x >= v.x - 1 && l.x + l.width <= v.x + v.width + 1; }).toBe(true);
+
+  // a API valida: tipo proibido e desenho num vídeo da Drive são recusados (22023), sem gravar nada
+  const bad = await rpc(h, "media_review_comment", { p_ws: WS_A, p_version: ids.v2, p_body: `mau ${tag}`, p_t_ms: 1000,
+    p_annotation: { v: 1, shapes: [{ type: "text", color: "#ffffff", width: 0.004, points: [[0.1, 0.1], [0.2, 0.2]] }] } });
+  expect(bad.status).toBe(400);
+  expect((await bad.json()).code).toBe("22023");
+  // a assinatura antiga (sem p_annotation) continua a funcionar
+  const old = await rpc(h, "media_review_comment", { p_ws: WS_A, p_version: ids.v2, p_body: `sem desenho ${tag}`, p_t_ms: 4000, p_parent: null, p_token: null });
+  expect(old.status).toBe(200);
+  expect(sql(`select count(*) from media_comments where version_id = '${ids.v2}' and body = 'mau ${tag}'`)).toEqual(["0"]);
+  await expectNoCrash(page);
+  expect(errors).toEqual([]);
+});
+
 test("revisor vê o pacote mas não exporta (UI e API 42501)", async ({ browser }) => {
   const ctx = await browser.newContext();
   const page = await ctx.newPage();
@@ -259,6 +363,8 @@ as("clientB")("outro cliente: a revisão de A é proibida pela rota, pela API e 
     ["media_review_list", { p_ws: WS_A, p_filters: {} }],
     ["media_review_detail", { p_ws: WS_A, p_asset: ids.h1 }],
     ["media_review_comment", { p_ws: WS_A, p_version: ids.v2, p_body: "intruso", p_t_ms: 1000 }],
+    ["media_review_comment", { p_ws: WS_A, p_version: ids.v2, p_body: "intruso", p_t_ms: 1000,
+      p_annotation: { v: 1, shapes: [{ type: "rect", color: "#ffffff", width: 0.004, points: [[0.1, 0.1], [0.2, 0.2]] }] } }],
     ["media_review_decide", { p_ws: WS_A, p_version: ids.v2, p_status: "approved" }],
     ["edit_package_export", { p_ws: WS_A, p_job: ids.job }],
   ] as const) {
