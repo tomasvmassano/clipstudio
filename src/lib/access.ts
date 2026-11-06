@@ -84,6 +84,11 @@ export function friendlyError(msg: string): string {
   if (msg.includes("texto_mudou")) return "O texto mudou depois de gravado: abre o guião e decide à mão.";
   if (msg.includes("arquivado")) return "Este guião está arquivado. Recupera-o primeiro.";
   if (msg.startsWith("duplicado:")) return "Esta fonte já existe neste cliente.";
+  if (msg.includes("link_nao_suportado")) return "Cola um link de um Reel do Instagram ou de um vídeo do TikTok. Para outros links usa Adicionar por link.";
+  if (msg.includes("transcricao_invalida")) return "A transcrição tem de ter entre 20 e 20 000 caracteres.";
+  if (msg.includes("sem_disseccao")) return "Primeiro é preciso dissecar esta referência.";
+  if (msg.includes("referencia_arquivada")) return "Esta referência está arquivada. Recupera-a primeiro.";
+  if (msg.includes("referencia_nao_encontrada")) return "Esta referência já não existe neste cliente ou não tens acesso.";
   if (msg.includes("url_obrigatorio")) return "Falta o link da referência.";
   if (msg.includes("url_invalido")) return "O link tem de começar por http:// ou https://.";
   if (msg.includes("titulo_obrigatorio")) return "Falta o título.";

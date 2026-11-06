@@ -15,7 +15,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { WorkspaceGate } from "@/components/workspace-gate";
 import type { Access } from "@/lib/access";
 import {
-  activateConfig, cancelJob, enqueueJob, fetchConfig, fetchOverview, JOB_KIND, JOB_STATUS, retryJob, saveConfig, STAGE_LABEL,
+  activateConfig, cancelJob, enqueueJob, fetchConfig, fetchOverview, JOB_KIND, JOB_STATUS, RUNNABLE_KINDS, retryJob, saveConfig, STAGE_LABEL,
   type AgentConfig, type Format, type Job, type Overview,
 } from "@/lib/agent-config";
 import { fmtDue } from "@/lib/tasks";
@@ -128,7 +128,7 @@ function Jobs({ o, busy, onRun, onCancel, onRetry }: { o: Overview; busy: boolea
     <div className="flex flex-col gap-3">
       {o.can.run && (
         <div className="flex flex-wrap items-center gap-2">
-          {(Object.keys(JOB_KIND) as Job["kind"][]).map((k) => (
+          {RUNNABLE_KINDS.map((k) => (
             <Button key={k} size="sm" variant={k === "daily_pipeline" ? "default" : "outline"} disabled={busy || !o.active} onClick={() => onRun(k)}><PlayIcon /> {JOB_KIND[k]}</Button>
           ))}
           <span className="text-xs text-muted-foreground">Uma por tipo e por dia: carregar de novo não duplica. Os guiões gerados entram em revisão; nada é publicado sem aprovação.</span>

@@ -3,7 +3,7 @@
 import { WsLink } from "@/components/ws-link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { ArchiveIcon, BookmarkPlusIcon, ExternalLinkIcon, Loader2Icon, PencilIcon, PlusIcon, RotateCwIcon, SearchIcon, StarIcon, UndoIcon } from "lucide-react";
+import { ArchiveIcon, BookmarkPlusIcon, ClipboardPasteIcon, ExternalLinkIcon, Loader2Icon, PencilIcon, PlusIcon, RotateCwIcon, ScissorsIcon, SearchIcon, StarIcon, UndoIcon } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,10 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { WorkspaceGate } from "@/components/workspace-gate";
 import { useSession } from "@/components/session-provider";
 import type { Access } from "@/lib/access";
-import { createReference, fetchDiscover, fetchReferences, updateReference } from "@/lib/references";
+import { createReference, fetchDiscover, fetchReferences, pasteReference, updateReference } from "@/lib/references";
+import { ReferenceDissection } from "@/components/reference-dissection";
+import { useFlags } from "@/lib/flags";
+import { pasteProblem } from "@/lib/reference-link";
 import type { Discover, DiscoverReel, RefMetrics, Reference } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -33,10 +36,14 @@ type Tab = "biblioteca" | "descobrir" | "arquivo";
 function Referencias({ access }: { access: Access }) {
   const { can } = useSession();
   const manage = can("references.manage");
+  const flags = useFlags(access.ws, access.token);
+  const linkOn = !!flags?.has("references.link");
   const [tab, setTab] = useState<Tab>("biblioteca");
   const [msg, setMsg] = useState("");
   const [adding, setAdding] = useState(false);
   const [rev, setRev] = useState(0);
+  const [open, setOpen] = useState<number | null>(null);
+  const reload = useCallback(() => setRev((n) => n + 1), []);
 
   return (
     <div className="flex flex-col gap-5">
@@ -47,8 +54,9 @@ function Referencias({ access }: { access: Access }) {
             Biblioteca de inspiração deste cliente: o que guardámos, como está classificado e em que guiões já serviu. Os números vêm do scraper, com a data de recolha.
           </p>
         </div>
-        {manage && <Button size="sm" onClick={() => setAdding(true)}><PlusIcon /> Adicionar por link</Button>}
+        {manage && <Button size="sm" variant={linkOn ? "outline" : "default"} onClick={() => setAdding(true)}><PlusIcon /> Adicionar por link</Button>}
       </div>
+      {manage && linkOn && <PasteBar access={access} analyzeAllowed={can("references.analyze")} onOpen={setOpen} onDone={() => { setTab("biblioteca"); reload(); }} />}
       <ToggleGroup value={[tab]} onValueChange={(v) => setTab(((v as string[])[0] as Tab) ?? "biblioteca")} variant="outline" size="sm">
         <ToggleGroupItem value="biblioteca">Biblioteca</ToggleGroupItem>
         <ToggleGroupItem value="descobrir">Descobrir</ToggleGroupItem>
@@ -59,7 +67,8 @@ function Referencias({ access }: { access: Access }) {
       )}
       {tab === "descobrir"
         ? <DiscoverView access={access} manage={manage} onError={setMsg} onSaved={() => setRev((n) => n + 1)} />
-        : <Library key={`${tab}-${rev}`} access={access} manage={manage} archived={tab === "arquivo"} onError={setMsg} />}
+        : <Library key={`${tab}-${rev}`} access={access} manage={manage} archived={tab === "arquivo"} onError={setMsg} linkOn={linkOn} onOpen={setOpen} />}
+      {open != null && <ReferenceDissection access={access} refId={open} onClose={() => setOpen(null)} onChanged={reload} />}
       <AddDialog open={adding} onOpenChange={setAdding} access={access} onDone={() => { setTab("biblioteca"); setRev((n) => n + 1); }} />
     </div>
   );
@@ -77,7 +86,59 @@ function Metrics({ m }: { m: RefMetrics | null }) {
   );
 }
 
-function Library({ access, manage, archived, onError }: { access: Access; manage: boolean; archived: boolean; onError: (m: string) => void }) {
+const JOB_LABEL: Record<string, string> = { queued: "em fila", running: "a correr", failed: "falhou", dead: "falhou", cancelled: "cancelada" };
+
+function DissectionBadge({ r }: { r: Reference }) {
+  const j = r.job;
+  if (j && j.status !== "succeeded") {
+    const what = j.kind === "reference_scripts" ? "guiões" : "dissecção";
+    return <Badge variant={j.status === "failed" || j.status === "dead" ? "destructive" : "outline"}>{what} {JOB_LABEL[j.status] ?? j.status}</Badge>;
+  }
+  if (r.dissection) return <Badge variant="outline" title={r.dissection.tese ?? undefined}>dissecada v{r.dissection.version}{r.scripts ? ` · ${r.scripts} guiões` : ""}</Badge>;
+  return null;
+}
+
+// REF-01: um campo para colar o link de um Reel ou TikTok; repetido não é erro, abre o que já existe.
+function PasteBar({ access, analyzeAllowed, onOpen, onDone }: { access: Access; analyzeAllowed: boolean; onOpen: (id: number) => void; onDone: () => void }) {
+  const [url, setUrl] = useState("");
+  const [analyze, setAnalyze] = useState(analyzeAllowed);
+  const [busy, setBusy] = useState(false);
+  const [note, setNote] = useState<{ kind: "ok" | "dup" | "err"; text: string; id?: number } | null>(null);
+  const problem = url.trim() ? pasteProblem(url) : null;
+  return (
+    <Card>
+      <CardContent className="flex flex-col gap-2 p-4">
+        <form className="flex flex-wrap items-end gap-2" onSubmit={async (e) => {
+          e.preventDefault(); setBusy(true); setNote(null);
+          try {
+            const r = await pasteReference(access, url, analyze && analyzeAllowed);
+            if (r.duplicate) setNote({ kind: "dup", text: `Este vídeo já está na biblioteca${r.reference.archived_at ? " (no arquivo)" : ""}: ${r.reference.titulo}.`, id: r.reference.id });
+            else { setNote({ kind: "ok", text: r.job ? "Guardado. A dissecção ficou em fila no motor." : "Guardado na biblioteca.", id: r.reference.id }); setUrl(""); onDone(); }
+          } catch (er) { setNote({ kind: "err", text: (er as Error).message }); }
+          finally { setBusy(false); }
+        }}>
+          <label className="flex min-w-[16rem] flex-1 flex-col gap-1 text-sm">Colar link
+            <Input inputMode="url" autoComplete="off" required aria-invalid={!!problem} aria-describedby={problem ? "paste-problem" : undefined} placeholder="https://www.instagram.com/reel/… ou https://www.tiktok.com/@…/video/…" value={url} onChange={(e) => setUrl(e.target.value)} />
+          </label>
+          {analyzeAllowed && (
+            <label className="flex h-8 items-center gap-2 text-sm"><input type="checkbox" className="size-4" checked={analyze} onChange={(e) => setAnalyze(e.target.checked)} /> Dissecar já</label>
+          )}
+          <Button type="submit" size="sm" disabled={busy || !url.trim() || !!problem}>{busy ? <Loader2Icon className="animate-spin" /> : <ClipboardPasteIcon />} Colar</Button>
+        </form>
+        {problem && <p id="paste-problem" className="text-sm text-destructive">{problem}</p>}
+        <p className="text-xs text-muted-foreground">Reel do Instagram ou vídeo do TikTok, de qualquer criador. O mesmo vídeo não entra duas vezes, mesmo com outro formato de link. A recolha da transcrição e dos números públicos usa o mecanismo do Scout (R-20); o vídeo nunca é publicado.</p>
+        {note && (
+          <p role={note.kind === "err" ? "alert" : "status"} className={cn("flex flex-wrap items-center gap-2 text-sm", note.kind === "err" && "text-destructive")}>
+            {note.text}
+            {note.id != null && <Button size="sm" variant="outline" onClick={() => onOpen(note.id!)}><ScissorsIcon /> Abrir dissecção</Button>}
+          </p>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function Library({ access, manage, archived, onError, linkOn, onOpen }: { access: Access; manage: boolean; archived: boolean; onError: (m: string) => void; linkOn: boolean; onOpen: (id: number) => void }) {
   const [items, setItems] = useState<Reference[] | null>(null);
   const [err, setErr] = useState("");
   // ?q= vem da pesquisa global (FR-16-01): abre a lista já filtrada
@@ -135,6 +196,7 @@ function Library({ access, manage, archived, onError }: { access: Access; manage
                     {r.formato && <Badge variant="secondary">{r.formato}</Badge>}
                     {r.estilo && <Badge variant="secondary">{r.estilo}</Badge>}
                     {r.duracao_s && <span className="text-muted-foreground tabular-nums">{r.duracao_s}s</span>}
+                    <DissectionBadge r={r} />
                     {manage && !archived ? (
                       <Button size="icon-sm" variant="ghost" className="ml-auto" aria-pressed={r.favorito} aria-label={r.favorito ? "Tirar dos favoritos" : "Marcar favorito"} onClick={() => run(r.id, { favorito: !r.favorito })}>
                         <StarIcon className={cn(r.favorito && "fill-amber-400 text-amber-400")} />
@@ -162,6 +224,7 @@ function Library({ access, manage, archived, onError }: { access: Access; manage
                   )}
                   <div className="flex flex-wrap gap-1.5 pt-1">
                     {r.url && <Button size="sm" variant="outline" render={<a href={r.url} target="_blank" rel="noopener" />} nativeButton={false}><ExternalLinkIcon /> Abrir original</Button>}
+                    {(linkOn || r.dissection) && <Button size="sm" variant="ghost" onClick={() => onOpen(r.id)}><ScissorsIcon /> Dissecção</Button>}
                     {manage && !archived && <Button size="sm" variant="ghost" onClick={() => setEditing(r)}><PencilIcon /> Classificar</Button>}
                     {manage && !archived && <Button size="sm" variant="ghost" onClick={() => run(r.id, { archived: true }, true)}><ArchiveIcon /> Arquivar</Button>}
                     {manage && archived && <Button size="sm" variant="outline" onClick={() => run(r.id, { archived: false }, true)}><UndoIcon /> Recuperar</Button>}
