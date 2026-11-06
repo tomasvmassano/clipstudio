@@ -11,6 +11,7 @@ import { fetchReferences, linkReference } from "@/lib/references";
 import { useSession } from "@/components/session-provider";
 import { fetchOwners, fetchProjects, saveProject, setContentMeta, type MetaPatch, type Owner, type Project, type ProjectList } from "@/lib/projects";
 import { fetchReworkReasons, transitionReasoned, type ReworkReasonList } from "@/lib/learn";
+import { decideLearned, fetchEditOptions, fetchEditRatio, saveEditReason, type Decision, type EditOptions, type EditRatio } from "@/lib/lessons";
 import { deleteContent } from "@/lib/content-delete";
 import { verificationLoader, type VerificationLookup } from "@/lib/verifier";
 
@@ -32,6 +33,14 @@ export type ScriptActions = {
   transitionReasoned: (id: string, to: "changes_requested" | "rejected", reason: string, code: string, lock?: number) => Promise<Guiao>;
   /** Motivos de rejeição do cliente e se a categoria está ligada. */
   reworkReasons: () => Promise<ReworkReasonList>;
+  /** LRN-01: chips de motivo e se a flag learn.edits está ligada (uma leitura por cliente aberto). */
+  editOptions: () => Promise<EditOptions>;
+  /** LRN-01: quanto a cópia de trabalho mudou em relação à versão do motor. */
+  editRatio: (id: string) => Promise<EditRatio>;
+  /** LRN-01: motivo de uma edição ao concluir (opcional). */
+  editReason: (id: string, codes: string[], note: string) => Promise<unknown>;
+  /** LRN-01: aprovar, pedir alterações ou rejeitar guardando o sinal de aprendizagem (mesmas regras da transição). */
+  decideLearned: (id: string, to: Decision, o: { codes?: string[]; note?: string; reason?: string; reasonCode?: string; lock?: number }) => Promise<Guiao>;
   record: (id: string, recorded: boolean) => Promise<Guiao>;
   duplicate: (id: string) => Promise<Guiao>;
   /** Eliminar um guião arquivado (FR-02-01): depois de a pessoa confirmar na UI; sai da lista. */
@@ -118,6 +127,10 @@ export function useScriptCaps(): ScriptCaps {
 /** Ações sobre guiões; put recebe cada linha atualizada, reload recarrega a lista de quem as usa. */
 export function useScriptActions(access: Access, put: (g: Guiao) => Guiao, reload: () => Promise<void>): ScriptActions {
   const verification = useMemo(() => verificationLoader(access), [access]);
+  const editOptions = useMemo(() => {
+    let p: Promise<EditOptions> | null = null;
+    return () => (p ??= fetchEditOptions(access).catch((e) => { p = null; throw e; }));
+  }, [access]);
   return useMemo<ScriptActions>(() => ({
     save: async (id, p, lock) => {
       try { return put(await saveContent(access, id, p, lock)); }
@@ -132,6 +145,13 @@ export function useScriptActions(access: Access, put: (g: Guiao) => Guiao, reloa
       catch (e) { if ((e as { code?: string }).code === "PT409") await reload(); throw e; }
     },
     reworkReasons: () => fetchReworkReasons(access),
+    editOptions,
+    editRatio: (id) => fetchEditRatio(access, id),
+    editReason: (id, codes, note) => saveEditReason(access, id, codes, note),
+    decideLearned: async (id, to, o) => {
+      try { return put(await decideLearned(access, id, to, o)); }
+      catch (e) { if ((e as { code?: string }).code === "PT409") await reload(); throw e; }
+    },
     record: async (id, recorded) => put(await setProduction(access, id, recorded ? "recorded" : "not_started")),
     meta: async (id, patch) => put(await setContentMeta(access, id, patch)),
     projects: (fresh) => fetchProjects(access, fresh),
@@ -152,5 +172,5 @@ export function useScriptActions(access: Access, put: (g: Guiao) => Guiao, reloa
     linkRef: async (id: string, refId: number, l: boolean) => { await linkReference(access, refId, { content: id }, l); return fetchContext(access, id); },
     reload,
     verification,
-  }), [access, put, reload, verification]);
+  }), [access, put, reload, verification, editOptions]);
 }

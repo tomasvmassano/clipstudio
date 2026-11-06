@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { ScriptActions } from "@/components/use-guioes";
 import type { ReworkReason } from "@/lib/learn";
+import type { EditCode } from "@/lib/lessons";
+import { ReasonChips } from "@/components/learn/edit-reason";
 import type { Guiao } from "@/lib/types";
 
 const selectCls = "h-8 rounded-md border bg-background px-2 text-sm";
@@ -13,11 +15,14 @@ const selectCls = "h-8 rounded-md border bg-background px-2 text-sm";
 /**
  * Rejeitar ou pedir alterações (PRD §4). Com a flag learn.rework e motivos configurados, pede também a categoria
  * (FR-17-10); o texto livre continua obrigatório. Sem flag ou sem motivos fica exatamente como antes.
+ * Com a flag learn.edits (LRN-01, learnCodes não nulo) mostra também os chips de um toque (opcionais) e guarda o sinal
+ * de aprendizagem na mesma transação.
  */
-export function ReasonForm({ g, mode, actions, busy, run, onCancel }: {
+export function ReasonForm({ g, mode, actions, busy, run, onCancel, learnCodes = null }: {
   g: Guiao; mode: "changes_requested" | "rejected"; actions: ScriptActions; busy: boolean;
-  run: (fn: () => Promise<unknown>) => Promise<void>; onCancel: () => void;
+  run: (fn: () => Promise<unknown>) => Promise<void>; onCancel: () => void; learnCodes?: EditCode[] | null;
 }) {
+  const [chips, setChips] = useState<string[]>([]);
   const [reason, setReason] = useState("");
   const [code, setCode] = useState("");
   const [reasons, setReasons] = useState<ReworkReason[] | null>(null);
@@ -40,9 +45,11 @@ export function ReasonForm({ g, mode, actions, busy, run, onCancel }: {
       onSubmit={(e) => {
         e.preventDefault();
         if (!ready) return;
-        void run(() => withCategory
-          ? actions.transitionReasoned(g.id, mode, reason, code, g.lock_version)
-          : actions.transition(g.id, mode, reason, g.lock_version));
+        void run(() => learnCodes
+          ? actions.decideLearned(g.id, mode, { codes: chips, reason, reasonCode: withCategory ? code : undefined, lock: g.lock_version })
+          : withCategory
+            ? actions.transitionReasoned(g.id, mode, reason, code, g.lock_version)
+            : actions.transition(g.id, mode, reason, g.lock_version));
       }}
     >
       <div className="flex flex-wrap gap-2">
@@ -65,6 +72,9 @@ export function ReasonForm({ g, mode, actions, busy, run, onCancel }: {
         </Button>
         <Button size="sm" type="button" variant="ghost" onClick={onCancel}>Cancelar</Button>
       </div>
+      {learnCodes && learnCodes.length > 0 && (
+        <ReasonChips codes={learnCodes} value={chips} onChange={setChips} label={rejected ? "Motivos da rejeição (opcional)" : "Motivos do pedido (opcional)"} />
+      )}
       {loadErr && <p className="text-xs text-muted-foreground" role="status">Não consegui carregar as categorias de motivo; segue só com o texto.</p>}
     </form>
   );

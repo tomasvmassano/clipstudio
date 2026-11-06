@@ -11,8 +11,8 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | Estado | Requisitos |
 |---|---|
 | feito | 26 |
-| parcial | 219 |
-| por começar | 58 |
+| parcial | 223 |
+| por começar | 54 |
 | bloqueado | 3 |
 | adiado | 3 |
 | **total** | **309** |
@@ -94,6 +94,10 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | PUB-06 | P0 | parcial | notificações a quem aprova; verificação com conta real (R-15) | Quem aprova |
 | GAZE-01 | P0 | parcial | verificação com sessão real no estúdio (iPad a ~2,5 m, R-15) | Coluna do teleprompter ligada à distância |
 | GAZE-02 | P0 | parcial | verificação com sessão real no estúdio (R-15) | Linha de foco e modo frase |
+| LRN-01 | P0 | parcial | migração por aplicar em produção; E2E só no CI; verificação com sessão real (R-15) | Motivo em cada edição |
+| LRN-02 | P0 | parcial | job lesson_editor no numeiro-engine (o lado da app está pronto); migração por aplicar; verificação real | Agente "Editor de lições" |
+| LRN-03 | P0 | parcial | migração por aplicar; decisão do owner sobre quem aprova (proposta: dono, admin e gestor do cliente); verificação com sessão real (R-15) | Aprovação de lições |
+| LRN-04 | P0 | parcial | lições da agência aprendidas dos resultados de todos os clientes (hoje só por Propor à agência); decisão do owner sobre a equipa do cliente ver as regras herdadas | Dois níveis (decisão) |
 | CLIP-01 | P0 | parcial | verificação com sessão real (R-15) e um master real no R2; Drive do cliente como fonte não ligado | Fonte = ficheiro master original |
 | CLIP-02 | P0 | parcial | separação de oradores: fornecedor por escolher depois do teste em PT-PT (UNVERIFIED); hoje só tempos por palavra (faster-whisper) | Transcrição com oradores |
 | CLIP-03 | P0 | parcial | rubrica e máquinas testadas com episódios reais (piloto CLIP-11); crítica num segundo passo | Agente "Clip Miner": candidatos e ranking |
@@ -747,10 +751,10 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
-| LRN-01 | por começar |  |  | — |
-| LRN-02 | por começar |  |  | — |
-| LRN-03 | por começar |  |  | — |
-| LRN-04 | por começar |  |  | — |
+| LRN-01 | parcial | migração por aplicar em produção; E2E só no CI; verificação com sessão real (R-15) | lrn_edit_signals, content_decide_learned, content_edit_reason, chips no cartão (flag learn.edits; W10-19, ADR-0069); w10_aprendizagem 74/74; e2e/aprendizagem-licoes.spec.ts | — |
+| LRN-02 | parcial | job lesson_editor no numeiro-engine (o lado da app está pronto); migração por aplicar; verificação real | job lesson_editor, worker_lesson_pairs/worker_lesson_save com evidência refeita na base, lrn_lessons_tick (W10-19, ADR-0069); w10_aprendizagem 74/74 | — |
+| LRN-03 | parcial | migração por aplicar; decisão do owner sobre quem aprova (proposta: dono, admin e gestor do cliente); verificação com sessão real (R-15) | /c/[ws]/aprendizagem/licoes (flag learn.lessons), learn.lessons.approve, lrn_lesson_versions imutáveis com voltar atrás (W10-19, ADR-0069); w10_aprendizagem 74/74; e2e/aprendizagem-licoes.spec.ts | — |
+| LRN-04 | parcial | lições da agência aprendidas dos resultados de todos os clientes (hoje só por Propor à agência); decisão do owner sobre a equipa do cliente ver as regras herdadas | níveis cliente/agência em lrn_lessons e lrn_lesson_versions, learn.lessons.agency (org), worker_lessons com precedência do cliente (W10-19, ADR-0069); w10_aprendizagem | — |
 | LRN-05 | por começar |  |  | — |
 | LRN-06 | por começar |  |  | — |
 | LRN-07 | por começar |  |  | — |
