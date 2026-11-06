@@ -1,4 +1,4 @@
-# ADR-0061 · Sessões e dispositivos, e revogação imediata no servidor
+# ADR-0064 · Sessões e dispositivos, e revogação imediata no servidor
 
 **Estado:** proposto · **Data:** 2026-11-06 · **Requisitos:** FR-14-03, R-11, CAP-06, FL-07, QA-03, QA-13 (parte de MIG-04)
 
