@@ -109,7 +109,7 @@ as("clientA")("custos de IA do cliente: estimado, tabelas e CSV da tabela visív
   await page.goto(`/c/${WS_A}/custos`);
   await expect(page.getByRole("heading", { name: "Consumo de IA" })).toBeVisible();
   await expect(page.getByText("Valores estimados.")).toBeVisible();
-  await expect(page.getByText("Custo das execuções")).toBeVisible();
+  await expect(page.getByText("Custo das execuções", { exact: true })).toBeVisible();
   await expect(page.getByRole("tab", { name: "Por cliente" })).toHaveCount(0);
   await page.getByRole("tab", { name: "Por modelo" }).click();
   await page.getByLabel("Período").selectOption("7");
