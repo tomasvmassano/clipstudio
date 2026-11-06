@@ -29,6 +29,16 @@ create table if not exists auth.mfa_factors (
   id uuid primary key default gen_random_uuid(), user_id uuid not null references auth.users(id) on delete cascade,
   friendly_name text, factor_type text not null default 'totp', status text not null default 'unverified',
   created_at timestamptz default now(), updated_at timestamptz default now());
+-- sessões e refresh tokens com as colunas que a app usa (W10-08); no Supabase são do supabase_auth_admin
+create table if not exists auth.sessions (
+  id uuid primary key, user_id uuid not null references auth.users(id) on delete cascade,
+  created_at timestamptz default now(), updated_at timestamptz default now(), factor_id uuid, aal text,
+  not_after timestamptz, refreshed_at timestamp, user_agent text, ip inet, tag text);
+create index if not exists sessions_user_id_idx on auth.sessions(user_id);
+create table if not exists auth.refresh_tokens (
+  id bigserial primary key, instance_id uuid, token text unique, user_id text, revoked boolean, parent text,
+  session_id uuid references auth.sessions(id) on delete cascade,
+  created_at timestamptz default now(), updated_at timestamptz default now());
 create or replace function auth.jwt() returns jsonb language sql stable as $f$
   select coalesce(nullif(current_setting('request.jwt.claims', true), ''), '{}')::jsonb $f$;
 create or replace function auth.uid() returns uuid language sql stable as $f$

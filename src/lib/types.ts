@@ -57,8 +57,16 @@ export type ContentPatch = Partial<{ hooks: Hook[]; corpo: string; cta: string; 
 export type EditorialTarget = "in_review" | "approved" | "changes_requested" | "rejected" | "archived" | "restore";
 
 export type ContentHistory = {
-  versions: { id: string; version_no: number; hooks: Hook[]; corpo: string; cta: string | null; created_at: string; created_kind: string; author: string | null; is_current: boolean; is_approved: boolean }[];
+  // formato, tema, is_recorded, restores e *_version_id chegam com PENDING_w10_diff_versoes (opcionais até estar aplicada).
+  versions: {
+    id: string; version_no: number; hooks: Hook[]; corpo: string; cta: string | null; created_at: string; created_kind: string; author: string | null;
+    is_current: boolean; is_approved: boolean; formato?: string | null; tema?: string | null; is_recorded?: boolean;
+  }[];
   transitions: { kind: "editorial" | "production"; from: string | null; to: string; reason: string | null; at: string; actor: string | null; version_no: number | null }[];
+  restores?: { at: string; actor: string | null; version_no: number | null }[];
+  current_version_id?: string | null;
+  approved_version_id?: string | null;
+  recorded_version_id?: string | null;
 };
 
 export type GuiaoPatch = Partial<
@@ -150,7 +158,13 @@ export type Reference = {
   hook: string | null; formato: string | null; estilo: string | null; narrativa: string | null; duracao_s: number | null; idioma: string | null;
   tags: string[]; colecoes: string[]; notas: string | null; favorito: boolean; archived_at: string | null; created_label: string | null; created_at: string;
   metrics: RefMetrics | null; analysis: RefAnalysis | null; links: { content_id: string | null; source_id: number | null; label: string }[];
+  /* REF-01/02 (W10-04): identidade do vídeo, última dissecção, última execução do motor e guiões da via rápida */
+  ref_key?: string | null;
+  dissection?: { version: number; at: string; third_party_flags: number; tese: string | null; maquina: string | null } | null;
+  job?: { kind: "reference_analysis" | "reference_scripts"; status: RefJobStatus; at: string } | null;
+  scripts?: number;
 };
+export type RefJobStatus = "queued" | "running" | "succeeded" | "failed" | "cancelled" | "dead";
 export type DiscoverReel = {
   id: string; url: string | null; platform: string | null; creator: string; hook: string | null; caption: string | null; views: number | null;
   likes: number | null; comments: number | null; outlier: number | null; duration: number | null; collected_at: string | null; analysis: RefAnalysis | null;

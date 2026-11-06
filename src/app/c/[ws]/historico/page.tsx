@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { ChevronDownIcon, ChevronRightIcon, Loader2Icon, RotateCwIcon } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,12 +11,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { WorkspaceGate } from "@/components/workspace-gate";
 import { useSession } from "@/components/session-provider";
 import type { Access } from "@/lib/access";
-import { ACTION_LABEL, actionLabel, changes, fetchAudit, type AuditPage, type AuditRow } from "@/lib/audit";
+import {
+  ACTION_LABEL, AFFILIATION_LABEL, actionLabel, attemptLabel, changes, fetchAudit, fetchDenials,
+  type AuditPage, type AuditRow, type DenialPage, type DenialRow,
+} from "@/lib/audit";
 import { fromLocalInput } from "@/lib/tasks";
 
 /*
  * Histórico de ações do cliente (PRD R-05). Só leitura: o registo não se altera nem se apaga.
- * As tentativas recusadas ficam no registo da base (não aqui) para não serem apagadas pelo rollback do pedido recusado.
+ * "Tentativas recusadas" lista as recusas gravadas por audit_denied_record (ADR-0066): quem, o quê, quando.
+ * As tentativas de quem não tem acesso a este cliente só aparecem a quem audita a agência (nunca ao admin do cliente).
  */
 
 const selectCls = "h-9 rounded-md border bg-background px-2 text-sm";
@@ -29,6 +34,24 @@ export default function AuditoriaPage() {
 type Filters = { action: string; actor: string; from: string; to: string };
 
 function Auditoria({ access }: { access: Access }) {
+  const [view, setView] = useState<"all" | "denied">("all");
+  const { ws } = useSession();
+  return (
+    <div className="flex flex-col gap-4">
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight">Histórico</h1>
+        <p className="text-sm text-muted-foreground">Quem fez o quê em {ws?.name}, com o antes e o depois. Não se altera nem se apaga.</p>
+      </div>
+      <div role="group" aria-label="Vista do histórico" className="flex gap-1">
+        <Button size="sm" variant={view === "all" ? "secondary" : "ghost"} aria-pressed={view === "all"} onClick={() => setView("all")}>Todas as ações</Button>
+        <Button size="sm" variant={view === "denied" ? "secondary" : "ghost"} aria-pressed={view === "denied"} onClick={() => setView("denied")}>Tentativas recusadas</Button>
+      </div>
+      {view === "all" ? <Actions access={access} /> : <Denials access={access} />}
+    </div>
+  );
+}
+
+function Actions({ access }: { access: Access }) {
   const { ws } = useSession();
   const tz = ws?.timezone ?? "Asia/Dubai";
   const [f, setF] = useState<Filters>({ action: "", actor: "", from: "", to: "" });
@@ -51,10 +74,6 @@ function Auditoria({ access }: { access: Access }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Histórico</h1>
-        <p className="text-sm text-muted-foreground">Quem fez o quê em {ws?.name}, com o antes e o depois. Não se altera nem se apaga.</p>
-      </div>
       <Card><CardContent className="flex flex-wrap items-end gap-3 pt-4 text-sm">
         <label className="flex flex-col gap-1">Ação
           <select aria-label="Filtrar por ação" className={selectCls} value={f.action} onChange={(e) => setF({ ...f, action: e.target.value })}>
@@ -121,6 +140,70 @@ function Row({ r, tz }: { r: AuditRow; tz: string }) {
           </tbody>
         </table>
       )}
+    </div>
+  );
+}
+
+function Denials({ access }: { access: Access }) {
+  const { ws } = useSession();
+  const tz = ws?.timezone ?? "Asia/Dubai";
+  const [page, setPage] = useState<DenialPage | null>(null);
+  const [rows, setRows] = useState<DenialRow[]>([]);
+  const [err, setErr] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [rev, setRev] = useState(0);
+
+  useEffect(() => {
+    let alive = true;
+    fetchDenials(access.ws, null).then((p) => { if (alive) { setPage(p); setRows(p.rows); setErr(""); } }).catch((e: Error) => { if (alive) setErr(e.message); });
+    return () => { alive = false; };
+  }, [access.ws, rev]);
+
+  return (
+    <div className="flex flex-col gap-4">
+      <p className="text-sm text-muted-foreground">
+        Pedidos que o servidor recusou por falta de permissão, com quem tentou, o quê e quando.
+        {page?.includes_outside ? " Inclui tentativas de quem não tem acesso a este cliente (só a agência vê estas)." : ""}
+      </p>
+      {err ? (
+        <Alert variant="destructive"><AlertDescription className="flex items-center justify-between gap-2">{err}
+          <Button size="sm" variant="outline" onClick={() => { setErr(""); setPage(null); setRev((n) => n + 1); }}><RotateCwIcon /> Tentar de novo</Button></AlertDescription></Alert>
+      ) : !page ? <Skeleton className="h-64" /> : rows.length === 0 ? (
+        <Alert><AlertDescription>Nenhuma tentativa recusada registada.</AlertDescription></Alert>
+      ) : (
+        <Card><CardContent className="divide-y p-0">
+          {rows.map((r) => <DenialItem key={r.id} r={r} tz={tz} />)}
+        </CardContent></Card>
+      )}
+      {page?.next_before && !err && (
+        <div><Button variant="outline" disabled={busy} onClick={async () => {
+          setBusy(true);
+          try { const p = await fetchDenials(access.ws, page.next_before); setPage(p); setRows((x) => [...x, ...p.rows]); }
+          catch (e) { setErr((e as Error).message); } finally { setBusy(false); }
+        }}>{busy && <Loader2Icon className="animate-spin" />} Carregar mais</Button></div>
+      )}
+    </div>
+  );
+}
+
+function DenialItem({ r, tz }: { r: DenialRow; tz: string }) {
+  const when = new Date(r.at).toLocaleString("pt-PT", { timeZone: tz, day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  return (
+    <div data-denial={r.id} className="flex flex-col gap-1 px-4 py-3 text-sm">
+      <div className="flex items-start gap-2">
+        <span className="flex-1">
+          <b>{r.actor ?? "Desconhecido"}</b> · tentou <span className="font-medium">{attemptLabel(r.attempted)}</span>
+          {r.entity_id && <span className="text-muted-foreground"> · {r.entity_id.length > 24 ? r.entity_id.slice(0, 8) + "…" : r.entity_id}</span>}
+        </span>
+        <span className="shrink-0 text-xs text-muted-foreground">{when}</span>
+      </div>
+      <div className="flex flex-wrap gap-1.5 text-xs text-muted-foreground">
+        {r.scope === "fora" && <Badge variant="destructive">fora deste cliente</Badge>}
+        {r.affiliation && <span>{AFFILIATION_LABEL[r.affiliation] ?? r.affiliation}</span>}
+        {r.capability && <span>· precisava de {r.capability}{r.verified === false ? " (já tem: recusa por outro motivo)" : ""}</span>}
+        {r.preview && <span>· durante a pré-visualização de outro papel</span>}
+        {r.via === "api" && <span>· pedido ao servidor</span>}
+      </div>
     </div>
   );
 }

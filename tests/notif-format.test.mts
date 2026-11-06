@@ -6,6 +6,9 @@ const eq = (name: string, got: unknown, exp: unknown) => { n++; if (got !== exp)
 const g = groupBy([{ group: "guioes" as const, k: 1 }, { group: "tarefas" as const, k: 2 }, { group: "tarefas" as const, k: 3 }]);
 eq("grupos pela ordem fixa", g.map((x) => x.group).join(","), "tarefas,guioes");
 eq("grupo vazio não aparece", g.length, 2);
+const gp = groupBy([{ group: "automacao", k: 1 }, { group: "prazos", k: 2 }, { group: "tarefas", k: 3 }, { group: "novo_grupo", k: 4 }]);
+eq("prazos entre tarefas e guiões; grupo desconhecido vai para Outras no fim", gp.map((x) => x.group).join(","), "tarefas,prazos,automacao,outras");
+eq("rótulo do grupo prazos", gp[1].label, "Prazos");
 eq("sem supressões: linha vazia", suppressedLine([], "task_done"), "");
 eq("sem supressões (nulo)", suppressedLine(null, "task_done"), "");
 eq("supressões somadas e explicadas", suppressedLine([{ kind: "task_done", reason: "org_off", n: 2 }, { kind: "task_done", reason: "muted", n: 1 }, { kind: "x", reason: "muted", n: 9 }], "task_done"),
