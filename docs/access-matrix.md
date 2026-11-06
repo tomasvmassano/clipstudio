@@ -36,6 +36,7 @@ Um `agency_member` sem atribuição a um workspace **não vê nada** desse works
 | `recording.use` / `confirm` | ✓ | ✓ | ✓ | ✓ (own) | — | — |
 | `styles.manage` (W5-02) | ✓ | ✓ | ✓ | — | — | — |
 | aplicar estilo guardado no editor (W5-08) | quem tem `edit.timeline` ou `edit.guided` no cliente; guardar como estilo só com `styles.manage` |||||
+| usar uma alternativa da IA no editor (W10-07) | quem tem `edit.timeline` ou `edit.guided` no cliente; o servidor monta a versão a partir das alternativas do documento |||||
 | `projects.manage` (W2-07) | ✓ | ✓ | ✓ | — | — | — |
 | `analytics.manage` (W6, centro de desempenho) | ✓ | ✓ | ✓ | — | — | — |
 | `tasks.delegate` (W6) | ✓ | ✓ | ✓ | ✓ (as suas) | ✓ (as suas) | — |
@@ -119,6 +120,8 @@ Portal do cliente (W8, ADR-0041): entrar com `scripts.read` (staff da agência s
 **W5-07 (ADR-0047):** exportar (`edit_export_request`, `edit_export_cancel`) exige `edit.export`; ver exports e as fontes da imagem do editor exige o acesso ao editor (`edit.timeline` ou `edit.guided`); a versão leve exige `media.read`. `media_worker_claim/heartbeat/finish` só para `engine_worker` (o browser recebe 42501). Outro cliente: 42501 em tudo.
 
 **W5-09 (ADR-0048):** pedir pacote exige `edit.timeline`; ver pacotes e documentos exige acesso ao editor; gravar documentos do pacote só `engine_worker`. Outro cliente: 42501.
+
+**W10-07 (ADR-0055):** o pacote lê o aspeto só de estilos do próprio cliente (e a música só se for áudio ativo desse cliente); `edit_alternative_apply` exige acesso ao editor (`edit.timeline` ou `edit.guided`; leitor, anon e outro cliente: 42501), só usa alternativas guardadas no próprio documento (opção inexistente ou de outro documento: P0002; vídeo de outro cliente pelo seu: P0002) e conflito 40001 sobre versão antiga.
 
 **W5-12 (ADR-0052):** exportar o pacote inteiro exige `edit.export` (revisor e outro cliente: 42501); ver na revisão os vídeos exportados e a versão leve: `media.read`; comentar `review.comment`; decidir `review.approve`. Outro cliente: 42501.
 **W5-14 (ADR-0053):** ler a lista de frases-persona: `agents.read`; gravar uma versão nova: `persona.manage` com sessão individual (código de equipa e manager: 42501). Versões imutáveis, tabela fechada à API. O worker recebe só os textos e o nome de quem está envolvido (o consentimento fica na app). Outro cliente: 42501.

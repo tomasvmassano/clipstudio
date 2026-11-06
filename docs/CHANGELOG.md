@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-06
+
+- W10-07 · Pacote com o estilo guardado e alternativas da IA (EDL-13, EDL-10, ADR-0055): o pacote automático manda ao worker o aspeto e a versão do estilo guardado (música só se ainda estiver na biblioteca; versão na chave de idempotência); o modo guiado mostra 2-3 alternativas da IA por secção no passo Corte ("Usar esta" cria uma versão nova montada no servidor, edit_alternative_apply) e os textos alternativos do hook. Migração 20261106060134_w10_pacote_estilo_alternativas.sql; teste SQL 37/37.
+
 ## 2026-11-06 (QC: documento e variantes irmãs)
 
 - **W10-09** QC do documento antes de render (cortes, duração, câmaras, retângulo seguro com o aspeto, visuais em falta; casos fatais param o export com mensagem clara antes de gastar render) e comparação por pHash com os exports das variantes irmãs do mesmo guião (numeiro-engine #17). `edit_export_request` passa as irmãs (mesmo cliente, R2, até 8; `_edit_resolve_siblings`). Testes `w10_qc_irmas` 6/6.
