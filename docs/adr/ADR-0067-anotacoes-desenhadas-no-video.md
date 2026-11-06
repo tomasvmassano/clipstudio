@@ -24,4 +24,4 @@ A revisão de vídeo (W5-04, W5-12) já tinha comentários por momento e, nos v�
 
 ## Rollback
 
-Bloco no fim de `PENDING_w10_anotacoes.sql`: repor as funções de `20261103153227_w5_media_review.sql`, apagar `_review_annotation` e, só depois de exportar os desenhos que se queiram guardar, a coluna. O código anterior não envia `p_annotation` e ignora a chave `annotation` nos comentários.
+Bloco no fim de `20261106065228_w10_anotacoes.sql`: repor as funções de `20261103153227_w5_media_review.sql`, apagar `_review_annotation` e, só depois de exportar os desenhos que se queiram guardar, a coluna. O código anterior não envia `p_annotation` e ignora a chave `annotation` nos comentários.
