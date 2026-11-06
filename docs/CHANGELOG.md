@@ -4,6 +4,14 @@
 
 - W10-01 · Saúde do sistema (FR-17-15, ADR-0058): página /saude da agência (capacidade ops.health: dono e admin, admin só os clientes atribuídos) com workers, filas de agentes e de media, trabalhos a correr com o último sinal, falhas de 24 h e 7 dias com o erro sem segredos, por cliente e alertas enviados. Alertas automáticos (pg_cron, 5 min) aos donos da agência quando um worker deixa de contactar a base com trabalho à espera ou um trabalho esgota as tentativas, um por incidente (notificação system_health).
 
+- W10-02 · Pesquisa global: a paleta Ctrl/Cmd+K passa a encontrar media da biblioteca (título, etiquetas, nome do ficheiro), comentários da revisão de vídeos e as tuas notificações, sempre com as permissões de cada funcionalidade e sem nada de outros clientes. A biblioteca abre um ativo pelo link (?asset=). FR-16-01, FR-16-05, MIG-08; ADR-0054; migração 20261106060240_w10_pesquisa.sql.
+
+- W10-07 · Pacote com o estilo guardado e alternativas da IA (EDL-13, EDL-10, ADR-0055): o pacote automático manda ao worker o aspeto e a versão do estilo guardado (música só se ainda estiver na biblioteca; versão na chave de idempotência); o modo guiado mostra 2-3 alternativas da IA por secção no passo Corte ("Usar esta" cria uma versão nova montada no servidor, edit_alternative_apply) e os textos alternativos do hook. Migração 20261106060134_w10_pacote_estilo_alternativas.sql; teste SQL 37/37.
+
+## 2026-11-06 (QC: documento e variantes irmãs)
+
+- **W10-09** QC do documento antes de render (cortes, duração, câmaras, retângulo seguro com o aspeto, visuais em falta; casos fatais param o export com mensagem clara antes de gastar render) e comparação por pHash com os exports das variantes irmãs do mesmo guião (numeiro-engine #17). `edit_export_request` passa as irmãs (mesmo cliente, R2, até 8; `_edit_resolve_siblings`). Testes `w10_qc_irmas` 6/6.
+
 ## 2026-11-06 (CHG-008 gravação, aprendizagem e cortes)
 
 - **CHG-008** (só documentação; PRD §46). GAZE-01..06: teleprompter com coluna ligada à distância, linha de foco, modo frase, ritmo por pedal, hooks de memória, pontuação de olhar por take e piloto opcional de correção por IA. LRN-01..07: motivo em cada edição, agente "Editor de lições", lições aprovadas como versão da configuração em dois níveis (agência e cliente). CLIP-01..11: cortes de vídeos longos com o agente Clip Miner, com prioridade. STU-01..05: captura direta das câmaras com cópia no cartão, agente de estúdio e pacote de edição por guião. 5 capacidades planeadas. Sem alteração funcional.

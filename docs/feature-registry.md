@@ -79,7 +79,7 @@ Estado: **ativo** (existe e é verificado no servidor por `authorize()`; também
 | `analytics.manage` | Centro de desempenho: contas e origem (PERF-01, R-16) | M | ws | ativo (W6, flag `perf.center`) | `/c/[ws]/desempenho/centro`: camada, criador e estado da conta (`perf_account_set`), corrigir origem com motivo (`perf_origin_set`). Ler com `analytics.read` (`perf_center`, `perf_publications`, `perf_breakdown`, `perf_levers`); linhagem pelo publicador com `publishing.publish` (`perf_record_lineage`); `perf_tick` de hora a hora só para service_role |
 | `tasks.delegate` | Passar tarefas (OPS-03) | B | ws | ativo (W6, flag `ops.workspace`) | `task_delegate`: as suas tarefas (com `tasks.manage`, qualquer uma) para alguém com `tasks.work` no mesmo cliente; notifica uma vez |
 | `ops.presence` | Quem trabalha em quê (OPS-02/04/10) | B | ws | ativo (W6, flag `ops.team_presence`) | `/c/[ws]/quem-trabalha` (`team_presence`), `presence_ping`, `availability_set`; canal `presence:<cliente>` só de leitura. Fila pessoal: `my_queue`, `inbox_item_act` (ver, adiar, mostrar já), sem capacidade nova |
-| `busca.global` (flag) | Pesquisa global e ações rápidas (FR-16-01/02, FR-01-05) | — | ws | ativo (W7, flag) | Ctrl/Cmd+K: guiões, fontes, referências, tarefas, campanhas, pessoas e estilos dos clientes a que a pessoa tem acesso, com a capacidade de leitura de cada entidade (`search_global`, `search_scope`); criar com sources.create, scripts.create, projects.manage, tasks.manage. ADR-0035 |
+| `busca.global` (flag) | Pesquisa global e ações rápidas (FR-16-01/02, FR-01-05) | — | ws | ativo (W7, flag) | Ctrl/Cmd+K: guiões, fontes, referências, tarefas, campanhas, pessoas e estilos dos clientes a que a pessoa tem acesso, com a capacidade de leitura de cada entidade (`search_global`, `search_scope`); criar com sources.create, scripts.create, projects.manage, tasks.manage. ADR-0035. W10: media da biblioteca (media.read + flag media.library, só ativos; abre `/biblioteca?asset=`), comentários dos vídeos (sessão, media.read + flag media.library + scripts.read, só vídeos que a revisão mostra; abre `/revisao?ver=videos&asset=`) e as minhas notificações (só as próprias, onde tem tasks.read; destino da caixa). Sem capacidades novas. ADR-0054 |
 | `guioes.bulk` (flag) | Operações em lote nos guiões (FR-17-07) | — | ws | ativo (W7, flag) | `content_bulk` (responsável, campanha, etiquetas com scripts.edit; aprovar com scripts.approve; reagendar com calendar.schedule) com pré-visualização e idempotência; `content_bulk_export` com scripts.export |
 | `publishing.approve` | Aprovar publicações originais (PUB-06) | A | ws | ativo (W7, flag `pub.planning`) | `pub_approve`, `pub_approve_batch`: presa à revisão, versão e destino; política do cliente (TEAM-10) |
 | `publishing.republish.approve` | Aprovar republicações (PUB-06) | A | ws | ativo (W7) | idem para republicações |
@@ -122,6 +122,10 @@ Por cliente (só a fase `all`): uploads novos para o Cloudflare R2, envio por pa
 ### Edição automática (W5-09, ADR-0048)
 
 `edit_package_request` (edit.timeline + R2), `edit_package_list` e `edit_doc_list` (acesso ao editor), `media_worker_package_save` (só engine_worker). Página `/c/[ws]/edicao-automatica` (flag `edit.studio`).
+
+### Pacote com o estilo guardado e alternativas da IA (W10-07, ADR-0055)
+
+`edit_package_request` passa a mandar ao worker o aspeto (`look`) e a versão do estilo guardado pedido (EDL-13). `edit_doc_get` devolve `ai_alternatives`; `edit_alternative_apply` (acesso ao editor: `edit.timeline` ou `edit.guided`) cria uma versão nova a partir de uma alternativa da IA guardada no documento: passo Corte do modo guiado, "Usar esta" (EDL-10). Sem capacidades novas.
 
 ### Revisão dos exportados e revisão em lote (W5-12, ADR-0052)
 
