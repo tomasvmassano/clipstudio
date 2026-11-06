@@ -7,7 +7,7 @@ import { useSession } from "@/components/session-provider";
 import { AiUsageView } from "@/components/costs/ai-usage";
 
 /*
- * Custos da agência (PRD §2 espaço da agência, M10 FR-10-01; ADR-0060): consumo de IA de todos os clientes em que a pessoa
+ * Custos da agência (PRD §2 espaço da agência, M10 FR-10-01; ADR-0062): consumo de IA de todos os clientes em que a pessoa
  * tem costs.read, por cliente, agente, modelo e execução. Só com costs.read_agency (por defeito o dono da agência); o
  * servidor volta a verificar tudo e omite os clientes sem acesso. A equipa do cliente e o código de equipa nunca entram.
  */

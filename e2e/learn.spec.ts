@@ -103,7 +103,7 @@ as("clientA")("custos por guião: página, vídeo indisponível e CSV", async ({
   expect(costsReady() ? errors : errors.filter((e) => !/status of 404/.test(e))).toEqual([]);
 });
 
-// W10-10 (FR-10-01, ADR-0060): consumo de IA por agente, modelo e execução, rotulado como estimado, com CSV auditado.
+// W10-10 (FR-10-01, ADR-0062): consumo de IA por agente, modelo e execução, rotulado como estimado, com CSV auditado.
 as("clientA")("custos de IA do cliente: estimado, tabelas e CSV da tabela visível", async ({ page, errors }) => {
   test.skip(!costsReady(), SKIP_COSTS);
   await page.goto(`/c/${WS_A}/custos`);

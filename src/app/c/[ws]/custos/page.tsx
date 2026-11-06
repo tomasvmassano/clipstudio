@@ -17,7 +17,7 @@ import { download, eur, exportCosts, fetchCosts, monthLabel, toCsv, type CostRep
 import { EDITORIAL_LABEL, type EditorialStatus } from "@/lib/types";
 
 /*
- * Custos do cliente: consumo de IA por agente, modelo e execução (FR-10-01, ADR-0060) e
+ * Custos do cliente: consumo de IA por agente, modelo e execução (FR-10-01, ADR-0062) e
  * custo por guião, vídeo e publicação (FR-10-05, ADR-0037): custo dos agentes repartido pelos guiões que cada execução
  * gerou e pelas publicações de cada guião, tendência mensal e CSV. Só com costs.read (o servidor omite tudo o resto).
  */

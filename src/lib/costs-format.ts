@@ -1,5 +1,5 @@
 /*
- * Custos de IA (FR-10-01, ADR-0060): formatação, tendência e CSV sem dependências, para testar em node.
+ * Custos de IA (FR-10-01, ADR-0062): formatação, tendência e CSV sem dependências, para testar em node.
  * Os valores vêm do servidor em EUR; em AED só com a taxa da agência (BIZ-05) e sempre com a taxa e a data à vista.
  */
 

@@ -18,7 +18,7 @@ import {
 } from "@/lib/costs-format";
 
 /*
- * Consumo de IA por cliente, agente, modelo e execução (FR-10-01, ADR-0060). A mesma vista serve a agência (ws nulo: todos os
+ * Consumo de IA por cliente, agente, modelo e execução (FR-10-01, ADR-0062). A mesma vista serve a agência (ws nulo: todos os
  * clientes em que a pessoa tem costs.read) e o cliente (só esse cliente). Tudo estimado: o rótulo diz sempre de onde vem.
  */
 

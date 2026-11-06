@@ -361,7 +361,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
-| FR-10-01 | parcial | verificação com sessão real (R-15) da agência e do cliente; decisão do owner sobre costs.read da equipa do cliente (AGENTS §9) | custo e tokens por execução em /agentes/configuracao; kpi.costs; W4-02b; worker de agentes alojado no Railway desde 2026-11-05; módulo Custos /custos e /c/[ws]/custos (PR #81, ADR-0060, w10_custos 55, costs-format 36) | — |
+| FR-10-01 | parcial | verificação com sessão real (R-15) da agência e do cliente; decisão do owner sobre costs.read da equipa do cliente (AGENTS §9) | custo e tokens por execução em /agentes/configuracao; kpi.costs; W4-02b; worker de agentes alojado no Railway desde 2026-11-05; módulo Custos /custos e /c/[ws]/custos (PR #81, ADR-0062, w10_custos 55, costs-format 36) | — |
 | FR-10-02 | por começar | sem custos de armazenamento, processamento e integrações | nada no código | — |
 | FR-10-03 | parcial | sem custos manuais; só moeda do cliente | moeda em /definicoes W1-07 | — |
 | FR-10-04 | parcial | sem orçamentos, limite soft, alertas nem autorização para ultrapassar | budget_eur_day limite rígido no worker; W4-02 | — |

@@ -1,4 +1,4 @@
-# ADR-0060 — Custos de IA por agente, modelo, execução e cliente (W10-10)
+# ADR-0062 — Custos de IA por agente, modelo, execução e cliente (W10-10)
 
 **Data:** 2026-11-06 · **Estado:** aceite (com decisão de produto pendente, ver fim) · **Requisitos:** PRD M10 FR-10-01; FR-10-06 (só rótulo); §2 (espaço da agência), §3 (custos globais vs do próprio cliente), CAP-04, BIZ-04; AGENTS §9, §15.
 

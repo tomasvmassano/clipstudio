@@ -3,7 +3,7 @@ import { friendlyError } from "@/lib/access";
 import { periodArgs, type CostRow, type CostTable, type Fx, type PeriodSel, type RunRow, type WsRow } from "@/lib/costs-format";
 
 /*
- * Consumo de IA por agente, modelo, execução e cliente (FR-10-01, ADR-0060). Só por RPC: o servidor verifica a sessão,
+ * Consumo de IA por agente, modelo, execução e cliente (FR-10-01, ADR-0062). Só por RPC: o servidor verifica a sessão,
  * costs.read (cliente) ou costs.read_agency + costs.read por cliente (agência), a flag, e costs.export para exportar.
  */
 
