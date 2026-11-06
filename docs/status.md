@@ -169,7 +169,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | EDL-13 | P1 | parcial | a IA usar o estilo na versão 1 (job do pacote, EDL-01); verificação com sessão real | Estilos guardados |
 | PERF-07 | P1 | parcial | o motor (Aprendiz/Estratega) ainda não lê as alavancas | Alavancas "o que replicar" |
 | FR-01-06 | P2 | parcial | filtros persistentes por utilizador por fazer | Estados vazios explicativos, loading, erro/retry, filtros persistentes por utili |
-| FR-02-06 | P2 | parcial | migração PENDING_w10_diff_versoes por aplicar em produção; verificação com conta real (R-15) | Histórico de versões com diff e restauro, conflitos de edição e autoria. |
+| FR-02-06 | P2 | parcial | verificação com conta real (R-15) | Histórico de versões com diff e restauro, conflitos de edição e autoria. |
 | FR-02-07 | P2 | parcial | sem pesquisa, ordenação, vistas guardadas nem impressão | Filtros, pesquisa, ordenação, vistas guardadas, exportação e impressão. |
 | FR-03-06 | P2 | parcial | sem anexar ficheiro ao take | Marcar take gravado, adicionar notas e anexar ficheiro, sem alterar estado edito |
 | FR-03-07 | P2 | parcial | não abre sem rede | Fallback de fullscreen/wake lock, falhas de gravação visíveis, estado offline e  |
@@ -271,7 +271,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-02-03 | parcial | título próprio (usa o tema); verificação com conta real (R-15) | guioes: título, cliente, tema, formato, data; fontes ligadas (content_sources); campanha, responsável, plataformas, etiquetas (content_meta_set, projects; W2-07, ADR-0029); w2_content_meta 30/30; e2e/content-meta.spec.ts | — |
 | FR-02-04 | feito |  | editorial_status e production_status independentes; w2_content 47/47, w3_calendar 39/39 | — |
 | FR-02-05 | parcial | verificação com sessão real (R-15) da equipa Numeiro | content_transition com motivo obrigatório na rejeição; W2-02; w2_content; aprovar em lote os guiões gravados, presos à versão gravada (W9-02); w9_aprovar_gravados 25/25; migração aplicada em produção 2026-11-06 | — |
-| FR-02-06 | parcial | migração PENDING_w10_diff_versoes por aplicar em produção; verificação com conta real (R-15) | content_history, content_restore_version, lock_version; guiao-history.tsx; W2-02; W10-13: comparar duas versões palavra a palavra (lado a lado e em linha, marcadores −/+), aprovada/gravada/em vigor marcadas, Restaurar esta versão com confirmação pelo content_restore_version (PT409 em conflito) e auditado; w10_diff_versoes 25/25; version-diff 22/22; e2e/diff-versoes.spec.ts | — |
+| FR-02-06 | parcial | verificação com conta real (R-15) | content_history, content_restore_version, lock_version; guiao-history.tsx; W2-02; W10-13: comparar duas versões palavra a palavra (lado a lado e em linha, marcadores −/+), aprovada/gravada/em vigor marcadas, Restaurar esta versão com confirmação pelo content_restore_version (PT409 em conflito) e auditado; w10_diff_versoes 25/25; version-diff 22/22; e2e/diff-versoes.spec.ts | — |
 | FR-02-07 | parcial | sem pesquisa, ordenação, vistas guardadas nem impressão | filtros por estado e Exportar .txt em guioes/page.tsx | — |
 | FR-02-08 | por começar | sem sugestões de IA no editor | nada no código | — |
 
