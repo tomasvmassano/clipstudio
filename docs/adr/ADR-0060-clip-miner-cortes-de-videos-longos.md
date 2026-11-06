@@ -30,4 +30,4 @@ O Tomás pôs o Clip Miner entre as funcionalidades com mais prioridade (§46.5:
 
 ## Rollback
 
-Bloco no fim de `supabase/migrations/PENDING_w10_clip_miner.sql`; a página e as RPCs param com a flag `clips.miner` desligada. No motor, tirar `clips` de `MEDIA_KINDS` (ou reverter o PR) deixa os jobs na fila.
+Bloco no fim de `supabase/migrations/20261106065110_w10_clip_miner.sql`; a página e as RPCs param com a flag `clips.miner` desligada. No motor, tirar `clips` de `MEDIA_KINDS` (ou reverter o PR) deixa os jobs na fila.
