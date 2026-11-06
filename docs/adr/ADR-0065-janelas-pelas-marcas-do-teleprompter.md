@@ -8,7 +8,7 @@ O Numeiro grava um ficheiro longo por câmara por sessão. O pacote automático 
 Produção está a ser usada para gravar; nada pode mudar até o dono aplicar a migração e o worker novo ser publicado.
 
 ## Decisão
-**App (migração `PENDING_w10_marcas_janelas.sql`, aditiva):**
+**App (migração `20261106131632_w10_marcas_janelas.sql`, aditiva):**
 - Flag `edit.package_marks` (por cliente, fase inicial `owner`). Avaliada para **quem pede** o pacote (`_flag_on_for(..., created_by)`), não para quem vê.
 - `_package_marks(ws, guiões)` (interna, sem EXECUTE para `anon`/`authenticated`): escolhe a sessão deste cliente com mais destes guiões lidos (empate: a mais recente) e devolve por guião as leituras de cada bloco (como `recording_timeline`: de `play`/`block` até à marca seguinte do mesmo dispositivo, até 300), os takes e o último "Gravaste?" (`recorded` só se não foi desfeito); por dispositivo, o desvio mínimo `server_at - client_at` e o número de marcas. Tudo filtrado por `workspace_id`.
 - Trigger `BEFORE INSERT` em `media_jobs` (só `kind = 'package'`, só se o input ainda não tem `marks`): junta `input.marks`. Erro ao juntar = `input.marks.error`, nunca falha o pedido. `edit_package_request` não muda (assinatura, chave de idempotência, auditoria iguais).

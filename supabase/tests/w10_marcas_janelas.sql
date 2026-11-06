@@ -105,8 +105,9 @@ begin
   insert into t values ('dono da agência: input com as marcas da sessão certa', true,
     inp->'marks'->'session'->>'id' = s1::text and jsonb_array_length(inp->'marks'->'items'->g1->'segments') = 3);
   insert into t values ('pedido repetido: o mesmo job (idempotente)', true, k->>'id' = j->>'id');
+  -- as marcas não mudam a chave; o sufixo ':ia1' só vem dos visuais da IA (W10-18) quando a flag edit.ai_visuals está ligada
   insert into t values ('chave de idempotência igual à de hoje', true,
-    (select idempotency_key from media_jobs where id = (k->>'id')::uuid) = 'package:' || f || ':' || s || ':' || md5(array_to_string(array[g1, g2, g3], ',')) || ':S15');
+    (select regexp_replace(idempotency_key, ':ia1$', '') from media_jobs where id = (k->>'id')::uuid) = 'package:' || f || ':' || s || ':' || md5(array_to_string(array[g1, g2, g3], ',')) || ':S15');
 
   -- flag 'off' para o cliente: nem o dono leva marcas
   insert into feature_flags (key, organization_id, workspace_id, stage) values ('edit.package_marks', org, 'numeiro', 'off');
