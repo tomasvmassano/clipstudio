@@ -26,7 +26,7 @@ O motor escreve guiões; a equipa edita, aprova ou rejeita. Até aqui só a reje
 
 ## Consequências e limites
 
-- O job do motor (`lesson_editor` no numeiro-engine) ainda não existe: sem ele, "Propor lições agora" fica na fila (a página mostra o estado real). Ver o relatório da tarefa.
+- O job do motor está em numeiro-engine#27 (`engine/agents/lesson_editor.py`): até esse merge, "Propor lições agora" fica na fila (a página mostra o estado real). Ordem: migração da app, depois o motor.
 - LRN-05 (o motor usar as lições e 5-10 pares parecidos) e LRN-06 (medir por versão) por fazer; `worker_lessons` e os ids de versão já estão prontos.
 - Sem notificação "há lições por aprovar" (evita mexer em `notifications_kind_check` nesta tarefa).
 
