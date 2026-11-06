@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-06 (pacote: erro claro e repetir)
+
+- **W10-21** (EDL-01, AGENTS §9) Edição automática: um pacote que falha mostra o motivo em linguagem simples (memória do worker, worker parado, som da câmara do lado, gravação em falta) com o detalhe técnico recolhido, e **Tentar de novo** volta a preencher o Novo pacote com as mesmas câmaras e guiões para confirmar. Tentativas falhadas que o worker vai repetir ficam assinaladas. Sem migração. Teste de ponta a ponta em produção (gravação de 3/11): upload R2, pacote (3 vídeos), 3 exports com QC e revisão, depois dos hotfixes do motor #21, #24, #25 e #26.
+
 ## 2026-11-06 (menu por rota, acessibilidade e telemóvel/iPad)
 
 - **W10-05** E2E com contas reais (QA-01, QA-14, QA-16, R-15): `e2e/menu.spec.ts` abre cada entrada do menu lateral pelo menu e com refresh (espaço do cliente: dono e cliente A; espaço da agência: dono). O menu esperado sai de `app-shared.tsx` + `my_context` + `my_flags`; o cliente não vê nada da agência e os módulos "em breve" não são links. `e2e/a11y.spec.ts`: axe WCAG 2.2 AA (`@axe-core/playwright` 4.14.0) nas 9 rotas principais com as duas contas, a falhar com violações serious/critical; teclado no menu (Tab pela ordem visual, foco visível), na folha de revisão (prende o foco, Escape fecha e devolve o foco) e num diálogo. `e2e/viewport.spec.ts`: telemóvel 390px e iPad 820px sem scroll horizontal, o menu recolhe. Correções: lista do menu lateral, nomes acessíveis (pesquisa, seletores de cliente, menu da conta, filtros da Revisão, cartões da Biblioteca), calendários sem `role="grid"` incompleto, lista da Sala dos agentes, contraste no tema escuro (destructive, delta, "Urgente"), "Toggle Sidebar" em PT-PT. No telemóvel, escolher um destino no menu fecha a folha (antes a página nova ficava tapada e inerte); os filtros de Guiões e os separadores de Tarefas passam para a linha seguinte em vez de transbordar. Sem migrações.
