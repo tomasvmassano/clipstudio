@@ -41,6 +41,11 @@ export async function loadContext(): Promise<AppContext | null> {
   // se aceitar convites falhar, a app abre na mesma e diz porquê (em vez de um "sem acesso" mudo)
   const acc = await sb.rpc("accept_invitations");
   const { data, error } = await sb.rpc("my_context");
+  if (error?.message.includes("sessao_terminada")) {
+    // sessão terminada noutro dispositivo ou por quem gere a equipa (W10-08): sai só deste browser e manda entrar outra vez
+    await sb.auth.signOut({ scope: "local" }).catch(() => undefined);
+    throw new Error(friendlyError(error.message));
+  }
   if (error) throw new Error(friendlyError(error.message));
   const ctx = (data as AppContext | null) ?? null;
   return ctx && acc.error ? { ...ctx, invite_error: friendlyError(acc.error.message) } : ctx;
@@ -55,6 +60,9 @@ export function friendlyError(msg: string): string {
   if (previewMode && (msg.includes("sem_permissao") || msg.includes("permission denied")))
     return "Estás em pré-visualização: só leitura. Sai da pré-visualização para fazer alterações.";
   if (msg.includes("sem_permissao") || msg.includes("permission denied")) return "Não tens permissão para isto neste workspace.";
+  if (msg.includes("sessao_terminada")) return "Esta sessão foi terminada. Entra outra vez.";
+  if (msg.includes("sessao_nao_encontrada")) return "Essa sessão já não existe. A lista foi atualizada.";
+  if (msg.includes("sessao_desconhecida")) return "Não foi possível identificar esta sessão. Sai e volta a entrar.";
   if (msg.includes("codigo_invalido") || msg.includes("nao_autenticado")) return "Sessão inválida ou expirada. Entra outra vez.";
   if (msg.includes("acima_do_teto")) return "Não podes dar a alguém um papel acima do teu.";
   if (msg.includes("email_invalido")) return "Email inválido.";
