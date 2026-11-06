@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-06
+
+```
+
 ## 2026-11-06 (anotações desenhadas no vídeo)
 
 - **W10-15** desenhar no fotograma ao rever um vídeo guardado (FR-05-03, OPS-07, QA-07; ADR-0067). Na revisão, "Desenhar" pausa o vídeo e abre caneta, seta, retângulo e círculo, 5 cores, Desfazer (e Ctrl+Z), Limpar e Concluir; funciona com rato, caneta e toque no iPad. O desenho vai com o comentário nesse momento, guardado como vetores normalizados (0..1 do fotograma visível) em `media_comments.annotation`, validado no servidor (`_review_annotation`: tipos, cor, espessura, 50 formas, 500 pontos por traço, 2000 ao todo, coordenadas 0..1) e imutável. A ±0,5 s do momento, ou ao clicar no tempo do comentário, o desenho aparece por cima do vídeo; linha do tempo com uma marca por comentário (âmbar com desenho). `media_review_comment` ganha `p_annotation` opcional no fim: chamadas antigas iguais. Vídeos da Drive continuam sem desenho. Migração `20261106065228_w10_anotacoes.sql` (aditiva, rollback no fim). Testes `w10_anotacoes` 49/49, `annotation` 57/57, E2E `review-stored` 6/6 (desenhar, desfazer, gravar, sobreposição no momento e na marca, iPad, API 22023/42501).

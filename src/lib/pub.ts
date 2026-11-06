@@ -18,7 +18,22 @@ export type Publication = {
   scheduled_at: string; local_day: string; local_time: string; caption: string; hashtags: string[]; cancelled_reason: string | null;
   created_label: string | null; revision_label: string | null; updated_at: string;
   missing: string[]; approvals: Approval[]; conflicts: Conflict[]; can_approve: boolean; approve_blocked: string | null;
+  /** FR-12-02: registo da publicação manual (só quando status = publicada). */
+  published?: Published | null; can_record?: boolean; record_blocked?: string | null;
 };
+export type Published = {
+  mode: "manual"; url: string; external_id: string; at: string; local_day: string; local_time: string;
+  media_version_id: string; media_version_no: number | null; asset_id: string | null; asset_title: string | null;
+  by_label: string | null; recorded_at: string; corrections: number;
+  history: { action: "pub.published_recorded" | "pub.published_corrected"; at: string; by: string | null; reason: string | null; before_url: string | null; url: string | null }[];
+};
+export type RecordVideo = { version_id: string; version: number; asset_id: string; title: string; variant: string; style: string | null; status: string; eligible: boolean };
+export type RecordOptions = {
+  timezone: string; can_record: boolean; media_available: boolean;
+  video: { version_id: string; version: number; asset_id: string; title: string; approved: boolean; current: boolean } | null;
+  publications: Publication[]; videos: RecordVideo[];
+};
+export type RecordInput = { url: string; published_at: string; media_version_id: string; revision?: number };
 export type PubAccount = { id: string; platform: Platform; handle: string; label: string | null; active: boolean; connection_state: string; token_expires_at: string | null };
 export type PlatformLimit = {
   platform: Platform; max_posts: number; window_kind: "rolling_24h" | "calendar_day"; window_tz: string; scope: "conta" | "projeto";
@@ -29,7 +44,7 @@ export type PubCalendar = {
   today: string; timezone: string; publications: Publication[]; accounts: PubAccount[]; limits: PlatformLimit[];
   policy: { required: PolicyRequired; forbid_self: boolean; updated_at: string | null; updated_label: string | null };
   me: { side: "agencia" | "cliente"; role: string } | null;
-  can: { schedule: boolean; approve: boolean; republish_approve: boolean; policy: boolean; accounts: boolean; limits: boolean };
+  can: { schedule: boolean; approve: boolean; republish_approve: boolean; policy: boolean; accounts: boolean; limits: boolean; record?: boolean };
   publish_available: false; publish_unavailable_reason: string;
 };
 export type ContentOption = { id: string; n: number; date: string; tema: string | null; hook: string | null; editorial_status: string; approved: boolean };
@@ -77,3 +92,10 @@ export const saveLimit = (a: Access, platform: Platform, patch: Partial<Platform
   rpc<PlatformLimit[]>("pub_limit_save", { p_ws: a.ws, p_platform: platform, p_patch: patch, p_token: a.token });
 export const addAccount = (a: Access, platform: Platform, handle: string, label: string) =>
   rpc<PubAccount>("pub_account_add", { p_ws: a.ws, p_platform: platform, p_handle: handle, p_label: label || null, p_token: a.token });
+
+/** FR-12-02: o que entra no registo (por publicação, no calendário; ou por vídeo, na revisão). */
+export const fetchRecordOptions = (a: Access, by: { publication?: string; version?: string }) =>
+  rpc<RecordOptions>("pub_record_options", { p_ws: a.ws, p_id: by.publication ?? null, p_version: by.version ?? null, p_token: a.token });
+/** Regista que foi publicado à mão (ou corrige o registo, com motivo). Nada é publicado pela app. */
+export const recordPublished = (a: Access, id: string, input: RecordInput, reason?: string | null) =>
+  rpc<Publication & { replayed: boolean; corrected: boolean }>("pub_record_published", { p_ws: a.ws, p_id: id, p_input: input, p_reason: reason ?? null, p_token: a.token });

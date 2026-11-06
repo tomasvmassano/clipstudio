@@ -45,6 +45,7 @@ Um `agency_member` sem atribuição a um workspace **não vê nada** desse works
 | `publishing.schedule` (W7) | ✓ | ✓ | ✓ | — | — | — |
 | `publishing.approve` (W7) | ✓ | ✓ | ✓ | — | — | — |
 | `publishing.republish.approve` / `publishing.policy.manage` / `social_accounts.manage` (W7) | ✓ | ✓ | — | — | — | — |
+| `publishing.publish`: registar publicação manual (W10-03, ADR-0056) | ✓ | ✓ | ✓ | — (grant) | — (grant) | — |
 | `learn.read` (W7) | ✓ | ✓ | ✓ | — | ✓ | — |
 | `learn.manage` (W7) | ✓ | ✓ | ✓ | — | — | — |
 | `calendar.read` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
@@ -72,6 +73,7 @@ Um `agency_member` sem atribuição a um workspace **não vê nada** desse works
 | `media.upload` / `download` | ✓ | ✓ | ✓ | ✓ | ✓ | — |
 | `media.share` | ✓ | ✓ | ✓ | — | — | — |
 | `publishing.schedule` / `publish` | ✓ | ✓ | grant | — | — | — |
+| registar publicação manual (`publishing.publish`, W10-03) | sessão individual; código de equipa recusado; cliente B recebe 404 (`P0002`) com IDs de A |||||
 | `analytics.read` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `costs.read` | ✓ | ✓ | grant | — | — | — |
 | `costs.export` (W10-10) | ✓ | ✓ | grant | — | — | — |

@@ -57,8 +57,15 @@ export function parseHashtags(text: string): { tags: string[]; invalid: string[]
   return { tags, invalid };
 }
 
-export type PubStatus = "planeada" | "aprovada" | "cancelada";
-export const STATUS_LABEL: Record<PubStatus, string> = { planeada: "Por aprovar", aprovada: "Aprovada", cancelada: "Cancelada" };
+export type PubStatus = "planeada" | "aprovada" | "publicada" | "cancelada";
+export const STATUS_LABEL: Record<PubStatus, string> = { planeada: "Por aprovar", aprovada: "Aprovada", publicada: "Publicada", cancelada: "Cancelada" };
+/** Porque não se pode registar a publicação (FR-12-02). sem_capacidade não se mostra: o botão fica escondido. */
+export const RECORD_BLOCKED_LABEL: Record<string, string> = {
+  por_aprovar: "Só se regista depois de a publicação estar aprovada.",
+  cancelada: "Esta publicação foi cancelada.",
+  versao_por_aprovar: "A versão do guião já não é a aprovada. Revê a publicação.",
+  sem_video_aprovado: "Ainda não há um vídeo aprovado na revisão para este guião.",
+};
 export type PolicyRequired = "qualquer" | "agencia" | "cliente" | "ambos";
 export const POLICY_LABEL: Record<PolicyRequired, string> = {
   qualquer: "Qualquer pessoa com a capacidade", agencia: "Agência (direção criativa)", cliente: "Cliente", ambos: "Agência e cliente",

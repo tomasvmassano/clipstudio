@@ -52,6 +52,7 @@ export const REASON_LABEL: Record<string, string> = {
   task_delegated: "passaram-ta", system_health: "saúde do sistema",
   task_due_soon: "prazo nas próximas 24 h", task_overdue: "prazo passou", task_due_changed: "prazo mudou",
   script_unapproved_recording: "gravação amanhã por aprovar", video_review_overdue: "revisão atrasada",
+  publication_published: "publicação registada",
 };
 export const AVAILABILITY_LABEL: Record<Availability, string> = {
   available: "Disponível", busy: "Ocupado", away: "Ausente", dnd: "Não incomodar",

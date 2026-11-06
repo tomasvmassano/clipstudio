@@ -11,8 +11,8 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | Estado | Requisitos |
 |---|---|
 | feito | 25 |
-| parcial | 219 |
-| por começar | 59 |
+| parcial | 220 |
+| por começar | 58 |
 | bloqueado | 3 |
 | adiado | 3 |
 | **total** | **309** |
@@ -39,6 +39,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-10-01 | P0 | parcial | verificação com sessão real (R-15) da agência e do cliente; decisão do owner sobre costs.read da equipa do cliente (AGENTS §9) | Consumo de IA por agente, modelo, execução e workspace. |
 | FR-11-01 | P0 | parcial | arrastar não verificado em produção; verificação com conta de cliente (R-15); E2E citado não está versionado no repo | Calendário editorial por dia, semana e mês; drag and drop com validação. |
 | FR-11-02 | P0 | parcial | verificação com sessão real (R-15) da equipa Numeiro | Tarefas, gravações, revisões, publicações, responsáveis, deadlines e dependência |
+| FR-12-02 | P0 | parcial | agendamento por API (PLAT-03/PUB-01); verificação com sessão real (R-15); E2E | Publicação manual com registo de URL e timestamp; agendamento por API quando aut |
 | FR-14-01 | P0 | parcial | recuperação por email depende do SMTP do Supabase (limitado) até haver domínio (FR-13-01 adiado); verificação com a conta real do Tomás em produção | Nome, avatar, email verificado, password reset e MFA quando disponível. |
 | FR-14-02 | P0 | parcial | idioma só PT-PT; email e resumo pessoais guardados mas sem envio; verificação com sessão real | Idioma, timezone, tema, notificações e preferências do teleprompter. |
 | FR-15-01 | P0 | parcial | sem idioma configurável (só PT-PT) | Geral: nome, logótipo, idioma, timezone, moeda e branding. |
@@ -79,7 +80,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | EDL-09 | P0 | parcial | verificação com sessão real | Linha do tempo (modo completo) |
 | EDL-11 | P0 | parcial | visuais guardados no Supabase Storage ou por link ficam de fora; posição por visual (caixa fixa); verificação com sessão real | Exportar |
 | PERF-01 | P0 | parcial | criador/marca é só um campo por conta; verificação com conta real (R-15) | Hierarquia |
-| PERF-02 | P0 | parcial | o publicador (PUB) tem de chamar perf_record_lineage | Etiquetas obrigatórias à publicação (R-18) |
+| PERF-02 | P0 | parcial | publicador por API (PUB-01); frase-persona não preenchida no registo manual | Etiquetas obrigatórias à publicação (R-18) |
 | PERF-03 | P0 | parcial | histórico só desde a primeira captura; 1 h quase nunca existe com scraping diário | Fotografias por idade |
 | PERF-04 | P0 | parcial | engagedViews do YouTube (API oficial) | Índice normalizado |
 | PERF-05 | P0 | parcial | alcance, retenção, skip rate, seguidores, For You (API oficial); custo por vídeo (BIZ-06) | Métricas por família |
@@ -161,7 +162,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-17-12 | P1 | parcial | vencedor sem guião ligado não se repete | Motor “repetir vencedor” cria proposta de continuação/variação ligada à publicaç |
 | FR-17-16 | P1 | parcial | OAuth real (PLAT-01..03); Drive, R2 e Resend por ligar | Centro de integrações com estado da ligação, última sincronização, limites e per |
 | FR-21-03 | P1 | parcial | importação só por scraping (não API autorizada) | importação manual e sync via API autorizada. |
-| FR-21-04 | P1 | parcial | publicador chama _pub_link_lineage | atribuição de métricas por publication_id, janela e origem. |
+| FR-21-04 | P1 | parcial | publicador por API (PUB-01) chama _pub_link_lineage; verificação com sessão real | atribuição de métricas por publication_id, janela e origem. |
 | CAP-07 | P1 | parcial | sem preview de impacto, segunda aprovação nem alertas de grants excessivos | Controlo de mudanças sensíveis |
 | CAP-08 | P1 | parcial | convidados com acesso a uma peça por fazer | Interface multi-cliente |
 | OPS-04 | P1 | parcial | verificação com conta real (R-15) | Quem trabalha em quê |
@@ -242,7 +243,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | R-15 | — | parcial | E2E com conta real no CI por fazer (ADR-0019 pendente) | Nenhuma página pode cair no erro genérico do browser ou do Next ("This page coul |
 | R-16 | — | parcial | correspondência por impressão digital com os nossos renders | Origem de cada publicação. |
 | R-17 | — | parcial | verificação com sessão real (R-15); lista do Numeiro por preencher | Hipérbole de persona. |
-| R-18 | — | parcial | publicador por fazer (nada chama perf_record_lineage) | Linhagem gravada no momento. |
+| R-18 | — | parcial | publicador por API (PUB-01); formato de reels.id no TikTok/YouTube por confirmar | Linhagem gravada no momento. |
 
 <!-- resumo:fim -->
 
@@ -398,7 +399,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
 | FR-12-01 | por começar | sem módulo de publicação | publishing.* planeadas (W6) | — |
-| FR-12-02 | por começar | sem registo de URL publicado nem agendamento | nada no código | — |
+| FR-12-02 | parcial | agendamento por API (PLAT-03/PUB-01); verificação com sessão real (R-15); E2E | registo manual de URL, hora e vídeo aprovado (pub_record_published, W10-03, ADR-0056); w10_publicacao_manual 53/53 | — |
 | FR-12-03 | por começar | sem fila de publicação | nada no código | — |
 | FR-12-04 | por começar | sem publicação | nada no código | — |
 | FR-12-05 | por começar | sem publicação | nada no código | — |
@@ -569,9 +570,9 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
 | FR-21-01 | parcial | OAuth (PLAT-02/03) | social_accounts por conta, credencial só por referência (W7, ADR-0036); w7_pub | — |
-| FR-21-02 | parcial | publicador (PUB-01) tem de voltar a verificar ao publicar | só pub_approve leva a aprovada; não há ação de publicar (W7, ADR-0036); w7_pub | — |
+| FR-21-02 | parcial | publicador (PUB-01) tem de voltar a verificar ao publicar | só pub_approve leva a aprovada; não há ação de publicar (W7, ADR-0036); w7_pub; registo manual volta a verificar aprovação, versão do guião e vídeo aprovado atual (W10-03); w10_publicacao_manual | — |
 | FR-21-03 | parcial | importação só por scraping (não API autorizada) | engine/scrape.py; publicacoes | — |
-| FR-21-04 | parcial | publicador chama _pub_link_lineage | correlation_id pub:<id> e lineage_id preparados (W7, ADR-0036); w7_pub | — |
+| FR-21-04 | parcial | publicador por API (PUB-01) chama _pub_link_lineage; verificação com sessão real | correlation_id pub:<id> e lineage_id preparados (W7, ADR-0036); w7_pub; registo manual liga a linhagem pelo correlation_id pub:<id> (W10-03); w10_publicacao_manual | — |
 
 ## 25. NFRs, qualidade e critérios de lançamento
 
@@ -586,7 +587,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | CAP-01 | parcial | registo sem descrição, dono, versão, ações e flag de disponibilidade | tabela capabilities (key, módulo, risco, âmbitos, estado); feature-registry.md | — |
 | CAP-02 | parcial | sem filtros por equipa/projeto, ações em lote, exportação, diff e preview antes de guardar | /permissoes por pessoa e por papel; w1_permissions 35/35; W1-08 | — |
 | CAP-03 | parcial | sem papéis personalizados versionados nem modelos por profissão; grants só por pessoa | permission_grants allow/deny com prazo, deny prevalece; w1_permissions 35/35 | — |
-| CAP-04 | parcial | capacidades de clipping, media, review, publishing, integrations sem uso | capabilities separadas por ação; feature-registry.md | — |
+| CAP-04 | parcial | capacidades de clipping, media, review, publishing, integrations sem uso | capabilities separadas por ação; feature-registry.md; publishing.publish ativa (W10-03) | — |
 | CAP-05 | parcial | authorize() só por workspace, sem recurso | authorize(), access_explain "porquê"; w1_permissions 35/35; simulador Ver como pessoa ou papel (access_simulate, W1-16); w1_access_simulate 11/11; e2e/see-as.spec.ts; produção 03/11: Ver como explica cada capacidade pela origem (papel) | 2026-11-03 (sessão real do dono da agência, produção) |
 | CAP-06 | parcial | sem revisões periódicas de acessos | convites com validade, suspender, remover com reatribuição; w1_clients 55/55; W10-08: revogação de sessões (ADR-0064), membro removido e sessão terminada recusados no pedido seguinte; w10_sessoes | — |
 | CAP-07 | parcial | sem preview de impacto, segunda aprovação nem alertas de grants excessivos | motivo obrigatório, antes/depois no audit (W1-08, W1-09) | — |
@@ -627,7 +628,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 |---|---|---|---|---|
 | R-16 | parcial | correspondência por impressão digital com os nossos renders | origem externo nas importadas, perf_origin_set com motivo e auditoria (W6, ADR-0033); w6_perf | — |
 | R-17 | parcial | verificação com sessão real (R-15); lista do Numeiro por preencher | persona_lists versionada e imutável, persona_list_get/version/save com consentimento de terceiros, persona.manage, worker_claim.persona, aba Agentes → Frases-persona (W5-14, ADR-0053); w5_persona_phrases 21/21; persona-rules 11/11; numeiro-engine #14 test_persona 4/4; E2E persona-phrases 4/4 (admin grava v1/v2, outra pessoa sem consentimento bloqueada na UI e no servidor 22023, histórico, manager só leitura 42501, cliente B 42501; W5-15); aba verificada em produção com a conta do Tomás (2026-11-06); verificador de títulos fora da lista (VAR-04, W10-06) | — |
-| R-18 | parcial | publicador por fazer (nada chama perf_record_lineage) | linhagem gravada imutável e idempotente; importadas inferidas e marcadas (W6, ADR-0033); w6_perf | — |
+| R-18 | parcial | publicador por API (PUB-01); formato de reels.id no TikTok/YouTube por confirmar | linhagem gravada imutável e idempotente; importadas inferidas e marcadas (W6, ADR-0033); w6_perf; registo manual grava a linhagem no momento (W10-03, ADR-0056) | — |
 | R-19 | adiado | decisão do Tomás 29/10: métricas passam a vir da API oficial no futuro; por agora continua o Apify (engine/scrape.py). Fecha com PERF-08/PLAT-02 | engine/scrape.py ApifyClient; ADR-0005 | — |
 
 ## 38. Vista de negócio da agência (BIZ)
@@ -676,7 +677,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
 | PERF-01 | parcial | criador/marca é só um campo por conta; verificação com conta real (R-15) | perf_accounts (camada A-D, criador, estado) (W6, ADR-0033); w6_perf 63/63 | — |
-| PERF-02 | parcial | o publicador (PUB) tem de chamar perf_record_lineage | publication_lineage com as etiquetas de §40 (W6, ADR-0033); w6_perf | — |
+| PERF-02 | parcial | publicador por API (PUB-01); frase-persona não preenchida no registo manual | publication_lineage com as etiquetas de §40 (W6, ADR-0033); w6_perf; registo manual chama _perf_record_lineage com hook, estilo, ativo e duração (W10-03) | — |
 | PERF-03 | parcial | histórico só desde a primeira captura; 1 h quase nunca existe com scraping diário | perf_readings e perf-tick de hora a hora, fotografia ±25% (W6, ADR-0033); w6_perf | — |
 | PERF-04 | parcial | engagedViews do YouTube (API oficial) | _perf_index pela mediana da mesma conta na mesma idade, base ≥5 (W6, ADR-0033); w6_perf | — |
 | PERF-05 | parcial | alcance, retenção, skip rate, seguidores, For You (API oficial); custo por vídeo (BIZ-06) | _perf_families com as métricas da recolha e indisponíveis marcadas (W6, ADR-0033); w6_perf | — |
@@ -704,7 +705,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | PUB-01 | por começar | sem publicador | nada no código | — |
 | PUB-02 | parcial | leitura dos limites em tempo real chega com o publicador | pub_platform_limits com data de verificação, recusa acima do limite (W7, ADR-0036); w7_pub | — |
 | PUB-03 | adiado | decisão do Tomás 29/10: sem publicação manual, espera pela API oficial (PLAT-03) | — | — |
-| PUB-04 | parcial | quotas de republicação só como aviso; verificação com conta real (R-15) | calendário de publicações com conflitos e arrastar (W7, ADR-0036); w7_pub 91/91; e2e/pub.spec.ts | — |
+| PUB-04 | parcial | quotas de republicação só como aviso; verificação com conta real (R-15) | calendário de publicações com conflitos e arrastar (W7, ADR-0036); w7_pub 91/91; e2e/pub.spec.ts; estado publicada no calendário de publicações (W10-03) | — |
 | PUB-05 | por começar | sem republicação agendada | nada no código | — |
 | PUB-06 | parcial | notificações a quem aprova; verificação com conta real (R-15) | publishing.approve e republish.approve; aprovação presa à revisão e invalidada ao mudar (W7, ADR-0036); w7_pub; e2e/pub.spec.ts | — |
 
