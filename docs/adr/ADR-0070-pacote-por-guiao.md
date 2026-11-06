@@ -33,4 +33,4 @@ O pacote de hoje (`edit_package_request`, job `package`, `numeiro-engine` `do_pa
 
 ## Rollback
 
-Bloco no fim de `supabase/migrations/PENDING_w10_pacote_por_guiao.sql`. Desligar sem rollback: flag `edit.package_script` a `off`. Jobs por guião já criados continuam válidos com o worker antigo.
+Bloco no fim de `supabase/migrations/20261106131955_w10_pacote_por_guiao.sql`. Desligar sem rollback: flag `edit.package_script` a `off`. Jobs por guião já criados continuam válidos com o worker antigo.
