@@ -123,6 +123,6 @@ Portal do cliente (W8, ADR-0041): entrar com `scripts.read` (staff da agência s
 **W5-12 (ADR-0052):** exportar o pacote inteiro exige `edit.export` (revisor e outro cliente: 42501); ver na revisão os vídeos exportados e a versão leve: `media.read`; comentar `review.comment`; decidir `review.approve`. Outro cliente: 42501.
 **W5-14 (ADR-0053):** ler a lista de frases-persona: `agents.read`; gravar uma versão nova: `persona.manage` com sessão individual (código de equipa e manager: 42501). Versões imutáveis, tabela fechada à API. O worker recebe só os textos e o nome de quem está envolvido (o consentimento fica na app). Outro cliente: 42501.
 
-**W10-06 (ADR-0054, VAR-04):** ver o resultado do verificador do motor: `scripts.read` (`content_verifications`; código de equipa só do seu cliente). Gravar: só o worker, para guiões da própria execução. Tabela fechada à API; outro cliente ou cliente inexistente: 42501; ids de outro cliente no pedido ficam de fora.
+**W10-06 (ADR-0057, VAR-04):** ver o resultado do verificador do motor: `scripts.read` (`content_verifications`; código de equipa só do seu cliente). Gravar: só o worker, para guiões da própria execução. Tabela fechada à API; outro cliente ou cliente inexistente: 42501; ids de outro cliente no pedido ficam de fora.
 
 **W9 (ADR-0051):** eliminar e recuperar guiões: `scripts.purge` (workspace_owner e dono da agência); aprovar gravados em lote: `scripts.approve`; pré-requisitos: ler `scripts.read`, configurar `settings.manage`. Outro cliente: 42501.

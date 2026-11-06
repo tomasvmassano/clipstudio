@@ -1,4 +1,4 @@
-# ADR-0054 — Verificador antes da revisão humana (W10-06)
+# ADR-0057 — Verificador antes da revisão humana (W10-06)
 
 **Data:** 2026-11-06 · **Estado:** proposto · **Requisitos:** PRD VAR-04, R-17 (CHG-003), SCALE-05; AGENTS §7. Número sujeito a renumeração se outro PR ocupar o 0054.
 

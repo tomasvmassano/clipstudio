@@ -254,7 +254,7 @@ Pacote `done` → "Exportar todos" (`edit_package_export`) → um job `export` p
 
 Versão 0 (sem lista: agentes sem hipérbole de persona) → gravar → versão N+1 (imutável; conflito se outra pessoa gravou a N entretanto) → próximas execuções dos agentes usam a versão em vigor no claim e registam-na no `agent_log`. Voltar atrás = gravar uma versão nova a partir da antiga.
 
-## Verificador antes da revisão humana (W10-06, VAR-04, ADR-0054)
+## Verificador antes da revisão humana (W10-06, VAR-04, ADR-0057)
 
 Sem estados editoriais novos. Motor: Crítico → Editor → Verificador (classifica cada hook: persona, opinião, facto, terceiro identificado, validade; PT-PT) → `worker_save_script` (guião entra em revisão como antes) → `worker_save_verification` (idempotente por execução e guião, evento `script.verified`). Marcas: `ok` < `atencao` < `rever` < `juridico` < `bloqueado`. Nenhuma marca muda o estado do guião: quem revê aprova, pede alterações ou rejeita. Editar o hook deixa a marca desse hook como "verificado noutro texto".
 
