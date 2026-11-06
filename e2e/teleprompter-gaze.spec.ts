@@ -1,6 +1,16 @@
-import { WS_A, sql, users } from "./env";
+import { execFileSync } from "node:child_process";
+import { existsSync } from "node:fs";
+import { DB_URL, WS_A, sql, users } from "./env";
 import { as, expect, expectNoCrash } from "./helpers";
-import type { Page } from "@playwright/test";
+import { test, type Page } from "@playwright/test";
+
+// `supabase start` só aplica migrações com versão; enquanto a migração deste PR se chama PENDING_*, aplica-se aqui
+// (só na stack local: env.ts recusa outra base; create or replace, repetir não muda nada).
+const PENDING = "supabase/migrations/PENDING_w10_teleprompter_olhar.sql";
+test.beforeAll(() => {
+  const known = sql(`select exists (select 1 from pg_proc where proname = '_tp_prefs_clean' and prosrc like '%distance_m%')`)[0] === "t";
+  if (!known && existsSync(PENDING)) execFileSync("psql", [DB_URL, "-XAtq", "-v", "ON_ERROR_STOP=1", "-f", PENDING]);
+});
 
 // GAZE-01/02 (PRD §46.1): a coluna segue a distância à câmara; linha de foco configurável; modo frase com 2 a 4 palavras
 // por linha. Preferências guardadas na conta para este dispositivo (FR-03-05).
