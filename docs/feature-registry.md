@@ -61,8 +61,9 @@ Estado: **ativo** (existe e é verificado no servidor por `authorize()`; também
 | `dashboard.configure` | Início (M01) | M | ws | ativo | `/` Personalizar: widgets e ordem por função no cliente (`dashboard_layouts_get`, `dashboard_layout_set`, `dashboard_layout_reset`), auditado |
 | `dashboard.agency` | Agência | B | org | ativo | `/` (Painel, entrada da equipa da agência; ADR-0018): clientes a que a pessoa tem acesso lado a lado, com totais e comparação (`agency_dashboard`); menu próprio do espaço da agência, com `/clientes` e `/caixa` de todos os clientes |
 | `team.read` (org) · `team.invite` (org) · `team.manage` (org) | Equipa da agência | M/A | org | ativo | `/equipa-agencia` (W1-13, ADR-0020): `agency_team`, `agency_invite`, `agency_invite_revoke`, `agency_member_update`; atribuir e tirar de clientes com `agency_staff_assign` e `member_remove` |
-| `costs.read` | Custos (M10) | M | ws | ativo (parcial) | custo e tokens por execução e gasto do dia em `/agentes/configuracao`, limite diário na configuração; módulo Custos completo mais tarde |
-| `costs.read_agency` | Custos | A | org | W4 | — |
+| `costs.read` | Custos (M10) | M | ws | ativo (parcial) | custo e tokens por execução e gasto do dia em `/agentes/configuracao`, limite diário na configuração; `/c/[ws]/custos` (flag `costs.content`): consumo de IA por agente, modelo e execução com tendência (`costs_ai_usage`, W10-10, ADR-0062) e custo por guião e publicação (`content_costs`) |
+| `costs.export` | Custos (M10) | M | ws | ativo (W10-10, ADR-0062) | `costs_ai_usage_export`: CSV da tabela visível (cliente, agente, modelo, execuções), auditado `costs.ai_exported`; na vista da agência exige `costs.export` em todos os clientes da resposta (senão recusa inteira) |
+| `costs.read_agency` | Custos | A | org | ativo (W10-10, flag `costs.agency`) | `/custos` (espaço da agência): `costs_ai_usage` com `p_ws` nulo; só os clientes ativos em que a pessoa também tem `costs.read` (uma negação explícita tira o cliente) |
 | `agents.read` | Agentes (M06) | B | ws | ativo | `/agentes`, `/agentes/configuracao` (catálogo, versão ativa, estado do worker, execuções sem custo) |
 | `agents.rehearse` | Agentes | M | ws | ativo | Ensaiar a sala |
 | `agents.run` | Agentes | A | ws | ativo | `agent_job_enqueue` (Correr agora, idempotente por tipo e dia), `agent_job_cancel`, `agent_job_retry`; executado pelo worker do motor (W4-02), que grava guiões em revisão; dados de pesquisa do motor por cliente (W4-03, ADR-0016) |
@@ -93,7 +94,8 @@ Estado: **ativo** (existe e é verificado no servidor por `authorize()`; também
 | `learn.read` / `learn.manage` | Retrabalho, experiências, vencedores e recomendações (FR-17-10/11/12, SCALE-06) | M | ws | ativo (W7, flags `learn.rework`, `learn.experiments`) | `/c/[ws]/aprendizagem/retrabalho` e `/experiencias`; categoria ao rejeitar por `content_transition_reasoned` |
 | `privacy.manage` | Pedidos de eliminação de dados (FR-14-05) | A | org | ativo (W7, flag `profile.data_export`) | tratar pedidos em `/equipa-agencia`; exportar os próprios dados com `profile.export` |
 | `team.job_titles` (flag) | Cargos no convite (BIZ-08) | — | ws | ativo (W7, flag) | `invite_member_with_title`: cargo pré-seleciona papel e exceções sugeridas; o cargo não dá acesso |
-| `costs.content` (flag) | Custos por guião e publicação (FR-10-05) | — | ws | ativo (W7, flag) | `/c/[ws]/custos` com `costs.read`; CSV auditado |
+| `costs.content` (flag) | Custos do cliente: consumo de IA (FR-10-01) e custo por guião e publicação (FR-10-05) | — | ws | ativo (W7, W10-10, flag) | `/c/[ws]/custos` com `costs.read`; CSV auditado |
+| `costs.agency` (flag) | Custos da agência (FR-10-01) | — | org | ativo (W10-10, flag, dono da agência por defeito) | `/custos` com `costs.read_agency` |
 | `projects.manage` | Campanhas e séries (FR-02-03) | M | ws | ativo (W2-07) | Criar, renomear e arquivar campanhas e séries (`project_save`); ler com `scripts.read` (`projects_list`). Campanha, responsável, plataformas e etiquetas do guião com `scripts.edit` (`content_meta_set`, `content_owners`); filtros da fila do teleprompter |
 | `performance.read` | Centro de desempenho (PERF) | B | ws, org | W6 (CHG-003) | — |
 | `performance.origin.override` | Corrigir origem sistema/externo (R-16) | M | ws | W6 (CHG-003) | — |
