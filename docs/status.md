@@ -11,8 +11,8 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | Estado | Requisitos |
 |---|---|
 | feito | 25 |
-| parcial | 206 |
-| por começar | 72 |
+| parcial | 211 |
+| por começar | 67 |
 | bloqueado | 3 |
 | adiado | 3 |
 | **total** | **309** |
@@ -43,7 +43,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-14-02 | P0 | parcial | idioma só PT-PT; email e resumo pessoais guardados mas sem envio; verificação com sessão real | Idioma, timezone, tema, notificações e preferências do teleprompter. |
 | FR-15-01 | P0 | parcial | sem idioma configurável (só PT-PT) | Geral: nome, logótipo, idioma, timezone, moeda e branding. |
 | FR-15-02 | P0 | parcial | sem categorias, estados e regras de aprovação configuráveis | Conteúdo: categorias, formatos, estados, templates, regras de aprovação e checkl |
-| FR-16-01 | P0 | parcial | notificações, comentários e media fora da pesquisa; verificação com conta real (R-15) | Pesquisa global com controlo de acesso em todas as entidades, sugestões e result |
+| FR-16-01 | P0 | parcial | verificação com conta real (R-15) dos grupos media, comentários e notificações | Pesquisa global com controlo de acesso em todas as entidades, sugestões e result |
 | FR-16-02 | P0 | parcial | verificação com conta de cliente (R-15) | Atalho de teclado, pesquisa por título/tag/ID e estado vazio. |
 | TEAM-05 | P0 | parcial | âmbitos projeto e assigned_only não aplicados; sem modelos por profissão | Matriz de permissões configurável |
 | TEAM-06 | P0 | parcial | tarefa sem projeto (não existem projetos) | Tarefas e responsáveis |
@@ -53,7 +53,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-17-05 | P0 | parcial | verificação com sessão real (R-15) da equipa Numeiro | Transições configuráveis de workflow geram tarefas e notificações idempotentes,  |
 | FR-17-13 | P0 | parcial | verificação com conta real (R-15) | Auto-save com indicador persistido, proteção contra alterações concorrentes e re |
 | FR-17-14 | P0 | parcial | verificação com carga real (pacote e exports da sessão de 2026-11-06) | Jobs duráveis com idempotency key, retries exponenciais, timeout, dead-letter, c |
-| FR-17-15 | P0 | parcial | sem alertas nem dashboard de saúde | Observabilidade com logs estruturados, correlação por workspace/run/content, ale |
+| FR-17-15 | P0 | parcial | verificação com sessão real (R-15) do dono da agência; alertas só na app (sem email, FR-13-01 adiado); ver ADR-0058 sobre kinds do worker partilhado | Observabilidade com logs estruturados, correlação por workspace/run/content, ale |
 | FR-21-01 | P0 | parcial | OAuth (PLAT-02/03) | permissões e credenciais são por conta. |
 | FR-21-02 | P0 | parcial | publicador (PUB-01) tem de voltar a verificar ao publicar | não publicar sem aprovação humana do asset/versão e do destino. |
 | CAP-01 | P0 | parcial | registo sem descrição, dono, versão, ações e flag de disponibilidade | Registo central de capacidades |
@@ -73,7 +73,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | ING-03 | P0 | parcial | verificação com a sessão real; ligar as marcas de gravação às janelas | Um ficheiro longo por câmara por sessão |
 | EDL-01 | P0 | parcial | verificação com a sessão real de 2026-11-06; deteção de cara para o enquadramento; usar as marcas de gravação (ING-03) para afinar as janelas | Pacote de edição automático |
 | EDL-02 | P0 | parcial | verificação com a sessão real de 2026-11-06 (pacote → exportar todos → rever); versão leve a 540p em vez de 720p (ADR-0052) | Revisão em lote |
-| EDL-03 | P0 | parcial | relatório por variante só no export (não sobre o documento antes de exportar); pHash face às irmãs não corre no export; calibrar limites no piloto (EDL-06) | QC técnico em código antes de qualquer revisão por IA |
+| EDL-03 | P0 | parcial | distinct_source só por opção (qc_rules.compare_source); calibrar limites no piloto (EDL-06) | QC técnico em código antes de qualquer revisão por IA |
 | EDL-07 | P0 | parcial | versão 1 gerada pela IA no job do pacote (EDL-01); visuais e música ainda vazios | Documento de edição |
 | EDL-08 | P0 | parcial | carregar as gravações da sessão no R2; verificação com sessão real | Pré-visualização ao vivo |
 | EDL-09 | P0 | parcial | verificação com sessão real | Linha do tempo (modo completo) |
@@ -87,6 +87,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | PERF-09 | P0 | parcial | só uma leitura por publicação; ligação ao conteúdo por inferência | Correções de dados imediatas |
 | VAR-01 | P0 | parcial | render das variantes | Receita de variante |
 | VAR-02 | P0 | parcial | layouts de S01 a S12 (equipa criativa); render real dos estilos no motor (hoje só no protótipo local); verificação com sessão real | Catálogo de estilos por workspace |
+| VAR-04 | P0 | parcial | verificação com sessão real (R-15) depois do deploy do motor; afirmações do corpo não classificadas; idioma por conta de clips | Verificador antes da revisão humana |
 | PUB-02 | P0 | parcial | leitura dos limites em tempo real chega com o publicador | Limites das APIs como restrições do agendador |
 | PUB-04 | P0 | parcial | quotas de republicação só como aviso; verificação com conta real (R-15) | Calendário de publicações |
 | PUB-06 | P0 | parcial | notificações a quem aprova; verificação com conta real (R-15) | Quem aprova |
@@ -110,7 +111,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-06-04 | P1 | parcial | sem teste antes de ativar; prompts no código do motor, não versionados na app | Versionamento de prompts/configurações, testes antes de ativar, rollback e audit |
 | FR-06-05 | P1 | parcial | sem latência e qualidade por execução | Custos, tokens, latência e qualidade por execução/agente. |
 | FR-07-03 | P1 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | Filtros, favoritos, coleções e pesquisa. |
-| FR-07-04 | P1 | parcial | só para reels recolhidos pelo motor; referências por link sem transcrição | Transcrição e análise de estrutura quando tecnicamente e legalmente permitido. |
+| FR-07-04 | P1 | parcial | recolha automática depende do APIFY_TOKEN no worker; TikTok só com transcrição colada; verificação com sessão real | Transcrição e análise de estrutura quando tecnicamente e legalmente permitido. |
 | FR-08-03 | P1 | parcial | partilha só da versão atual; verificação com sessão real | Pré-visualização, download, links temporários e permissões de partilha. |
 | FR-08-04 | P1 | parcial | verificação com sessão real | Versionamento, substituição, histórico e associação a guião/take/publicação. |
 | FR-08-05 | P1 | parcial | sem antivírus (decisão em aberto); limite por ficheiro depende do plano Supabase; retenção automática por fazer | Controlo de tipos, tamanho, antivírus quando aplicável, quotas e retenção. |
@@ -121,7 +122,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-10-04 | P1 | parcial | sem orçamentos, limite soft, alertas nem autorização para ultrapassar | Orçamentos, limites rígidos/soft, alertas e autorização para ultrapassar quota. |
 | FR-10-05 | P1 | parcial | custo por vídeo (sem custos de render) | Custo por guião, vídeo e publicação; tendência mensal e exportação. |
 | FR-11-03 | P1 | parcial | sem vistas por equipa, plataforma, campanha; sem deteção de conflitos | Vistas por equipa, plataforma, campanha e estado; conflitos e atrasos destacados |
-| FR-11-04 | P1 | parcial | sem notificações de prazo (só de atribuição) | Templates de produção, checklist por conteúdo e notificações. |
+| FR-11-04 | P1 | parcial | ligar a flag notifications.deadlines e verificar com sessão real (R-15) | Templates de produção, checklist por conteúdo e notificações. |
 | FR-11-05 | P1 | parcial | sem ficheiros, revisões nem publicações ligadas | Links para guiões, ficheiros, revisões e publicações. |
 | FR-13-03 | P1 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | Múltiplos workspaces por utilizador, papéis independentes e mudança de contexto  |
 | FR-13-04 | P1 | parcial | sem transferência de propriedade | Desativar membro, transferir propriedade, impedir remoção do último Owner. |
@@ -133,18 +134,18 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-15-05 | P1 | parcial | envio de email e resumo diário (FR-13-01 adiado); verificação com sessão real | Notificações: canais, eventos e preferências organizacionais. |
 | FR-16-03 | P1 | parcial | sem preferências de notificação; deep links não confirmados para todos os tipos | Inbox de notificações, marcar como lida, deep links e preferências. |
 | FR-16-04 | P1 | parcial | sem notificações de integrações | Menções, atribuições, aprovações, falhas de automação e integrações. |
-| FR-16-05 | P1 | parcial | pesquisa inexistente, por isso não testada | Evitar notificação de dados de outros workspaces e impedir vazamento em resultad |
+| FR-16-05 | P1 | parcial | verificação com conta real (R-15); E2E da pesquisa com dois clientes para os tipos novos | Evitar notificação de dados de outros workspaces e impedir vazamento em resultad |
 | TEAM-07 | P1 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | Dashboard por âmbito |
 | TEAM-08 | P1 | parcial | sem equipas funcionais | Equipas funcionais e capacidade |
 | TEAM-09 | P1 | parcial | sem etapas, aprovadores e SLA por tipo de conteúdo | Workflow adaptável por cliente |
 | TEAM-10 | P1 | parcial | diretor criativo tratado como lado da agência (decisão); verificação com conta real (R-15) | Aprovações sem conflito |
 | TEAM-11 | P1 | parcial | sem acesso limitado a projetos/tarefas para convidados | Freelancer/guest |
-| TEAM-12 | P1 | parcial | sem notificações de prazos e alterações | Notificações direcionadas |
+| TEAM-12 | P1 | parcial | ligar a flag notifications.deadlines e verificar com sessão real (R-15) | Notificações direcionadas |
 | TEAM-13 | P1 | parcial | sem definições da agência nem /perfil | Separação de settings |
 | TEAM-14 | P1 | parcial | sem ficheiros brutos, versões de edição, clips e entregas | Produção e edição |
 | TEAM-15 | P1 | parcial | sair da equipa não pede reatribuição | Transferência e offboarding |
 | FR-17-02 | P1 | parcial | sem feedback do cliente nem material entregue | Caixa de entrada por workspace com triagem de novas fontes, pedidos do talento,  |
-| FR-17-06 | P1 | parcial | sem SLA nem escalonamento; fila de exceções só com sem responsável e erro de automação | Regras de escalonamento por SLA e fila de exceções (sem responsável, atraso, err |
+| FR-17-06 | P1 | parcial | sem SLA nem escalonamento; fila de exceções com sem responsável, erro de automação e atrasos (W10-14); faltam erro de upload e publicação falhada | Regras de escalonamento por SLA e fila de exceções (sem responsável, atraso, err |
 | FR-17-07 | P1 | parcial | seleção só dentro de um dia; verificação com conta real (R-15) | Operações em lote: atribuir, categorizar, aprovar quando permitido, exportar e r |
 | FR-17-08 | P1 | parcial | sem disponibilidade, estimativas e redistribuição | Gestão de capacidade por pessoa e equipa: disponibilidade, estimativas, WIP limi |
 | FR-17-09 | P1 | parcial | sem projetos, campanhas e séries | Templates de projetos, campanhas, séries e checklists; clonagem segura sem copia |
@@ -162,14 +163,18 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | OPS-07 | P1 | parcial | sem timestamps, comparação de versões e acesso externo | Colaboração e revisão |
 | OPS-08 | P1 | parcial | sem relatórios de throughput, lead/cycle time e retrabalho | Auditoria de operações |
 | OPS-10 | P1 | parcial | Realtime Presence track e Broadcast para colaboração (decisão); verificação com conta real (R-15) | Presença segura |
-| SCALE-05 | P1 | parcial | sem guidelines de marca, verificação factual, áudio, direitos | Quality gates: |
+| SCALE-05 | P1 | parcial | sem guidelines de marca, áudio, direitos; verificação factual só marca (VAR-04), não confirma na fonte | Quality gates: |
 | SCALE-06 | P1 | parcial | recomendações só de leitura; limiares por calibrar | Learning loop: |
 | BIZ-05 | P1 | parcial | verificação com conta real (R-15) | Contratos por cliente |
 | BIZ-06 | P1 | parcial | custo de IA só em EUR; verificação com conta real (R-15) | Custos e margem por cliente |
 | BIZ-08 | P1 | parcial | verificação com sessão real (convite com cargo) | Cargos como modelos de permissões |
-| EDL-10 | P1 | parcial | 2-3 alternativas por secção geradas pela IA (job do pacote, EDL-01); imagem no palco (EDL-08); verificação com sessão real de cliente (R-15) | Modo guiado |
-| EDL-13 | P1 | parcial | a IA usar o estilo na versão 1 (job do pacote, EDL-01); verificação com sessão real | Estilos guardados |
+| EDL-10 | P1 | parcial | imagem no palco (EDL-08); verificação com sessão real de cliente (R-15) a usar uma alternativa da IA | Modo guiado |
+| EDL-13 | P1 | parcial | verificação com sessão real (pacote com estilo guardado → v1 com o aspeto e a música) | Estilos guardados |
 | PERF-07 | P1 | parcial | o motor (Aprendiz/Estratega) ainda não lê as alavancas | Alavancas "o que replicar" |
+| REF-01 | P1 | parcial | campo só no espaço do cliente (agência sem biblioteca, REF-07); links curtos do TikTok não resolvidos; verificação com sessão real (R-15) | Colar link |
+| REF-02 | P1 | parcial | deploy do worker (numeiro-engine#19) e APIFY_TOKEN no worker (não verificado); verificação com sessão real (R-15) | Dissecção visível |
+| REF-03 | P1 | parcial | deploy do worker; calibrar limites de semelhança (pressuposto); verificador factual (VAR-04); verificação com sessão real | Adaptação ao cliente: 3 guiões por link (decisão), cada um com 3 hooks |
+| REF-04 | P1 | parcial | topo da fila do teleprompter, modo rápido pelo telemóvel (ING-04), estilo extraído (REF-05); meta de 10 min por medir | Via rápida |
 | FR-01-06 | P2 | parcial | filtros persistentes por utilizador por fazer | Estados vazios explicativos, loading, erro/retry, filtros persistentes por utili |
 | FR-02-06 | P2 | parcial | sem diff visual entre versões | Histórico de versões com diff e restauro, conflitos de edição e autoria. |
 | FR-02-07 | P2 | parcial | sem pesquisa, ordenação, vistas guardadas nem impressão | Filtros, pesquisa, ordenação, vistas guardadas, exportação e impressão. |
@@ -194,7 +199,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | R-01 | — | parcial | caminho do código de equipa (legacy_can) sem identidade individual; storage de media e pesquisa por fazer | Toda a leitura/escrita de dados de negócio deve ser autorizada no servidor com b |
 | R-02 | — | parcial | pesquisa e storage de media inexistentes; tabelas legadas usam client_id texto em vez de workspace_id | Todas as tabelas de negócio multi-tenant têm workspace_id, FK e RLS; storage, pe |
 | R-04 | — | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | Dashboard global da agência agrega apenas workspaces autorizados; o cliente vê a |
-| R-05 | — | parcial | tentativas negadas só no log da base (RAISE LOG), não em audit_events | Todas as ações críticas são auditáveis com ator, afiliação, âmbito, recurso, dat |
+| R-05 | — | parcial | recusas gravadas por um segundo pedido da sessão (melhor-esforço; o RAISE LOG continua a fonte completa); código de equipa (anónimo) não regista; verificação com conta real (R-15) | Todas as ações críticas são auditáveis com ator, afiliação, âmbito, recurso, dat |
 | R-07 | — | parcial | sem padrão comum de retry em todas as ações; media e publicação por fazer | Falhas de rede não podem aparentar sucesso; ações assíncronas apresentam estado  |
 | R-08 | — | parcial | sem operações externas nem publicações com chave de idempotência (só jobs internos) | Operações externas e publicações têm chave de idempotência. |
 | R-09 | — | parcial | soft-delete só em guiões, referências e clientes; sem política de eliminação | Timestamps UTC e timezone por workspace; soft-delete com recuperação controlada. |
@@ -212,7 +217,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | MIG-05 | — | parcial | sem entidade content_item separada (guioes continua tabela principal) | Migrar Guiao para content_item + content_versions, mantendo compatibilidade de l |
 | MIG-06 | — | parcial | ideas não migrada para sources; take_numeiro mantido, sem editorial_angle | Migrar Idea para sources, removendo take_numeiro em favor de editorial_angle gen |
 | MIG-07 | — | parcial | faltam /perfil e /publicacoes | Criar rotas reais para módulos existentes no menu e novas páginas /fontes, /equi |
-| MIG-08 | — | parcial | sem pesquisa real | Implementar pesquisa real em app-search.tsx, corrigir links #, perfil demo, load |
+| MIG-08 | — | parcial | verificação com conta real (R-15) da pesquisa na paleta | Implementar pesquisa real em app-search.tsx, corrigir links #, perfil demo, load |
 | MIG-09 | — | parcial | dual-read e plano de rollback testado por módulo; verificação com conta real (R-15) | Introduzir feature flags por workspace para migração progressiva, dual-read limi |
 | MIG-10 | — | parcial | RPCs e token legado (studio_whoami, legacy_can, studio_tokens) ainda ativos | Remover RPCs e credenciais legadas só depois de validação e reconciliação de dad |
 | QA-01 | — | parcial | E2E versionados cobrem rotas por URL direta e refresh; falta abrir cada rota pelo menu | Abrir cada rota por menu, URL direta e refresh |
@@ -228,7 +233,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | QA-16 | — | parcial | falta o mesmo com cada papel de cliente (viewer, reviewer) e telemóvel | Abrir cada rota com conta de agência, conta de cliente e código de equipa, com t |
 | R-15 | — | parcial | E2E com conta real no CI por fazer (ADR-0019 pendente) | Nenhuma página pode cair no erro genérico do browser ou do Next ("This page coul |
 | R-16 | — | parcial | correspondência por impressão digital com os nossos renders | Origem de cada publicação. |
-| R-17 | — | parcial | verificação com sessão real (R-15); verificador de títulos fora da lista (VAR-04); lista do Numeiro por preencher | Hipérbole de persona. |
+| R-17 | — | parcial | verificação com sessão real (R-15); lista do Numeiro por preencher | Hipérbole de persona. |
 | R-18 | — | parcial | publicador por fazer (nada chama perf_record_lineage) | Linhagem gravada no momento. |
 
 <!-- resumo:fim -->
@@ -242,7 +247,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | R-02 | parcial | pesquisa e storage de media inexistentes; tabelas legadas usam client_id texto em vez de workspace_id | RLS por authorize(); bucket branding; canais agents:<ws>; w4_engine_isolation 23/23; W4-03 | — |
 | R-03 | feito |  | W1-11 cliente único, w1_invite_isolation 23/23; workspace_access por papel; w1_clients 55/55 | — |
 | R-04 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | agency_dashboard só clientes autorizados; w1_dashboard 38/38; W1-10, ADR-0017 (sem sessão real no painel) | — |
-| R-05 | parcial | tentativas negadas só no log da base (RAISE LOG), não em audit_events | audit_events append-only; /historico W1-09; w1_audit 16/16; limitação W1 no CHANGELOG | — |
+| R-05 | parcial | recusas gravadas por um segundo pedido da sessão (melhor-esforço; o RAISE LOG continua a fonte completa); código de equipa (anónimo) não regista; verificação com conta real (R-15) | audit_events append-only; /historico W1-09; w1_audit 16/16; limitação W1 no CHANGELOG; W10-16 access.denied em audit_events via audit_denied_record (fetch do cliente Supabase, browser e /api), separador Tentativas recusadas (audit_denials_list); w10_auditoria_negacoes 35/35; denials 27/27; ADR-0066 | — |
 | R-06 | feito |  | content_versions imutáveis, approved_version_id, estados separados; w2_content 47/47; ADR-0002 | — |
 | R-07 | parcial | sem padrão comum de retry em todas as ações; media e publicação por fazer | error boundaries W1-12; autosave com conflito W2-02; takes offline W2-05; ADR-0019 | — |
 | R-08 | parcial | sem operações externas nem publicações com chave de idempotência (só jobs internos) | agent_jobs idempotency, eventos de tarefas, takes offline sem duplicar; w4_agents, w3_tasks | — |
@@ -329,10 +334,10 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
-| FR-07-01 | parcial | sem upload nem captura | reference_create por link e a partir de reels; w2_references 36/36 | — |
+| FR-07-01 | parcial | sem upload nem captura | reference_create por link e a partir de reels; w2_references 36/36; colar link de Reel/TikTok com deteção do mesmo vídeo (W10-04) | — |
 | FR-07-02 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | classificação formato, estilo, narrativa, hook, duração, idioma, tags; w2_references 36/36; W2-04 | — |
 | FR-07-03 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | filtros, favoritos, coleções, pesquisa; references_list; W2-04; E2E 13/13 (não versionado) | — |
-| FR-07-04 | parcial | só para reels recolhidos pelo motor; referências por link sem transcrição | script_analysis do motor; references_discover | — |
+| FR-07-04 | parcial | recolha automática depende do APIFY_TOKEN no worker; TikTok só com transcrição colada; verificação com sessão real | script_analysis do motor; references_discover; dissecção de referências por link com transcrição recolhida ou colada (W10-04, ADR-0059) | — |
 | FR-07-05 | feito |  | reference_link a guiões e fontes, URL original; w2_references 36/36 | — |
 | FR-07-06 | parcial | métricas vêm de scraping, não de API oficial (conflito com R-19) | "scraper · data" na UI; ADR-0005 | — |
 
@@ -377,7 +382,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-11-01 | parcial | arrastar não verificado em produção; verificação com conta de cliente (R-15); E2E citado não está versionado no repo | /calendario dia/semana/mês, arrastar com validação; content_reschedule; w3_calendar 39/39; produção 03/11: vistas semana e mês, navegação de mês, guiões e tarefas no dia | 2026-11-03 (sessão real do dono da agência, produção) |
 | FR-11-02 | parcial | verificação com sessão real (R-15) da equipa Numeiro | tarefas, gravações, dependências; W3-01, W3-02; calendário com revisões de vídeo e publicações planeadas (W9-03); w9_calendario 14/14; migração aplicada em produção 2026-11-06 | — |
 | FR-11-03 | parcial | sem vistas por equipa, plataforma, campanha; sem deteção de conflitos | atrasados a vermelho; limitações W3-02 | — |
-| FR-11-04 | parcial | sem notificações de prazo (só de atribuição) | template_apply, content_checklist; w3_templates 35/35; W3-03 | — |
+| FR-11-04 | parcial | ligar a flag notifications.deadlines e verificar com sessão real (R-15) | template_apply, content_checklist; w3_templates 35/35; W3-03; W10-14 (#83): avisos de prazo 24 h/atraso, guião por aprovar com gravação amanhã, revisão de vídeo atrasada, mudança de prazo; tick pg_cron 15 min; w10_prazos 39/39 | — |
 | FR-11-05 | parcial | sem ficheiros, revisões nem publicações ligadas | detalhe do guião com tarefas no calendário (W3-02) | — |
 
 ## M12 — Publicação
@@ -399,7 +404,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-13-02 | feito |  | papéis workspace_owner..viewer + role_capabilities; w1_isolation 38/38, w1_permissions 35/35 | — |
 | FR-13-03 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | workspace_access por pessoa, workspace-switcher; W1-03, W1-11 | — |
 | FR-13-04 | parcial | sem transferência de propriedade | member_update suspender, último dono protegido (_last_client_owner); w1_clients 55/55 | — |
-| FR-13-05 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | audit_events em convites e papéis; /historico; w1_audit 16/16; invitation.sent e invitation.declined (W1-14) | — |
+| FR-13-05 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | audit_events em convites e papéis; /historico; w1_audit 16/16; invitation.sent e invitation.declined (W1-14); tentativas recusadas no histórico (W10-16, ADR-0066) | — |
 | FR-13-06 | parcial | sem grupos/equipas | atribuição de tarefas com _task_valid_assignee; W3-01 | — |
 
 ## M14 — Perfil
@@ -420,7 +425,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-15-02 | parcial | sem categorias, estados e regras de aprovação configuráveis | só gravar aprovados, templates/checklists; W1-07, W3-03 | — |
 | FR-15-03 | parcial | ligar e renovar indisponíveis sem OAuth; testar só recolha de métricas e motor | revogar real com motivo e purga do segredo; testar com histórico; W8 (ramo w8-vaga3): SQL 1648/1648, E2E 143/143 no stack local; ainda não aplicado em produção | — |
 | FR-15-04 | parcial | sem política de aprovação de IA nas definições | modelos e limites em /agentes/configuracao (W4-01) | — |
-| FR-15-05 | parcial | envio de email e resumo diário (FR-13-01 adiado); verificação com sessão real | catálogo de eventos, preferências por cliente com obrigatórias, _notify aplica no servidor (ADR-0040); w8_notif 72; W8 (ramo w8-vaga3): SQL 1648/1648, E2E 143/143 no stack local; ainda não aplicado em produção; W5-05: video_decision e video_comment no catálogo (13 tipos); w8_notif 72/72 | — |
+| FR-15-05 | parcial | envio de email e resumo diário (FR-13-01 adiado); verificação com sessão real | catálogo de eventos, preferências por cliente com obrigatórias, _notify aplica no servidor (ADR-0040); w8_notif 72; W8 (ramo w8-vaga3): SQL 1648/1648, E2E 143/143 no stack local; ainda não aplicado em produção; W5-05: video_decision e video_comment no catálogo (13 tipos); w8_notif 72/72; W10-14: 5 tipos de prazos no catálogo (grupo Prazos), preferências e obrigatório do cliente aplicam-se; w8_notif 72 | — |
 | FR-15-06 | parcial | sem MFA, políticas de sessão, exportação e retenção | /historico (logs) W1-09 | — |
 | FR-15-07 | parcial | sem importação/exportação nem política de eliminação | arquivo e recuperação de guiões e clientes | — |
 | FR-15-08 | parcial | sem transferir propriedade nem eliminar | workspace_archive com motivo e confirmação; w1_clients 55/55 | — |
@@ -429,11 +434,11 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
-| FR-16-01 | parcial | notificações, comentários e media fora da pesquisa; verificação com conta real (R-15) | search_global com acesso por cliente e entidade (W7, ADR-0035); w7_busca 71/71; e2e/busca.spec.ts | — |
+| FR-16-01 | parcial | verificação com conta real (R-15) dos grupos media, comentários e notificações | search_global com acesso por cliente e entidade (W7, ADR-0035); w7_busca 71/71; e2e/busca.spec.ts; W10-02: media, comentários dos vídeos e notificações próprias na pesquisa (ADR-0054); w10_pesquisa 40/40 | — |
 | FR-16-02 | parcial | verificação com conta de cliente (R-15) | paleta Ctrl/Cmd+K com título, #etiqueta e ID, estado vazio (W7, ADR-0035); e2e/busca.spec.ts; produção 03/11: Cmd+K, pesquisa por título no corpo, abrir resultado; 0 erros na consola | 2026-11-03 (sessão real do dono da agência, produção) |
-| FR-16-03 | parcial | sem preferências de notificação; deep links não confirmados para todos os tipos | /caixa, notifications_read; W3-01 | — |
+| FR-16-03 | parcial | sem preferências de notificação; deep links não confirmados para todos os tipos | /caixa, notifications_read; W3-01; W10-14: tipos de prazos na caixa (alerta/tarefa) com deep link para tarefa, guião ou vídeo | — |
 | FR-16-04 | parcial | sem notificações de integrações | menções em task_comment, atribuições, automation_error; W3-01, W4-01 | — |
-| FR-16-05 | parcial | pesquisa inexistente, por isso não testada | _viewer_sees/inbox só clientes autorizados; w3_tasks 53/53 | — |
+| FR-16-05 | parcial | verificação com conta real (R-15); E2E da pesquisa com dois clientes para os tipos novos | _viewer_sees/inbox só clientes autorizados; w3_tasks 53/53; pesquisa sem vazamento entre clientes em todos os grupos, incluindo media, comentários e notificações (w7_busca 71/71, w10_pesquisa 40/40; ADR-0035, ADR-0054) | — |
 
 ## 5A. Requisitos adicionais — equipas duplas e operação multid
 
@@ -450,7 +455,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | TEAM-09 | parcial | sem etapas, aprovadores e SLA por tipo de conteúdo | task_rules por cliente W3-01 | — |
 | TEAM-10 | parcial | diretor criativo tratado como lado da agência (decisão); verificação com conta real (R-15) | pub_approval_policies (agência, cliente, ambos, sem autoaprovação) (W7, ADR-0036); w7_pub | — |
 | TEAM-11 | parcial | sem acesso limitado a projetos/tarefas para convidados | expires_at em workspace_access e permission_grants | — |
-| TEAM-12 | parcial | sem notificações de prazos e alterações | _notify só a quem tem acesso; w3_tasks 53/53 | — |
+| TEAM-12 | parcial | ligar a flag notifications.deadlines e verificar com sessão real (R-15) | _notify só a quem tem acesso; w3_tasks 53/53; W10-14: prazos e mudanças de prazo só a quem tem acesso atual e a capacidade do caso; removido e outro cliente nada; w10_prazos 39/39 | — |
 | TEAM-13 | parcial | sem definições da agência nem /perfil | /c/[ws]/definicoes W1-07; /definicoes é só redirecionamento para o cliente | — |
 | TEAM-14 | parcial | sem ficheiros brutos, versões de edição, clips e entregas | recording_sessions e takes ligados ao guião (W2-05) | — |
 | TEAM-15 | parcial | sair da equipa não pede reatribuição | member_remove com reatribuição de tarefas W1-06; w1_clients 55/55 | — |
@@ -480,7 +485,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | MIG-05 | parcial | sem entidade content_item separada (guioes continua tabela principal) | content_versions + guiao_update compatível; w2_content 47/47 | — |
 | MIG-06 | parcial | ideas não migrada para sources; take_numeiro mantido, sem editorial_angle | ideas + workspace e RLS; w2_sources 41/41 | — |
 | MIG-07 | parcial | faltam /perfil e /publicacoes | /fontes, /equipa, /definicoes, /calendario; /ideias → /fontes (next.config.ts) | — |
-| MIG-08 | parcial | sem pesquisa real | links # removidos, perfil demo removido, erros do teleprompter (W0, W2-02) | — |
+| MIG-08 | parcial | verificação com conta real (R-15) da pesquisa na paleta | links # removidos, perfil demo removido, erros do teleprompter (W0, W2-02); pesquisa real na paleta Ctrl/Cmd+K (command-palette.tsx, substitui app-search.tsx) com todas as entidades; W7 e W10-02 | — |
 | MIG-09 | parcial | dual-read e plano de rollback testado por módulo; verificação com conta real (R-15) | feature_flag_defs, feature_flags, my_flags, flag_set, /funcionalidades (W0, ADR-0031); w0_feature_flags 20/20 | — |
 | MIG-10 | parcial | RPCs e token legado (studio_whoami, legacy_can, studio_tokens) ainda ativos | tmp_import removida (20261029101111_w1_drop_tmp_import) | — |
 
@@ -524,7 +529,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
 | FR-17-05 | parcial | verificação com sessão real (R-15) da equipa Numeiro | task_rules e domain_events_handoff idempotentes; w3_tasks 53/53; pré-requisitos configuráveis por transição de produção, verificados no servidor (W9-04); w9_prerequisitos 25/25; migração aplicada em produção 2026-11-06 | — |
-| FR-17-06 | parcial | sem SLA nem escalonamento; fila de exceções só com sem responsável e erro de automação | /caixa sem responsável; automation_error (W4-01) | — |
+| FR-17-06 | parcial | sem SLA nem escalonamento; fila de exceções com sem responsável, erro de automação e atrasos (W10-14); faltam erro de upload e publicação falhada | /caixa sem responsável; automation_error (W4-01); W10-14: tarefas e revisões atrasadas como alerta na caixa | — |
 
 ## 19.4 Operação de alto volume
 
@@ -548,7 +553,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 |---|---|---|---|---|
 | FR-17-13 | parcial | verificação com conta real (R-15) | autosave com indicador e lock_version (W2-02); rascunho local com recuperação e aviso ao sair (W2-09); e2e/drafts.spec.ts | — |
 | FR-17-14 | parcial | verificação com carga real (pacote e exports da sessão de 2026-11-06) | agent_jobs: idempotência, backoff, lease, dead-letter, cancelar; w4_agents 44/44, w4_worker 30/30; media_jobs (lease, heartbeat, backoff, dead, cancelar) e worker de agentes alojados no Railway desde 2026-11-05 | — |
-| FR-17-15 | parcial | sem alertas nem dashboard de saúde | correlation_id em audit/transições; agent_job_attempts; estado do worker na UI | — |
+| FR-17-15 | parcial | verificação com sessão real (R-15) do dono da agência; alertas só na app (sem email, FR-13-01 adiado); ver ADR-0058 sobre kinds do worker partilhado | correlation_id em audit/transições; agent_job_attempts; estado do worker na UI; PR W10-01 (painel /saude, ops_health, ops_health_tick pg_cron 5 min, system_health; supabase/tests/w10_saude.sql 38 casos; e2e/saude.spec.ts) | — |
 | FR-17-16 | parcial | OAuth real (PLAT-01..03); Drive, R2 e Resend por ligar | centro em /c/[ws]/definicoes/integracoes e /integracoes (ADR-0039); w8_integ 58; W8 (ramo w8-vaga3): SQL 1648/1648, E2E 143/143 no stack local; ainda não aplicado em produção | — |
 
 ## 21. Social accounts e publicação multi-canal
@@ -603,7 +608,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | SCALE-02 | por começar | sem ingestão em lote | nada no código | — |
 | SCALE-03 | por começar | sem clip factory | nada no código | — |
 | SCALE-04 | por começar | sem centro de publicação | nada no código | — |
-| SCALE-05 | parcial | sem guidelines de marca, verificação factual, áudio, direitos | checklist por cliente (W3-03); rubrica do Crítico no motor | — |
+| SCALE-05 | parcial | sem guidelines de marca, áudio, direitos; verificação factual só marca (VAR-04), não confirma na fonte | checklist por cliente (W3-03); rubrica do Crítico no motor; verificador VAR-04 (W10-06) | — |
 | SCALE-06 | parcial | recomendações só de leitura; limiares por calibrar | learn_recommendations com evidência e limitações (W7, ADR-0037); w7_learn | — |
 | SCALE-07 | parcial | papéis não copiados | workspace_create com estrutura de outro cliente, template_clone (W1-06, W3-03) | — |
 | SCALE-08 | parcial | revisão de vídeos pelo cliente; relatórios para enviar; notificar o cliente do que espera por ele; escolher outro mês nas entregas; verificação com sessão real | portal /c/[ws]/portal: aprovações pelas RPCs existentes, entregas sem valores, desempenho, pedidos (ADR-0041); w8_portal 46; W8 (ramo w8-vaga3): SQL 1648/1648, E2E 143/143 no stack local; ainda não aplicado em produção | — |
@@ -613,7 +618,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
 | R-16 | parcial | correspondência por impressão digital com os nossos renders | origem externo nas importadas, perf_origin_set com motivo e auditoria (W6, ADR-0033); w6_perf | — |
-| R-17 | parcial | verificação com sessão real (R-15); verificador de títulos fora da lista (VAR-04); lista do Numeiro por preencher | persona_lists versionada e imutável, persona_list_get/version/save com consentimento de terceiros, persona.manage, worker_claim.persona, aba Agentes → Frases-persona (W5-14, ADR-0053); w5_persona_phrases 21/21; persona-rules 11/11; numeiro-engine #14 test_persona 4/4; E2E persona-phrases 4/4 (admin grava v1/v2, outra pessoa sem consentimento bloqueada na UI e no servidor 22023, histórico, manager só leitura 42501, cliente B 42501; W5-15); aba verificada em produção com a conta do Tomás (2026-11-06) | — |
+| R-17 | parcial | verificação com sessão real (R-15); lista do Numeiro por preencher | persona_lists versionada e imutável, persona_list_get/version/save com consentimento de terceiros, persona.manage, worker_claim.persona, aba Agentes → Frases-persona (W5-14, ADR-0053); w5_persona_phrases 21/21; persona-rules 11/11; numeiro-engine #14 test_persona 4/4; E2E persona-phrases 4/4 (admin grava v1/v2, outra pessoa sem consentimento bloqueada na UI e no servidor 22023, histórico, manager só leitura 42501, cliente B 42501; W5-15); aba verificada em produção com a conta do Tomás (2026-11-06); verificador de títulos fora da lista (VAR-04, W10-06) | — |
 | R-18 | parcial | publicador por fazer (nada chama perf_record_lineage) | linhagem gravada imutável e idempotente; importadas inferidas e marcadas (W6, ADR-0033); w6_perf | — |
 | R-19 | adiado | decisão do Tomás 29/10: métricas passam a vir da API oficial no futuro; por agora continua o Apify (engine/scrape.py). Fecha com PERF-08/PLAT-02 | engine/scrape.py ApifyClient; ADR-0005 | — |
 
@@ -639,9 +644,9 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | ING-02 | por começar | sem ingestão da câmara | media.ingest planeada | — |
 | ING-03 | parcial | verificação com a sessão real; ligar as marcas de gravação às janelas | recording_marks, recording_marks_add, recording_timeline (W5-01, ADR-0026); w5_recording_marks 17/17; e2e/recording-marks.spec.ts 2/2; ficheiro longo por câmara no R2 (W5-07) com transcrição com tempos por palavra e sincronização pelo áudio no pacote (W5-09) | — |
 | ING-04 | por começar | sem upload pelo telemóvel | nada no código | — |
-| EDL-01 | parcial | verificação com a sessão real de 2026-11-06; deteção de cara para o enquadramento; usar as marcas de gravação (ING-03) para afinar as janelas | preset de edição versionado por cliente com o defeito do PRD (edit_presets, edit_preset_save; W5-02, ADR-0027); job package no worker (transcrição, sincronização pelo som, janelas por guião, takes pela IA, documento v1 por hook), página Edição automática (W5-09, ADR-0048); w5_edit_package 19/19; janelas 20/23 dentro de 5 s na sessão de teste; W5-16: pacote recusa guiões eliminados e o worker só grava guiões do pedido; IDs de outro cliente P0002/42501 (w5_auditoria_isolamento) | — |
+| EDL-01 | parcial | verificação com a sessão real de 2026-11-06; deteção de cara para o enquadramento; usar as marcas de gravação (ING-03) para afinar as janelas | preset de edição versionado por cliente com o defeito do PRD (edit_presets, edit_preset_save; W5-02, ADR-0027); job package no worker (transcrição, sincronização pelo som, janelas por guião, takes pela IA, documento v1 por hook), página Edição automática (W5-09, ADR-0048); w5_edit_package 19/19; janelas 20/23 dentro de 5 s na sessão de teste; W5-16: pacote recusa guiões eliminados e o worker só grava guiões do pedido; IDs de outro cliente P0002/42501 (w5_auditoria_isolamento); W10-07: o pacote usa o estilo guardado pedido (aspeto, música, layout) e guarda 2-3 alternativas por secção para o modo guiado (numeiro-engine #16, ADR-0055) | — |
 | EDL-02 | parcial | verificação com a sessão real de 2026-11-06 (pacote → exportar todos → rever); versão leve a 540p em vez de 720p (ADR-0052) | edit_package_export, revisão com ficheiros guardados e player da app, QC por vídeo, Aprovar e seguinte (W5-12, ADR-0052); w5_review_stored 34/34; review-queue 12/12; E2E review-stored 5/5 (player da app com clip, Agora, saltar ao momento, Aprovar e seguinte; sem R2 erro claro e Tentar de novo; revisor sem exportar 42501; Exportar todos idempotente; cliente B 403/42501; W5-15) | — |
-| EDL-03 | parcial | relatório por variante só no export (não sobre o documento antes de exportar); pHash face às irmãs não corre no export; calibrar limites no piloto (EDL-06) | numeiro-engine #7: engine/qc.py, run.py qc, tests/test_qc.py 11/11 no CI do motor (ADR-0028); QC sobre cada export no worker, relatório em media_info.qc e na revisão (W5-12); test_qc_summary_on_export | — |
+| EDL-03 | parcial | distinct_source só por opção (qc_rules.compare_source); calibrar limites no piloto (EDL-06) | numeiro-engine #7: engine/qc.py, run.py qc, tests/test_qc.py 11/11 no CI do motor (ADR-0028); QC sobre cada export no worker, relatório em media_info.qc e na revisão (W5-12); test_qc_summary_on_export; QC do documento antes de render e pHash com as irmãs no worker (numeiro-engine #17, QC 2026-11-06.1); _edit_resolve_siblings (W10-09, w10_qc_irmas 6/6) | — |
 | EDL-04 | por começar | sem biblioteca de vídeos de atenção | nada no código | — |
 | EDL-05 | por começar | sem pós-produção multi-agente | nada no código nem no motor | — |
 | EDL-06 | por começar | piloto não iniciado | nada no código | — |
@@ -653,10 +658,10 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | EDL-07 | parcial | versão 1 gerada pela IA no job do pacote (EDL-01); visuais e música ainda vazios | edit_documents/edit_versions imutáveis, edit_doc_get/save com conflito, 68 vídeos importados do plano (W5-06, ADR-0046); w5_edit_doc 21/21; edit-doc 25/25; produção 04/11: 68 documentos com v1 importada do plano (13 866 palavras); produção 04/11: abrir, nota no cursor, gravar v2, v1 intacta, restaurar v1 como v3, 0 erros | 2026-11-04 (sessão real do dono da agência, produção) |
 | EDL-08 | parcial | carregar as gravações da sessão no R2; verificação com sessão real | edit_preview_sources, media_proxy_access, /api/media/versions/:id/proxy, PreviewVideo (um vídeo por câmara no tempo da sessão), versão leve pelo worker (W5-07, ADR-0047); w5_media_r2 39/39; edit-preview 2/2; palco ligado na página do editor e no modo guiado (PR #62); worker no Railway a gerar versões leves (verificado em produção 2026-11-05) | — |
 | EDL-09 | parcial | verificação com sessão real | /c/[ws]/editor: faixas, arrastar pontas e mover, dividir, tirar, reordenar, palavras e hook, visuais e música da biblioteca, volume por corte, notas por momento, desfazer/refazer, atalhos (W5-06); edit-doc 37/37; área principal cabe no ecrã com a barra lateral (min-w-0); visuais e música desenhados no export (numeiro-engine #15, W5-17) | 2026-11-04 (sessão real do dono da agência, produção) |
-| EDL-10 | parcial | 2-3 alternativas por secção geradas pela IA (job do pacote, EDL-01); imagem no palco (EDL-08); verificação com sessão real de cliente (R-15) | modo guiado /c/[ws]/editor (só edit.guided ou ?modo=guiado): passos Estilo, Corte, Hook, Visual e música, Legendas, Exportar; edit_doc_save valida a diferença no servidor (_edit_guided_problem, W5-10, ADR-0049); w5_edit_guided 38/38 (19 recusas entre modos, música de outro cliente, admin de B); edit-doc 61/61 | — |
+| EDL-10 | parcial | imagem no palco (EDL-08); verificação com sessão real de cliente (R-15) a usar uma alternativa da IA | modo guiado /c/[ws]/editor (só edit.guided ou ?modo=guiado): passos Estilo, Corte, Hook, Visual e música, Legendas, Exportar; edit_doc_save valida a diferença no servidor (_edit_guided_problem, W5-10, ADR-0049); w5_edit_guided 38/38 (19 recusas entre modos, música de outro cliente, admin de B); edit-doc 61/61; W10-07: alternativas da IA por secção no passo Corte (edit_alternative_apply, versão montada no servidor a partir de doc.ai.alternatives) e textos do hook da IA (ADR-0055); w10_pacote_estilo_alternativas 37/37; edit-doc 70/70 | — |
 | EDL-11 | parcial | visuais guardados no Supabase Storage ou por link ficam de fora; posição por visual (caixa fixa); verificação com sessão real | edit_export_request/list/cancel, media_jobs export, engine/render_doc.py (cortes, câmaras, janelas, zoom, legendas S14/S15, hook, volume, música, -14 LUFS), ExportPanel (W5-07); render local do guião 3: 60,4 s em ~2,5 min; worker numeiro-engine no Railway ligado (abedaf5304ce-1-media, 2026-11-05); exports entram na revisão com QC (W5-12); aspeto e visuais no render (numeiro-engine #15), visuais resolvidos no export (W5-17, w5_export_visuais 8/8) | — |
 | EDL-12 | por começar |  |  | — |
-| EDL-13 | parcial | a IA usar o estilo na versão 1 (job do pacote, EDL-01); verificação com sessão real | Guardar como estilo no editor (aspeto, música, layout da versão gravada) no catálogo do VAR-02, versionado (edit_style_from_doc, coluna look); aplicar a outro vídeo cria versão nova, também no modo guiado (edit_style_apply) (W5-11, ADR-0050); w5_edit_saved_styles 24/24; edit-doc 63/63; o render do export desenha o aspeto guardado (numeiro-engine #15, test_render_doc) | — |
+| EDL-13 | parcial | verificação com sessão real (pacote com estilo guardado → v1 com o aspeto e a música) | Guardar como estilo no editor (aspeto, música, layout da versão gravada) no catálogo do VAR-02, versionado (edit_style_from_doc, coluna look); aplicar a outro vídeo cria versão nova, também no modo guiado (edit_style_apply) (W5-11, ADR-0050); w5_edit_saved_styles 24/24; edit-doc 63/63; o render do export desenha o aspeto guardado (numeiro-engine #15, test_render_doc); W10-07: edit_package_request manda look e style_version ao worker (numeiro-engine #16), música só se ativa no cliente, versão do estilo na chave de idempotência (ADR-0055); w10_pacote_estilo_alternativas 37/37 | — |
 
 ## 40. Centro de desempenho (PERF)
 
@@ -679,7 +684,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | VAR-01 | parcial | render das variantes | pub_variants com os 5 elementos e regra das irmãs (W7, ADR-0036); w7_pub; pub-rules 14/14 | — |
 | VAR-02 | parcial | layouts de S01 a S12 (equipa criativa); render real dos estilos no motor (hoje só no protótipo local); verificação com sessão real | edit_styles, edit_style_versions, edit_style_save/set_status (W5-02, ADR-0027); w5_edit_styles 34/34; e2e/edit-styles.spec.ts 3/3; pré-visualização fiel ao spec: letra, tamanho, caixas e destaque (W8-08, StylePreview) | — |
 | VAR-03 | por começar | sem motor frase-imagem | nada no código nem no motor | — |
-| VAR-04 | por começar | sem verificador de títulos | nada no código | — |
+| VAR-04 | parcial | verificação com sessão real (R-15) depois do deploy do motor; afirmações do corpo não classificadas; idioma por conta de clips | W10-06 (ADR-0057): script_verifications, worker_save_verification, content_verifications, flag scripts.verifier, marcas por hook no cartão do guião; w10_verificador 27/27; verifier-format 12/12; numeiro-engine #18 test_verifier 19/19 | — |
 | VAR-05 | por começar | sem republicação | publishing.republish.approve planeada | — |
 | VAR-06 | por começar | sem fontes longas no pacote | nada no código | — |
 | VAR-07 | por começar | sem distribuição por camadas | nada no código | — |
@@ -709,10 +714,10 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
 | R-20 | por começar |  |  | — |
-| REF-01 | por começar |  |  | — |
-| REF-02 | por começar |  |  | — |
-| REF-03 | por começar |  |  | — |
-| REF-04 | por começar |  |  | — |
+| REF-01 | parcial | campo só no espaço do cliente (agência sem biblioteca, REF-07); links curtos do TikTok não resolvidos; verificação com sessão real (R-15) | reference_paste + ref_key (W10-04, ADR-0059); w10_referencias_link 65/65; reference-link 13/13 | — |
+| REF-02 | parcial | deploy do worker (numeiro-engine#19) e APIFY_TOKEN no worker (não verificado); verificação com sessão real (R-15) | reference_analyses versionada e imutável, worker reference_analysis, dissecção na UI (W10-04, ADR-0059); w10_referencias_link 65/65; motor test_reference 15/15 | — |
+| REF-03 | parcial | deploy do worker; calibrar limites de semelhança (pressuposto); verificador factual (VAR-04); verificação com sessão real | reference_adapt + worker reference_scripts, 3 hooks, semelhança no motor e no servidor (W10-04); w10_referencias_link 65/65; motor test_reference 15/15 | — |
+| REF-04 | parcial | topo da fila do teleprompter, modo rápido pelo telemóvel (ING-04), estilo extraído (REF-05); meta de 10 min por medir | guiões origem via_rapida em revisão, badge, reference_script_outputs (W10-04) | — |
 | REF-05 | por começar |  |  | — |
 | REF-06 | por começar |  |  | — |
 | REF-07 | por começar |  |  | — |
