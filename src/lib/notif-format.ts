@@ -5,18 +5,21 @@
 
 export type NotifChannelKey = "in_app" | "email" | "digest";
 export type NotifChannel = { key: NotifChannelKey; label: string; available: boolean; unavailable_reason: string | null };
-export type NotifGroup = "tarefas" | "guioes" | "automacao";
+export type NotifGroup = "tarefas" | "prazos" | "guioes" | "automacao";
 export type SuppressReason = "org_off" | "user_off" | "muted";
 export type Suppressed = { kind: string; reason: SuppressReason; n: number };
 
-export const GROUP_LABEL: Record<NotifGroup, string> = { tarefas: "Tarefas", guioes: "Guiões", automacao: "Automação" };
-export const GROUP_ORDER: NotifGroup[] = ["tarefas", "guioes", "automacao"];
+export const GROUP_LABEL: Record<NotifGroup, string> = { tarefas: "Tarefas", prazos: "Prazos", guioes: "Guiões", automacao: "Automação" };
+export const GROUP_ORDER: NotifGroup[] = ["tarefas", "prazos", "guioes", "automacao"];
 export const REASON_LABEL: Record<SuppressReason, string> = {
   org_off: "desligadas pelo cliente", user_off: "desligadas pela pessoa", muted: "com o cliente silenciado",
 };
 
-export function groupBy<T extends { group: NotifGroup }>(events: T[]): { group: NotifGroup; label: string; events: T[] }[] {
-  return GROUP_ORDER.map((g) => ({ group: g, label: GROUP_LABEL[g], events: events.filter((e) => e.group === g) })).filter((x) => x.events.length > 0);
+/** Agrupa pela ordem do catálogo. Um grupo que a app ainda não conhece (servidor mais novo) vai para "Outras", nunca desaparece. */
+export function groupBy<T extends { group: NotifGroup | string }>(events: T[]): { group: NotifGroup | "outras"; label: string; events: T[] }[] {
+  const known = GROUP_ORDER.map((g) => ({ group: g as NotifGroup | "outras", label: GROUP_LABEL[g], events: events.filter((e) => e.group === g) }));
+  const rest = events.filter((e) => !(GROUP_ORDER as string[]).includes(e.group));
+  return [...known, { group: "outras" as const, label: "Outras", events: rest }].filter((x) => x.events.length > 0);
 }
 
 /** Resumo das notificações não criadas nos últimos 30 dias, por tipo. "" quando não houve nenhuma. */

@@ -3,12 +3,16 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { blockLabel, blocksOf, isRecorded, type BlockKey, type MarkKind, type SessionItem, type TakeRow, type TpAction, type TpPrefs } from "@/lib/recording";
 import { keyMap } from "@/components/teleprompter/use-prefs";
+import { useScreenInfo } from "@/components/teleprompter/use-screen";
+import { fmtDeg, gazeColumn, gazeLevel, halfAngleDeg, phraseParagraphs } from "@/lib/gaze";
 import { cn } from "@/lib/utils";
 
 /*
  * Ecrã de leitura (FR-03-02/03/04/07). Preto e branco de propósito.
  * Ler até 80% NÃO marca gravado (AGENTS §6, PRD §20): fica como telemetria; marcar gravado pede confirmação.
  * Marcar takes não mexe no estado editorial nem no de produção (FR-03-06).
+ * Olhar na câmara (GAZE-01/02): a coluna segue a distância para cada linha caber em ±3°; a linha de foco fica à altura
+ * da lente (focus_pct) e o modo frase mostra 2 a 4 palavras por linha.
  */
 
 type Props = {
@@ -83,7 +87,37 @@ export function Prompter(p: Props) {
     toastT.current = setTimeout(() => setToast(null), error ? 6000 : 2500);
   }, []);
 
-  const readLine = () => (scrollRef.current?.clientHeight ?? 0) * 0.34;
+  const focusRef = useRef(prefs.focus_pct);
+  useEffect(() => { focusRef.current = prefs.focus_pct; }, [prefs.focus_pct]);
+  const readLine = () => (scrollRef.current?.clientHeight ?? 0) * (focusRef.current / 100);
+  // GAZE-01: largura da coluna pela distância e pelo tamanho físico do ecrã; ângulo medido na linha mais larga
+  const screen = useScreenInfo();
+  const colRef = useRef<HTMLDivElement>(null);
+  const [availPx, setAvailPx] = useState(0);
+  const [sweepPx, setSweepPx] = useState(0);
+  const col = useMemo(() => (screen ? gazeColumn({
+    distanceM: prefs.distance_m, diagonalIn: prefs.screen_in, screenWidthCss: screen.width, screenHeightCss: screen.height, dpr: screen.dpr, availablePx: availPx,
+  }) : null), [screen, prefs.distance_m, prefs.screen_in, availPx]);
+  const colMaxPx = prefs.column_fit && col?.maxPx ? col.maxPx : null;
+  const measure = useCallback(() => {
+    const sc = scrollRef.current, el = colRef.current;
+    if (sc) { const cs = getComputedStyle(sc); setAvailPx(sc.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight)); }
+    if (!el) return;
+    const lines = el.querySelectorAll<HTMLElement>("[data-phrase-line] > span");
+    let w = 0;
+    if (lines.length) lines.forEach((n) => { w = Math.max(w, n.offsetWidth); });
+    else w = Math.max(el.clientWidth, el.scrollWidth);
+    setSweepPx(w);
+  }, []);
+  useEffect(() => {
+    const ro = new ResizeObserver(() => measure());
+    if (scrollRef.current) ro.observe(scrollRef.current);
+    if (colRef.current) ro.observe(colRef.current);
+    return () => ro.disconnect();
+  }, [measure]);
+  const angle = col?.pxPerCm && sweepPx ? halfAngleDeg(sweepPx / col.pxPerCm, prefs.distance_m) : null;
+  const level = angle == null ? null : gazeLevel(angle);
+
   const pct = () => { const el = scrollRef.current; if (!el) return 1; const max = el.scrollHeight - el.clientHeight; return max > 0 ? el.scrollTop / max : 1; };
   const currentBlock = useCallback((): BlockKey | null => {
     const el = scrollRef.current;
@@ -111,6 +145,8 @@ export function Prompter(p: Props) {
     else el.scrollTop = 0;
     queueMicrotask(() => { setProgress(pct()); setBlock(cbRef.current()); });
   }, [curKey]);
+
+  useLayoutEffect(() => { measure(); }, [measure, curKey, blocks, prefs.font, prefs.line_height, prefs.phrase_mode, prefs.margin, colMaxPx]);
 
   // wake lock: pedido com gesto (Rolar) e de novo quando o separador volta a ficar visível
   const requestWake = useCallback(async () => {
@@ -300,6 +336,15 @@ export function Prompter(p: Props) {
           {!p.online && <span role="status" className="rounded-md bg-red-900/80 px-2 py-0.5 text-red-100">Sem ligação{p.pendingCount ? ` · ${p.pendingCount} takes por enviar` : ""}</span>}
           {p.online && p.pendingCount > 0 && <span role="status" className="rounded-md bg-amber-900/70 px-2 py-0.5 text-amber-100">{p.pendingCount} takes por enviar</span>}
           {(wake === "unsupported" || wake === "failed") && <span className="text-amber-500">o ecrã pode apagar-se: este browser não o deixa manter ligado</span>}
+          {angle != null && level ? (
+            <span data-gaze-angle={angle.toFixed(2)} role={level === "acima_teto" ? "alert" : undefined}
+              className={cn(level === "acima_teto" ? "rounded-md bg-red-900/80 px-2 py-0.5 text-red-100" : level === "acima_alvo" ? "text-amber-400" : "text-neutral-500")}>
+              linha {fmtDeg(angle)} a {prefs.distance_m.toLocaleString("pt-PT")} m
+              {level === "acima_teto" ? " · acima de ±4,5°: nota-se que estás a ler. Reduz a letra ou liga a coluna pela distância" : level === "acima_alvo" ? " · acima do alvo de ±3°" : ""}
+            </span>
+          ) : cur && !prefs.screen_in ? (
+            <span className="text-neutral-500">indica o tamanho do ecrã nas Definições para a coluna seguir a distância</span>
+          ) : null}
         </span>
         <span>{cur ? `guião ${idx + 1} de ${items.length}${block ? ` · ${blockLabel(block)}` : ""}${recorded ? " · gravado" : ""}` : ""}</span>
       </div>
@@ -308,8 +353,9 @@ export function Prompter(p: Props) {
         onDoubleClick={toggleFs}>
         <div ref={scrollRef} className="relative h-full overflow-y-auto [scrollbar-width:none]" style={{ paddingInline: `${prefs.margin}vw` }}
           onScroll={() => { setProgress(pct()); setBlock(currentBlock()); }}>
-          <div className={cn("mx-auto max-w-[1100px] py-[34vh] pb-[70vh] font-bold", textColor, prefs.contrast === "alto" && "font-black")}
-            style={{ fontSize: prefs.font, lineHeight: prefs.line_height }}>
+          <div ref={colRef} data-gaze-column data-phrase-mode={prefs.phrase_mode ? "on" : "off"}
+            className={cn("mx-auto pb-[70vh] font-bold", !colMaxPx && "max-w-[1100px]", textColor, prefs.contrast === "alto" && "font-black")}
+            style={{ fontSize: prefs.font, lineHeight: prefs.line_height, paddingTop: `${prefs.focus_pct}vh`, maxWidth: colMaxPx ?? undefined }}>
             {!cur ? (
               <p>Não há guiões nesta fila.</p>
             ) : (
@@ -322,14 +368,23 @@ export function Prompter(p: Props) {
                       {b.label}
                       {takeCount(b.key) > 0 && <span className="ml-3 normal-case tracking-normal">· {takeCount(b.key)} take{takeCount(b.key) > 1 ? "s" : ""}{chosen(b.key) ? ` · escolhido #${chosen(b.key)!.take_number}` : ""}</span>}
                     </div>
-                    {b.text.split("\n").filter(Boolean).map((l, i) => <p key={i} className={cn("mb-[.6em]", b.key === "cta" && prefs.contrast !== "ambar" && "text-amber-300")}>{l}</p>)}
+                    {prefs.phrase_mode
+                      ? phraseParagraphs(b.text).map((lines, i) => (
+                        <div key={i} className={cn("mb-[.6em]", b.key === "cta" && prefs.contrast !== "ambar" && "text-amber-300")}>
+                          {lines.map((l, k) => <p key={k} data-phrase-line><span className="inline-block">{l}</span></p>)}
+                        </div>
+                      ))
+                      : b.text.split("\n").filter(Boolean).map((l, i) => <p key={i} className={cn("mb-[.6em]", b.key === "cta" && prefs.contrast !== "ambar" && "text-amber-300")}>{l}</p>)}
                   </section>
                 ))}
               </>
             )}
           </div>
         </div>
-        <div aria-hidden className="pointer-events-none absolute left-0 right-0 top-[34%]"><div className="absolute left-[1.5vw] -top-[9px] border-[9px] border-transparent border-l-[14px] border-l-amber-400" /></div>
+        <div aria-hidden data-focus-line className="pointer-events-none absolute left-0 right-0" style={{ top: `${prefs.focus_pct}%` }}>
+          <div className="absolute inset-x-[1.5vw] top-0 h-px bg-amber-400/35" />
+          <div className="absolute left-[1.5vw] -top-[9px] border-[9px] border-transparent border-l-[14px] border-l-amber-400" />
+        </div>
       </div>
 
       {toast && (
@@ -370,6 +425,7 @@ export function Prompter(p: Props) {
         <Btn label="A+" aria="Letra maior" onClick={() => update((x) => ({ font: x.font + 4 }))} />
         <Btn label="↔" aria="Espelho horizontal" on={prefs.mirror_h} onClick={() => update((x) => ({ mirror_h: !x.mirror_h }))} />
         <Btn label="↕" aria="Espelho vertical" on={prefs.mirror_v} onClick={() => update((x) => ({ mirror_v: !x.mirror_v }))} />
+        <Btn label="Frase" aria="Modo frase" on={prefs.phrase_mode} onClick={() => update((x) => ({ phrase_mode: !x.phrase_mode }))} />
         {canTake && cur && <Btn label={`Take${block ? ` ${blockLabel(block)}` : ""}`} aria="Marcar take do bloco atual" onClick={markTake} />}
         {cur && <Btn label={`Takes (${takes.filter((t) => t.status === "ok").length})`} aria="Ver takes" on={showTakes} onClick={() => setShowTakes((x) => !x)} />}
         {canTake && cur && toggleable && <Btn label="Gravado" on={recorded} onClick={() => { mark(recorded ? "not_recorded" : "recorded", cur.content_id, null); p.onRecorded(cur.content_id, !recorded).catch((e: Error) => flash(`Não ficou marcado: ${e.message}`, true)); }} />}

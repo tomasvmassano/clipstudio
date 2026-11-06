@@ -229,6 +229,10 @@ Conta social: `por_ligar` → (serviço de OAuth futuro) `ligada` → `expirada`
 
 Evento → `_notify` → sem acesso, quem age ou já existe: nada → obrigatória: cria → desligada no cliente, cliente silenciado ou desligada pela pessoa: não cria e soma ao contador diário (`notification_suppressions`) → senão cria. As preferências só valem com a flag `notifications.prefs` ligada para quem recebe. Email e resumo diário: preferência guardada, sem envio.
 
+## Notificações de prazos (W10-14, FR-11-04, TEAM-12)
+
+Tick (`deadline_notify_tick`, pg_cron de 15 em 15 min, lock consultivo contra ticks sobrepostos) → para cada limiar: flag `notifications.deadlines` para quem recebe → acesso atual (`tasks.read`) e a capacidade do caso → registo `notification_deadline_sent (user_id, dedup_key)`: já existe = nada → `_notify` (preferências, obrigatório no cliente, dedup). Limiares e chaves: tarefa aberta com prazo em ≤ 24 h `task_due_soon:<tarefa>:<epoch do due_at>`; atrasada (até 7 dias) `task_overdue:<tarefa>:<epoch>`; guião `draft`/`in_review`/`changes_requested` por gravar (`not_started`/`scheduled`) com data = amanhã no fuso do cliente `script_unapproved_recording:<guião>:<data>`; vídeo `in_review`/`changes_requested` com o dia do prazo (regra do calendário W9-03) passado há ≤ 7 dias `video_review_overdue:<versão>:<dia>`. Mudar `due_at` ou a data muda a chave e volta a armar o aviso. Trigger `tasks_due_changed_notify` (depois de mudar `due_at`, mesmo responsável, tarefa aberta) → `task_due_changed` ao responsável, chave `due_changed:<tarefa>:<lock_version>`. Mudança de responsável: `task_assigned` ao novo e `task_unassigned` ao antigo (já existente). Registo limpo ao fim de 45 dias.
+
 ## Portal do cliente (W8, SCALE-08)
 
 Sem estados novos. O portal dispara as transições existentes: editorial `in_review` → `approved` | `changes_requested` | `rejected` (`content_transition`, `content_transition_reasoned`), publicação `planeada` → `aprovada` (`pub_approve`) e cria pedidos `ideas(kind=talent_request, status=nova)` (`talent_request_create`, evento `request.created`).
@@ -246,6 +250,7 @@ Exportar: `edit_export_request` (versão gravada; câmaras, música e visuais re
 ## Pacote de edição (W5-09)
 
 `edit_package_request` → job `package` (`queued` → `running` com passos: som, sincronização, transcrição, guião N) → documentos v1 (`ai`) um a um → `done` avisa quem pediu. Falhou/cancelado permite pedir outra vez.
+Com um estilo guardado (W10-07, ADR-0055) o job leva `look` e `style_version` (chave `…:<estilo>:v<N>`) e a v1 sai com o aspeto e a música do estilo e com `doc.ai.alternatives`. Modo guiado, passo Corte: "Usar esta" (`edit_alternative_apply`) → versão N+1 (`user`) com os cortes e as legendas da alternativa; versão base antiga → conflito 40001 (recarregar); opção já em uso → devolve a atual sem versão nova.
 
 ## Revisão em lote (W5-12, ADR-0052)
 
@@ -254,6 +259,18 @@ Pacote `done` → "Exportar todos" (`edit_package_export`) → um job `export` p
 
 Versão 0 (sem lista: agentes sem hipérbole de persona) → gravar → versão N+1 (imutável; conflito se outra pessoa gravou a N entretanto) → próximas execuções dos agentes usam a versão em vigor no claim e registam-na no `agent_log`. Voltar atrás = gravar uma versão nova a partir da antiga.
 
+## Verificador antes da revisão humana (W10-06, VAR-04, ADR-0057)
+
+Sem estados editoriais novos. Motor: Crítico → Editor → Verificador (classifica cada hook: persona, opinião, facto, terceiro identificado, validade; PT-PT) → `worker_save_script` (guião entra em revisão como antes) → `worker_save_verification` (idempotente por execução e guião, evento `script.verified`). Marcas: `ok` < `atencao` < `rever` < `juridico` < `bloqueado`. Nenhuma marca muda o estado do guião: quem revê aprova, pede alterações ou rejeita. Editar o hook deixa a marca desse hook como "verificado noutro texto".
+
 ## Guião eliminado e pré-requisitos (W9, ADR-0051)
 
 `archived` → eliminado (lápide, 30 dias recuperável para `archived`). Produção: avançar para agendado/gravado/edição/pronto verifica os pré-requisitos do cliente; recusa com `pre_requisito_em_falta` e a causa; recuar nunca é bloqueado.
+
+## Referências por link (W10-04, REF-01..04, ADR-0059)
+
+Colar (`reference_paste`, `references.manage`, flag `references.link`): link de Reel/TikTok → identidade do vídeo (`ref_key`) → referência nova (evento `reference.created`, `via: paste`) ou a existente (`duplicate`, sem erro). Dissecção (`reference_analyze`, `references.analyze`): execução `reference_analysis` em `agent_jobs` (uma ativa por referência; repetir devolve a mesma) → worker recolhe transcrição e métricas (R-20) ou usa a transcrição colada → `reference_analyses` versão N+1, imutável (evento `reference.analyzed`, auditoria do motor com modelo e versão dos prompts). Falha de recolha sem token ou sem transcrição: execução `dead` sem repetir, com mensagem e caminho manual; falha do fornecedor: nova tentativa com espera. 3 guiões (`reference_adapt`, `references.adapt`, exige dissecção): execução `reference_scripts` → até 3 guiões `in_review`, `origem = via_rapida`, no dia de hoje do cliente, ligados à referência e à dissecção (`reference_script_outputs`, evento `reference.script_created`); guiões demasiado parecidos com o original são bloqueados (motor e servidor). A aprovação segue o fluxo editorial normal.
+
+## Saúde do sistema e alertas (W10-01, ADR-0058)
+
+Sem estados novos nos trabalhos. Tick (pg_cron, 5 min) → para cada cliente e origem com trabalho pronto sem worker capaz visto em 10 min: incidente `worker_down` (chave: origem + cliente + último contacto do worker, ou "nunca") → se novo, `system_health` aos donos da agência; trabalho `dead` nas últimas 24 h: incidente `job_dead` (chave: origem + trabalho) → se novo, avisa os donos que ainda não receberam `automation_error` desse trabalho. Repetir o tick não cria nada (dedupe na tabela e em `_notify`). O worker voltar e cair outra vez é incidente novo.
