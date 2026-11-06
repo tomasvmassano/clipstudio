@@ -19,7 +19,7 @@ export const ACTION_LABEL: Record<string, string> = {
   "script.rescheduled": "mudou o dia de um guião", "review.changes_requested": "pediu alterações num guião",
   "brief.saved": "guardou um brief", "content.source_linked": "ligou uma fonte a um guião", "content.source_unlinked": "desligou uma fonte de um guião",
   "reference.linked": "ligou uma referência", "request.created": "fez um pedido de tema",
-  "access.preview_started": "começou a navegar como outro papel ou pessoa", "access.preview_stopped": "saiu da pré-visualização",
+  "access.denied": "foi recusado", "access.preview_started": "começou a navegar como outro papel ou pessoa", "access.preview_stopped": "saiu da pré-visualização",
   "recording.session_opened": "abriu o teleprompter", "recording.queue_set": "mudou a fila de gravação", "recording.confirmed": "confirmou uma gravação",
   "take.recorded": "registou um take", "take.update": "mudou um take",
   "production.scheduled": "agendou a produção", "production.not_started": "tirou da agenda",
@@ -45,4 +45,25 @@ export async function fetchAudit(ws: string, f: { action: string | null; actor: 
   });
   if (error) throw new Error(friendlyError(error.message));
   return data as AuditPage;
+}
+
+/* Tentativas recusadas (R-05, ADR-0066): quem, o quê, quando. "fora" = alguém sem acesso a este cliente (só a agência vê). */
+export type DenialRow = {
+  id: number; at: string; actor: string | null; affiliation: string | null; scope: "cliente" | "fora"; attempted: string;
+  capability: string | null; verified: boolean | null; via: string | null; preview: boolean; entity_id: string | null; correlation_id: string | null;
+};
+export type DenialPage = { rows: DenialRow[]; next_before: number | null; includes_outside: boolean };
+
+export const AFFILIATION_LABEL: Record<string, string> = {
+  client_staff: "equipa do cliente", agency_staff: "agência", agency_owner: "dona da agência",
+  agency_staff_sem_atribuicao: "agência, sem atribuição a este cliente", none: "sem ligação a este cliente",
+};
+
+/** "rpc:guiao_update" → "guiao update". */
+export const attemptLabel = (a: string) => a.replace(/^rpc:/, "").replaceAll("_", " ");
+
+export async function fetchDenials(ws: string, before: number | null) {
+  const { data, error } = await supabase().rpc("audit_denials_list", { p_ws: ws, p_before: before, p_limit: 50 });
+  if (error) throw new Error(friendlyError(error.message));
+  return data as DenialPage;
 }
