@@ -36,7 +36,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-08-01 | P0 | parcial | verificação com sessão real de um upload grande no R2 (sessão de 2026-11-06) | Upload de vídeo, áudio, imagens, thumbnails, legendas e documentos com progresso |
 | FR-08-02 | P0 | parcial | pastas são filtros (campanha, formato, estado, tipo, etiqueta) e pesquisa; verificação com sessão real | Pastas/coleções lógicas por campanha, projeto, formato e estado; pesquisa e tags |
 | FR-09-02 | P0 | parcial | só views, likes, comentários, partilhas por scraping; sem alcance, retenção, seguidores, conversões | Métricas por conteúdo e período: views, alcance, interações, retenção, seguidore |
-| FR-10-01 | P0 | parcial | sem módulo Custos | Consumo de IA por agente, modelo, execução e workspace. |
+| FR-10-01 | P0 | parcial | verificação com sessão real (R-15) da agência e do cliente; decisão do owner sobre costs.read da equipa do cliente (AGENTS §9) | Consumo de IA por agente, modelo, execução e workspace. |
 | FR-11-01 | P0 | parcial | arrastar não verificado em produção; verificação com conta de cliente (R-15); E2E citado não está versionado no repo | Calendário editorial por dia, semana e mês; drag and drop com validação. |
 | FR-11-02 | P0 | parcial | verificação com sessão real (R-15) da equipa Numeiro | Tarefas, gravações, revisões, publicações, responsáveis, deadlines e dependência |
 | FR-14-01 | P0 | parcial | recuperação por email depende do SMTP do Supabase (limitado) até haver domínio (FR-13-01 adiado); verificação com a conta real do Tomás em produção | Nome, avatar, email verificado, password reset e MFA quando disponível. |
@@ -361,7 +361,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
-| FR-10-01 | parcial | sem módulo Custos | custo e tokens por execução em /agentes/configuracao; kpi.costs; W4-02b; worker de agentes alojado no Railway desde 2026-11-05 | — |
+| FR-10-01 | parcial | verificação com sessão real (R-15) da agência e do cliente; decisão do owner sobre costs.read da equipa do cliente (AGENTS §9) | custo e tokens por execução em /agentes/configuracao; kpi.costs; W4-02b; worker de agentes alojado no Railway desde 2026-11-05; módulo Custos /custos e /c/[ws]/custos (PR #81, ADR-0060, w10_custos 55, costs-format 36) | — |
 | FR-10-02 | por começar | sem custos de armazenamento, processamento e integrações | nada no código | — |
 | FR-10-03 | parcial | sem custos manuais; só moeda do cliente | moeda em /definicoes W1-07 | — |
 | FR-10-04 | parcial | sem orçamentos, limite soft, alertas nem autorização para ultrapassar | budget_eur_day limite rígido no worker; W4-02 | — |

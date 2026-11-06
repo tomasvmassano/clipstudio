@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-06 (custos de IA)
+
+- **W10-10** módulo Custos, consumo de IA (FR-10-01; ADR-0060): `/custos` no espaço da agência (só com `costs.read_agency`, por defeito o dono da agência; flag `costs.agency`; só os clientes em que a pessoa também tem `costs.read`) e aba "Consumo de IA" em `/c/<cliente>/custos` (`costs.read`, flag `costs.content`). Custo por cliente, agente, modelo e execução, 7/30/90 dias ou personalizado, tendência face ao período anterior e as 50 execuções mais caras; execuções sem custo conhecido à parte, nunca zero. Valores rotulados como estimados (FR-10-06 por fazer); AED só com a taxa EUR/AED da agência. Capacidade nova `costs.export` (dono e admin do cliente, os mesmos de `costs.read`): CSV da tabela visível, auditado `costs.ai_exported`; na vista da agência exige `costs.export` em todos os clientes. Migração `PENDING_w10_custos.sql` (aditiva, por aplicar em produção). Testes `w10_custos` 55/55, `costs-format` 36/36, E2E em `e2e/learn.spec.ts`. Decisão pendente do owner: `costs.read` da equipa do cliente (AGENTS §9).
+
 ## 2026-11-06 (CHG-008 gravação, aprendizagem e cortes)
 
 - **CHG-008** (só documentação; PRD §46). GAZE-01..06: teleprompter com coluna ligada à distância, linha de foco, modo frase, ritmo por pedal, hooks de memória, pontuação de olhar por take e piloto opcional de correção por IA. LRN-01..07: motivo em cada edição, agente "Editor de lições", lições aprovadas como versão da configuração em dois níveis (agência e cliente). CLIP-01..11: cortes de vídeos longos com o agente Clip Miner, com prioridade. STU-01..05: captura direta das câmaras com cópia no cartão, agente de estúdio e pacote de edição por guião. 5 capacidades planeadas. Sem alteração funcional.
