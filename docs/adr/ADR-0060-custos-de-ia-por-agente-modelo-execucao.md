@@ -26,4 +26,4 @@ O `workspace_admin` e o `workspace_owner` de um cliente (equipa do cliente, `cli
 
 ## Rollback
 
-Bloco no fim de `PENDING_w10_custos.sql` (funções, índice, flag `costs.agency`, capacidade `costs.export` e o texto anterior da flag `costs.content`). A app sem as funções mostra o erro com "Tentar de novo" na aba; a aba "Por guião e publicação" continua igual.
+Bloco no fim de `20261106064815_w10_custos.sql` (funções, índice, flag `costs.agency`, capacidade `costs.export` e o texto anterior da flag `costs.content`). A app sem as funções mostra o erro com "Tentar de novo" na aba; a aba "Por guião e publicação" continua igual.
