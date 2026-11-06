@@ -246,6 +246,7 @@ Exportar: `edit_export_request` (versão gravada; câmaras, música e visuais re
 ## Pacote de edição (W5-09)
 
 `edit_package_request` → job `package` (`queued` → `running` com passos: som, sincronização, transcrição, guião N) → documentos v1 (`ai`) um a um → `done` avisa quem pediu. Falhou/cancelado permite pedir outra vez.
+Com um estilo guardado (W10-07, ADR-0055) o job leva `look` e `style_version` (chave `…:<estilo>:v<N>`) e a v1 sai com o aspeto e a música do estilo e com `doc.ai.alternatives`. Modo guiado, passo Corte: "Usar esta" (`edit_alternative_apply`) → versão N+1 (`user`) com os cortes e as legendas da alternativa; versão base antiga → conflito 40001 (recarregar); opção já em uso → devolve a atual sem versão nova.
 
 ## Revisão em lote (W5-12, ADR-0052)
 
