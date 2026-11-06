@@ -152,6 +152,10 @@ Flag `edit.package_marks` (por cliente, fase inicial `owner`, avaliada para quem
 
 `edit_package_export` (edit.export + R2, por vídeo as regras de `edit_export_request`): botão "Exportar todos" no pacote. `media_review_list/detail` passam a incluir ficheiros de vídeo guardados (export, upload) com player da app (`media_proxy_access`, media.read) e as notas do QC (`media_info.qc`, worker). Sem capacidades novas.
 
+### Pacote por guião (W10-20, ADR-0070)
+
+Flag `edit.package_script` (por cliente, fase inicial `owner`; precisa também de `edit.studio` e `media.r2`). `media_clip_link` / `media_clip_unlink` (`media.upload`) e `media_clip_get` (`media.read`): de que guião e de que câmara é uma gravação. `edit_package_script_request` (`edit.timeline` + R2): pacote de um guião a partir das gravações ligadas, idempotente. `edit_package_script_list` (acesso ao editor). `package_script_settings_set` (`styles.manage`; exportar automático também `edit.export`). Triggers: pacote automático quando as duas gravações ficam prontas e exportar todos automático quando o pacote por guião acaba. Na app: secção "Pacote por guião" na Edição automática, guião + câmara no envio da Biblioteca, secção "Gravação de um guião" na ficha do ficheiro. Sem capacidades novas.
+
 ### Cortes de vídeos longos (W10-12, ADR-0063)
 
 Flag `clips.miner` (por cliente, fase inicial `owner`; precisa também de `edit.studio` e `media.r2`). `clips_request` (clips.mine + R2; versão de vídeo R2 pronta do cliente, 2 min a 4 h, 5-10 cortes; idempotente), `clips_list` (acesso ao editor), `clips_export` (edit.export, por corte as regras de `edit_export_request`), `media_worker_clips_save` (só engine_worker; documento válido, só o vídeo do pedido, metadados válidos, nunca um corte bloqueado pelo portão da dignidade, master ativo). Tabela `media_job_clips` fechada à API. `media_review_list` inclui os cortes exportados (sem guião). Página `/c/[ws]/cortes`; menu "Cortes de vídeos longos".
