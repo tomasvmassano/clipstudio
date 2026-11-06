@@ -135,7 +135,10 @@ export function useScriptActions(access: Access, put: (g: Guiao) => Guiao, reloa
     owners: () => fetchOwners(access),
     duplicate: async (id) => put(await duplicateContent(access, id)),
     remove: async (id, reason, lock) => { await deleteContent(access, id, id, reason, lock); await reload(); },
-    restore: async (id, versionId, lock) => put(await restoreVersion(access, id, versionId, lock)),
+    restore: async (id, versionId, lock) => {
+      try { return put(await restoreVersion(access, id, versionId, lock)); }
+      catch (e) { if ((e as { code?: string }).code === "PT409") await reload(); throw e; }
+    },
     history: (id: string) => fetchHistory(access, id),
     context: (id: string) => fetchContext(access, id),
     saveBrief: (id: string, f: BriefFields) => saveBrief(access, id, f),

@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-06 (comparar versões de guiões)
+
+- **W10-13** comparar versões de um guião (FR-02-06, FR-05-06, FR-05-07): no Histórico, separador Comparar com duas versões à escolha (ou a cópia de trabalho), diff por palavra em hooks, corpo, CTA, formato e tema, lado a lado ou em linha; o que saiu aparece riscado com "−" e o que entrou sublinhado com "+", com texto para leitores de ecrã (a cor não é o único sinal). As versões aprovada, gravada (a mesma regra de W9-02) e em vigor ficam marcadas, e cada versão mostra quem, quando e porquê (transições com motivo e restauros). "Restaurar esta versão" pede confirmação e usa o caminho de sempre (`content_restore_version` → `content_save`: `scripts.edit`, conflito PT409, guião aprovado volta a rascunho e a aprovação fica na versão antiga); o restauro passa a ficar no audit (`script.version_restored`). Migração aditiva `supabase/migrations/PENDING_w10_diff_versoes.sql` (por aplicar em produção; a UI funciona sem ela, sem formato e tema no diff). Testes `w10_diff_versoes` 25/25, `version-diff` 22/22, `e2e/diff-versoes.spec.ts`.
+
 ## 2026-11-06 (CHG-008 gravação, aprendizagem e cortes)
 
 - **CHG-008** (só documentação; PRD §46). GAZE-01..06: teleprompter com coluna ligada à distância, linha de foco, modo frase, ritmo por pedal, hooks de memória, pontuação de olhar por take e piloto opcional de correção por IA. LRN-01..07: motivo em cada edição, agente "Editor de lições", lições aprovadas como versão da configuração em dois níveis (agência e cliente). CLIP-01..11: cortes de vídeos longos com o agente Clip Miner, com prioridade. STU-01..05: captura direta das câmaras com cópia no cartão, agente de estúdio e pacote de edição por guião. 5 capacidades planeadas. Sem alteração funcional.

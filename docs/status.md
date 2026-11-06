@@ -169,13 +169,13 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | EDL-13 | P1 | parcial | a IA usar o estilo na versão 1 (job do pacote, EDL-01); verificação com sessão real | Estilos guardados |
 | PERF-07 | P1 | parcial | o motor (Aprendiz/Estratega) ainda não lê as alavancas | Alavancas "o que replicar" |
 | FR-01-06 | P2 | parcial | filtros persistentes por utilizador por fazer | Estados vazios explicativos, loading, erro/retry, filtros persistentes por utili |
-| FR-02-06 | P2 | parcial | sem diff visual entre versões | Histórico de versões com diff e restauro, conflitos de edição e autoria. |
+| FR-02-06 | P2 | parcial | migração PENDING_w10_diff_versoes por aplicar em produção; verificação com conta real (R-15) | Histórico de versões com diff e restauro, conflitos de edição e autoria. |
 | FR-02-07 | P2 | parcial | sem pesquisa, ordenação, vistas guardadas nem impressão | Filtros, pesquisa, ordenação, vistas guardadas, exportação e impressão. |
 | FR-03-06 | P2 | parcial | sem anexar ficheiro ao take | Marcar take gravado, adicionar notas e anexar ficheiro, sem alterar estado edito |
 | FR-03-07 | P2 | parcial | não abre sem rede | Fallback de fullscreen/wake lock, falhas de gravação visíveis, estado offline e  |
 | FR-04-06 | P2 | parcial | sem controlo de cópias não autorizadas | Converter fonte em guião ou ligar múltiplas fontes a um guião; evitar cópias não |
 | FR-04-07 | P2 | parcial | sem feed por utilizador nem exclusões | Feed personalizado por workspace e utilizador; configurações de tópicos e exclus |
-| FR-05-06 | P2 | parcial | sem comparação entre versões; bloqueio de publicação sem publicação | Comparação entre versões e bloqueio de publicação sem aprovação exigida. |
+| FR-05-06 | P2 | parcial | bloqueio de publicação sem publicador (PUB-01); comparação só de guiões (vídeos não); verificação com conta real (R-15) | Comparação entre versões e bloqueio de publicação sem aprovação exigida. |
 | FR-05-07 | P2 | parcial | só guiões (sem vídeo) | Registo de decisões e auditoria de alterações após aprovação. |
 | FR-06-06 | P2 | parcial | aprovação não configurável; sem bloqueio de dados sensíveis | Aprovação humana configurável antes de criar guião ou publicar resultado; bloque |
 | FR-06-07 | P2 | parcial | sem biblioteca de templates de agentes | Biblioteca de templates de agentes, duplicação entre workspaces sem copiar dados |
@@ -271,7 +271,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-02-03 | parcial | título próprio (usa o tema); verificação com conta real (R-15) | guioes: título, cliente, tema, formato, data; fontes ligadas (content_sources); campanha, responsável, plataformas, etiquetas (content_meta_set, projects; W2-07, ADR-0029); w2_content_meta 30/30; e2e/content-meta.spec.ts | — |
 | FR-02-04 | feito |  | editorial_status e production_status independentes; w2_content 47/47, w3_calendar 39/39 | — |
 | FR-02-05 | parcial | verificação com sessão real (R-15) da equipa Numeiro | content_transition com motivo obrigatório na rejeição; W2-02; w2_content; aprovar em lote os guiões gravados, presos à versão gravada (W9-02); w9_aprovar_gravados 25/25; migração aplicada em produção 2026-11-06 | — |
-| FR-02-06 | parcial | sem diff visual entre versões | content_history, content_restore_version, lock_version; guiao-history.tsx; W2-02 | — |
+| FR-02-06 | parcial | migração PENDING_w10_diff_versoes por aplicar em produção; verificação com conta real (R-15) | content_history, content_restore_version, lock_version; guiao-history.tsx; W2-02; W10-13: comparar duas versões palavra a palavra (lado a lado e em linha, marcadores −/+), aprovada/gravada/em vigor marcadas, Restaurar esta versão com confirmação pelo content_restore_version (PT409 em conflito) e auditado; w10_diff_versoes 25/25; version-diff 22/22; e2e/diff-versoes.spec.ts | — |
 | FR-02-07 | parcial | sem pesquisa, ordenação, vistas guardadas nem impressão | filtros por estado e Exportar .txt em guioes/page.tsx | — |
 | FR-02-08 | por começar | sem sugestões de IA no editor | nada no código | — |
 
@@ -308,8 +308,8 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-05-03 | parcial | anotações desenhadas no vídeo; momento escrito à mão (o player da Drive não dá o tempo); verificação com vídeos registados e com conta de cliente | W5-04 sobre a biblioteca (W8): media_review_list/detail/comment (t_ms)/decide, /c/[ws]/revisao?ver=videos com player da Drive; w5_media_review 31/31; media-time 18/18; ADR-0043, CHG-006; produção 03/11: separador Vídeos com estado vazio, flag media.library em all no Numeiro | 2026-11-03 (sessão real do dono da agência, produção) |
 | FR-05-04 | parcial | notificações de guiões dependem de automação configurada; envio fora da app (email) por fazer | content_transition com motivo; task_rules W3-01; ; vídeo: media_review_decide com motivo obrigatório (W5-04); vídeo: notificações video_decision/video_comment por trigger, idempotentes, com preferências (W5-05, ADR-0044); w5_media_review_notif 16/16; produção 03/11 (sessão real do dono): preferências mostram os dois tipos novos; link ?asset= abre o painel e mostra erro com Tentar de novo para vídeo inexistente; 0 erros na consola | 2026-11-03 (sessão real do dono da agência, produção) |
 | FR-05-05 | parcial | sem fluxos de aprovação configuráveis (só regras de tarefas por evento) | task_rule_save W3-01 | — |
-| FR-05-06 | parcial | sem comparação entre versões; bloqueio de publicação sem publicação | content_history; approved_version_id | — |
-| FR-05-07 | parcial | só guiões (sem vídeo) | content_transitions append-only, validacao_anulada no audit; w1_review_fixes 11/11 | — |
+| FR-05-06 | parcial | bloqueio de publicação sem publicador (PUB-01); comparação só de guiões (vídeos não); verificação com conta real (R-15) | content_history; approved_version_id; W10-13: comparação entre versões de guião (diff por palavra, versão aprovada e gravada marcadas); w10_diff_versoes 25/25 | — |
+| FR-05-07 | parcial | só guiões (sem vídeo) | content_transitions append-only, validacao_anulada no audit; w1_review_fixes 11/11; W10-13: restauro de versão auditado (script.version_restored com versão de origem e estado antes/depois) e visível no histórico | — |
 
 ## M06 — Agentes IA
 

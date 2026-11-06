@@ -57,8 +57,16 @@ export type ContentPatch = Partial<{ hooks: Hook[]; corpo: string; cta: string; 
 export type EditorialTarget = "in_review" | "approved" | "changes_requested" | "rejected" | "archived" | "restore";
 
 export type ContentHistory = {
-  versions: { id: string; version_no: number; hooks: Hook[]; corpo: string; cta: string | null; created_at: string; created_kind: string; author: string | null; is_current: boolean; is_approved: boolean }[];
+  // formato, tema, is_recorded, restores e *_version_id chegam com PENDING_w10_diff_versoes (opcionais até estar aplicada).
+  versions: {
+    id: string; version_no: number; hooks: Hook[]; corpo: string; cta: string | null; created_at: string; created_kind: string; author: string | null;
+    is_current: boolean; is_approved: boolean; formato?: string | null; tema?: string | null; is_recorded?: boolean;
+  }[];
   transitions: { kind: "editorial" | "production"; from: string | null; to: string; reason: string | null; at: string; actor: string | null; version_no: number | null }[];
+  restores?: { at: string; actor: string | null; version_no: number | null }[];
+  current_version_id?: string | null;
+  approved_version_id?: string | null;
+  recorded_version_id?: string | null;
 };
 
 export type GuiaoPatch = Partial<

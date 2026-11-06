@@ -17,9 +17,9 @@ Estado: **ativo** (existe e é verificado no servidor por `authorize()`; também
 | `permissions.manage` | CAP | A | org, ws | ativo | `/permissoes`: por pessoa (o que tem, porquê, permitir/negar com motivo e prazo), por papel, exceções ativas (`permissions_matrix`, `grant_set`, `grant_revoke`, `access_explain`); papéis personalizados por fazer |
 | navegar como papel/pessoa (`access_preview_start`/`stop`/`mine`) | Permissões | A | ws | ativo (W1-17) | Começar exige `permissions.manage`; durante 30 min `_authorize` da própria sessão só dá leitura que a pessoa e o alvo têm (ADR-0045); faixa fixa com "Sair"; auditado |
 | `audit.read` | CAP | M | org, ws | ativo | `/historico` (`audit_list`): quem fez o quê, com antes e depois, filtros por ação, pessoa e período; vista de agência (todos os clientes) por fazer |
-| `scripts.read` | Guiões (M02) | B | ws, proj, own | ativo | `/guioes`, `/`, teleprompter |
+| `scripts.read` | Guiões (M02) | B | ws, proj, own | ativo | `/guioes`, `/`, teleprompter; histórico e comparar versões (`content_history`, W10-13) |
 | `scripts.create` | Guiões | M | ws, proj | ativo | Novo guião, Duplicar (`content_create`, `content_duplicate`); o motor insere direto |
-| `scripts.edit` | Guiões | M | ws, proj, own | ativo | Editor por blocos com autosave, restaurar versão (`content_save`, `content_restore_version`) |
+| `scripts.edit` | Guiões | M | ws, proj, own | ativo | Editor por blocos com autosave, restaurar versão (`content_save`, `content_restore_version`, auditado como `script.version_restored`, W10-13) |
 | `scripts.submit` | Guiões | M | ws, proj, own | ativo | Enviar para revisão (`content_transition` → `in_review`) |
 | `scripts.approve` | Guiões | A | ws, proj | ativo | Validar |
 | `scripts.reject` | Guiões | M | ws, proj | ativo | Rejeitar |
