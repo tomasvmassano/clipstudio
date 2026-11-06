@@ -43,7 +43,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-14-02 | P0 | parcial | idioma só PT-PT; email e resumo pessoais guardados mas sem envio; verificação com sessão real | Idioma, timezone, tema, notificações e preferências do teleprompter. |
 | FR-15-01 | P0 | parcial | sem idioma configurável (só PT-PT) | Geral: nome, logótipo, idioma, timezone, moeda e branding. |
 | FR-15-02 | P0 | parcial | sem categorias, estados e regras de aprovação configuráveis | Conteúdo: categorias, formatos, estados, templates, regras de aprovação e checkl |
-| FR-16-01 | P0 | parcial | notificações, comentários e media fora da pesquisa; verificação com conta real (R-15) | Pesquisa global com controlo de acesso em todas as entidades, sugestões e result |
+| FR-16-01 | P0 | parcial | verificação com conta real (R-15) dos grupos media, comentários e notificações | Pesquisa global com controlo de acesso em todas as entidades, sugestões e result |
 | FR-16-02 | P0 | parcial | verificação com conta de cliente (R-15) | Atalho de teclado, pesquisa por título/tag/ID e estado vazio. |
 | TEAM-05 | P0 | parcial | âmbitos projeto e assigned_only não aplicados; sem modelos por profissão | Matriz de permissões configurável |
 | TEAM-06 | P0 | parcial | tarefa sem projeto (não existem projetos) | Tarefas e responsáveis |
@@ -131,7 +131,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-15-05 | P1 | parcial | envio de email e resumo diário (FR-13-01 adiado); verificação com sessão real | Notificações: canais, eventos e preferências organizacionais. |
 | FR-16-03 | P1 | parcial | sem preferências de notificação; deep links não confirmados para todos os tipos | Inbox de notificações, marcar como lida, deep links e preferências. |
 | FR-16-04 | P1 | parcial | sem notificações de integrações | Menções, atribuições, aprovações, falhas de automação e integrações. |
-| FR-16-05 | P1 | parcial | pesquisa inexistente, por isso não testada | Evitar notificação de dados de outros workspaces e impedir vazamento em resultad |
+| FR-16-05 | P1 | parcial | verificação com conta real (R-15); E2E da pesquisa com dois clientes para os tipos novos | Evitar notificação de dados de outros workspaces e impedir vazamento em resultad |
 | TEAM-07 | P1 | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | Dashboard por âmbito |
 | TEAM-08 | P1 | parcial | sem equipas funcionais | Equipas funcionais e capacidade |
 | TEAM-09 | P1 | parcial | sem etapas, aprovadores e SLA por tipo de conteúdo | Workflow adaptável por cliente |
@@ -210,7 +210,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | MIG-05 | — | parcial | sem entidade content_item separada (guioes continua tabela principal) | Migrar Guiao para content_item + content_versions, mantendo compatibilidade de l |
 | MIG-06 | — | parcial | ideas não migrada para sources; take_numeiro mantido, sem editorial_angle | Migrar Idea para sources, removendo take_numeiro em favor de editorial_angle gen |
 | MIG-07 | — | parcial | faltam /perfil e /publicacoes | Criar rotas reais para módulos existentes no menu e novas páginas /fontes, /equi |
-| MIG-08 | — | parcial | sem pesquisa real | Implementar pesquisa real em app-search.tsx, corrigir links #, perfil demo, load |
+| MIG-08 | — | parcial | verificação com conta real (R-15) da pesquisa na paleta | Implementar pesquisa real em app-search.tsx, corrigir links #, perfil demo, load |
 | MIG-09 | — | parcial | dual-read e plano de rollback testado por módulo; verificação com conta real (R-15) | Introduzir feature flags por workspace para migração progressiva, dual-read limi |
 | MIG-10 | — | parcial | RPCs e token legado (studio_whoami, legacy_can, studio_tokens) ainda ativos | Remover RPCs e credenciais legadas só depois de validação e reconciliação de dad |
 | QA-01 | — | parcial | E2E versionados cobrem rotas por URL direta e refresh; falta abrir cada rota pelo menu | Abrir cada rota por menu, URL direta e refresh |
@@ -427,11 +427,11 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
-| FR-16-01 | parcial | notificações, comentários e media fora da pesquisa; verificação com conta real (R-15) | search_global com acesso por cliente e entidade (W7, ADR-0035); w7_busca 71/71; e2e/busca.spec.ts | — |
+| FR-16-01 | parcial | verificação com conta real (R-15) dos grupos media, comentários e notificações | search_global com acesso por cliente e entidade (W7, ADR-0035); w7_busca 71/71; e2e/busca.spec.ts; W10-02: media, comentários dos vídeos e notificações próprias na pesquisa (ADR-0054); w10_pesquisa 40/40 | — |
 | FR-16-02 | parcial | verificação com conta de cliente (R-15) | paleta Ctrl/Cmd+K com título, #etiqueta e ID, estado vazio (W7, ADR-0035); e2e/busca.spec.ts; produção 03/11: Cmd+K, pesquisa por título no corpo, abrir resultado; 0 erros na consola | 2026-11-03 (sessão real do dono da agência, produção) |
 | FR-16-03 | parcial | sem preferências de notificação; deep links não confirmados para todos os tipos | /caixa, notifications_read; W3-01 | — |
 | FR-16-04 | parcial | sem notificações de integrações | menções em task_comment, atribuições, automation_error; W3-01, W4-01 | — |
-| FR-16-05 | parcial | pesquisa inexistente, por isso não testada | _viewer_sees/inbox só clientes autorizados; w3_tasks 53/53 | — |
+| FR-16-05 | parcial | verificação com conta real (R-15); E2E da pesquisa com dois clientes para os tipos novos | _viewer_sees/inbox só clientes autorizados; w3_tasks 53/53; pesquisa sem vazamento entre clientes em todos os grupos, incluindo media, comentários e notificações (w7_busca 71/71, w10_pesquisa 40/40; ADR-0035, ADR-0054) | — |
 
 ## 5A. Requisitos adicionais — equipas duplas e operação multid
 
@@ -478,7 +478,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | MIG-05 | parcial | sem entidade content_item separada (guioes continua tabela principal) | content_versions + guiao_update compatível; w2_content 47/47 | — |
 | MIG-06 | parcial | ideas não migrada para sources; take_numeiro mantido, sem editorial_angle | ideas + workspace e RLS; w2_sources 41/41 | — |
 | MIG-07 | parcial | faltam /perfil e /publicacoes | /fontes, /equipa, /definicoes, /calendario; /ideias → /fontes (next.config.ts) | — |
-| MIG-08 | parcial | sem pesquisa real | links # removidos, perfil demo removido, erros do teleprompter (W0, W2-02) | — |
+| MIG-08 | parcial | verificação com conta real (R-15) da pesquisa na paleta | links # removidos, perfil demo removido, erros do teleprompter (W0, W2-02); pesquisa real na paleta Ctrl/Cmd+K (command-palette.tsx, substitui app-search.tsx) com todas as entidades; W7 e W10-02 | — |
 | MIG-09 | parcial | dual-read e plano de rollback testado por módulo; verificação com conta real (R-15) | feature_flag_defs, feature_flags, my_flags, flag_set, /funcionalidades (W0, ADR-0031); w0_feature_flags 20/20 | — |
 | MIG-10 | parcial | RPCs e token legado (studio_whoami, legacy_can, studio_tokens) ainda ativos | tmp_import removida (20261029101111_w1_drop_tmp_import) | — |
 
