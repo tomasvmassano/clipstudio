@@ -49,7 +49,7 @@ export type PackageJob = Omit<ExportJob, "kind" | "result"> & {
   kind: "package"; front_name: string | null; side_name: string | null; version_id: string | null;   // version_id = câmara do lado
   guioes: { id: string; n: number; tema: string | null; deleted?: boolean }[] | null;
   outputs: { guiao_id: string; hook: number; asset_id: string; title: string }[];
-  result: { documents?: unknown[]; missing?: string[]; flags?: string[]; offset?: { front: number; confidence: number } } | null;
+  result: { documents?: unknown[]; missing?: string[]; flags?: string[]; offset?: { front: number; confidence: number }; windows?: unknown } | null;
 };
 export type EditDocRow = {
   asset_id: string; title: string; content_id: string | null; tags: string[]; version_no: number; source: "import" | "ai" | "user" | "agent";

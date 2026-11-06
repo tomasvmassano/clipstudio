@@ -140,6 +140,10 @@ Por cliente (só a fase `all`): uploads novos para o Cloudflare R2, envio por pa
 
 `edit_package_request` passa a mandar ao worker o aspeto (`look`) e a versão do estilo guardado pedido (EDL-13). `edit_doc_get` devolve `ai_alternatives`; `edit_alternative_apply` (acesso ao editor: `edit.timeline` ou `edit.guided`) cria uma versão nova a partir de uma alternativa da IA guardada no documento: passo Corte do modo guiado, "Usar esta" (EDL-10). Sem capacidades novas.
 
+### Janelas pelas marcas do teleprompter (W10-17, ADR-0065)
+
+Flag `edit.package_marks` (por cliente, fase inicial `owner`, avaliada para quem pede o pacote). Com ela, o pedido de pacote (`edit_package_request`, sem mudanças) leva `input.marks` (trigger `media_jobs_package_marks` + `_package_marks`, internas). O worker usa-as como janelas principais e grava a origem por guião em `result.windows`; a Edição automática mostra "Janelas por guião" (só com a flag). Sem capacidades novas: pedir continua a ser `edit.timeline`, ver `edit_package_list` (acesso ao editor).
+
 ### Revisão dos exportados e revisão em lote (W5-12, ADR-0052)
 
 `edit_package_export` (edit.export + R2, por vídeo as regras de `edit_export_request`): botão "Exportar todos" no pacote. `media_review_list/detail` passam a incluir ficheiros de vídeo guardados (export, upload) com player da app (`media_proxy_access`, media.read) e as notas do QC (`media_info.qc`, worker). Sem capacidades novas.
