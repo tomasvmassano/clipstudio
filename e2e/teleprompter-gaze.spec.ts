@@ -42,13 +42,15 @@ as("clientA")("coluna pela distância, linha de foco e modo frase, guardados por
   await expect.poll(() => colWidth(page)).toBeGreaterThan(w1 * 1.45);
   expect(await colWidth(page)).toBeLessThan(w1 * 1.55);
 
-  // coluna desligada: volta à largura antiga e o ângulo passa o teto, com aviso
+  // coluna desligada a 1 m: volta à largura antiga (até 1100 px) e o ângulo passa o teto, com aviso
   dlg = await openSettings(page);
+  await dlg.getByLabel("Distância à câmara em metros").fill("1");
   await dlg.getByRole("switch", { name: "Coluna pela distância" }).click();
   await dlg.getByRole("button", { name: "Fechar" }).click();
   await expect(page.locator("[data-gaze-angle]")).toContainText("acima de ±4,5°");
   dlg = await openSettings(page);
   await dlg.getByRole("switch", { name: "Coluna pela distância" }).click();
+  await dlg.getByLabel("Distância à câmara em metros").fill("1,5");
   // linha de foco a 30%
   await dlg.getByLabel("Altura da linha de foco").fill("30");
   await dlg.getByRole("button", { name: "Fechar" }).click();

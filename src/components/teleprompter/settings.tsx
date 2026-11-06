@@ -78,7 +78,7 @@ export function TpSettings({ prefs, update, keysFor, serverSync, syncError, onCl
   }, [capture, prefs.keys, update]);
 
   return (
-    <div role="dialog" aria-label="Definições do teleprompter" className="fixed inset-y-0 right-0 z-30 flex w-[min(100vw,26rem)] flex-col border-l border-neutral-800 bg-neutral-950 text-white shadow-2xl">
+    <div role="dialog" aria-label="Definições do teleprompter" className="fixed inset-y-0 right-0 z-[60] flex w-[min(100vw,26rem)] flex-col border-l border-neutral-800 bg-neutral-950 text-white shadow-2xl">
       <div className="flex items-center justify-between border-b border-neutral-800 px-4 py-3">
         <h2 className="text-base font-semibold">Definições</h2>
         <button type="button" onClick={onClose} className="min-h-11 rounded-lg border border-neutral-700 px-4 text-sm">Fechar</button>

@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-06 (teleprompter: olhar na câmara)
+
+- **W10-11** teleprompter com olhar na câmara (GAZE-01, GAZE-02; estende FR-03-03 e FR-03-05; ADR-0060): distância à câmara e diagonal do ecrã por dispositivo; a coluna fica com a largura que cabe em ±3° (2·d·tan 3°, 10,5 cm a 1 m), convertida para px pela diagonal e pelo devicePixelRatio; o topo mostra o ângulo da linha mais larga desenhada, âmbar acima de ±3° e aviso acima de ±4,5°; sem diagonal fica a coluna antiga e a app pede o tamanho do ecrã. Linha de foco à altura da lente (20 % por defeito, configurável), usada também para bloco atual, retoma e salto. Modo frase: 2 a 4 palavras por linha, quebras nas pausas, por bloco. Corrigido: o painel de Definições aberto a partir do ecrã de leitura ficava por baixo dele. Migração aditiva `PENDING_w10_teleprompter_olhar.sql` (5 chaves novas nas preferências, validadas). Testes `gaze` 34/34, `w10_teleprompter_olhar` 15/15, `w2_teleprompter` 52/52, `e2e/teleprompter-gaze.spec.ts`.
+
 ## 2026-11-06 (CHG-008 gravação, aprendizagem e cortes)
 
 - **CHG-008** (só documentação; PRD §46). GAZE-01..06: teleprompter com coluna ligada à distância, linha de foco, modo frase, ritmo por pedal, hooks de memória, pontuação de olhar por take e piloto opcional de correção por IA. LRN-01..07: motivo em cada edição, agente "Editor de lições", lições aprovadas como versão da configuração em dois níveis (agência e cliente). CLIP-01..11: cortes de vídeos longos com o agente Clip Miner, com prioridade. STU-01..05: captura direta das câmaras com cópia no cartão, agente de estúdio e pacote de edição por guião. 5 capacidades planeadas. Sem alteração funcional.
