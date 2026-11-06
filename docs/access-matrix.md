@@ -21,6 +21,7 @@ Fonte: PRD v2.1 §3 (papéis), §5A (TEAM-01…16), CAP-03/05/08. **PROPOSTA de 
 | `contracts.manage` | ✓ | — | — | — |
 | `publishing.limits.manage` (W7) | ✓ | — | — | — |
 | `privacy.manage` (W7) | ✓ | — | — | — |
+| `ops.health` (saúde do sistema, `/saude`; W10-01) | ✓ (todos os clientes) | ✓ (só os atribuídos) | — | — |
 
 Um `agency_member` sem atribuição a um workspace **não vê nada** desse workspace (R-03, TEAM-03).
 
@@ -129,3 +130,5 @@ Portal do cliente (W8, ADR-0041): entrar com `scripts.read` (staff da agência s
 **W5-14 (ADR-0053):** ler a lista de frases-persona: `agents.read`; gravar uma versão nova: `persona.manage` com sessão individual (código de equipa e manager: 42501). Versões imutáveis, tabela fechada à API. O worker recebe só os textos e o nome de quem está envolvido (o consentimento fica na app). Outro cliente: 42501.
 
 **W9 (ADR-0051):** eliminar e recuperar guiões: `scripts.purge` (workspace_owner e dono da agência); aprovar gravados em lote: `scripts.approve`; pré-requisitos: ler `scripts.read`, configurar `settings.manage`. Outro cliente: 42501.
+
+**W10-01 (ADR-0058):** `ops_health` exige `ops.health` (dono e admin da agência); gestor e membro da agência, equipa do cliente A ou B e sem sessão: 42501/28000. Por cliente: só os visíveis (dono todos, admin os atribuídos como staff ativo); parte dos agentes com `agents.read`, de media com `media.read` (negação explícita retira-a). Atribuição suspensa: o cliente desaparece; admin suspenso: 42501. `ops_health_tick` só service_role/pg_cron (browser 42501). Alertas `system_health` só para os donos da agência. Tabelas `ops_health_alerts` e `ops_health_runs` fechadas à API.

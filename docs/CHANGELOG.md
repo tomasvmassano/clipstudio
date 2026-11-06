@@ -2,6 +2,8 @@
 
 ## 2026-11-06
 
+- W10-01 · Saúde do sistema (FR-17-15, ADR-0058): página /saude da agência (capacidade ops.health: dono e admin, admin só os clientes atribuídos) com workers, filas de agentes e de media, trabalhos a correr com o último sinal, falhas de 24 h e 7 dias com o erro sem segredos, por cliente e alertas enviados. Alertas automáticos (pg_cron, 5 min) aos donos da agência quando um worker deixa de contactar a base com trabalho à espera ou um trabalho esgota as tentativas, um por incidente (notificação system_health).
+
 - W10-02 · Pesquisa global: a paleta Ctrl/Cmd+K passa a encontrar media da biblioteca (título, etiquetas, nome do ficheiro), comentários da revisão de vídeos e as tuas notificações, sempre com as permissões de cada funcionalidade e sem nada de outros clientes. A biblioteca abre um ativo pelo link (?asset=). FR-16-01, FR-16-05, MIG-08; ADR-0054; migração 20261106060240_w10_pesquisa.sql.
 
 - W10-07 · Pacote com o estilo guardado e alternativas da IA (EDL-13, EDL-10, ADR-0055): o pacote automático manda ao worker o aspeto e a versão do estilo guardado (música só se ainda estiver na biblioteca; versão na chave de idempotência); o modo guiado mostra 2-3 alternativas da IA por secção no passo Corte ("Usar esta" cria uma versão nova montada no servidor, edit_alternative_apply) e os textos alternativos do hook. Migração 20261106060134_w10_pacote_estilo_alternativas.sql; teste SQL 37/37.
