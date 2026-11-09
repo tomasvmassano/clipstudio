@@ -29,6 +29,8 @@ export function MediaAssetSheet({ access, lib, id, onClose, onChanged, onReplace
   const [n, setN] = useState(0);
   // o link criado só se mostra uma vez: fica aqui para sobreviver ao recarregar da ficha (que desmonta as secções)
   const [createdShare, setCreatedShare] = useState<CreatedShare | null>(null);
+  // a confirmação de "Guardado." fica aqui: o formulário remonta a cada gravação (key = lock_version) e perdia-a
+  const [savedNote, setSavedNote] = useState<string | null>(null);
   const reload = () => { r.reload(); onChanged(); setN((x) => x + 1); };
   const a = r.data;
   return (
@@ -50,7 +52,7 @@ export function MediaAssetSheet({ access, lib, id, onClose, onChanged, onReplace
             <>
               <Preview key={`${a.current?.id}-${n}`} access={access} lib={lib} a={a} />
               <Actions access={access} lib={lib} a={a} onChanged={reload} onReplace={onReplace} onClose={onClose} />
-              {a.lifecycle === "ativo" && <MetaForm key={a.lock_version} access={access} lib={lib} a={a} onSaved={reload} />}
+              {a.lifecycle === "ativo" && <MetaForm key={a.lock_version} access={access} lib={lib} a={a} onSaved={reload} note={savedNote} setNote={setSavedNote} />}
               {a.lifecycle === "ativo" && a.kind === "video" && !a.tags.includes("pacote") && <ClipSection access={access} lib={lib} assetId={a.id} onChanged={reload} />}
               <History access={access} lib={lib} a={a} />
               {a.shares && a.lifecycle === "ativo" && <Shares access={access} lib={lib} a={a} onChanged={reload} created={createdShare} setCreated={setCreatedShare} />}
@@ -191,7 +193,8 @@ function Actions({ access, lib, a, onChanged, onReplace, onClose }: {
   );
 }
 
-function MetaForm({ access, lib, a, onSaved }: { access: Access; lib: MediaLibrary; a: MediaAssetDetail; onSaved: () => void }) {
+function MetaForm({ access, lib, a, onSaved, note, setNote }: { access: Access; lib: MediaLibrary; a: MediaAssetDetail; onSaved: () => void;
+                    note: string | null; setNote: (v: string | null) => void }) {
   const [title, setTitle] = useState(a.title);
   const [tags, setTags] = useState(a.tags.join(" "));
   const [project, setProject] = useState(a.project?.id ?? "");
@@ -210,7 +213,7 @@ function MetaForm({ access, lib, a, onSaved }: { access: Access; lib: MediaLibra
   const aiAdded = aiTagsAdded(a.tags, splitTags(tags));
   const needRights = aiAdded.length > 0;
   const save = async () => {
-    setBusy(true); setMsg(null);
+    setBusy(true); setMsg(null); setNote(null);
     try {
       await saveAsset(access, a.id, {
         title: title.trim(), tags: splitTags(tags), project_id: project || null, format: format || null, status,
@@ -218,7 +221,7 @@ function MetaForm({ access, lib, a, onSaved }: { access: Access; lib: MediaLibra
         ...(needRights ? { ai_rights_confirmed: rights } : {}),
       }, a.lock_version);
       setRights(false);
-      setMsg({ text: contentChanged ? "Guardado. Escolhe agora o take e a publicação do guião novo, se quiseres." : "Guardado.", bad: false });
+      setNote(contentChanged ? "Guardado. Escolhe agora o take e a publicação do guião novo, se quiseres." : "Guardado.");
       onSaved();
     } catch (e) {
       setMsg({ text: errCode(e) === "PT409" ? "Alguém mudou este ativo entretanto. Recarreguei: revê e volta a guardar." : (e as Error).message, bad: true });
@@ -279,7 +282,8 @@ function MetaForm({ access, lib, a, onSaved }: { access: Access; lib: MediaLibra
         </Alert>
       )}
       {!ro && <Button className="self-start" size="sm" disabled={busy || !title.trim() || (needRights && !rights)} onClick={() => void save()}>{busy && <Loader2Icon className="animate-spin" />} Guardar</Button>}
-      {msg && <p role={msg.bad ? "alert" : "status"} className={msg.bad ? "text-destructive" : ""}>{msg.text}</p>}
+      {msg ? <p role={msg.bad ? "alert" : "status"} className={msg.bad ? "text-destructive" : ""}>{msg.text}</p>
+           : note && <p role="status">{note}</p>}
     </section>
   );
 }

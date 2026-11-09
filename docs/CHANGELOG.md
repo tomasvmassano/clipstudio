@@ -2,6 +2,7 @@
 
 ## 2026-11-09 (notificação agrupada do pacote por guião)
 
+- Correção: na ficha do ativo da Biblioteca a confirmação "Guardado." desaparecia logo, porque o formulário remonta a cada gravação. Passa a ficar visível depois do recarregar (apanhado pelo E2E `decisoes-dono`).
 - **W10-23** Notificações do pacote por guião agrupadas (STU-03; decisão do responsável de produto, 2026-11-09; ADR-0072). Em vez de uma notificação "Pacote de edição pronto" por guião (até 30 por sessão), quem pediu (ou quem ligou o automático) recebe UMA notificação por lote de gravação (sessão do teleprompter das gravações ligadas; senão o dia local do cliente), atualizada à medida que os pacotes acabam: "Pacotes por guião prontos: 7 de 12", de novo por ler quando a contagem muda, e estado final "12 de 12" ou "9 de 12 prontos, 3 falharam" com os guiões falhados nomeados. Conta por guião (pedir de novo um guião que falhou substitui-o), idempotente a retries, advisory lock por lote, mesma regra de destinatário e preferências de `_notify`, `domain_events` `package_script.batch_progress` e audit `edit.package_script_batch_done` no fim. Pacote da sessão igual a hoje. Na caixa, a notificação leva à Edição automática. Migração `supabase/migrations/PENDING_w10_notif_agrupada.sql` (aditiva, por aplicar; rollback no fim). Testes `w10_notif_agrupada` 22/22, suite SQL 2892/2892, `notif-format`.
 
 ## 2026-11-09 (original vs. cortado no editor)
