@@ -12,10 +12,10 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 |---|---|
 | feito | 36 |
 | parcial | 214 |
-| por começar | 53 |
+| por começar | 60 |
 | bloqueado | 3 |
 | adiado | 3 |
-| **total** | **309** |
+| **total** | **316** |
 
 ## Pendentes abertos (bloqueados primeiro, depois por prioridade)
 
@@ -775,3 +775,15 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | STU-03 | parcial | verificar com sessão real (cortes curtos por guião → pacote em minutos → notificação agrupada → exportar → rever); disparo pelo agente de estúdio (STU-02) | W10-20 (ADR-0070): recording_clips + media_clip_link (envio da Biblioteca, ficha do ficheiro, Edição automática), edit_package_script_request (job package com mode=script, idempotente por guião, versões das gravações e estilo), automático quando as duas gravações ficam prontas e exportar todos automático (em nome de quem ligou, verificado a cada disparo), secção Pacote por guião (flag edit.package_script); numeiro-engine stu03-pacote-por-guiao (transcreve só o corte, janela = ficheiro todo; test_package 14/14); w10_pacote_por_guiao 43/43; e2e/pacote-por-guiao.spec.ts (não corrido localmente: sem stack); migração 20261106131955_w10_pacote_por_guiao aplicada em produção a 2026-11-06; numeiro-engine#28 em produção (2026-11-06); W10-23 (ADR-0072): notificação agrupada por lote de gravação (sessão ou dia local) para pacotes por guião, N de M, por ler a cada mudança, final com falhas nomeadas, idempotente e com advisory lock (decisão do responsável de produto 2026-11-09); w10_notif_agrupada 22/22; suite SQL 2892/2892; edit.package_script ligada no Numeiro; migração 20261109094755_w10_notif_agrupada aplicada em produção a 2026-11-09 | — |
 | STU-04 | por começar |  |  | — |
 | STU-05 | por começar |  |  | — |
+
+## 47. Radar de reacts (REACT, CHG-009)
+
+| ID | Estado | O que falta | Evidência | Verificado |
+|---|---|---|---|---|
+| REACT-01 | por começar |  |  | — |
+| REACT-02 | por começar |  |  | — |
+| REACT-03 | por começar |  |  | — |
+| REACT-04 | por começar |  |  | — |
+| REACT-05 | por começar |  |  | — |
+| REACT-06 | por começar |  |  | — |
+| REACT-07 | por começar |  |  | — |

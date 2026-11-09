@@ -128,6 +128,9 @@ Estado: **ativo** (existe e é verificado no servidor por `authorize()`; também
 | — (quem recebe) | Notificações (FR-14-02) | B | ws, own | ativo (W8) | Preferências pessoais no perfil e silêncio por cliente (`my_notif_workspaces`, `my_notif_prefs`, `my_notif_pref_set`, `my_notif_mute`; flag `notifications.prefs`), dentro do que o cliente permite |
 | — (sistema; quem recebe) | Notificações de prazos (FR-11-04, TEAM-12) | B | ws, own | W10-14 | Tick SQL `deadline_notify_tick` de 15 em 15 min (pg_cron `deadline-notify-tick`) e trigger `tasks_due_changed_notify`; flag `notifications.deadlines` verificada para quem recebe; sem capacidade nova: destinatários por `tasks.read`, `scripts.read`, `scripts.approve`, `media.read`, `review.approve` no momento do envio; 5 tipos no grupo "Prazos" das preferências (ADR-0061) |
 | `scripts.read` (portal) | Portal do cliente (SCALE-08) | B | ws | ativo (W8) | `/c/[ws]/portal` (flag `client.portal`, `portal_home`, `portal_block`): aprovações pelas RPCs existentes, entregas sem valores, desempenho, pedidos; sem capacidade própria (ADR-0041) |
+| `reacts.read` | Radar de reacts: ver a fila, abrir e descarregar o vídeo original (REACT-02..04) | B | ws | W10 (CHG-009) | — |
+| `reacts.decide` | Radar de reacts: gravar (cria guião), guardar, rejeitar com motivo e nota (REACT-04/05) | M | ws | W10 (CHG-009) | — |
+| `reacts.sources.manage` | Radar de reacts: aceitar e rejeitar contas propostas, gerir contas vigiadas (REACT-01) | M | ws | W10 (CHG-009) | — |
 
 Regras: ter `edit` não dá `approve` nem `publish` (CAP-04); uma feature flag ligada não concede acesso (CAP-09); toda a key nova entra aqui no mesmo PR em que nasce, senão o CI falha (PRD §34).
 
