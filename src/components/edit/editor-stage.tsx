@@ -1,7 +1,11 @@
 "use client";
 
-import type { ReactNode } from "react";
-import { hookEnd, layout, outToSrc, wordsOut, type EditDoc, type TextLook } from "@/lib/edit-doc";
+import { useMemo, type ReactNode } from "react";
+import { hookEnd, layout, outToSrc, type EditDoc, type TextLook } from "@/lib/edit-doc";
+import { CAP_STYLES, captionAtState, captionStates, capStyleOf } from "@/lib/caption-plan";
+
+/** Vermelho do destaque do S15 (RED em render_doc.py). */
+const S15_RED = "#E2002C";
 
 /** Aspeto por omissão (o mesmo que o palco mostrava antes de haver "look" no documento). Em px de 1080×1920. */
 export const DEFAULT_LOOK: { captions: Required<Pick<TextLook, "color" | "size" | "y">>; hook: Required<Pick<TextLook, "color" | "size" | "y">> } = {
@@ -21,8 +25,13 @@ export function EditorStage({ doc, t, media, className }: { doc: EditDoc; t: num
   const src = at?.src ?? null;
   const cam = doc.cameras.find((c) => src != null && src >= c.s && src < c.e);
   const ovNow = doc.overlays.filter((o) => src != null && src >= o.s && src < o.e);
-  const cap = wordsOut(doc).filter((w) => w.end > t - 0.6 && w.at < t + 0.6);   // a mesma janela de captionAt
-  const cl = { ...DEFAULT_LOOK.captions, ...(doc.look?.captions ?? {}) };
+  // legendas: o mesmo plano que a exportação (blocos e tempos de render_doc.caption_plan), não uma janela deslizante
+  const { duration } = layout(doc);
+  const states = useMemo(() => captionStates(doc, duration), [doc, duration]);
+  const capNow = captionAtState(states, t);
+  const capStyle = capStyleOf(doc);
+  const cs = CAP_STYLES[capStyle];
+  const lk: TextLook = doc.look?.captions ?? {};
   const hl = { ...DEFAULT_LOOK.hook, ...(doc.look?.hook ?? {}) };
   const segNo = at ? segs.findIndex((s) => s.id === at.seg.id) + 1 : segs.length;
   const px = (v: number) => `${(v / 1080) * 100}cqw`;   // px de 1080 → largura do palco
@@ -54,14 +63,31 @@ export function EditorStage({ doc, t, media, className }: { doc: EditDoc; t: num
           {o.kind === "broll" ? "B-roll" : o.kind === "graphic" ? "Gráfico" : "Texto"}: {o.label}
         </div>
       ))}
-      {cap.length > 0 && (
-        <div className="absolute inset-x-[6%] -translate-y-1/2 text-center font-black [text-shadow:0_2px_4px_#000,0_0_3px_#000]"
-          style={{ top: top(cl.y), fontSize: px(cl.size), color: cl.color }}>
-          <span className="box-decoration-clone px-[0.2em]" style={cl.background ? { background: cl.background } : undefined}>{cap.map((w, i) => (
-            <span key={`${w.id}-${i}`} style={cl.highlight && t >= w.at && t < w.end ? { color: cl.highlight } : undefined}>{i ? " " : ""}{text(w.w, cl.upper)}</span>
-          ))}</span>
+      {capNow && (capStyle === "S14" ? (
+        // S14: a palavra que se ouve, ao centro da caixa; com destaque no aspeto leva essa cor
+        <div className="absolute -translate-y-1/2 text-center font-serif [text-shadow:0_3px_5px_rgba(0,0,0,.8)]"
+          style={{ left: `${(cs.box[0] / 1080) * 100}%`, width: `${(cs.box[2] / 1080) * 100}%`, top: top(lk.y ?? cs.box[1] + cs.size * 0.6),
+            fontSize: px(lk.size ?? cs.size), color: lk.highlight || lk.color || "#FFFFFF" }}>
+          <span className="box-decoration-clone px-[0.2em]" style={lk.background ? { background: lk.background } : undefined}>{text(capNow.chunk[0].w, lk.upper)}</span>
         </div>
-      )}
+      ) : (
+        // S15: o bloco inteiro (até 2 linhas), alinhado à esquerda; o que já se disse em caixa vermelha (ou a palavra dita na cor de destaque)
+        <div className="absolute font-serif leading-[1.12]"
+          style={{ left: `${(cs.box[0] / 1080) * 100}%`, width: `${(cs.box[2] / 1080) * 100}%`, fontSize: px(lk.size ?? cs.size), color: lk.color || "#FFFFFF",
+            ...(lk.y != null ? { top: top(lk.y), transform: "translateY(-50%)" } : { top: top(cs.box[1]) }) }}>
+          {capNow.chunk.map((w, j) => {
+            const said = j <= capNow.active;
+            const redBox = !("highlight" in lk);
+            const bg = redBox && said ? S15_RED : lk.background || undefined;
+            const color = !redBox && lk.highlight && j === capNow.active ? lk.highlight : undefined;
+            return (
+              <span key={j} className="box-decoration-clone [text-shadow:2px_3px_0_rgba(0,0,0,.47)]" style={{ background: bg, color, padding: bg ? "0 0.11em" : undefined }}>
+                {text(w.w, lk.upper)}{j < capNow.chunk.length - 1 ? " " : ""}
+              </span>
+            );
+          })}
+        </div>
+      ))}
     </div>
   );
 }

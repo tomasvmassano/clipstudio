@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-10 (legendas do palco iguais à exportação)
+
+- **W10-30** As legendas do palco deixam de saltar e de se repetir (EDL-08; queixa do Tomás a 10/11; ADR-0078). O palco mostrava as palavras numa janela deslizante de ±0,6 s (entravam e saíam uma a uma) e repetia a palavra que atravessa dois cortes. Agora usa o mesmo plano da exportação (`caption-plan.ts`, espelho de `render_doc.caption_plan`, igual ao motor em 200 documentos aleatórios): S15 em blocos de até 6 palavras com a caixa vermelha no que já se disse, S14 uma palavra de cada vez. Novo "Estilo das legendas" (S15/S14) no painel Aspeto do editor (EDL-13). Sem migração. Testes: `caption-plan` 4/4.
+
 ## 2026-11-10 (som contínuo no palco do editor)
 
 - **W10-29** O som do palco do editor deixa de dar solavancos (EDL-08; queixa do Tomás a 10/11; ADR-0077). A causa era o palco corrigir o vídeo contra um relógio próprio: cada reposicionamento parava o vídeo a carregar, o relógio seguia e o vídeo voltava a ser reposicionado, em ciclo. Agora, a tocar, é o som que dá o tempo ao editor; o som vem de dois leitores da câmara do som que se revezam nos cortes (o trecho seguinte já posicionado), e só salta onde o corte o exige (`audioRuns`). A imagem fica sem som e segue o áudio. Vale para o editor e para o modo guiado. Sem migração. Testes: `edit-preview` (trechos e índice).
