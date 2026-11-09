@@ -49,3 +49,38 @@ export function audioCam(doc: EditDoc): string {
 
 /** Desvio tolerado entre o vídeo e o relógio do editor antes de voltar a posicionar (s). */
 export const DRIFT_S = 0.25;
+
+/** Trecho de áudio contínuo: de outStart a outEnd (saída) o som corre seguido a partir de sess (tempo da gravação). */
+export type Run = { outStart: number; outEnd: number; sess: number };
+
+/**
+ * Os trechos que o palco toca sem saltar (W10-29): cada segmento partido nas janelas da sessão, e segmentos seguidos na
+ * fonte e na gravação colados num só. Só há salto no áudio onde o corte o exige; o resto toca de seguida.
+ */
+export function audioRuns(doc: EditDoc, windows?: Windows | null): Run[] {
+  const runs: Run[] = [];
+  const wins = windows ?? (doc as EditDoc & { source?: { windows?: Windows } }).source?.windows ?? null;
+  const bounds: number[] = [];                       // fronteiras do tempo virtual onde a gravação salta
+  if (wins?.length) { let acc = 0; for (const [a, b] of wins) { acc += b - a; bounds.push(acc); } }
+  let at = 0;
+  for (const s of doc.segments) {
+    const cuts = [s.in, ...bounds.filter((x) => x > s.in + 1e-6 && x < s.out - 1e-6), s.out];
+    for (let i = 0; i < cuts.length - 1; i++) {
+      const a = cuts[i], b = cuts[i + 1], len = b - a;
+      if (len <= 1e-6) continue;
+      const sess = virtualToSession(wins, a);
+      const prev = runs[runs.length - 1];
+      if (prev && Math.abs(prev.outEnd - at) < 1e-6 && Math.abs(prev.sess + (prev.outEnd - prev.outStart) - sess) < 0.02) prev.outEnd = at + len;
+      else runs.push({ outStart: at, outEnd: at + len, sess });
+      at += len;
+    }
+  }
+  return runs.map((r) => ({ outStart: Math.round(r.outStart * 1000) / 1000, outEnd: Math.round(r.outEnd * 1000) / 1000, sess: Math.round(r.sess * 1000) / 1000 }));
+}
+
+/** Índice do trecho que contém o instante t de saída (o último se t passou o fim); -1 sem trechos. */
+export function runAt(runs: Run[], t: number): number {
+  if (!runs.length) return -1;
+  const i = runs.findIndex((r) => t >= r.outStart - 1e-6 && t < r.outEnd - 1e-6);
+  return i >= 0 ? i : runs.length - 1;
+}

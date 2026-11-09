@@ -53,6 +53,7 @@ export function GuidedEditor({ access, st, onReload }: { access: Access; st: Edi
   const [libErr, setLibErr] = useState(false);
   const [tRaw, setT] = useState(0);
   const [playing, setPlaying] = useState(false);
+  const soundDriving = useRef(false);   // a tocar com imagem, é o som do palco que dá o tempo (W10-29)
   const [word, setWord] = useState<string | null>(null);
   const [newNote, setNewNote] = useState("");
   const [vnote, setVnote] = useState("");
@@ -84,7 +85,7 @@ export function GuidedEditor({ access, st, onReload }: { access: Access; st: Edi
     if (!playing) return;
     let raf = 0; let last = performance.now();
     const tick = (now: number) => {
-      setT((x) => { const n = x + (now - last) / 1000; if (n >= duration) { setPlaying(false); return duration; } return n; });
+      if (!soundDriving.current) setT((x) => { const n = x + (now - last) / 1000; if (n >= duration) { setPlaying(false); return duration; } return n; });
       last = now; raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
@@ -169,7 +170,8 @@ export function GuidedEditor({ access, st, onReload }: { access: Access; st: Edi
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,20rem)_1fr]">
         <div className="flex flex-col gap-2">
-          <EditorStage doc={doc} t={t} media={<PreviewVideo access={access} asset={st.asset.id} versionId={v.id} doc={doc} t={t} playing={playing} />} />
+          <EditorStage doc={doc} t={t} media={<PreviewVideo access={access} asset={st.asset.id} versionId={v.id} doc={doc} t={t} playing={playing}
+            onTime={setT} onEnd={() => setPlaying(false)} onDriving={(on) => { soundDriving.current = on; }} />} />
           <div className="flex items-center justify-center gap-2">
             <Button size="sm" variant="outline" onClick={() => seek(t - 1)} aria-label="Recuar 1 s"><ArrowLeftIcon /></Button>
             <Button size="sm" onClick={() => { if (t >= duration) setT(0); setPlaying((p) => !p); }} aria-label={playing ? "Pausa" : "Tocar"}>{playing ? <PauseIcon /> : <PlayIcon />}</Button>
