@@ -24,6 +24,8 @@ import {
 } from "@/lib/edit-doc";
 import { useFlags } from "@/lib/flags";
 import { AiVisualsPanel } from "@/components/edit/ai-visuals";
+import { ClipOrderView } from "@/components/edit/clip-order-view";
+import { WidgetBoundary } from "@/components/widget-boundary";
 import { variantLabel } from "@/lib/media-review";
 import { clientPath } from "@/lib/ws-path";
 import { cn } from "@/lib/utils";
@@ -351,6 +353,9 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
           </div>
         </div>
       </div>
+
+      {/* original vs. cortado (CLIP-06): só com doc.ai.clip */}
+      <WidgetBoundary label="Original vs. cortado"><ClipOrderView doc={doc} t={t} onSeek={(x) => { setPlaying(false); setT(x); }} /></WidgetBoundary>
 
       {/* linha do tempo (min-w-0: a faixa larga rola dentro, sem alargar a página) */}
       <div className="flex min-w-0 flex-col gap-2 rounded-lg border p-3">

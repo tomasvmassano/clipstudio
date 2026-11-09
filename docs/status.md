@@ -98,7 +98,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | CLIP-03 | P0 | parcial | rubrica e máquinas testadas com episódios reais (piloto CLIP-11); crítica num segundo passo | Agente "Clip Miner": candidatos e ranking |
 | CLIP-04 | P0 | parcial | regra final para afirmações sobre terceiros (§46.5, decisão do Tomás); pessoas identificadas só assinaladas | Etiquetas de polémica e portão da dignidade |
 | CLIP-05 | P0 | parcial | medir com vídeos reais (contexto perdido, ≤ 30 min por hora de fonte) | Diversidade e cortes limpos |
-| CLIP-06 | P0 | parcial | vista lado a lado original/reordenado no editor (dados em ai.clip); verificação com sessão real | Preparação do corte |
+| CLIP-06 | P0 | parcial | verificação com sessão real com um master real (vista Original vs. cortado no editor) | Preparação do corte |
 | CLIP-07 | P0 | parcial | reframe 9:16 com orador ativo (hoje corte ao centro), fontes multi-câmara, verificação com sessão real | Vertical, legendas, estilo e revisão |
 | STU-03 | P0 | parcial | ligar edit.package_script e verificar com sessão real (cortes curtos por guião → pacote em minutos → exportar → rever); disparo pelo agente de estúdio (STU-02); aplicar PENDING_w10_notif_agrupada (notificação agrupada) | Pacote de edição por guião |
 | FR-01-04 | P1 | parcial | sem calendário compacto no Início | Calendário editorial compacto e atividade recente com ator e timestamp. |
@@ -759,7 +759,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | CLIP-03 | parcial | rubrica e máquinas testadas com episódios reais (piloto CLIP-11); crítica num segundo passo | clips.py + prompts/clip_miner.md (clip-miner-1): IDs de frase, tese, máquina, polémica, riscos, pontuação e justificação; test_clips | — |
 | CLIP-04 | parcial | regra final para afirmações sobre terceiros (§46.5, decisão do Tomás); pessoas identificadas só assinaladas | portão da dignidade no motor e no servidor (_clip_meta_problem); test_clips, w10_clip_miner | — |
 | CLIP-05 | parcial | medir com vídeos reais (contexto perdido, ≤ 30 min por hora de fonte) | diversidade, 25-60 s, cortes em fins de frase e silêncios em código; test_clips | — |
-| CLIP-06 | parcial | vista lado a lado original/reordenado no editor (dados em ai.clip); verificação com sessão real | documento v1: gancho no 0:00 com ≤ 3 trechos de frases inteiras, título ≤ 8 palavras, 3 hooks, contexto, CTA; test_clips | — |
+| CLIP-06 | parcial | verificação com sessão real com um master real (vista Original vs. cortado no editor) | documento v1: gancho no 0:00 com ≤ 3 trechos de frases inteiras, título ≤ 8 palavras, 3 hooks, contexto, CTA; test_clips; vista Original vs. cortado no editor e no modo guiado (W10-24, ADR-0073): clip-order.ts + tests/clip-order.test.mts 25/25; e2e/clip-lado-a-lado.spec.ts escrito, não corrido (stack local em baixo) | — |
 | CLIP-07 | parcial | reframe 9:16 com orador ativo (hoje corte ao centro), fontes multi-câmara, verificação com sessão real | cortes no editor, export (EDL-11, QC) e revisão em lote (media_review_list); w10_clip_miner | — |
 | CLIP-08 | por começar |  |  | — |
 | CLIP-09 | por começar |  |  | — |
