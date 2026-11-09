@@ -25,7 +25,7 @@ export function VariantTabs({ access, current, variants, dirty, mode }: {
           return on ? (
             <span key={v.asset_id} aria-current="page" className="rounded-md bg-primary px-3 py-1 text-sm font-medium text-primary-foreground">{variantShort(v.variant)}</span>
           ) : (
-            <Link key={v.asset_id} href={href} title={v.hook_text ?? v.title}
+            <Link key={v.asset_id} href={href} title={v.hook_spoken ?? v.hook_text ?? v.title}
               onClick={(e) => { if (dirty && !window.confirm("Tens alterações por gravar neste hook. Sair sem gravar?")) e.preventDefault(); }}
               className="rounded-md px-3 py-1 text-sm hover:bg-muted">{variantShort(v.variant)}</Link>
           );
