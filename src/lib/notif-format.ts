@@ -71,6 +71,8 @@ export function notifPath(entityType: string, entityId: string): string {
     case "media_asset": return `/revisao?ver=videos&asset=${id}`;
     case "content": return "/guioes";
     case "agent_job": return "/agentes/configuracao";
+    // Notificação agrupada dos pacotes por guião (W10-23, ADR-0072): um lote de gravação leva à Edição automática.
+    case "package_script_batch": return "/edicao-automatica";
     default: return "/";
   }
 }

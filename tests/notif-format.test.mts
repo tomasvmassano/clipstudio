@@ -28,6 +28,7 @@ eq("fuso inválido cai para UTC e diz", fmtInTz("2026-10-30T18:00:00Z", "Nao/Exi
 eq("vídeo abre na revisão de vídeo", notifPath("media_asset", "a b"), "/revisao?ver=videos&asset=a%20b");
 eq("tarefa abre a tarefa", notifPath("task", "7"), "/tarefas?task=7");
 eq("guião abre os guiões", notifPath("content", "numeiro-1"), "/guioes");
+eq("lote de pacotes por guião abre a Edição automática", notifPath("package_script_batch", "b1"), "/edicao-automatica");
 eq("tipo desconhecido vai ao início", notifPath("x", "1"), "/");
 console.log(`notif-format: ${n - bad}/${n}`);
 if (bad) process.exit(1);
