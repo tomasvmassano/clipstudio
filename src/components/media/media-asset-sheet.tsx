@@ -16,6 +16,10 @@ import {
   addLink, createShare, errCode, fetchAsset, purge, restoreAsset, revokeShare, saveAsset, shareUrl, signedUrl, trashAsset,
   type MediaAssetDetail, type MediaLibrary, type MediaVersion,
 } from "@/lib/media";
+import { useSession } from "@/components/session-provider";
+import { LinkForm } from "@/components/editor/script-packages";
+import { useFlags } from "@/lib/flags";
+import { CAMERA_LABEL, getClip, unlinkClip } from "@/lib/package-script";
 import { FORMATS, KIND_LABEL, STATUS_LABEL, VERSION_STATE_LABEL, bytes, kindAccepts, mimeOf, precheck, previewKind, splitTags, type MediaStatus } from "@/lib/media-format";
 
 export function MediaAssetSheet({ access, lib, id, onClose, onChanged, onReplace }: {
@@ -47,6 +51,7 @@ export function MediaAssetSheet({ access, lib, id, onClose, onChanged, onReplace
               <Preview key={`${a.current?.id}-${n}`} access={access} lib={lib} a={a} />
               <Actions access={access} lib={lib} a={a} onChanged={reload} onReplace={onReplace} onClose={onClose} />
               {a.lifecycle === "ativo" && <MetaForm key={a.lock_version} access={access} lib={lib} a={a} onSaved={reload} />}
+              {a.lifecycle === "ativo" && a.kind === "video" && !a.tags.includes("pacote") && <ClipSection access={access} lib={lib} assetId={a.id} onChanged={reload} />}
               <History access={access} lib={lib} a={a} />
               {a.shares && a.lifecycle === "ativo" && <Shares access={access} lib={lib} a={a} onChanged={reload} created={createdShare} setCreated={setCreatedShare} />}
             </>
@@ -348,6 +353,38 @@ function Shares({ access, lib, a, onChanged, created, setCreated }: {
             </li>
           ))}
         </ul>
+      )}
+    </section>
+  );
+}
+
+/** Pacote por guião (STU-03, ADR-0070): de que guião e de que câmara é esta gravação. Só com a flag edit.package_script. */
+function ClipSection({ access, lib, assetId, onChanged }: { access: Access; lib: MediaLibrary; assetId: string; onChanged: () => void }) {
+  const { mode } = useSession();
+  const flags = useFlags(access.ws, access.token ?? null, mode !== "loading");
+  const on = !!flags?.has("edit.package_script");
+  const [n, setN] = useState(0);
+  const c = useLoad(() => (on ? getClip(access, assetId) : Promise.resolve(null)), `${access.ws}:clip:${assetId}:${on}:${n}`);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  if (!on) return null;
+  const done = () => { setN((x) => x + 1); onChanged(); };
+  const unlink = async () => {
+    setBusy(true); setErr(null);
+    try { await unlinkClip(access, assetId); done(); } catch (e) { setErr((e as Error).message); } finally { setBusy(false); }
+  };
+  return (
+    <section aria-labelledby="clip-guiao" className="flex flex-col gap-2">
+      <h3 id="clip-guiao" className="font-medium">Gravação de um guião</h3>
+      {c.error ? (
+        <p className="text-destructive" role="alert">Não consegui ver a ligação: {(c.error as Error).message} <button type="button" className="underline" onClick={c.reload}>Tentar de novo</button></p>
+      ) : c.loading ? <Skeleton className="h-10" /> : (
+        <>
+          <p className="text-muted-foreground">{c.data ? `Câmara ${CAMERA_LABEL[c.data.camera].toLowerCase()} do guião ligado (${c.data.linked_label ?? "?"}, ${fmtDateTime(c.data.linked_at, lib.timezone)}).` : "Não está ligada a nenhum guião. Liga-a para o pacote por guião."}</p>
+          {lib.can.upload && <LinkForm key={`${c.data?.content_id}-${c.data?.camera}`} access={access} asset={assetId} current={c.data} onDone={done} />}
+          {lib.can.upload && c.data && <div><Button size="sm" variant="outline" onClick={unlink} disabled={busy}>{busy && <Loader2Icon className="animate-spin" />} Desligar do guião</Button></div>}
+          {err && <p className="text-destructive" role="alert">{err}</p>}
+        </>
       )}
     </section>
   );

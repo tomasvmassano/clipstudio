@@ -27,6 +27,8 @@ import { MARKER } from "@/lib/recording";
 import { ReasonForm } from "@/components/guiao-reason-form";
 import { DeleteScriptDialog } from "@/components/guiao-delete";
 import { HookChecks, VerifierSummary, useVerification } from "@/components/guiao-verifier";
+import { ApproveLearnForm, EditReasonPrompt, useEditOptions } from "@/components/learn/edit-reason";
+import type { EditRatio } from "@/lib/lessons";
 
 const MECH = ["pergunta", "contra", "numero", "ego", "confissao", "segredo"];
 
@@ -38,6 +40,9 @@ const STATUS_STYLE: Record<EditorialStatus, string> = {
   rejected: "bg-destructive text-white border-transparent",
   archived: "text-muted-foreground",
 };
+
+/** Sinal interno: a aprovação precisa do formulário de motivo (não é um erro para mostrar). */
+const APPROVE_FORM = Symbol("approve-form");
 
 type Props = {
   g: Guiao;
@@ -72,7 +77,8 @@ const clean = (d: Draft) => ({
 
 export function GuiaoCard({ g, carried, caps, actions, onError, startInEdit, openComments }: Props) {
   const [open, setOpen] = useState(false);
-  const [mode, setMode] = useState<"view" | "edit" | "changes_requested" | "rejected">(startInEdit ? "edit" : "view");
+  const [mode, setMode] = useState<"view" | "edit" | "changes_requested" | "rejected" | "approve" | "edit_reason">(startInEdit ? "edit" : "view");
+  const [approveRatio, setApproveRatio] = useState<EditRatio | null>(null);
   const [busy, setBusy] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [briefOpen, setBriefOpen] = useState(false);
@@ -88,6 +94,10 @@ export function GuiaoCard({ g, carried, caps, actions, onError, startInEdit, ope
   }, [g, mode]);
   const lists = useMetaLists(actions);
   const verif = useVerification(g, actions);
+  // LRN-01: com learn.edits ligada, editar/aprovar/rejeitar um guião do motor pede o motivo (um toque). Desligada = como antes.
+  const editOpts = useEditOptions(actions);
+  const learned = !!editOpts?.enabled;
+  const backToView = useCallback(() => setMode("view"), []);
   const names = metaNames(g, lists.projects, lists.owners);
 
   const st = g.editorial_status;
@@ -103,11 +113,20 @@ export function GuiaoCard({ g, carried, caps, actions, onError, startInEdit, ope
       await fn();
       setMode("view");
     } catch (e) {
+      if (e === APPROVE_FORM) { setMode("approve"); return; }
       onError((e as Error).message);
     } finally {
       setBusy(false);
     }
   };
+
+  // Aprovar: sem flag, como sempre; com flag, guião do motor sem edição aprova logo (sinal positivo), editado pede motivo.
+  const approve = () => run(async () => {
+    if (!learned) return actions.transition(g.id, "approved", undefined, g.lock_version);
+    const r = await actions.editRatio(g.id);
+    if (r.engine && r.ratio) { setApproveRatio(r); throw APPROVE_FORM; }
+    return actions.decideLearned(g.id, "approved", { lock: g.lock_version });
+  });
 
   const meta = (
     <div className="flex flex-wrap items-center gap-1.5 text-xs">
@@ -144,7 +163,7 @@ export function GuiaoCard({ g, carried, caps, actions, onError, startInEdit, ope
           {meta}
 
           {mode === "edit" ? (
-            <BlockEditor g={g} actions={actions} onError={onError} onClose={() => setMode("view")} />
+            <BlockEditor g={g} actions={actions} onError={onError} onClose={backToView} onFinish={() => setMode(learned ? "edit_reason" : "view")} />
           ) : (
             <>
               <ol className="flex flex-col gap-1.5" aria-label="Hooks">
@@ -187,7 +206,13 @@ export function GuiaoCard({ g, carried, caps, actions, onError, startInEdit, ope
           )}
 
           {(mode === "changes_requested" || mode === "rejected") && (
-            <ReasonForm g={g} mode={mode} actions={actions} busy={busy} run={run} onCancel={() => setMode("view")} />
+            <ReasonForm g={g} mode={mode} actions={actions} busy={busy} run={run} onCancel={() => setMode("view")} learnCodes={learned ? editOpts!.codes : null} />
+          )}
+          {mode === "approve" && approveRatio && editOpts && (
+            <ApproveLearnForm g={g} actions={actions} codes={editOpts.codes} ratio={approveRatio} busy={busy} run={run} onCancel={backToView} />
+          )}
+          {mode === "edit_reason" && editOpts && (
+            <EditReasonPrompt g={g} actions={actions} codes={editOpts.codes} onDone={backToView} onError={onError} />
           )}
 
           {mode === "view" && (
@@ -202,8 +227,8 @@ export function GuiaoCard({ g, carried, caps, actions, onError, startInEdit, ope
                 </Button>
               )}
               {(st === "in_review" || ((st === "draft" || st === "changes_requested") && caps.submit)) && caps.approve && (
-                <Button size="sm" disabled={busy} onClick={() => run(() => actions.transition(g.id, "approved", undefined, g.lock_version))}>
-                  <CheckIcon /> Aprovar
+                <Button size="sm" disabled={busy || (caps.approve && editOpts === null)} onClick={approve}>
+                  {busy ? <Loader2Icon className="animate-spin" /> : <CheckIcon />} Aprovar
                 </Button>
               )}
               {st === "in_review" && caps.reject && (
@@ -289,7 +314,9 @@ export function GuiaoCard({ g, carried, caps, actions, onError, startInEdit, ope
 }
 
 /** Editor por blocos: Hook 1..N, Corpo, CTA e Notas. Guarda sozinho (FR-02-02); conflitos recarregam (FR-02-06). */
-function BlockEditor({ g, actions, onError, onClose }: { g: Guiao; actions: ScriptActions; onError: (m: string) => void; onClose: () => void }) {
+function BlockEditor({ g, actions, onError, onClose, onFinish }: {
+  g: Guiao; actions: ScriptActions; onError: (m: string) => void; onClose: () => void; onFinish: () => void;
+}) {
   const [d, setD] = useState<Draft>(() => toDraft(g));
   const [state, setState] = useState<"idle" | "dirty" | "saving" | "saved" | "error">("idle");
   const [recover, setRecover] = useState<LocalDraft | null>(() => {
@@ -402,7 +429,7 @@ function BlockEditor({ g, actions, onError, onClose }: { g: Guiao; actions: Scri
         <Textarea id={`${g.id}-notas`} rows={2} className="font-normal text-foreground" value={d.notas} onChange={(e) => change({ ...d, notas: e.target.value })} />
       </label>
       <div className="flex flex-wrap items-center gap-3">
-        <Button size="sm" onClick={async () => { if (await flush()) onClose(); }} disabled={state === "saving"}>
+        <Button size="sm" onClick={async () => { if (await flush()) onFinish(); }} disabled={state === "saving"}>
           {state === "saving" && <Loader2Icon className="animate-spin" />} Concluir
         </Button>
         <span className="text-xs text-muted-foreground" role="status" aria-live="polite">

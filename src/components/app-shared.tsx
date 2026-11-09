@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import {
 	Building2Icon, GaugeIcon, KeyRoundIcon, ScrollIcon, SettingsIcon, SlidersHorizontalIcon,
 	LayoutGridIcon, ScrollTextIcon, MonitorPlayIcon, LightbulbIcon, BarChart3Icon, BotIcon,
-	BriefcaseBusinessIcon, ClapperboardIcon, FlaskRoundIcon, RotateCcwIcon, FilmIcon, ReceiptIcon, FlaskConicalIcon, LibraryIcon, ShieldCheckIcon, UsersIcon, UsersRoundIcon, WalletIcon, FileTextIcon, DoorOpenIcon, HistoryIcon, PlugIcon, InboxIcon, ListTodoIcon, CalendarDaysIcon, WandSparklesIcon, ScissorsIcon, ActivityIcon } from "lucide-react";
+	BriefcaseBusinessIcon, ClapperboardIcon, FlaskRoundIcon, GraduationCapIcon, RotateCcwIcon, FilmIcon, ReceiptIcon, FlaskConicalIcon, LibraryIcon, ShieldCheckIcon, UsersIcon, UsersRoundIcon, WalletIcon, FileTextIcon, DoorOpenIcon, HistoryIcon, PlugIcon, InboxIcon, ListTodoIcon, CalendarDaysIcon, WandSparklesIcon, ScissorsIcon, ActivityIcon } from "lucide-react";
 
 export type SidebarNavItem = {
 	title: string;
@@ -90,6 +90,7 @@ export const clientNavGroups: SidebarNavGroup[] = [
 			{ title: "Agentes e execuções", path: "/agentes/configuracao", icon: <SlidersHorizontalIcon />, cap: "agents.read" },
 			{ title: "Retrabalho", path: "/aprendizagem/retrabalho", icon: <RotateCcwIcon />, cap: "learn.read", flag: "learn.rework" },
 			{ title: "Experiências e vencedores", path: "/aprendizagem/experiencias", icon: <FlaskRoundIcon />, cap: "learn.read", flag: "learn.experiments" },
+			{ title: "Lições", path: "/aprendizagem/licoes", icon: <GraduationCapIcon />, cap: "learn.read", flag: "learn.lessons" },
 			{ title: "Custos", path: "/custos", icon: <WalletIcon />, cap: "costs.read", flag: "costs.content" },
 		],
 	},

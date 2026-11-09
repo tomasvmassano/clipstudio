@@ -22,6 +22,7 @@ begin
     ('ws_v_a', 1, 'active', cfg, '{"ok":true,"errors":[],"warnings":[]}', now()), ('ws_v_b', 1, 'active', cfg, '{"ok":true,"errors":[],"warnings":[]}', now());
   ja := (_agent_enqueue('ws_v_a', 'daily_pipeline', 'verif-a', now(), '{"kind":"system","label":"t"}', '{}')).id;
   jb := (_agent_enqueue('ws_v_b', 'daily_pipeline', 'verif-b', now(), '{"kind":"system","label":"t"}', '{}')).id;
+  perform agent_schedule_tick();   -- a agenda corre dentro do worker_claim: já aqui (idempotente por dia), para não depender da hora
   update agent_jobs set next_attempt_at = now() + interval '1 day' where status = 'queued' and id not in (ja, jb);
   update agent_jobs set scheduled_for = now() - interval '1 minute', next_attempt_at = now() - interval '1 minute' where id = ja;
   create temp table t(name text, expected boolean, got boolean) on commit drop;
