@@ -100,7 +100,7 @@ function Queue({ access, tab, onCounts }: { access: Access; tab: ReactTab; onCou
         {data.last_run ? <>Última recolha do agente: {fmtWhen(data.last_run)}.</> : <>O agente ainda não correu para este cliente.</>}
         {tab === "open" && " Ordenado pela nota da IA e pelo tempo que falta."}
       </p>
-      {data.items.length === 0 && <Empty tab={tab} />}
+      {data.items.length === 0 && <div aria-live="polite"><Empty tab={tab} /></div>}
       {data.items.map((it) => (
         <ReactCard key={it.id} access={access} it={it} can={data.can} onChange={replace} onReject={() => setRejecting(it)} onError={setError} />
       ))}
