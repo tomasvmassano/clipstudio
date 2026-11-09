@@ -25,3 +25,20 @@ test("plano no ar: câmara, zoom e tempo na gravação", () => {
   assert.equal(shotAt(doc, 99), null);
   assert.equal(audioCam(doc), "side");
 });
+
+test("trechos de áudio: só salta onde o corte salta (W10-29)", async () => {
+  const { audioRuns, runAt } = await import("../src/lib/edit-preview.ts");
+  // dois segmentos afastados na fonte → dois trechos; janelas [100,110],[200,230]
+  assert.deepEqual(audioRuns(doc), [{ outStart: 0, outEnd: 5, sess: 105 }, { outStart: 5, outEnd: 10, sess: 215 }]);
+  // segmentos seguidos na fonte (corte de pausa desfeito) colam num trecho só
+  const glued = { ...(doc as object), segments: [{ id: "a", in: 1, out: 3 }, { id: "b", in: 3, out: 6 }] } as never;
+  assert.deepEqual(audioRuns(glued), [{ outStart: 0, outEnd: 5, sess: 101 }]);
+  // um segmento que atravessa a fronteira de duas janelas parte-se onde a gravação salta
+  const cross = { ...(doc as object), segments: [{ id: "a", in: 8, out: 12 }] } as never;
+  assert.deepEqual(audioRuns(cross), [{ outStart: 0, outEnd: 2, sess: 108 }, { outStart: 2, outEnd: 4, sess: 200 }]);
+  // sem janelas: tempo virtual = gravação
+  assert.deepEqual(audioRuns(glued, null).length, 1);
+  const runs = audioRuns(doc);
+  assert.equal(runAt(runs, 0), 0); assert.equal(runAt(runs, 4.99), 0); assert.equal(runAt(runs, 5), 1); assert.equal(runAt(runs, 99), 1);
+  assert.equal(runAt([], 1), -1);
+});

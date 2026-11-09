@@ -97,6 +97,7 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
   const words = useMemo(() => wordsOut(doc), [doc]);
   const [tRaw, setT] = useState(0);
   const [playing, setPlaying] = useState(false);
+  const soundDriving = useRef(false);   // a tocar com imagem, é o som do palco que dá o tempo (W10-29)
   const [sel, setSel] = useState<Sel>(null);
   const [pps, setPps] = useState(40);
   const [note, setNote] = useState("");
@@ -149,7 +150,7 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
     if (!playing) return;
     let raf = 0; let last = performance.now();
     const tick = (now: number) => {
-      setT((x) => { const n = x + (now - last) / 1000; if (n >= duration) { setPlaying(false); return duration; } return n; });
+      if (!soundDriving.current) setT((x) => { const n = x + (now - last) / 1000; if (n >= duration) { setPlaying(false); return duration; } return n; });
       last = now; raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
@@ -244,7 +245,8 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
       <div className="grid gap-4 lg:grid-cols-[minmax(0,20rem)_1fr]">
         {/* palco 9:16 */}
         <div className="flex flex-col gap-2">
-          <EditorStage doc={doc} t={t} media={<PreviewVideo access={access} asset={st.asset.id} versionId={v.id} doc={doc} t={t} playing={playing} />} />
+          <EditorStage doc={doc} t={t} media={<PreviewVideo access={access} asset={st.asset.id} versionId={v.id} doc={doc} t={t} playing={playing}
+            onTime={setT} onEnd={() => setPlaying(false)} onDriving={(on) => { soundDriving.current = on; }} />} />
           <div className="flex items-center justify-center gap-2">
             <Button size="sm" variant="outline" onClick={() => setT((x) => Math.max(0, x - 1))} aria-label="Recuar 1 s"><ArrowLeftIcon /></Button>
             <Button size="sm" onClick={() => { if (t >= duration) setT(0); setPlaying((p) => !p); }} aria-label={playing ? "Pausa" : "Tocar"}>{playing ? <PauseIcon /> : <PlayIcon />}</Button>
