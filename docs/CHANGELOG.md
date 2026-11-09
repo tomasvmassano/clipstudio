@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-09 (som da lapela na câmara escolhida)
+
+- **W10-27** Câmara com o som da lapela escolhida em cada pacote (EDL-01; pedido do Tomás a 09/11; ADR-0074). Até aqui o pacote assumia sempre a lapela na câmara do lado, uma regra herdada do protótipo que nunca foi confirmada. Em Edição automática → Novo pacote, o campo "Som da lapela" (na câmara da frente ou na do lado) é obrigatório e fica lembrado no dispositivo. `edit_package_request` ganha `p_audio` (por defeito `side`, o comportamento de sempre) e guarda-o em `input.audio`; o motor (numeiro-engine `lapela-camara`) tira daí o som, a transcrição e o tempo do documento, e sincroniza a outra câmara. Migração `PENDING_w10_som_da_lapela.sql` (drop + create com o parâmetro novo no fim, rollback no fim). Testes: `w10_som_da_lapela`, suite SQL 3006/3006, motor `test_do_package_som_da_lapela_na_frente`. Limite: o pacote por guião ainda usa o lado.
+
 ## 2026-11-09 (teleprompter: só aprovados)
 
 - **W10-25** Filtro "Só aprovados" na fila do teleprompter (FR-03-01; pedido do Tomás a 09/11), ao lado da campanha e do responsável: a fila e o "Começar no guião" ficam só com os guiões aprovados, prontos para ler. A escolha fica guardada no dispositivo, como os outros filtros, e "Limpar filtros" repõe tudo. Sem migração: usa o estado editorial que a fila já traz. E2E `content-meta` alargado.

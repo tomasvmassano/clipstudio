@@ -49,7 +49,7 @@ export type PackageJob = Omit<ExportJob, "kind" | "result"> & {
   kind: "package"; front_name: string | null; side_name: string | null; version_id: string | null;   // version_id = câmara do lado
   guioes: { id: string; n: number; tema: string | null; deleted?: boolean }[] | null;
   outputs: { guiao_id: string; hook: number; asset_id: string; title: string }[];
-  result: { documents?: unknown[]; missing?: string[]; flags?: string[]; offset?: { front: number; confidence: number }; windows?: unknown } | null;
+  result: { documents?: unknown[]; missing?: string[]; flags?: string[]; offset?: { front: number; side?: number; confidence: number }; windows?: unknown } | null;
 };
 export type EditDocRow = {
   asset_id: string; title: string; content_id: string | null; tags: string[]; version_no: number; source: "import" | "ai" | "user" | "agent";
@@ -57,8 +57,8 @@ export type EditDocRow = {
   flags: string[] | null; guiao: { id: string; n: number; date: string; tema: string | null } | null;
   export: { status: ExportJob["status"]; progress: ExportJob["progress"] } | null;
 };
-export const requestPackage = (a: Access, front: string, side: string, guioes: string[], style: string) =>
-  rpc<PackageJob>("edit_package_request", { p_ws: a.ws, p_front: front, p_side: side, p_guioes: guioes, p_style: style, p_token: a.token });
+export const requestPackage = (a: Access, front: string, side: string, guioes: string[], style: string, audio: "front" | "side" = "side") =>
+  rpc<PackageJob>("edit_package_request", { p_ws: a.ws, p_front: front, p_side: side, p_guioes: guioes, p_style: style, p_token: a.token, p_audio: audio });
 export const listPackages = (a: Access) => rpc<PackageJob[]>("edit_package_list", { p_ws: a.ws, p_token: a.token });
 export const listEditDocs = (a: Access) => rpc<EditDocRow[]>("edit_doc_list", { p_ws: a.ws, p_token: a.token });
 

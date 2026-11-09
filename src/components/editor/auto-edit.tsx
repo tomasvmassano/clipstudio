@@ -50,6 +50,12 @@ export function AutoEditView({ access }: { access: Access }) {
   const [side, setSide] = useState("");
   const [picked, setPicked] = useState<Set<string> | null>(null);
   const [style, setStyle] = useState("S15");
+  // câmara com o som da lapela: escolhida em cada pacote (pode mudar de sessão para sessão); lembra a última neste dispositivo
+  const audioKey = `pkg.audio.${access.ws}`;
+  const [audio, setAudioState] = useState<"" | "front" | "side">(() => {
+    try { const v = localStorage.getItem(audioKey); return v === "front" || v === "side" ? v : ""; } catch { return ""; }
+  });
+  const setAudio = (v: "" | "front" | "side") => { setAudioState(v); try { if (v) localStorage.setItem(audioKey, v); } catch {} };
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -63,7 +69,7 @@ export function AutoEditView({ access }: { access: Access }) {
     setBusy(true); setErr(null);
     try {
       const ordered = guioes.filter((g) => sel.has(g.id)).sort((a, b) => (a.date === b.date ? a.n - b.n : a.date < b.date ? -1 : 1)).map((g) => g.id);
-      await requestPackage(access, front, side, ordered, style);
+      await requestPackage(access, front, side, ordered, style, audio || "side");
       setTick((n) => n + 1);
     } catch (e) { setErr((e as Error).message); } finally { setBusy(false); }
   };
@@ -82,6 +88,7 @@ export function AutoEditView({ access }: { access: Access }) {
   };
   const reason = !mayRequest ? "Sem permissão para pedir pacotes (precisa de editar na linha do tempo)."
     : !front || !side ? "Escolhe as duas gravações." : front === side ? "As duas câmaras têm de ser gravações diferentes."
+    : !audio ? "Escolhe em que câmara está o som da lapela."
     : sel.size === 0 ? "Escolhe os guiões gravados nesta sessão." : null;
 
   return (
@@ -98,19 +105,26 @@ export function AutoEditView({ access }: { access: Access }) {
         <section ref={formRef} className="rounded-xl border p-4" aria-labelledby="novo-pacote">
           <h2 id="novo-pacote" className="mb-3 font-medium">Novo pacote</h2>
           {lib.error ? <LoadState loading={false} error={lib.error} reload={lib.reload} label="as gravações">{null}</LoadState> : !lib.last ? <Skeleton className="h-24" /> : recordings.length < 2 ? (
-            <Alert><AlertDescription>Carrega primeiro na <Link className="underline" href={`/c/${access.ws}/biblioteca`}>Biblioteca</Link> as duas gravações da sessão (câmara da frente e câmara do lado, com o som). Precisam de estar prontas (verificadas no servidor).</AlertDescription></Alert>
+            <Alert><AlertDescription>Carrega primeiro na <Link className="underline" href={`/c/${access.ws}/biblioteca`}>Biblioteca</Link> as duas gravações da sessão (câmara da frente e câmara do lado; uma delas com o som da lapela). Precisam de estar prontas (verificadas no servidor).</AlertDescription></Alert>
           ) : (
-            <div className="grid gap-3 md:grid-cols-3">
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
               <label className="flex flex-col gap-1 text-sm">Câmara da frente
                 <select className={selectCls} value={front} onChange={(e) => setFront(e.target.value)}>
                   <option value="">Escolher…</option>
                   {recordings.map((a) => <option key={a.id} value={a.current!.id}>{a.current!.original_name ?? a.title}</option>)}
                 </select>
               </label>
-              <label className="flex flex-col gap-1 text-sm">Câmara do lado (com o som da lapela)
+              <label className="flex flex-col gap-1 text-sm">Câmara do lado
                 <select className={selectCls} value={side} onChange={(e) => setSide(e.target.value)}>
                   <option value="">Escolher…</option>
                   {recordings.map((a) => <option key={a.id} value={a.current!.id}>{a.current!.original_name ?? a.title}</option>)}
+                </select>
+              </label>
+              <label className="flex flex-col gap-1 text-sm">Som da lapela
+                <select className={selectCls} value={audio} onChange={(e) => setAudio(e.target.value as "" | "front" | "side")}>
+                  <option value="">Escolher…</option>
+                  <option value="front">Na câmara da frente</option>
+                  <option value="side">Na câmara do lado</option>
                 </select>
               </label>
               <label className="flex flex-col gap-1 text-sm">Estilo de legendas
@@ -231,7 +245,7 @@ function PackageRow({ j, access, mayExport, showWindows, onRetry, onDone }: { j:
       )}
       {err && <p className="mt-1 text-xs text-destructive" role="alert">{err} <button type="button" className="underline" onClick={exportAll}>Tentar de novo</button></p>}
       {j.status === "done" && (j.result?.missing?.length ?? 0) > 0 && <p className="mt-1 text-xs text-amber-500">Não encontrei na gravação: {j.result!.missing!.join(", ")}.</p>}
-      {j.status === "done" && j.result?.offset && <p className="mt-1 text-xs text-muted-foreground">Câmaras sincronizadas pelo som (desvio {j.result.offset.front.toFixed(2)} s, confiança {j.result.offset.confidence}).</p>}
+      {j.status === "done" && j.result?.offset && <p className="mt-1 text-xs text-muted-foreground">Câmaras sincronizadas pelo som (desvio {(j.result.offset.front || j.result.offset.side || 0).toFixed(2)} s, confiança {j.result.offset.confidence}).</p>}
       {showWindows && j.status === "done" && <WindowsDetail j={j} />}
     </div>
   );
