@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-09 (CHG-009 radar de reacts)
+
+- **CHG-009** (só documentação; PRD §47). REACT-01..07: contas vigiadas e agente de descoberta de contas com takes polémicos, recolha de takes das últimas 48 h com índice de polémica, avaliação pela IA com parcelas, tab Reacts para ver, descarregar e decidir (gravar, guardar, rejeitar com motivo e nota), gravar cria guião, aprendizagem com decisões e resultados. 3 capacidades planeadas. Sem alteração funcional.
+
 ## 2026-11-06 (testes SQL independentes da hora)
 
 - Correção de testes: `w10_referencias_link` e `w10_verificador` falhavam quando a suite corria depois das 18:00 em Dubai, porque o `worker_claim` corre a agenda diária (`agent_schedule_tick`) e enfileirava a corrida do dia do Numeiro, que o worker do teste apanhava. Os dois testes correm a agenda antes (idempotente por dia) e empurram essa corrida para amanhã. Só testes; sem migração nem mudança de comportamento. Suite SQL 2753/2753 às 18:30 de Dubai.

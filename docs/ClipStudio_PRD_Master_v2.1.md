@@ -1522,3 +1522,23 @@ Concretiza ING-02 e ING-03 para gravação ao vivo e edição guião a guião.
 **Sequência (altera §44 na ordem, não no âmbito):** GAZE-06 já, sem código; a seguir às tarefas W5 em curso: CLIP-01..07 e CLIP-11 (MVP do Clip Miner, a reutilizar storage, transcrição, catálogo de estilos, QC e revisão em lote), STU-01..03 e GAZE-01..02; depois LRN-01..05, GAZE-03..04, CLIP-08..09; por fim LRN-06..07, CLIP-10 e GAZE-05.
 
 **Em aberto:** regra final para afirmações falsas sobre terceiros (R-17 mantém-se até decisão; proposta: o motor não as gera, as escritas por pessoas ficam marcadas e só avançam com aprovação explícita e auditada); usar a curva "mais revistos" recolhida por scraper na seleção (fora da exceção R-20, que cobre referências) ou só a retenção oficial com OAuth; autorização dos convidados que aparecem nos vídeos; revisor por cliente e prazo máximo do upload aos cortes aprovados; rotulagem no TikTok de vídeos com olhar corrigido; fornecedor de transcrição depois do teste em PT-PT.
+
+## 47. Radar de reacts (REACT, CHG-009)
+
+Origem: IDEA-017 da inbox de ideias do Tomás (09/11/2026). Os reacts a takes polémicos de outras pessoas rendem mais discussão do que os talking heads com guião: o react do Numeiro a um vídeo do @kikoishot (05/11) teve 487 mil reproduções e 1,6 comentários por mil, cerca de 5 vezes a média da conta. O radar encontra esses takes cedo, avalia se vale a pena reagir e deixa-os prontos a abrir, descarregar e gravar dentro da app. Usa o mesmo mecanismo de recolha de R-20 (risco de termos de serviço aceite pelo Tomás).
+
+**REACT-01 [P1] Fontes vigiadas e descoberta de contas.** Lista de contas vigiadas por cliente (Instagram e TikTok). Um agente de descoberta propõe contas novas a partir das vigiadas: coautores e contas marcadas, perfis relacionados, comentadores com muitos seguidores e pesquisa pelos temas quentes do dia. Cada proposta mostra a origem e uma pontuação (língua, peso de vídeos de opinião, índice de polémica médio, tamanho). Uma conta só passa a ser vigiada depois de alguém a aceitar; aceitar e rejeitar ficam registados e servem de aprendizagem.
+
+**REACT-02 [P1] Recolha de takes.** Das contas vigiadas, os vídeos das últimas 48 horas [pressuposto] entram como candidatos com métricas públicas e data de recolha, link original, legenda, transcrição quando existe, tipo de vídeo (react, talking head, visual, frase) e índice de polémica = comentários por mil reproduções a dividir pela mediana da própria conta. Repetidos detetados pela identidade do vídeo (REF-01).
+
+**REACT-03 [P1] Avaliação pela IA.** Cada candidato recebe uma nota de 0 a 100 com as parcelas visíveis: polémica medida, encaixe com a persona do cliente, força do contra-ângulo, frescura, tamanho do alvo e risco. Gera ângulo sugerido, 3 ganchos e um rascunho de resposta. Risco alto (acusações a pessoas identificadas, menores, pessoas vulneráveis, regras das plataformas) fica assinalado e nunca é escondido. Modelo, prompt e versão do avaliador ficam registados (AGENTS §7).
+
+**REACT-04 [P1] Tab Reacts.** Fila por cliente ordenada por nota e tempo até expirar (72 h por defeito [pressuposto]), com contagem decrescente. Cada cartão permite ver o vídeo original dentro da app e descarregá-lo diretamente, ver as métricas e a nota explicada, e decidir: Gravar, Guardar para depois ou Rejeitar com motivo (sem interesse, velho, alvo errado, ângulo fraco, risco), com nota manual opcional de 1 a 5. Separadores para A decidir, Guardados, Gravados e Rejeitados, e para Fontes (contas vigiadas e propostas).
+
+**REACT-05 [P1] Gravar a partir de um react.** "Gravar" cria um guião no cliente (formato react) com o ângulo, os ganchos e a resposta, ligado ao vídeo de origem, e marca o candidato como gravado. O guião segue o fluxo editorial normal; nada é publicado sem aprovação (AGENTS §2.7). Mostra-se só um excerto curto e creditado do original no vídeo final.
+
+**REACT-06 [P1] Aprendizagem.** Decisões humanas (gravar, guardar, rejeitar, nota) e o desempenho dos reacts publicados (comentários por mil e reproduções face à mediana) alimentam a avaliação seguinte e propõem lições (LRN). Relatório de calibração: concordância da nota da IA com as decisões humanas e com o resultado.
+
+**REACT-07 [P2] Agendamento e frescura.** O agente corre pelo menos uma vez por dia; os links de vídeo que expiram são renovados enquanto o candidato está aberto ou guardado; candidatos expirados saem da fila "A decidir" mas não se apagam.
+
+**Regras:** opinião forte sim; acusações de crimes ou factos falsos sobre a pessoa a quem se reage, não (R-17, AGENTS §7). Isolamento por cliente (R-13): fontes, candidatos e decisões de um cliente nunca aparecem noutro.
