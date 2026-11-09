@@ -14,6 +14,8 @@ import { ExportPanel } from "@/components/editor/export-panel";
 import { PreviewVideo } from "@/components/editor/preview-video";
 import { SavedStylesPanel } from "@/components/edit/style-tools";
 import { AiVisualsPanel } from "@/components/edit/ai-visuals";
+import { ClipOrderView } from "@/components/edit/clip-order-view";
+import { WidgetBoundary } from "@/components/widget-boundary";
 import type { Access } from "@/lib/access";
 import { EditRpcError, SOURCE_LABEL, applyAlternative, saveEdit, type EditState } from "@/lib/edit";
 import {
@@ -193,6 +195,7 @@ export function GuidedEditor({ access, st, onReload }: { access: Access; st: Edi
             <TabsContent value="corte" className="flex flex-col gap-3 pt-2">
               {ai && <p className="text-muted-foreground">Escolha da IA (v{ai.version_no}): {ai.segments.length} cortes.
                 {aiSegsOk && <Button size="sm" variant="link" disabled={!canEdit} onClick={() => apply({ ...doc, segments: ai.segments })}>Voltar aos cortes da IA</Button>}</p>}
+              <WidgetBoundary label="Original vs. cortado"><ClipOrderView doc={doc} t={t} onSeek={seek} /></WidgetBoundary>
               <ol className="flex flex-col gap-1" aria-label="Cortes">
                 {wordsBySegment(doc).map(({ seg, words }, i) => (
                   <li key={seg.id} className={cn("flex items-start gap-2 rounded border px-2 py-1", t >= seg.at && t < seg.at + seg.dur && "border-primary")}>

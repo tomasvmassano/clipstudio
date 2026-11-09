@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-09 (original vs. cortado no editor)
+
+- **W10-24** vista "Original vs. cortado" no editor para cortes do Clip Miner (CLIP-06; ADR-0073). Só aparece quando o documento tem `ai.clip`: à esquerda os trechos pela ordem do master com os tempos do master e o que ficou de fora com fala ("cortado: 0:46-0:54", texto riscado), à direita a ordem do corte na versão aberta, com "movido de 2.º para 1.º" e "repetido"; clicar (ou Enter) num trecho leva a pré-visualização até ele. Também no passo "Corte" do modo guiado (só leitura). `ai.clip` só tem IDs de frase, por isso a comparação calcula-se dos segmentos e das palavras do documento (`src/lib/clip-order.ts`). Sem migração nem permissão nova. Testes `clip-order` 25/25 (no `npm test`); E2E `e2e/clip-lado-a-lado.spec.ts` escrito, não corrido (stack local em baixo).
+
 ## 2026-11-06 (testes SQL independentes da hora)
 
 - Correção de testes: `w10_referencias_link` e `w10_verificador` falhavam quando a suite corria depois das 18:00 em Dubai, porque o `worker_claim` corre a agenda diária (`agent_schedule_tick`) e enfileirava a corrida do dia do Numeiro, que o worker do teste apanhava. Os dois testes correm a agenda antes (idempotente por dia) e empurram essa corrida para amanhã. Só testes; sem migração nem mudança de comportamento. Suite SQL 2753/2753 às 18:30 de Dubai.
