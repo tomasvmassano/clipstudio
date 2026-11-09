@@ -15,13 +15,14 @@ import { WorkspaceGate } from "@/components/workspace-gate";
 import { FlagGate } from "@/components/flag-gate";
 import type { Access } from "@/lib/access";
 import { SOURCE_LABEL, fetchBoard, fetchEdit, saveEdit, variantShort, type BoardVariant, type EditState } from "@/lib/edit";
-import { applyBodyToSiblings, bodySummary } from "@/lib/body-share-client";
+import { applyBodyToSiblings, bodySummary, flashBody, takeBodyFlash } from "@/lib/body-share-client";
 import { VariantTabs } from "@/components/edit/variant-tabs";
 import { fetchLibrary, type MediaAsset } from "@/lib/media";
 import { useSession } from "@/components/session-provider";
 import {
   addNote, addOverlay, clearGain, deleteSegment, editWord, fmtT, historyOf, layout, moveSegment, notesOut, problem, push, redo,
   removeNote, removeOverlay, resizeOverlay, setGain, setHook, setMusic, setMusicDb, shiftOverlay, shiftWord, spanOut, splitSegment, toggleNote, trimSegment, undo,
+  camAt, setCam, splitCamAt, frameAllCam, outToSrc, CAM_ANCHOR, ZOOM_LIMITS,
   wordsOut, BOX_PRESETS, boxPreset, setOverlayBox, type EditDoc, type History,
 } from "@/lib/edit-doc";
 import { useFlags } from "@/lib/flags";
@@ -31,13 +32,13 @@ import { WidgetBoundary } from "@/components/widget-boundary";
 import { variantLabel } from "@/lib/media-review";
 import { clientPath } from "@/lib/ws-path";
 import { cn } from "@/lib/utils";
-import { EditorStage } from "@/components/edit/editor-stage";
+import { EditorStage, type StageGuides } from "@/components/edit/editor-stage";
 import { ExportPanel } from "@/components/editor/export-panel";
 import { PreviewVideo } from "@/components/editor/preview-video";
 import { GuidedEditor } from "@/components/edit/guided-editor";
 import { LookPanel, SavedStylesPanel } from "@/components/edit/style-tools";
 
-type Sel = { kind: "seg" | "word" | "ov" | "note"; id: string } | null;
+type Sel = { kind: "seg" | "word" | "ov" | "note" | "cam"; id: string } | null;
 type DragKind = "seg-in" | "seg-out" | "word" | "ov" | "ov-s" | "ov-e";
 type Drag = { kind: DragKind; id: string; x0: number; base: EditDoc; doc: EditDoc };
 const EDITABLE_KINDS = new Set(["video", "imagem", "thumbnail", "link_externo"]);
@@ -97,7 +98,6 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
   const dirty = h.past.length > 0;
   // hooks do mesmo guião (EDL-14/15): separadores e corpo partilhado
   const [siblings, setSiblings] = useState<BoardVariant[]>([]);
-  const [shareBody, setShareBody] = useState(() => { try { return localStorage.getItem("edit.shareBody") !== "0"; } catch { return true; } });
   useEffect(() => {
     if (!st.asset.content_id) return;
     let live = true;
@@ -113,7 +113,7 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
   const [pps, setPps] = useState(40);
   const [note, setNote] = useState("");
   const [saving, setSaving] = useState(false);
-  const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
+  const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(takeBodyFlash);   // o resultado do corpo partilhado, depois de recarregar
   const idSeq = useRef(0);
   const apply = useCallback((d: EditDoc) => { if (canEdit) setH((x) => push(x, d)); }, [canEdit]);
   const nextId = (p: string) => { idSeq.current += 1; return `${p}${Date.now().toString(36)}${idSeq.current}`; };
@@ -181,9 +181,31 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
     if (sel.kind === "seg") apply(deleteSegment(doc, sel.id));
     else if (sel.kind === "word") apply(editWord(doc, sel.id, { w: "" }));
     else if (sel.kind === "ov") apply(removeOverlay(doc, sel.id));
+    else if (sel.kind === "cam") return;   // um trecho de câmara não se tira: troca-se o ângulo
     else apply(removeNote(doc, sel.id));
     setSel(null);
   }, [apply, doc, sel]);
+  // câmaras à mão (W10-35): ângulos que há nas gravações deste documento
+  const camNames = useMemo(() => {
+    const ks = Object.keys((doc as EditDoc & { source?: { cams?: Record<string, string> } }).source?.cams ?? {});
+    return ks.length ? ks : Array.from(new Set(doc.cameras.map((c) => c.cam)));
+  }, [doc]);
+  const camLabel = (c: string) => (c === "front" ? "Frente" : c === "side" ? "Lado" : c);
+  const toggleCamAtCursor = useCallback(() => {
+    const src = outToSrc(doc, t)?.src;
+    if (src == null) return;
+    const i = camAt(doc, src);
+    if (i < 0) return;
+    const next = camNames[(camNames.indexOf(doc.cameras[i].cam) + 1) % camNames.length] ?? doc.cameras[i].cam;
+    apply(setCam(doc, i, { cam: next }));
+    setSel({ kind: "cam", id: String(i) });
+  }, [apply, camNames, doc, t]);
+  const [guides, setGuides] = useState<StageGuides>(() => { try { return JSON.parse(localStorage.getItem("edit.guides") || "{}"); } catch { return {}; } });
+  const toggleGuide = (k: keyof StageGuides) => setGuides((g) => {
+    const n = { ...g, [k]: !g[k] };
+    try { localStorage.setItem("edit.guides", JSON.stringify(n)); } catch { /* só neste dispositivo */ }
+    return n;
+  });
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -194,12 +216,13 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
       else if (e.key === "ArrowLeft") setT((x) => Math.max(0, x - (e.shiftKey ? 1 : 0.1)));
       else if (e.key === "ArrowRight") setT((x) => Math.min(duration, x + (e.shiftKey ? 1 : 0.1)));
       else if (e.key.toLowerCase() === "s" && canEdit) split();
+      else if (e.key.toLowerCase() === "c" && canEdit) toggleCamAtCursor();
       else if (e.key.toLowerCase() === "n" && canEdit) { e.preventDefault(); setPlaying(false); noteRef.current?.focus(); }
       else if ((e.key === "Delete" || e.key === "Backspace") && canEdit) remove();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [canEdit, duration, remove, split]);
+  }, [canEdit, duration, remove, split, toggleCamAtCursor]);
 
   const save = async () => {
     const why = problem(doc);
@@ -209,14 +232,24 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
       await saveEdit(access, st.asset.id, st.document?.current_version_id ?? null, doc, note.trim() || undefined); setNote("");
       // corpo partilhado (EDL-14): o mesmo corpo nos outros hooks do guião, cada um com o seu hook
       const others = siblings.filter((x) => x.asset_id !== st.asset.id);
-      if (shareBody && others.length) {
+      if (others.length) {
         const rs = await applyBodyToSiblings(access, st.asset.id, `${variantShort(st.asset.variant)} v${st.versions.length + 1}`, doc, others);
-        setMsg(bodySummary(rs));
+        flashBody(bodySummary(rs));
       }
       await onReload();
     }
     catch (e) { setMsg({ kind: "err", text: (e as Error).message }); }
     finally { setSaving(false); }
+  };
+  const [syncing, setSyncing] = useState(false);
+  // Igualar corpos (EDL-14): o corpo da versão gravada deste hook vai para os outros
+  const syncBodies = async () => {
+    const others = siblings.filter((x) => x.asset_id !== st.asset.id);
+    if (!others.length || dirty) return;
+    setSyncing(true); setMsg(null);
+    try { flashBody(bodySummary(await applyBodyToSiblings(access, st.asset.id, `${variantShort(st.asset.variant)} v${v.version_no}`, v.doc, others))); await onReload(); }
+    catch (e) { setMsg({ kind: "err", text: (e as Error).message }); }
+    finally { setSyncing(false); }
   };
   const restore = async () => {
     setSaving(true); setMsg(null);
@@ -227,6 +260,8 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
   const selSeg = sel?.kind === "seg" ? segs.find((s) => s.id === sel.id) ?? null : null;
   const selWord = sel?.kind === "word" ? doc.captions.words.find((w) => w.id === sel.id) ?? null : null;
   const selOv = sel?.kind === "ov" ? doc.overlays.find((o) => o.id === sel.id) ?? null : null;
+  const selCamIdx = sel?.kind === "cam" ? Number(sel.id) : -1;
+  const selCam = selCamIdx >= 0 ? doc.cameras[selCamIdx] ?? null : null;
   const notes = notesOut(doc);
   const visuals = (lib ?? []).filter((a) => EDITABLE_KINDS.has(a.kind));
   const tracks = (lib ?? []).filter((a) => a.kind === "audio");
@@ -244,7 +279,8 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
           <p className="text-sm text-muted-foreground">
             Versão {v.version_no} ({SOURCE_LABEL[v.source]}{v.created_label ? `, ${v.created_label}` : ""}){!isCurrent && " · versão antiga, só leitura"}{dirty && " · alterações por gravar"}
           </p>
-          <div className="mt-2"><VariantTabs access={access} current={st.asset.id} variants={siblings} dirty={dirty} /></div>
+          <div className="mt-2"><VariantTabs access={access} current={st.asset.id} variants={siblings} dirty={dirty} syncing={syncing}
+            onSync={canEdit ? () => void syncBodies() : undefined} /></div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <select aria-label="Versão" className="h-9 rounded-md border bg-background px-2 text-sm" value={v.id}
@@ -266,13 +302,18 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
       <div className="grid gap-4 lg:grid-cols-[minmax(0,20rem)_1fr]">
         {/* palco 9:16 */}
         <div className="flex flex-col gap-2">
-          <EditorStage doc={doc} t={t} media={<PreviewVideo access={access} asset={st.asset.id} versionId={v.id} doc={doc} t={t} playing={playing}
+          <EditorStage doc={doc} t={t} guides={guides} media={<PreviewVideo access={access} asset={st.asset.id} versionId={v.id} doc={doc} t={t} playing={playing}
             onTime={setT} onEnd={() => setPlaying(false)} onDriving={(on) => { soundDriving.current = on; }} />} />
           <div className="flex items-center justify-center gap-2">
             <Button size="sm" variant="outline" onClick={() => setT((x) => Math.max(0, x - 1))} aria-label="Recuar 1 s"><ArrowLeftIcon /></Button>
             <Button size="sm" onClick={() => { if (t >= duration) setT(0); setPlaying((p) => !p); }} aria-label={playing ? "Pausa" : "Tocar"}>{playing ? <PauseIcon /> : <PlayIcon />}</Button>
             <Button size="sm" variant="outline" onClick={() => setT((x) => Math.min(duration, x + 1))} aria-label="Avançar 1 s"><ArrowRightIcon /></Button>
             <span className="tabular-nums text-sm text-muted-foreground">{fmtT(t)} / {fmtT(duration)}</span>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-2" aria-label="Guias do palco">
+            <span className="text-xs text-muted-foreground">Guias:</span>
+            <Button size="xs" variant={guides.reels ? "default" : "outline"} aria-pressed={!!guides.reels} onClick={() => toggleGuide("reels")}>Zona segura Reels</Button>
+            <Button size="xs" variant={guides.grid ? "default" : "outline"} aria-pressed={!!guides.grid} onClick={() => toggleGuide("grid")}>Hook · olhos · legendas</Button>
           </div>
         </div>
 
@@ -299,6 +340,40 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
                 <Button size="sm" variant="outline" disabled={!canEdit} onClick={() => apply(moveSegment(doc, selSeg.id, 1))}>Mover para a frente</Button>
                 <Button size="sm" variant="outline" disabled={!canEdit} onClick={split}><ScissorsIcon /> Dividir no cursor</Button>
                 <Button size="sm" variant="destructive" disabled={!canEdit || segs.length <= 1} onClick={remove}><Trash2Icon /> Tirar corte</Button>
+              </div>
+            </div>
+          )}
+          {selCam && (
+            <div className="flex flex-col gap-2" aria-label="Câmara selecionada">
+              <span className="font-medium">Câmara · trecho {selCamIdx + 1} de {doc.cameras.length}</span>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="w-16 text-muted-foreground">Ângulo</span>
+                {camNames.map((c) => (
+                  <Button key={c} size="sm" variant={selCam.cam === c ? "default" : "outline"} aria-pressed={selCam.cam === c} disabled={!canEdit}
+                    onClick={() => apply(setCam(doc, selCamIdx, { cam: c }))}>{camLabel(c)}</Button>
+                ))}
+                <Button size="sm" variant="outline" disabled={!canEdit} title="Parte este trecho no cursor, para trocar só uma parte"
+                  onClick={() => { const src = outToSrc(doc, t)?.src; if (src != null) apply(splitCamAt(doc, src)); }}><ScissorsIcon /> Dividir no cursor</Button>
+              </div>
+              <label className="flex items-center gap-2 text-xs text-muted-foreground">Zoom {selCam.zoom.toFixed(2)}×
+                <input type="range" min={ZOOM_LIMITS[0]} max={ZOOM_LIMITS[1]} step={0.05} value={selCam.zoom} disabled={!canEdit} className="flex-1"
+                  onChange={(e) => apply(setCam(doc, selCamIdx, { zoom: Number(e.target.value) }))} aria-label="Zoom da câmara" />
+              </label>
+              <label className="flex items-center gap-2 text-xs text-muted-foreground">Vertical
+                <input type="range" min={0} max={1} step={0.01} value={selCam.y ?? CAM_ANCHOR.y} disabled={!canEdit || selCam.zoom <= 1.001} className="flex-1"
+                  onChange={(e) => apply(setCam(doc, selCamIdx, { y: Number(e.target.value) }))} aria-label="Posição vertical" />
+              </label>
+              <label className="flex items-center gap-2 text-xs text-muted-foreground">Horizontal
+                <input type="range" min={0} max={1} step={0.01} value={selCam.x ?? CAM_ANCHOR.x} disabled={!canEdit || selCam.zoom <= 1.001} className="flex-1"
+                  onChange={(e) => apply(setCam(doc, selCamIdx, { x: Number(e.target.value) }))} aria-label="Posição horizontal" />
+              </label>
+              {selCam.zoom <= 1.001 && <span className="text-xs text-muted-foreground">A posição muda o enquadramento quando há zoom acima de 1×.</span>}
+              <div className="flex flex-wrap gap-2">
+                <Button size="sm" variant="outline" disabled={!canEdit}
+                  onClick={() => apply(frameAllCam(doc, selCam.cam, { zoom: selCam.zoom, x: selCam.x, y: selCam.y }))}>
+                  Aplicar a toda a câmara {camLabel(selCam.cam).toLowerCase()}</Button>
+                <Button size="sm" variant="ghost" disabled={!canEdit}
+                  onClick={() => apply(setCam(doc, selCamIdx, { zoom: 1, x: CAM_ANCHOR.x, y: CAM_ANCHOR.y }))}>Repor</Button>
               </div>
             </div>
           )}
@@ -332,7 +407,7 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
               )}
             </div>
           )}
-          {!sel && <p className="text-muted-foreground">Clica num corte ou numa palavra na linha do tempo para a ajustar. Arrasta as pontas de um corte ou de um visual para aparar e uma palavra ou um visual para o mover. Atalhos: Espaço tocar, ←/→ 0,1 s (Shift 1 s), S dividir, N nota, Delete tirar, Cmd+Z desfazer.</p>}
+          {!sel && <p className="text-muted-foreground">Clica num corte ou numa palavra na linha do tempo para a ajustar. Arrasta as pontas de um corte ou de um visual para aparar e uma palavra ou um visual para o mover. Clica na faixa das câmaras para trocar o ângulo, o zoom e a posição. Atalhos: Espaço tocar, ←/→ 0,1 s (Shift 1 s), S dividir, C trocar a câmara no cursor, N nota, Delete tirar, Cmd+Z desfazer.</p>}
           <details className="border-t pt-3">
             <summary className="cursor-pointer font-medium">Aspeto e estilos guardados</summary>
             <div className="mt-2 flex flex-col gap-3">
@@ -369,11 +444,9 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
                   {dirty && <Button variant="ghost" onClick={() => setH(historyOf(v.doc))}>Descartar</Button>}
                 </div>
                 {siblings.length > 1 && (
-                  <label className="flex items-center gap-2 text-xs">
-                    <input type="checkbox" checked={shareBody} disabled={!canEdit}
-                      onChange={(e) => { setShareBody(e.target.checked); try { localStorage.setItem("edit.shareBody", e.target.checked ? "1" : "0"); } catch { /* só neste dispositivo */ } }} />
-                    Aplicar o corpo aos outros hooks ({siblings.filter((x) => x.asset_id !== st.asset.id).map((x) => variantShort(x.variant)).join(", ")})
-                  </label>
+                  <span className="text-xs text-muted-foreground">
+                    O corpo vai também para {siblings.filter((x) => x.asset_id !== st.asset.id).map((x) => variantShort(x.variant)).join(", ")} (cada um com o seu hook).
+                  </span>
                 )}
                 {!canEdit && <span className="text-xs text-muted-foreground">Não tens permissão para editar vídeos neste cliente.</span>}
               </>
@@ -433,7 +506,9 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
                   onEdge={canEdit ? (edge) => startDrag(edge === "start" ? "seg-in" : "seg-out", s.id) : undefined} />
               ))}</Track>
               <Track>{doc.cameras.flatMap((c, i) => spanOut(doc, c.s, c.e).map((p, k) => (
-                <Block key={`${i}-${k}`} left={p.at * pps} w={(p.end - p.at) * pps} label={c.cam === "front" ? "frente" : "lado"} className={c.cam === "front" ? "bg-emerald-500/20" : "bg-teal-500/30"} />
+                <Block key={`${i}-${k}`} left={p.at * pps} w={(p.end - p.at) * pps} label={`${c.cam === "front" ? "frente" : "lado"}${c.zoom > 1.001 ? ` ${c.zoom.toFixed(1)}×` : ""}`}
+                  className={c.cam === "front" ? "bg-emerald-500/20" : "bg-teal-500/30"} selected={sel?.kind === "cam" && sel.id === String(i)}
+                  onClick={() => setSel({ kind: "cam", id: String(i) })} />
               )))}</Track>
               <Track>{words.map((w, i) => (
                 <Block key={`${w.id}-${i}`} left={w.at * pps} w={Math.max(4, (w.end - w.at) * pps)} label={pps >= 60 ? w.w : ""} title={w.w}

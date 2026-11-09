@@ -38,3 +38,12 @@ export function bodySummary(rs: BodyResult[]): { kind: "ok" | "err"; text: strin
     fl.length ? `Falhou em ${fl.map((r) => `${r.label} (${r.error})`).join("; ")}` : ""].filter(Boolean);
   return { kind: fl.length ? "err" : "ok", text: parts.join(". ") + "." };
 }
+
+/* A mensagem sobrevive ao recarregar o editor (que remonta com a versão nova): fica na sessão do separador até ser mostrada. */
+const FLASH = "edit.bodyFlash";
+export function flashBody(m: { kind: "ok" | "err"; text: string } | null) {
+  try { if (m) sessionStorage.setItem(FLASH, JSON.stringify(m)); } catch { /* sem armazenamento: não se mostra */ }
+}
+export function takeBodyFlash(): { kind: "ok" | "err"; text: string } | null {
+  try { const v = sessionStorage.getItem(FLASH); sessionStorage.removeItem(FLASH); return v ? JSON.parse(v) : null; } catch { return null; }
+}

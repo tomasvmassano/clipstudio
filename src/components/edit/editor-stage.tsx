@@ -18,7 +18,12 @@ export const DEFAULT_LOOK: { captions: Required<Pick<TextLook, "color" | "size" 
  * do documento no instante t da saída. `media` é a camada de imagem por baixo (o <video> do proxy quando houver R2, EDL-08):
  * fica em absolute inset-0 e quem a fornece sincroniza o tempo. Sem `media` mostra a câmara e o corte em texto.
  */
-export function EditorStage({ doc, t, media, className }: { doc: EditDoc; t: number; media?: ReactNode; className?: string }) {
+/** Guias do palco (W10-35): só no editor, nunca na exportação. reels = zona segura dos Reels; grid = terços com hook, olhos e legendas. */
+export type StageGuides = { reels?: boolean; grid?: boolean };
+/** O retângulo seguro do QC (EDL-03, engine/qc.py SAFE): o que fica fora pode ser tapado pela interface dos Reels. */
+export const SAFE_RECT = { x0: 60, x1: 960, y0: 210, y1: 1600 };
+
+export function EditorStage({ doc, t, media, className, guides }: { doc: EditDoc; t: number; media?: ReactNode; className?: string; guides?: StageGuides }) {
   const { segs } = layout(doc);
   const hEnd = hookEnd(doc);
   const at = outToSrc(doc, t);
@@ -91,6 +96,42 @@ export function EditorStage({ doc, t, media, className }: { doc: EditDoc; t: num
           })}
         </div>
       ))}
+      {guides?.reels && <ReelsGuide />}
+      {guides?.grid && <GridGuide />}
+    </div>
+  );
+}
+
+/* Zona segura dos Reels: sombreia o que fica fora do retângulo seguro (a interface da app tapa) e a coluna dos botões à direita. */
+function ReelsGuide() {
+  const P = (v: number, total: number) => `${(v / total) * 100}%`;
+  const shade = "absolute bg-red-600/30";
+  return (
+    <div className="pointer-events-none absolute inset-0" aria-hidden>
+      <div className={shade} style={{ left: 0, right: 0, top: 0, height: P(SAFE_RECT.y0, 1920) }} />
+      <div className={shade} style={{ left: 0, right: 0, top: P(SAFE_RECT.y1, 1920), bottom: 0 }} />
+      <div className={shade} style={{ left: 0, width: P(SAFE_RECT.x0, 1080), top: P(SAFE_RECT.y0, 1920), height: P(SAFE_RECT.y1 - SAFE_RECT.y0, 1920) }} />
+      <div className={shade} style={{ right: 0, width: P(1080 - SAFE_RECT.x1, 1080), top: P(SAFE_RECT.y0, 1920), height: P(SAFE_RECT.y1 - SAFE_RECT.y0, 1920) }} />
+      <div className="absolute border border-dashed border-red-400/80" style={{ left: P(SAFE_RECT.x0, 1080), width: P(SAFE_RECT.x1 - SAFE_RECT.x0, 1080), top: P(SAFE_RECT.y0, 1920), height: P(SAFE_RECT.y1 - SAFE_RECT.y0, 1920) }} />
+      <span className="absolute left-1 top-1 rounded bg-black/60 px-1 text-[9px] text-red-200">fora da zona segura dos Reels</span>
+    </div>
+  );
+}
+
+/* Terços com as faixas habituais: hook em cima, olhos na linha de cima dos terços, legendas em baixo. */
+function GridGuide() {
+  const band = (top: number, h: number, label: string) => (
+    <div className="absolute inset-x-[8%] border border-yellow-300/70 bg-yellow-300/15" style={{ top: `${(top / 1920) * 100}%`, height: `${(h / 1920) * 100}%` }}>
+      <span className="absolute left-1 top-0.5 text-[9px] font-medium text-yellow-100 [text-shadow:0_1px_2px_#000]">{label}</span>
+    </div>
+  );
+  return (
+    <div className="pointer-events-none absolute inset-0" aria-hidden>
+      {[1, 2].map((k) => <div key={`h${k}`} className="absolute inset-x-0 border-t border-white/50" style={{ top: `${(k / 3) * 100}%` }} />)}
+      {[1, 2].map((k) => <div key={`v${k}`} className="absolute inset-y-0 border-l border-white/50" style={{ left: `${(k / 3) * 100}%` }} />)}
+      {band(215, 260, "hook")}
+      {band(560, 160, "olhos")}
+      {band(1250, 300, "legendas")}
     </div>
   );
 }
