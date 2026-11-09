@@ -8,6 +8,7 @@ import { DEFAULT_LOOK } from "@/components/edit/editor-stage";
 import type { Access } from "@/lib/access";
 import { applyStyle, fetchSavedStyles, saveStyleFromDoc, type EditState, type SavedStyles } from "@/lib/edit";
 import { LOOK_LIMITS, setLook, type EditDoc, type TextLook } from "@/lib/edit-doc";
+import { CAP_STYLES, capStyleOf, type CapStyle } from "@/lib/caption-plan";
 
 /* Aspeto e estilos guardados no editor (EDL-13, ADR-0050). O servidor lê a versão gravada e valida tudo. */
 
@@ -37,7 +38,18 @@ export function LookPanel({ doc, disabled, onChange }: { doc: EditDoc; disabled:
       </fieldset>
     );
   };
-  return <div className="flex flex-col gap-3">{part("captions", "Legendas")}{part("hook", "Hook")}</div>;
+  return (
+    <div className="flex flex-col gap-3">
+      <label className="flex flex-col gap-1">
+        <span className="font-medium">Estilo das legendas</span>
+        <select aria-label="Estilo das legendas" className="h-9 max-w-64 rounded-md border bg-background px-2" disabled={disabled}
+          value={capStyleOf(doc)} onChange={(e) => onChange({ ...doc, style: e.target.value as CapStyle })}>
+          {(Object.keys(CAP_STYLES) as CapStyle[]).map((k) => <option key={k} value={k}>{CAP_STYLES[k].label}</option>)}
+        </select>
+      </label>
+      {part("captions", "Legendas")}{part("hook", "Hook")}
+    </div>
+  );
 }
 
 /**
