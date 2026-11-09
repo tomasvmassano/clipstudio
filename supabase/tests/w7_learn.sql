@@ -352,7 +352,13 @@ begin
   insert into t values ('flag desligada: exportação recusa (55000) e status diz indisponível', true, st = '55000' and not (my_data_status()->>'available')::boolean);
 
   -- ═════ FR-10-05 custos ═════
+  -- ADR-0071: a equipa do cliente nunca vê custos, mesmo como admin; os números leem-se com o dono da agência
   perform set_config('request.jwt.claims', json_build_object('sub', u_adm, 'role','authenticated')::text, true);
+  begin perform content_costs('la_a', 3); st := 'none'; exception when others then st := sqlstate; end;
+  insert into t values ('admin do cliente não vê custos (ADR-0071)', true, st = '42501');
+  begin perform content_costs_export('la_a', 3); st := 'none'; exception when others then st := sqlstate; end;
+  insert into t values ('admin do cliente não exporta custos (ADR-0071)', true, st = '42501');
+  perform set_config('request.jwt.claims', json_build_object('sub', u_own, 'role','authenticated')::text, true);
   j := content_costs('la_a', 3);
   k := j->'by_month'->0;
   insert into t values ('mês: total 2,05 €, atribuído 1,80 €, por atribuir 0,25 €, 1 execução sem custo', true,
@@ -371,7 +377,7 @@ begin
   insert into t values ('custos de B não entram em A', true, j::text not like '%la_b%' and (k->>'ai_total')::numeric < 9);
   j := content_costs_export('la_a', 3);
   execute 'reset role';
-  insert into t values ('exportação auditada', true, exists (select 1 from audit_events where action = 'costs.exported' and workspace_id = 'la_a' and actor_user_id = u_adm));
+  insert into t values ('exportação auditada', true, exists (select 1 from audit_events where action = 'costs.exported' and workspace_id = 'la_a' and actor_user_id = u_own));
   execute 'set local role authenticated';
   perform set_config('request.jwt.claims', json_build_object('sub', u_ag, 'role','authenticated')::text, true);
   begin perform content_costs('la_a'); st := 'none'; exception when others then st := sqlstate; end;

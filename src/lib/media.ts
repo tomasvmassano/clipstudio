@@ -81,7 +81,9 @@ const clean = (f: MediaFilters) => Object.fromEntries(Object.entries(f).filter((
 export const fetchLibrary = (a: Access, f: MediaFilters) => rpc<MediaLibrary>("media_library", { p_ws: a.ws, p_filters: clean(f), p_token: a.token });
 export const fetchAsset = (a: Access, id: string) => rpc<MediaAssetDetail>("media_asset", { p_ws: a.ws, p_id: id, p_token: a.token });
 export type AssetFields = Partial<{ title: string; tags: string[]; project_id: string | null; format: string | null; status: MediaStatus;
-  content_id: string | null; take_id: string | null; publication_id: string | null; notes: string | null }>;
+  content_id: string | null; take_id: string | null; publication_id: string | null; notes: string | null;
+  /** Declaração de direitos para a IA quando se acrescenta uma etiqueta ia-* (ADR-0071). Só media_asset_save. */
+  ai_rights_confirmed: boolean }>;
 export const saveAsset = (a: Access, id: string, fields: AssetFields, lock?: number) =>
   rpc<MediaAsset>("media_asset_save", { p_ws: a.ws, p_id: id, p_fields: fields, p_lock: lock ?? null, p_token: a.token });
 export const addLink = (a: Access, assetId: string | null, fields: AssetFields & { url: string }) =>

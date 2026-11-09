@@ -20,7 +20,7 @@ import { useSession } from "@/components/session-provider";
 import { LinkForm } from "@/components/editor/script-packages";
 import { useFlags } from "@/lib/flags";
 import { CAMERA_LABEL, getClip, unlinkClip } from "@/lib/package-script";
-import { FORMATS, KIND_LABEL, STATUS_LABEL, VERSION_STATE_LABEL, bytes, kindAccepts, mimeOf, precheck, previewKind, splitTags, type MediaStatus } from "@/lib/media-format";
+import { AI_RIGHTS_TEXT, FORMATS, KIND_LABEL, STATUS_LABEL, VERSION_STATE_LABEL, aiTagsAdded, bytes, kindAccepts, mimeOf, precheck, previewKind, splitTags, type MediaStatus } from "@/lib/media-format";
 
 export function MediaAssetSheet({ access, lib, id, onClose, onChanged, onReplace }: {
   access: Access; lib: MediaLibrary; id: string; onClose: () => void; onChanged: () => void; onReplace: (assetId: string, f: File) => void;
@@ -203,15 +203,21 @@ function MetaForm({ access, lib, a, onSaved }: { access: Access; lib: MediaLibra
   const [notes, setNotes] = useState(a.notes ?? "");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ text: string; bad: boolean } | null>(null);
+  const [rights, setRights] = useState(false);
   const contentChanged = content !== (a.content?.id ?? "");
   const ro = !lib.can.upload;
+  // etiquetas ia-* novas: é a declaração de direitos para a IA (ADR-0071); o servidor recusa sem a confirmação
+  const aiAdded = aiTagsAdded(a.tags, splitTags(tags));
+  const needRights = aiAdded.length > 0;
   const save = async () => {
     setBusy(true); setMsg(null);
     try {
       await saveAsset(access, a.id, {
         title: title.trim(), tags: splitTags(tags), project_id: project || null, format: format || null, status,
         content_id: content || null, take_id: contentChanged ? null : take || null, publication_id: contentChanged ? null : pub || null, notes: notes.trim() || null,
+        ...(needRights ? { ai_rights_confirmed: rights } : {}),
       }, a.lock_version);
+      setRights(false);
       setMsg({ text: contentChanged ? "Guardado. Escolhe agora o take e a publicação do guião novo, se quiseres." : "Guardado.", bad: false });
       onSaved();
     } catch (e) {
@@ -257,7 +263,22 @@ function MetaForm({ access, lib, a, onSaved }: { access: Access; lib: MediaLibra
         </label>
         <label className="flex flex-col gap-1 sm:col-span-2">Notas<Textarea value={notes} disabled={ro} onChange={(e) => setNotes(e.target.value)} rows={2} /></label>
       </div>
-      {!ro && <Button className="self-start" size="sm" disabled={busy || !title.trim()} onClick={() => void save()}>{busy && <Loader2Icon className="animate-spin" />} Guardar</Button>}
+      {!ro && needRights && (
+        <Alert role="status">
+          <AlertDescription className="flex flex-col gap-2">
+            <span>
+              {aiAdded.length === 1 ? "A etiqueta " : "As etiquetas "}<strong>{aiAdded.join(", ")}</strong>{aiAdded.length === 1 ? " deixa" : " deixam"} a IA
+              usar este ficheiro nos pacotes de edição deste cliente. Ao guardar declaras que o cliente tem direitos para isso
+              (imagem, música ou vídeo). Fica registado no histórico com o teu nome, a data e a versão do ficheiro.
+            </span>
+            <label className="flex items-start gap-2 text-sm font-medium text-foreground">
+              <input type="checkbox" className="mt-0.5 size-4 accent-primary" checked={rights} onChange={(e) => setRights(e.target.checked)} />
+              {AI_RIGHTS_TEXT}
+            </label>
+          </AlertDescription>
+        </Alert>
+      )}
+      {!ro && <Button className="self-start" size="sm" disabled={busy || !title.trim() || (needRights && !rights)} onClick={() => void save()}>{busy && <Loader2Icon className="animate-spin" />} Guardar</Button>}
       {msg && <p role={msg.bad ? "alert" : "status"} className={msg.bad ? "text-destructive" : ""}>{msg.text}</p>}
     </section>
   );

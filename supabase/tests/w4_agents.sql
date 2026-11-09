@@ -131,7 +131,8 @@ begin
   begin perform agent_job_enqueue('numeiro', 'analysis'); st := 'none'; exception when others then st := sqlstate; end;
   insert into t values ('limite de custo diário atingido não enfileira (22023)', true, st = '22023');
   perform set_config('request.jwt.claims', json_build_object('sub', u_adm, 'role','authenticated')::text, true);
-  insert into t values ('admin vê o custo do dia', true, (agents_overview('numeiro')->>'spend_today')::numeric >= 2.5);
+  -- ADR-0071: a equipa do cliente nunca vê custos, mesmo como admin
+  insert into t values ('admin do cliente não vê o custo do dia', true, agents_overview('numeiro')->'spend_today' is null or agents_overview('numeiro')->'spend_today' = 'null'::jsonb);
 
   -- worker só para o service_role
   begin perform worker_claim('worker-x'); st := 'none'; exception when others then st := sqlstate; end;
