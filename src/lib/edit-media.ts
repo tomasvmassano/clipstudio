@@ -6,7 +6,9 @@ import { friendlyError, type Access } from "@/lib/access";
  * jobs de exportação vêm por RPC; os links assinados pela rota /api/media/versions/:id/proxy. O servidor decide tudo.
  */
 export type CamSource = { state: "pronta" | "pendente" | "falhou" | "nao_aplica" | "em_falta"; version_id?: string; name?: string;
-  media_info?: { duration?: number; width?: number; height?: number } | null };
+  media_info?: { duration?: number; width?: number; height?: number } | null;
+  /** Som substituto ligado à gravação (W10-32, ADR-0080): o palco toca-o no lugar do som do vídeo. */
+  audio_version_id?: string | null };
 export type PreviewSources = { windows: [number, number][] | null; audio: string | null; cams: Record<string, CamSource>; names: Record<string, string> | null };
 export type ExportJob = {
   id: string; kind: "export"; status: "queued" | "running" | "done" | "failed" | "dead" | "cancelled"; attempts: number; max_attempts: number;
@@ -32,6 +34,14 @@ export async function proxyUrl(a: Access, versionId: string): Promise<{ url: str
   const r = await fetch(`/api/media/versions/${versionId}/proxy?ws=${encodeURIComponent(a.ws)}`, { cache: "no-store" });
   const b = (await r.json().catch(() => ({}))) as { url?: string; expires_at?: string; error?: string };
   if (!r.ok || !b.url) throw new Error(b.error ?? `Não consegui abrir a versão leve (${r.status}).`);
+  return { url: b.url, expires_at: b.expires_at ?? "" };
+}
+
+/** Link assinado curto (5 min) para ouvir um áudio da Biblioteca: o som substituto no palco. Quando expira, o palco pede outro. */
+export async function audioUrl(a: Access, versionId: string): Promise<{ url: string; expires_at: string }> {
+  const r = await fetch(`/api/media/versions/${versionId}/url?ws=${encodeURIComponent(a.ws)}&purpose=preview`, { cache: "no-store" });
+  const b = (await r.json().catch(() => ({}))) as { url?: string; expires_at?: string; error?: string };
+  if (!r.ok || !b.url) throw new Error(b.error ?? `Não consegui abrir o som substituto (${r.status}).`);
   return { url: b.url, expires_at: b.expires_at ?? "" };
 }
 

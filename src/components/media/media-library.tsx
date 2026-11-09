@@ -16,7 +16,7 @@ import { MediaAssetSheet } from "@/components/media/media-asset-sheet";
 import { MediaPolicySheet } from "@/components/media/media-policy";
 import type { Access } from "@/lib/access";
 import {
-  abandonUpload, addLink, errCode, fetchLibrary, purge, redoProxy, resumeUpload, uploadFile,
+  abandonUpload, addLink, errCode, fetchAudioLinks, fetchLibrary, purge, redoProxy, replaceAudio, resumeUpload, uploadFile,
   type MediaAsset, type MediaFilters, type MediaLibrary, type MediaView, type UploadProgress,
 } from "@/lib/media";
 import { FORMATS, KIND_LABEL, STATUS_LABEL, aiTagsAdded, bytes, kindForMime, mimeOf, pctOf, precheck, splitTags, type MediaKind } from "@/lib/media-format";
@@ -292,6 +292,9 @@ function AssetGrid({ d, view, onOpen, onResume, access, onChanged }: {
                 {a.current.storage === "r2" && a.current.proxy_state === "pendente" ? " · a preparar a versão leve" : ""}
               </span>
             )}
+            {a.current && a.current.storage === "r2" && a.current.state === "pronta" && (a.current.mime ?? "").startsWith("video/") && d.can.upload && (
+              <AudioReplace access={access} version={a.current.id} duration={a.current.media_info?.duration ?? null} />
+            )}
             {a.current && a.current.storage === "r2" && a.current.proxy_state === "falhou" && (a.current.mime ?? "").startsWith("video/") && d.can.upload && (
               <div className="flex flex-wrap items-center gap-2 text-xs">
                 <Button size="xs" variant="outline" disabled={redoing === a.current.id} onClick={async () => {
@@ -323,6 +326,55 @@ function AssetGrid({ d, view, onOpen, onResume, access, onChanged }: {
       </ul>
       {d.total > d.assets.length && <p className="text-xs text-muted-foreground">A mostrar {d.assets.length} de {d.total}. Afina a pesquisa ou os filtros para ver os restantes.</p>}
     </>
+  );
+}
+
+/**
+ * Som substituto da gravação (W10-32, ADR-0080): um áudio da Biblioteca com a mesma duração (ex.: a lapela tratada fora da app)
+ * passa a ser o som desta gravação no palco do editor e na exportação, no mesmo tempo. O original não muda.
+ */
+function AudioReplace({ access, version, duration }: { access: Access; version: string; duration: number | null }) {
+  const [opts, setOpts] = useState<{ id: string; title: string; duration: number | null }[] | null>(null);
+  const [cur, setCur] = useState<string>("");
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
+  useEffect(() => {
+    let live = true;
+    (async () => {
+      try {
+        const [lib, links] = await Promise.all([fetchLibrary(access, { kind: "audio", limit: 100 }), fetchAudioLinks(access)]);
+        if (!live) return;
+        setOpts(lib.assets.filter((x) => x.current && x.current.storage === "r2" && x.current.state === "pronta")
+          .map((x) => ({ id: x.current!.id, title: x.title, duration: x.current!.media_info?.duration ?? null })));
+        setCur(links[version] ?? "");
+      } catch (e) { if (live) setMsg({ kind: "err", text: (e as Error).message }); }
+    })();
+    return () => { live = false; };
+  }, [access, version]);
+  if (!opts) return msg ? <span className="text-xs text-destructive">{msg.text}</span> : null;
+  if (opts.length === 0 && !cur) return null;
+  const change = async (v: string) => {
+    setBusy(true); setMsg(null);
+    try {
+      await replaceAudio(access, version, v || null);
+      setCur(v);
+      setMsg({ kind: "ok", text: v ? "Som substituto ligado. O editor e as próximas exportações usam este som." : "Volta a usar o som da câmara." });
+    } catch (e) { setMsg({ kind: "err", text: (e as Error).message }); }
+    finally { setBusy(false); }
+  };
+  return (
+    <label className="flex flex-col gap-1 text-xs">
+      <span className="text-muted-foreground">Som desta gravação</span>
+      <select aria-label="Som substituto" className={selectCls} value={cur} disabled={busy} onChange={(e) => void change(e.target.value)}>
+        <option value="">Som da câmara</option>
+        {opts.map((o) => (
+          <option key={o.id} value={o.id}>
+            {o.title}{o.duration != null ? ` · ${o.duration.toFixed(1)} s` : ""}{duration != null && o.duration != null && Math.abs(o.duration - duration) > 1 ? " (duração diferente)" : ""}
+          </option>
+        ))}
+      </select>
+      {msg && <span className={msg.kind === "err" ? "text-destructive" : "text-muted-foreground"} role="status">{msg.text}</span>}
+    </label>
   );
 }
 
