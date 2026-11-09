@@ -11,11 +11,11 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | Estado | Requisitos |
 |---|---|
 | feito | 36 |
-| parcial | 222 |
+| parcial | 224 |
 | por começar | 53 |
 | bloqueado | 3 |
 | adiado | 3 |
-| **total** | **317** |
+| **total** | **319** |
 
 ## Pendentes abertos (bloqueados primeiro, depois por prioridade)
 
@@ -74,6 +74,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | EDL-07 | P0 | parcial | ligar edit.ai_visuals, carregar e etiquetar ativos ia-imagem/ia-atencao/ia-musica (a Biblioteca do Numeiro ainda não tem imagens nem áudio); verificação com a sessão real | Documento de edição |
 | EDL-08 | P0 | parcial | verificação do Tomás com sessão real a ouvir um vídeo inteiro com o som contínuo (W10-29) | Pré-visualização ao vivo |
 | EDL-11 | P0 | parcial | visuais guardados no Supabase Storage ou por link ficam de fora (decisão ADR-0068: a IA só usa R2); verificação com sessão real | Exportar |
+| EDL-14 | P0 | parcial | verificação do Tomás com sessão real: editar o corpo num hook e ver nos outros | Corpo partilhado entre hooks (CHG-011) |
 | PERF-01 | P0 | parcial | criador/marca é só um campo por conta; verificação com conta real (R-15) | Hierarquia |
 | PERF-02 | P0 | parcial | publicador por API (PUB-01); frase-persona não preenchida no registo manual | Etiquetas obrigatórias à publicação (R-18) |
 | PERF-03 | P0 | parcial | histórico só desde a primeira captura; 1 h quase nunca existe com scraping diário | Fotografias por idade |
@@ -176,6 +177,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | BIZ-08 | P1 | parcial | verificação com sessão real (convite com cargo) | Cargos como modelos de permissões |
 | EDL-10 | P1 | parcial | imagem no palco (EDL-08); verificação com sessão real de cliente (R-15) a usar uma alternativa da IA | Modo guiado |
 | EDL-13 | P1 | parcial | verificação com sessão real (pacote com estilo guardado → v1 com o aspeto e a música) | Estilos guardados |
+| EDL-15 | P1 | parcial | verificação do Tomás com sessão real (imagens, exportar a partir do quadro) | Vídeos por guião (CHG-011) |
 | PERF-07 | P1 | parcial | o motor (Aprendiz/Estratega) ainda não lê as alavancas | Alavancas "o que replicar" |
 | REF-01 | P1 | parcial | campo só no espaço do cliente (agência sem biblioteca, REF-07); links curtos do TikTok não resolvidos; verificação com sessão real (R-15) | Colar link |
 | REF-02 | P1 | parcial | deploy do worker (numeiro-engine#19) e APIFY_TOKEN no worker (não verificado); verificação com sessão real (R-15) | Dissecção visível |
@@ -673,6 +675,8 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | EDL-11 | parcial | visuais guardados no Supabase Storage ou por link ficam de fora (decisão ADR-0068: a IA só usa R2); verificação com sessão real | edit_export_request/list/cancel, media_jobs export, engine/render_doc.py (cortes, câmaras, janelas, zoom, legendas S14/S15, hook, volume, música, -14 LUFS), ExportPanel (W5-07); render local do guião 3: 60,4 s em ~2,5 min; worker numeiro-engine no Railway ligado (abedaf5304ce-1-media, 2026-11-05); exports entram na revisão com QC (W5-12); aspeto e visuais no render (numeiro-engine #15), visuais resolvidos no export (W5-17, w5_export_visuais 8/8); W10-18: posição por visual (overlays[].box) no palco e no render, B-roll com caixa só na caixa (numeiro-engine edl07-visuais-musica, test_render_doc); W10-22: direitos dos visuais da IA declarados ao etiquetar ia-* na Biblioteca, com registo media.ai_rights_declared (ADR-0071) | — |
 | EDL-12 | por começar |  |  | — |
 | EDL-13 | parcial | verificação com sessão real (pacote com estilo guardado → v1 com o aspeto e a música) | Guardar como estilo no editor (aspeto, música, layout da versão gravada) no catálogo do VAR-02, versionado (edit_style_from_doc, coluna look); aplicar a outro vídeo cria versão nova, também no modo guiado (edit_style_apply) (W5-11, ADR-0050); w5_edit_saved_styles 24/24; edit-doc 63/63; o render do export desenha o aspeto guardado (numeiro-engine #15, test_render_doc); W10-07: edit_package_request manda look e style_version ao worker (numeiro-engine #16), música só se ativa no cliente, versão do estilo na chave de idempotência (ADR-0055); w10_pacote_estilo_alternativas 37/37; W10-30: estilo das legendas (S15/S14) escolhido no editor; W10-31: barra vermelha contínua do S15 no render e no palco (ADR-0079) | — |
+| EDL-14 | parcial | verificação do Tomás com sessão real: editar o corpo num hook e ver nos outros | W10-33: applyBody + gravação nas variantes (body-share 5/5), separadores e estado do corpo no editor (ADR-0081) | — |
+| EDL-15 | parcial | verificação do Tomás com sessão real (imagens, exportar a partir do quadro) | W10-33: edit_board (w10_videos_por_guiao 12/12; 16 guiões do Numeiro em produção), Vídeos por guião na Edição automática, separadores no editor | — |
 
 ## 40. Centro de desempenho (PERF)
 

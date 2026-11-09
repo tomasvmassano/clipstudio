@@ -1249,6 +1249,7 @@ Referências externas consultadas em 2026-10-28: ClickUp (custom roles, workload
 
 ## 36. Registo de alterações
 
+- **CHG-011 — 2026-11-10:** corpo partilhado entre hooks (EDL-14) e vista dos vídeos por guião (EDL-15), §39.1. Pedido do Tomás depois de editar o primeiro pacote real.
 - **CHG-008 — 2026-11-06:** §46: olhar na câmara e teleprompter (GAZE-01..06), aprendizagem contínua com edições e rejeições em dois níveis, agência e cliente (LRN-01..07), cortes de vídeos longos com o agente Clip Miner, com prioridade (CLIP-01..11), estúdio ligado à app com captura direta e pacote por guião (STU-01..05); sequência revista em §46.5. Origem: IDEA-010 a IDEA-013.
 - **CHG-006 — 2026-11-03:** revisão de vídeo por link da Google Drive enquanto não há object storage (FR-05-03, ING-01): player da Drive embutido, comentários com o momento escrito por quem comenta, aprovar ou pedir alterações com motivo. Decisão do Tomás para rever os 69 vídeos do Numeiro.
 - **CHG-007 — 2026-11-04:** editor de vídeo (§39.1, EDL-07..EDL-13): documento de edição versionado, pré-visualização ao vivo no browser, linha do tempo e modo guiado, exportar por job, notas ao Claude com aceitação, estilos guardados. Decisão do Tomás depois de rever os 69 vídeos do Numeiro.
@@ -1336,6 +1337,10 @@ A primeira versão é da IA; as pessoas ajustam na app. A edição é um **docum
 **EDL-12 [P1] Notas ao Claude.** Uma nota num momento ("N") pode ser enviada ao agente de edição, que propõe alterações ao documento como diferença; a pessoa aceita, ajusta ou recusa. Nada se aplica sem aceitação (AGENTS §7). Custo e versão do agente registados.
 
 **EDL-13 [P1] Estilos guardados.** "Guardar como estilo" grava as escolhas (legendas, hook, cor, música, layouts) como preset versionado do cliente, que a IA usa na versão 1 seguinte; complementa VAR-02 e a memória de revisões de EDL-05.
+
+**EDL-14 [P0] Corpo partilhado entre hooks (CHG-011).** As variantes do mesmo guião (um vídeo por hook, EDL-01) partilham o corpo: gravar uma versão de uma variante aplica o corpo (cortes que não são hook, e legendas, câmaras, visuais e volumes desse trecho da gravação) às outras variantes do guião, cada uma com o seu hook, como versão nova com nota e auditoria. Ligado por defeito, com opção de não aplicar; uma variante gravada entretanto por outra pessoa fica de fora com aviso (conflito de versão), nunca sobrescrita. O editor mostra se o corpo está igual em todas as variantes.
+
+**EDL-15 [P1] Vídeos por guião (CHG-011).** A escolha dos vídeos para editar mostra-os agrupados por guião (número, data, tema), cada variante com uma imagem do vídeo, o texto do hook, a duração, a versão e o estado de exportação, com abrir e exportar; no editor, separadores para saltar entre os hooks do mesmo guião.
 
 Pré-requisitos: object storage com proxies (ING-01, R2) e worker alojado. Capacidades novas: `edit.timeline` (dono, admin, gestor; atribuível), `edit.guided` (todos os papéis do cliente exceto leitor), `edit.export` (dono, admin, gestor). Sequência (§44): entra no passo (4), com EDL-07, -08, -09 e -11 primeiro, depois -10, -12 e -13.
 
