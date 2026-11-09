@@ -11,8 +11,8 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | Estado | Requisitos |
 |---|---|
 | feito | 36 |
-| parcial | 214 |
-| por começar | 60 |
+| parcial | 221 |
+| por começar | 53 |
 | bloqueado | 3 |
 | adiado | 3 |
 | **total** | **316** |
@@ -181,6 +181,12 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | REF-02 | P1 | parcial | deploy do worker (numeiro-engine#19) e APIFY_TOKEN no worker (não verificado); verificação com sessão real (R-15) | Dissecção visível |
 | REF-03 | P1 | parcial | deploy do worker; calibrar limites de semelhança (pressuposto); verificador factual (VAR-04); verificação com sessão real | Adaptação ao cliente: 3 guiões por link (decisão), cada um com 3 hooks |
 | REF-04 | P1 | parcial | topo da fila do teleprompter, modo rápido pelo telemóvel (ING-04), estilo extraído (REF-05); meta de 10 min por medir | Via rápida |
+| REACT-01 | P1 | parcial | agente diário de descoberta a correr e verificado com sessão real; aprendizagem da descoberta com aceitar/rejeitar | Fontes vigiadas e descoberta de contas |
+| REACT-02 | P1 | parcial | recolha diária pelo agente (tarefa agendada) e classificação do tipo de vídeo por frames; verificação com sessão real | Recolha de takes |
+| REACT-03 | P1 | parcial | avaliação feita pelo agente em cada corrida; calibração | Avaliação pela IA |
+| REACT-04 | P1 | parcial | verificação com sessão real (agência e cliente) no preview e em produção | Tab Reacts |
+| REACT-05 | P1 | parcial | verificação com sessão real; excerto do original no editor | Gravar a partir de um react |
+| REACT-06 | P1 | parcial | lições LRN a partir das decisões e relatório de calibração | Aprendizagem |
 | FR-01-06 | P2 | parcial | filtros persistentes por utilizador por fazer | Estados vazios explicativos, loading, erro/retry, filtros persistentes por utili |
 | FR-02-07 | P2 | parcial | sem pesquisa, ordenação, vistas guardadas nem impressão | Filtros, pesquisa, ordenação, vistas guardadas, exportação e impressão. |
 | FR-03-06 | P2 | parcial | sem anexar ficheiro ao take | Marcar take gravado, adicionar notas e anexar ficheiro, sem alterar estado edito |
@@ -201,6 +207,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | FR-15-08 | P2 | parcial | sem transferir propriedade nem eliminar | Administração de workspace: transferir propriedade, arquivar e eliminar com conf |
 | SCALE-07 | P2 | parcial | papéis não copiados | Templates de operação: |
 | SCALE-08 | P2 | parcial | revisão de vídeos pelo cliente; relatórios para enviar; notificar o cliente do que espera por ele; escolher outro mês nas entregas; verificação com sessão real | Portal de cliente: |
+| REACT-07 | P2 | parcial | agente diário a renovar links | Agendamento e frescura |
 | R-01 | — | parcial | caminho do código de equipa (legacy_can) sem identidade individual; storage de media e pesquisa por fazer | Toda a leitura/escrita de dados de negócio deve ser autorizada no servidor com b |
 | R-02 | — | parcial | pesquisa e storage de media inexistentes; tabelas legadas usam client_id texto em vez de workspace_id | Todas as tabelas de negócio multi-tenant têm workspace_id, FK e RLS; storage, pe |
 | R-04 | — | parcial | verificação com conta real (R-15); E2E citado não está versionado no repo | Dashboard global da agência agrega apenas workspaces autorizados; o cliente vê a |
@@ -780,10 +787,10 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
-| REACT-01 | por começar |  |  | — |
-| REACT-02 | por começar |  |  | — |
-| REACT-03 | por começar |  |  | — |
-| REACT-04 | por começar |  |  | — |
-| REACT-05 | por começar |  |  | — |
-| REACT-06 | por começar |  |  | — |
-| REACT-07 | por começar |  |  | — |
+| REACT-01 | parcial | agente diário de descoberta a correr e verificado com sessão real; aprendizagem da descoberta com aceitar/rejeitar | W10-25 (ADR-0074): react_sources/react_candidates fechadas à API, RPCs com ws_can + flag reacts.radar, worker_react_* só engine_worker; tab /c/[ws]/reacts e rota /api/reacts/:id/video; w10_reacts 33/33, reacts-format 26/26; migração 20261109095944_w10_reacts aplicada em produção a 2026-11-09 | — |
+| REACT-02 | parcial | recolha diária pelo agente (tarefa agendada) e classificação do tipo de vídeo por frames; verificação com sessão real | W10-25 (ADR-0074): react_sources/react_candidates fechadas à API, RPCs com ws_can + flag reacts.radar, worker_react_* só engine_worker; tab /c/[ws]/reacts e rota /api/reacts/:id/video; w10_reacts 33/33, reacts-format 26/26; migração 20261109095944_w10_reacts aplicada em produção a 2026-11-09 | — |
+| REACT-03 | parcial | avaliação feita pelo agente em cada corrida; calibração | W10-25 (ADR-0074): react_sources/react_candidates fechadas à API, RPCs com ws_can + flag reacts.radar, worker_react_* só engine_worker; tab /c/[ws]/reacts e rota /api/reacts/:id/video; w10_reacts 33/33, reacts-format 26/26; migração 20261109095944_w10_reacts aplicada em produção a 2026-11-09 | — |
+| REACT-04 | parcial | verificação com sessão real (agência e cliente) no preview e em produção | W10-25 (ADR-0074): react_sources/react_candidates fechadas à API, RPCs com ws_can + flag reacts.radar, worker_react_* só engine_worker; tab /c/[ws]/reacts e rota /api/reacts/:id/video; w10_reacts 33/33, reacts-format 26/26; migração 20261109095944_w10_reacts aplicada em produção a 2026-11-09 | — |
+| REACT-05 | parcial | verificação com sessão real; excerto do original no editor | W10-25 (ADR-0074): react_sources/react_candidates fechadas à API, RPCs com ws_can + flag reacts.radar, worker_react_* só engine_worker; tab /c/[ws]/reacts e rota /api/reacts/:id/video; w10_reacts 33/33, reacts-format 26/26; migração 20261109095944_w10_reacts aplicada em produção a 2026-11-09 | — |
+| REACT-06 | parcial | lições LRN a partir das decisões e relatório de calibração | W10-25 (ADR-0074): react_sources/react_candidates fechadas à API, RPCs com ws_can + flag reacts.radar, worker_react_* só engine_worker; tab /c/[ws]/reacts e rota /api/reacts/:id/video; w10_reacts 33/33, reacts-format 26/26; migração 20261109095944_w10_reacts aplicada em produção a 2026-11-09 (worker_react_context devolve as decisões ao agente) | — |
+| REACT-07 | parcial | agente diário a renovar links | W10-25 (ADR-0074): react_sources/react_candidates fechadas à API, RPCs com ws_can + flag reacts.radar, worker_react_* só engine_worker; tab /c/[ws]/reacts e rota /api/reacts/:id/video; w10_reacts 33/33, reacts-format 26/26; migração 20261109095944_w10_reacts aplicada em produção a 2026-11-09 (worker_react_context lista links a renovar) | — |
