@@ -12,10 +12,10 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 |---|---|
 | feito | 36 |
 | parcial | 221 |
-| por começar | 53 |
+| por começar | 54 |
 | bloqueado | 3 |
 | adiado | 3 |
-| **total** | **316** |
+| **total** | **317** |
 
 ## Pendentes abertos (bloqueados primeiro, depois por prioridade)
 
@@ -794,3 +794,4 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | REACT-05 | parcial | verificação com sessão real; excerto do original no editor | W10-25 (ADR-0074): react_sources/react_candidates fechadas à API, RPCs com ws_can + flag reacts.radar, worker_react_* só engine_worker; tab /c/[ws]/reacts e rota /api/reacts/:id/video; w10_reacts 33/33, reacts-format 26/26; migração 20261109095944_w10_reacts aplicada em produção a 2026-11-09 | — |
 | REACT-06 | parcial | lições LRN a partir das decisões e relatório de calibração | W10-25 (ADR-0074): react_sources/react_candidates fechadas à API, RPCs com ws_can + flag reacts.radar, worker_react_* só engine_worker; tab /c/[ws]/reacts e rota /api/reacts/:id/video; w10_reacts 33/33, reacts-format 26/26; migração 20261109095944_w10_reacts aplicada em produção a 2026-11-09 (worker_react_context devolve as decisões ao agente) | — |
 | REACT-07 | parcial | agente diário a renovar links | W10-25 (ADR-0074): react_sources/react_candidates fechadas à API, RPCs com ws_can + flag reacts.radar, worker_react_* só engine_worker; tab /c/[ws]/reacts e rota /api/reacts/:id/video; w10_reacts 33/33, reacts-format 26/26; migração 20261109095944_w10_reacts aplicada em produção a 2026-11-09 (worker_react_context lista links a renovar) | — |
+| REACT-08 | por começar |  |  | — |

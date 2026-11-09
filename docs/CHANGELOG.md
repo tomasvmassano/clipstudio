@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-09 (CHG-010 comentários como fonte de ideias)
+
+- **CHG-010** (só documentação; PRD §47). REACT-08: separador Comentários na tab Reacts; de 3 em 3 dias o agente escolhe comentários dos Reels do cliente que dão vídeos novos (discorda, concorda e acrescenta, outro ponto de vista, pergunta), avalia com a configuração do cliente e propõe ideia, ângulo, ganchos e resposta. Sem capacidades novas. Sem alteração funcional.
+
 ## 2026-11-09 (W10-25 radar de reacts)
 
 - **W10-25 · Radar de reacts** (REACT-01..05, parte de REACT-06/07; ADR-0074). Tab Reacts por cliente (flag `reacts.radar`): fila ordenada pela nota da IA e pelo tempo até expirar, vídeo original para ver dentro da app e descarregar, métricas com comentários por mil e índice de polémica, ângulo, 3 ganchos, avaliação com parcelas e rascunho da resposta; Gravar cria guião em rascunho (formato react), Guardar, Rejeitar com motivo, Voltar à fila, nota de 1 a 5; separador Fontes com contas propostas pelo agente (aceitar/rejeitar), vigiadas (pausar) e adicionar à mão. 3 capacidades ativas, 2 tabelas fechadas à API, RPCs do agente só para `engine_worker`. Teste SQL com 33 casos.
