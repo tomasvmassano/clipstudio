@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-09 (teleprompter: só aprovados)
+
+- **W10-25** Filtro "Só aprovados" na fila do teleprompter (FR-03-01; pedido do Tomás a 09/11), ao lado da campanha e do responsável: a fila e o "Começar no guião" ficam só com os guiões aprovados, prontos para ler. A escolha fica guardada no dispositivo, como os outros filtros, e "Limpar filtros" repõe tudo. Sem migração: usa o estado editorial que a fila já traz. E2E `content-meta` alargado.
+
 ## 2026-11-09 (CHG-010 comentários como fonte de ideias)
 
 - **CHG-010** (só documentação; PRD §47). REACT-08: separador Comentários na tab Reacts; de 3 em 3 dias o agente escolhe comentários dos Reels do cliente que dão vídeos novos (discorda, concorda e acrescenta, outro ponto de vista, pergunta), avalia com a configuração do cliente e propõe ideia, ângulo, ganchos e resposta. Sem capacidades novas. Sem alteração funcional.

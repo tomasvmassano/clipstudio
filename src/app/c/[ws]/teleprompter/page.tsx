@@ -195,7 +195,7 @@ function TeleprompterInner({ access }: { access: Access }) {
   }, [access, session]);
 
   // ---------- filtros da fila (FR-03-01): por campanha e responsável, neste dispositivo ----------
-  type Filter = { project: string; owner: string };
+  type Filter = { project: string; owner: string; approved?: boolean };
   const filterKey = `tp.filter.${access.ws}`;
   const [filter, setFilterState] = useState<Filter>(() => {
     try { return { project: "", owner: "", ...JSON.parse(localStorage.getItem(filterKey) ?? "{}") } as Filter; } catch { return { project: "", owner: "" }; }
@@ -213,12 +213,13 @@ function TeleprompterInner({ access }: { access: Access }) {
   const me = owners?.find((o) => o.email === email)?.user_id ?? null;
   const matches = useCallback((i: SessionItem) => {
     const c = i.content;
+    if (filter.approved && c.editorial_status !== "approved") return false;   // só os aprovados, prontos para ler
     if (filter.project === "none" ? !!c.project_id : filter.project && c.project_id !== filter.project) return false;
     if (filter.owner === "none") return !c.owner_id;
     if (filter.owner === "me") return !!me && c.owner_id === me;
     return !filter.owner || c.owner_id === filter.owner;
   }, [filter, me]);
-  const filtering = !!(filter.project || filter.owner);
+  const filtering = !!(filter.project || filter.owner || filter.approved);
 
   // ---------- fila ----------
   const allItems = useMemo(() => session?.items ?? [], [session]);
@@ -327,6 +328,11 @@ function TeleprompterInner({ access }: { access: Access }) {
 
         {session && allItems.length > 0 && (
           <div className="flex flex-wrap items-center gap-2 text-sm" role="group" aria-label="Filtrar a fila">
+            <select aria-label="Estado" className="h-11 rounded-xl border border-neutral-700 bg-neutral-900 px-3" value={filter.approved ? "approved" : ""}
+              onChange={(e) => setFilter({ ...filter, approved: e.target.value === "approved" })}>
+              <option value="">Todos os estados</option>
+              <option value="approved">Só aprovados</option>
+            </select>
             <select aria-label="Campanha" className="h-11 rounded-xl border border-neutral-700 bg-neutral-900 px-3" value={filter.project}
               onChange={(e) => setFilter({ ...filter, project: e.target.value })}>
               <option value="">Todas as campanhas</option>
@@ -340,7 +346,7 @@ function TeleprompterInner({ access }: { access: Access }) {
               <option value="none">Sem responsável</option>
               {(owners ?? []).map((o) => <option key={o.user_id} value={o.user_id}>{o.label}</option>)}
             </select>
-            {filtering && <Btn label="Limpar filtros" onClick={() => setFilter({ project: "", owner: "" })} />}
+            {filtering && <Btn label="Limpar filtros" onClick={() => setFilter({ project: "", owner: "", approved: false })} />}
             {filtering && <span className="text-neutral-400">{items.length} de {allItems.length} guiões</span>}
           </div>
         )}
@@ -349,7 +355,7 @@ function TeleprompterInner({ access }: { access: Access }) {
         ) : session && allItems.length === 0 ? (
           <p className="text-neutral-300">Não há guiões para gravar neste dia. Os guiões rejeitados e arquivados não entram na fila.</p>
         ) : session && items.length === 0 ? (
-          <p className="text-neutral-300">Nenhum guião da fila corresponde aos filtros. <button type="button" className="underline" onClick={() => setFilter({ project: "", owner: "" })}>Limpar filtros</button></p>
+          <p className="text-neutral-300">Nenhum guião da fila corresponde aos filtros. <button type="button" className="underline" onClick={() => setFilter({ project: "", owner: "", approved: false })}>Limpar filtros</button></p>
         ) : session ? (
           <>
             <div className="flex flex-wrap items-center gap-2">
