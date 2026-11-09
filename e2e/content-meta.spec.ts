@@ -38,6 +38,15 @@ as("clientA")("pôr o guião numa campanha nova com responsável e filtrar a fil
   await expect(page.locator(`[data-item="${GID}"]`)).toHaveCount(0);
   await page.getByRole("button", { name: "Limpar filtros" }).click();
   await expect(page.locator(`[data-item="${GID}"]`)).toBeVisible();
+  // só aprovados: o guião 20 (não aprovado) sai da fila; a contagem bate com os aprovados da base
+  const [st] = sql(`select editorial_status from guioes where id = '${GID}'`);
+  await page.getByLabel("Estado").selectOption("approved");
+  if (st !== "approved") await expect(page.locator(`[data-item="${GID}"]`)).toHaveCount(0);
+  await expect(page.getByText(/^\d+ de \d+ guiões$/)).toBeVisible();
+  await page.reload();
+  await expect(page.getByLabel("Estado")).toHaveValue("approved");   // fica guardado no dispositivo
+  await page.getByRole("button", { name: "Limpar filtros" }).click();
+  await expect(page.getByLabel("Estado")).toHaveValue("");
   expect(errors).toEqual([]);
 });
 
