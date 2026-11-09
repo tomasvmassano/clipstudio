@@ -2,7 +2,7 @@
 
 import { useMemo, type ReactNode } from "react";
 import { hookEnd, layout, outToSrc, type EditDoc, type TextLook } from "@/lib/edit-doc";
-import { CAP_STYLES, captionAtState, captionStates, capStyleOf } from "@/lib/caption-plan";
+import { CAP_STYLES, captionAtState, captionStates, capStyleOf, wipeFrac } from "@/lib/caption-plan";
 
 /** Vermelho do destaque do S15 (RED em render_doc.py). */
 const S15_RED = "#E2002C";
@@ -76,15 +76,18 @@ export function EditorStage({ doc, t, media, className }: { doc: EditDoc; t: num
           style={{ left: `${(cs.box[0] / 1080) * 100}%`, width: `${(cs.box[2] / 1080) * 100}%`, fontSize: px(lk.size ?? cs.size), color: lk.color || "#FFFFFF",
             ...(lk.y != null ? { top: top(lk.y), transform: "translateY(-50%)" } : { top: top(cs.box[1]) }) }}>
           {capNow.chunk.map((w, j) => {
-            const said = j <= capNow.active;
             const redBox = !("highlight" in lk);
-            const bg = redBox && said ? S15_RED : lk.background || undefined;
-            const color = !redBox && lk.highlight && j === capNow.active ? lk.highlight : undefined;
-            return (
-              <span key={j} className="box-decoration-clone [text-shadow:2px_3px_0_rgba(0,0,0,.47)]" style={{ background: bg, color, padding: bg ? "0 0.11em" : undefined }}>
-                {text(w.w, lk.upper)}{j < capNow.chunk.length - 1 ? " " : ""}
-              </span>
-            );
+            const last = j === capNow.chunk.length - 1;
+            const shadow = "box-decoration-clone [text-shadow:2px_3px_0_rgba(0,0,0,.47)]";
+            if (redBox) {
+              // barra contínua (como o render): as já ditas inteiras com o espaço a seguir, a que se diz até à fração dita
+              if (j < capNow.active) return <span key={j} className={shadow} style={{ background: S15_RED }}>{text(w.w, lk.upper)}{last ? "" : " "}</span>;
+              const pct = j === capNow.active ? Math.round(wipeFrac(w, t) * 1000) / 10 : 0;
+              const bg = pct > 0 ? `linear-gradient(90deg, ${S15_RED} ${pct}%, ${lk.background || "transparent"} ${pct}%)` : lk.background || undefined;
+              return <span key={j}><span className={shadow} style={{ background: bg }}>{text(w.w, lk.upper)}</span>{last ? "" : " "}</span>;
+            }
+            const color = lk.highlight && j === capNow.active ? lk.highlight : undefined;
+            return <span key={j} className={shadow} style={{ background: lk.background || undefined, color }}>{text(w.w, lk.upper)}{last ? "" : " "}</span>;
           })}
         </div>
       ))}

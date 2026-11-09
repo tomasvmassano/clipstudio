@@ -43,3 +43,12 @@ test("estados S14: uma palavra de cada vez, até 0,35 s depois de dita", () => {
   assert.equal(captionAtState(st, 1.6), null);
   assert.equal(captionAtState(st, 3.1)!.chunk[0].w, "nunca");
 });
+
+test("barra contínua: fração dita da palavra ativa (W10-31)", async () => {
+  const { wipeFrac } = await import("../src/lib/caption-plan.ts");
+  const w = { w: "jerKING", s: 2, e: 2.4 };
+  assert.equal(wipeFrac(w, 1.9), 0);
+  assert.ok(Math.abs(wipeFrac(w, 2.2) - 0.5) < 1e-9);
+  assert.equal(wipeFrac(w, 3), 1);
+  assert.ok(Math.abs(wipeFrac({ w: "a", s: 1, e: 1 }, 1.025) - 0.5) < 1e-9);   // palavra sem duração: 50 ms, como o motor
+});

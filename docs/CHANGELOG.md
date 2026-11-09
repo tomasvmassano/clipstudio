@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-10 (S15: barra vermelha contínua)
+
+- **W10-31** A barra vermelha do S15 avança de forma contínua, a meio da palavra, como na referência do estilo (instagram.com/p/DenrdHBRDpo; pedido do Tomás a 10/11; ADR-0079). Na exportação (numeiro-engine `s15-barra-continua`) e no palco do editor (`wipeFrac`). S14 e o destaque próprio do aspeto não mudam. Sem migração. Testes: `caption-plan` 5/5, motor `test_wipe` 4/4.
+
 ## 2026-11-10 (legendas do palco iguais à exportação)
 
 - **W10-30** As legendas do palco deixam de saltar e de se repetir (EDL-08; queixa do Tomás a 10/11; ADR-0078). O palco mostrava as palavras numa janela deslizante de ±0,6 s (entravam e saíam uma a uma) e repetia a palavra que atravessa dois cortes. Agora usa o mesmo plano da exportação (`caption-plan.ts`, espelho de `render_doc.caption_plan`, igual ao motor em 200 documentos aleatórios): S15 em blocos de até 6 palavras com a caixa vermelha no que já se disse, S14 uma palavra de cada vez. Novo "Estilo das legendas" (S15/S14) no painel Aspeto do editor (EDL-13). Sem migração. Testes: `caption-plan` 4/4.
