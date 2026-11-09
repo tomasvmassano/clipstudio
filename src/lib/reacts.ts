@@ -1,6 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import { friendlyError, type Access } from "@/lib/access";
 import type { ReactAi } from "@/lib/reacts-format";
+import type { CommentAi, CommentKind } from "@/lib/comments-format";
 
 /* Radar de reacts (W10-25, PRD §47). Tudo passa por RPCs com permissão e flag verificadas no servidor. */
 
@@ -47,3 +48,23 @@ export const addReactSource = (a: Access, platform: "instagram" | "tiktok", hand
 
 /** URL da rota que serve o vídeo (ver dentro da app) ou o descarrega (dl). A rota volta a verificar a permissão. */
 export const reactVideoUrl = (ws: string, id: number, dl = false) => `/api/reacts/${id}/video?ws=${encodeURIComponent(ws)}${dl ? "&dl=1" : ""}`;
+
+/* Comentários como fonte de ideias (W10-26, REACT-08): mesmas capacidades e flag do radar. */
+export type CommentTab = "open" | "saved" | "recorded" | "rejected";
+export type CommentItem = {
+  id: number; platform: string; comment_key: string; reel_ref_key: string | null; reel_url: string | null; reel_account: string | null;
+  reel_caption: string | null; author: string | null; text: string; likes: number | null; replies: number | null; posted_at: string | null;
+  kind: CommentKind | null; ai: CommentAi | null; score: number | null; risk_level: string | null; status: CommentTab;
+  reject_reason: string | null; rating: number | null; decision_note: string | null; decided_at: string | null; decided_label: string | null;
+  content_id: string | null; created_at: string;
+};
+export type CommentList = {
+  items: CommentItem[]; counts: Record<CommentTab, number>; kinds: Partial<Record<CommentKind, number>> | null; last_run: string | null;
+  can: { decide: boolean; record: boolean };
+};
+export const fetchComments = (a: Access, tab: CommentTab, kind: CommentKind | null) =>
+  rpc<CommentList>("comments_list", { p_ws: a.ws, p_tab: tab, p_kind: kind, p_token: a.token });
+export const decideComment = (a: Access, id: number, action: "save" | "reject" | "reopen" | "rate", o: { reason?: string; rating?: number; note?: string } = {}) =>
+  rpc<CommentItem>("comment_decide", { p_id: id, p_action: action, p_reason: o.reason ?? null, p_rating: o.rating ?? null, p_note: o.note ?? null, p_token: a.token });
+export const recordComment = (a: Access, id: number) =>
+  rpc<{ content_id: string; created: boolean; item: CommentItem }>("comment_record", { p_id: id, p_token: a.token });

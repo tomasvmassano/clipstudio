@@ -4,6 +4,10 @@
 
 - **W10-25** Filtro "Só aprovados" na fila do teleprompter (FR-03-01; pedido do Tomás a 09/11), ao lado da campanha e do responsável: a fila e o "Começar no guião" ficam só com os guiões aprovados, prontos para ler. A escolha fica guardada no dispositivo, como os outros filtros, e "Limpar filtros" repõe tudo. Sem migração: usa o estado editorial que a fila já traz. E2E `content-meta` alargado.
 
+## 2026-11-09 (W10-26 comentários como fonte de ideias)
+
+- **W10-26 · Comentários** (REACT-08; ADR-0075). Separador Comentários na tab Reacts: comentários dos Reels do cliente que dão vídeo novo, com tipo (discorda, concorda e acrescenta, outro ponto de vista, pergunta), nota da IA com parcelas, ideia, ângulo, 3 ganchos e rascunho da resposta; filtro por tipo; Gravar resposta cria guião em rascunho (formato resposta a comentário, sem o nome de quem comentou), Guardar, Rejeitar com motivo, Voltar à fila, nota de 1 a 5. Tabela `comment_ideas` fechada à API, RPCs com `reacts.read`/`reacts.decide` + flag `reacts.radar`, RPCs do agente só para `engine_worker`; o contexto do agente traz a configuração ativa do cliente. Teste SQL com 26 casos, comments-format 5 casos.
+
 ## 2026-11-09 (CHG-010 comentários como fonte de ideias)
 
 - **CHG-010** (só documentação; PRD §47). REACT-08: separador Comentários na tab Reacts; de 3 em 3 dias o agente escolhe comentários dos Reels do cliente que dão vídeos novos (discorda, concorda e acrescenta, outro ponto de vista, pergunta), avalia com a configuração do cliente e propõe ideia, ângulo, ganchos e resposta. Sem capacidades novas. Sem alteração funcional.

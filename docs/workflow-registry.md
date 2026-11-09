@@ -312,3 +312,9 @@ Gravação ligada a guião + câmara (`recording_clips`) → quando a frente e o
 ## Radar de reacts (W10-25, REACT-01..07, ADR-0074)
 
 Contas: `proposed` (agente) → `active` (aceite) ou `rejected`; `active` ↔ `paused`; adicionar à mão entra `active`. O agente só atualiza estatísticas e nota; nunca muda uma decisão humana. Candidatos (identidade do vídeo única por cliente): o agente cria ou atualiza `open` com métricas, link do vídeo (renovado enquanto aberto ou guardado), tipo, transcrição e avaliação; `open` → `saved` | `rejected` (motivo obrigatório) | `recorded` (cria guião rascunho, `formato = react`, idempotente); `saved`/`rejected` → `open` (reabrir, +24 h no mínimo); `recorded` é final (o guião segue o fluxo editorial; publicar exige aprovação). `open` com `expires_at` passado aparece em Expirados, sem se apagar. Cada decisão e nota em `audit_events` (`react.*`) e devolvida ao agente em `worker_react_context` para aprender.
+
+## Comentários como fonte de ideias (W10-26, REACT-08, ADR-0075)
+
+Estados de `comment_ideas.status`: `open` → `saved` | `rejected` (motivo obrigatório) | `recorded` (cria guião); `saved` → `open` | `rejected` | `recorded`; `rejected` → `open`. `recorded` é final (muda-se no guião). A nota de 1 a 5 muda-se em qualquer estado. Cada decisão grava `audit_events` (`comment.save|reject|reopen|rate|record`) com antes/depois e o ator.
+
+Agente (tarefa agendada de 3 em 3 dias): `worker_comment_context` → recolhe comentários dos Reels recentes das contas do cliente → ignora os vistos → classifica (discorda, concorda, outro_angulo, pergunta) e avalia contra a configuração ativa → `worker_comment_upsert` (idempotente pela `comment_key`; nunca muda estado). Comentários ofensivos sem ideia, spam e ataques pessoais não entram.
