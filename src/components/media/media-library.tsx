@@ -19,7 +19,7 @@ import {
   abandonUpload, addLink, errCode, fetchLibrary, purge, resumeUpload, uploadFile,
   type MediaAsset, type MediaFilters, type MediaLibrary, type MediaView, type UploadProgress,
 } from "@/lib/media";
-import { FORMATS, KIND_LABEL, STATUS_LABEL, bytes, kindForMime, mimeOf, pctOf, precheck, splitTags, type MediaKind } from "@/lib/media-format";
+import { FORMATS, KIND_LABEL, STATUS_LABEL, aiTagsAdded, bytes, kindForMime, mimeOf, pctOf, precheck, splitTags, type MediaKind } from "@/lib/media-format";
 import { useSession } from "@/components/session-provider";
 import { fetchGuioes, todayDubai } from "@/lib/data";
 import { useFlags } from "@/lib/flags";
@@ -371,6 +371,8 @@ function UploadDialog({ access, d, onClose, onStart }: {
   const clipOn = useClipFlag(access);
   const camErr = guiao ? cameraProblem(okIdx.map((i) => cams[i] ?? "")) : null;
   const noCam = !!guiao && okIdx.every((i) => !cams[i]);
+  // ia-* pede a declaração de direitos, que se faz na ficha do ativo (o servidor recusa ia-* no envio; ADR-0071)
+  const aiTags = aiTagsAdded([], splitTags(tags));
   return (
     <Dialog open onOpenChange={(v) => { if (!v) onClose(); }}>
       <DialogContent className="sm:max-w-lg">
@@ -424,11 +426,16 @@ function UploadDialog({ access, d, onClose, onStart }: {
           {clipOn && <ClipGuiaoSelect access={access} value={guiao} onChange={setGuiao} />}
         </div>
         {clipOn && guiao && <p className="text-xs text-muted-foreground">Escolhe a câmara de cada vídeo acima (frente e lado). Com as duas, o pacote deste guião pode começar logo que cheguem.</p>}
+        {aiTags.length > 0 && (
+          <p className="text-xs text-destructive" role="alert">
+            Tira {aiTags.join(", ")} daqui: as etiquetas da IA põem-se na ficha do ativo depois de carregar, onde confirmas que o cliente tem direitos para a IA usar o ficheiro.
+          </p>
+        )}
         {camErr && <p className="text-xs text-destructive" role="alert">{camErr}</p>}
         {noCam && <p className="text-xs text-amber-500">Escolheste o guião mas nenhuma câmara: os ficheiros ficam só ligados ao guião, sem pacote por guião.</p>}
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>Cancelar</Button>
-          <Button disabled={okFiles.length === 0 || !!camErr} onClick={() => onStart(okFiles, {
+          <Button disabled={okFiles.length === 0 || !!camErr || aiTags.length > 0} onClick={() => onStart(okFiles, {
             ...(kind ? { kind } : {}), ...(project ? { project_id: project } : {}), ...(format ? { format } : {}), ...(tags.trim() ? { tags: splitTags(tags) } : {}),
             ...(clipOn && guiao ? { content_id: guiao } : {}),
           }, okIdx.map((i) => (clipOn && guiao && cams[i] ? { guiao, camera: cams[i] as Camera } : null)))}><UploadIcon /> Carregar {okFiles.length || ""}</Button>

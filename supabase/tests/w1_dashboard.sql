@@ -33,7 +33,8 @@ begin
   insert into t values ('admin: views do período e do anterior', true, (j #>> '{kpis,kpi.views,value}')::int = 1500 and (j #>> '{kpis,kpi.views,prev}')::int = 300);
   insert into t values ('admin: engagement = interações ÷ views', true, (j #>> '{kpis,kpi.engagement,value}')::numeric = 8.33);
   insert into t values ('admin: fontes recebidas', true, (j #>> '{kpis,kpi.sources,value}')::int = 2 and (j #>> '{kpis,kpi.sources,prev}')::int = 0);
-  insert into t values ('admin: vê custos e pode configurar', true, j->'kpis' ? 'kpi.costs' and (j->>'can_configure')::boolean);
+  -- ADR-0071: a equipa do cliente nunca vê custos, mesmo como admin
+  insert into t values ('admin do cliente: não vê custos e pode configurar', true, not (j->'kpis' ? 'kpi.costs') and (j->>'can_configure')::boolean);
   insert into t values ('admin: layout por omissão da função, com explicação', true, j->>'role' = 'workspace_admin' and not (j->>'customized')::boolean
     and j->'widgets'->0->>'key' = 'kpi.scripts_created' and length(j->'widgets'->0->>'description') > 20);
   insert into t values ('período anterior do mesmo tamanho', true, (j #>> '{period,prev_from}')::date = d0 - 7 and (j #>> '{period,prev_to}')::date = d0 - 1);

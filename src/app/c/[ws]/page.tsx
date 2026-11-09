@@ -33,6 +33,7 @@ import {
 import { fetchDesempenho, fmtDay, type Desempenho } from "@/lib/desempenho";
 import { fetchHoje, type Hoje } from "@/lib/hoje";
 import { FORMATO_LABEL } from "@/lib/types";
+import { formatMix, liveToday } from "@/lib/today-format";
 import { clientPath } from "@/lib/ws-path";
 
 /** Início do cliente (PRD M01): KPIs do período com comparação, widgets por função (configuráveis) e o dia de hoje. */
@@ -191,15 +192,9 @@ function TodayWidget({ w, access, tz }: { w: Widget; access: Access; tz: string 
   const { all, loading, error } = useGuioes(access, date);
   if (error) return <Alert variant="destructive" className="md:col-span-2"><AlertDescription>{w.label}: {error}</AlertDescription></Alert>;
   if (loading) return <Skeleton className="h-64 md:col-span-2" />;
-  const { day } = splitDay(all, date);
-  const ok = day.filter((g) => g.status !== "rejeitado");
+  // arquivados e eliminados não contam no Início (W10-22)
+  const day = liveToday(splitDay(all, date).day);
   if (w.key === "panel.scripts_today") return <RecentConversations guioes={day} />;
-  const count = new Map<string, number>();
-  ok.forEach((g) => count.set(g.formato ?? "outros", (count.get(g.formato ?? "outros") ?? 0) + 1));
-  const sorted = [...count.entries()].sort((a, b) => b[1] - a[1]);
-  const rest = sorted.slice(4).reduce((t, [, n]) => t + n, 0);
-  const mix = [...sorted.slice(0, 4), ...(rest ? [["outros", rest] as [string, number]] : [])].map(([k, n]) => ({
-    key: k.replace(/[^a-z0-9]/gi, "_"), label: FORMATO_LABEL[k] ?? k, share: Math.round((n / Math.max(1, ok.length)) * 100),
-  }));
-  return <ChannelBreakdownChart data={mix} total={ok.length} />;
+  const { mix, total } = formatMix(day, FORMATO_LABEL);
+  return <ChannelBreakdownChart data={mix} total={total} />;
 }
