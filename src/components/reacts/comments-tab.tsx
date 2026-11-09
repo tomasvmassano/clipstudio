@@ -136,7 +136,7 @@ function CommentCard({ access, it, can, onChange, onReject, onError }: {
           {it.risk_level === "alto" && <Badge variant="destructive">Risco alto</Badge>}
           {it.risk_level === "medio" && <Badge variant="outline">Risco médio</Badge>}
           {eng && <span className="text-xs text-muted-foreground">{eng}</span>}
-          <span className="text-xs text-muted-foreground">{fmtWhen(it.posted_at)}</span>
+          {it.posted_at && <span className="text-xs text-muted-foreground">{fmtWhen(it.posted_at)}</span>}
         </div>
 
         <blockquote className="flex gap-2 rounded-md border-l-2 border-primary/60 bg-muted/40 px-3 py-2 text-sm">
