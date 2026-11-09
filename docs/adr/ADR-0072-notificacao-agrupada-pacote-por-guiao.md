@@ -34,4 +34,4 @@ Os triggers nunca falham a transação do worker ou do pedido (exceção regista
 
 ## Rollback
 
-Bloco no fim de `supabase/migrations/PENDING_w10_notif_agrupada.sql`: tirar os dois triggers, repor `_media_package_done` de 20261105192728, apagar as funções; contract posterior apaga as duas tabelas. As notificações já criadas ficam na caixa.
+Bloco no fim de `supabase/migrations/20261109094755_w10_notif_agrupada.sql`: tirar os dois triggers, repor `_media_package_done` de 20261105192728, apagar as funções; contract posterior apaga as duas tabelas. As notificações já criadas ficam na caixa.
