@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import {
 	Building2Icon, GaugeIcon, KeyRoundIcon, ScrollIcon, SettingsIcon, SlidersHorizontalIcon,
 	LayoutGridIcon, ScrollTextIcon, MonitorPlayIcon, LightbulbIcon, BarChart3Icon, BotIcon,
-	BriefcaseBusinessIcon, ClapperboardIcon, FlaskRoundIcon, GraduationCapIcon, RotateCcwIcon, FilmIcon, ReceiptIcon, FlaskConicalIcon, LibraryIcon, ShieldCheckIcon, UsersIcon, UsersRoundIcon, WalletIcon, FileTextIcon, DoorOpenIcon, HistoryIcon, PlugIcon, InboxIcon, ListTodoIcon, CalendarDaysIcon, WandSparklesIcon, ScissorsIcon, ActivityIcon } from "lucide-react";
+	BriefcaseBusinessIcon, ClapperboardIcon, FlaskRoundIcon, GraduationCapIcon, RotateCcwIcon, FilmIcon, ReceiptIcon, FlaskConicalIcon, LibraryIcon, ShieldCheckIcon, UsersIcon, UsersRoundIcon, WalletIcon, FileTextIcon, DoorOpenIcon, HistoryIcon, PlugIcon, InboxIcon, ListTodoIcon, CalendarDaysIcon, WandSparklesIcon, ScissorsIcon, ActivityIcon, MegaphoneIcon } from "lucide-react";
 
 export type SidebarNavItem = {
 	title: string;
@@ -79,6 +79,7 @@ export const clientNavGroups: SidebarNavGroup[] = [
 			{ title: "Biblioteca", path: "/biblioteca", icon: <LibraryIcon />, cap: "media.read", flag: "media.library" },
 			{ title: "Fontes", path: "/fontes", icon: <LightbulbIcon />, cap: "sources.read" },
 			{ title: "Referências", path: "/referencias", icon: <UsersIcon />, cap: "references.read" },
+			{ title: "Reacts", path: "/reacts", icon: <MegaphoneIcon />, cap: "reacts.read", flag: "reacts.radar" },
 		],
 	},
 	{
