@@ -9,7 +9,7 @@ import { as, expect, expectNoCrash } from "./helpers";
 // ligação e as negações passam pelas RPCs reais. O cliente B não liga nem pede nada no cliente A.
 test.describe.configure({ mode: "serial" });
 
-const PENDING = "supabase/migrations/20261106131955_w10_pacote_por_guiao.sql";
+const PENDING = "supabase/migrations/PENDING_w10_pacote_por_guiao.sql";   // já aplicada e com versão: o supabase start aplica-a; só um PENDING_ se aplica aqui
 const tag = `e2epg${Date.now() % 1_000_000}`;
 const GID = `${WS_A}-2026-10-28-21`;
 const FLAGS = ["media.library", "edit.studio", "media.r2", "edit.package_script"];

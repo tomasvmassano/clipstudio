@@ -10,7 +10,7 @@ import { flagsOnForA, restoreFlags } from "./flags";
 // versão nova. O cliente B não lê nem aprova nada de A; a equipa do cliente não vê a secção da agência.
 test.describe.configure({ mode: "serial" });
 
-const PENDING = "supabase/migrations/20261106132216_w10_aprendizagem.sql";
+const PENDING = "supabase/migrations/PENDING_w10_aprendizagem.sql";   // já aplicada e com versão: o supabase start aplica-a; só um PENDING_ se aplica aqui
 const tag = `e2elrn${Date.now() % 1_000_000}`;
 // guiões do motor num dia longe dos outros testes (a base local é partilhada)
 const DAY = sql(`select to_char((now() at time zone 'Asia/Dubai')::date + 500 + (${Date.now() % 97}), 'YYYY-MM-DD')`)[0];
@@ -89,7 +89,9 @@ test("o Editor de lições propõe com evidência só deste cliente", async () =
 as("clientA")("Lições: aprovar com texto editado cria a versão em vigor", async ({ page, errors }) => {
   await page.goto(`/c/${WS_A}/aprendizagem/licoes`);
   await expect(page.getByRole("heading", { name: "Lições", level: 1 })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Agência" })).toHaveCount(0);   // equipa do cliente não vê a agência
+  // equipa do cliente: vê as regras da agência só para leitura (LRN-04, ADR-0071), nunca a secção da agência com propostas
+  await expect(page.getByRole("heading", { name: /Regras da agência/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /^Agência/ })).toHaveCount(0);
   const card = page.locator(`[data-lesson="${lessonId}"]`);
   await expect(card).toContainText(tag);
   await expect(card).toContainText(/edições? como evidência/);

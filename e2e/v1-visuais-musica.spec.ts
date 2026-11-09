@@ -10,7 +10,7 @@ import { flagsOnForA, restoreFlags } from "./flags";
 // O documento v1 é escrito aqui como o worker o grava (media_worker_package_save faz o mesmo insert, testado em SQL).
 test.describe.configure({ mode: "serial" });
 
-const PENDING = "supabase/migrations/20261106131703_w10_v1_visuais_musica.sql";
+const PENDING = "supabase/migrations/PENDING_w10_v1_visuais_musica.sql";   // já aplicada e com versão: o supabase start aplica-a; só um PENDING_ se aplica aqui
 const tag = `e2evm${Date.now() % 1_000_000}`;
 let asset = "";
 let img = "";
