@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-10 (corpo partilhado e vídeos por guião)
+
+- **W10-33** Corpo partilhado entre hooks (EDL-14) e vídeos por guião (EDL-15), a pedido do Tomás (CHG-011, ADR-0081). Ao gravar no editor, o corpo (cortes que não são hook e as legendas, câmaras, visuais e volumes desses trechos) é aplicado aos outros hooks do guião, cada um com o seu hook, como versão nova; quem gravou entretanto fica de fora com aviso. Separadores Hook 1/2/3 no editor e no modo guiado, com "corpo igual" ou "diferente em". Na Edição automática, "Vídeos por guião": imagem do início, texto do hook, duração, versão e exportação, com Abrir e Exportar. Migração `20261109230237_w10_videos_por_guiao.sql` (`edit_board`, só leitura). Testes: `w10_videos_por_guiao` 12/12, `body-share` 5/5.
+
 ## 2026-11-10 (CHG-011: corpo partilhado e vídeos por guião)
 
 - **CHG-011** EDL-14 (corpo partilhado entre hooks) e EDL-15 (vídeos por guião) no PRD §39.1, a pedido do Tomás depois de editar o primeiro pacote real. Só documentação; implementação a seguir.

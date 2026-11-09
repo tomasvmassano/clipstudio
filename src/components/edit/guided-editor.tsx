@@ -17,7 +17,8 @@ import { AiVisualsPanel } from "@/components/edit/ai-visuals";
 import { ClipOrderView } from "@/components/edit/clip-order-view";
 import { WidgetBoundary } from "@/components/widget-boundary";
 import type { Access } from "@/lib/access";
-import { EditRpcError, SOURCE_LABEL, applyAlternative, saveEdit, type EditState } from "@/lib/edit";
+import { EditRpcError, SOURCE_LABEL, applyAlternative, fetchBoard, saveEdit, type BoardVariant, type EditState } from "@/lib/edit";
+import { VariantTabs } from "@/components/edit/variant-tabs";
 import {
   addNote, altSections, deleteSegment, editWord, fmtT, guidedProblem, historyOf, hookTexts, layout, notesOut, optionInDoc, problem, push, redo, restorable,
   restoreSegment, setHook, setMusic, toggleNote, undo, wordsBySegment, type AltSection, type EditDoc, type History,
@@ -48,6 +49,13 @@ export function GuidedEditor({ access, st, onReload }: { access: Access; st: Edi
   const [h, setH] = useState<History>(() => historyOf(base));
   const doc = h.present;
   const dirty = h.past.length > 0;
+  const [siblings, setSiblings] = useState<BoardVariant[]>([]);   // hooks do mesmo guião (EDL-15)
+  useEffect(() => {
+    if (!st.asset.content_id) return;
+    let live = true;
+    fetchBoard(access, st.asset.content_id, 1).then((g) => { if (live) setSiblings(g[0]?.variants ?? []); }).catch(() => { /* sem separadores */ });
+    return () => { live = false; };
+  }, [access, st.asset.content_id, st.document?.current_version_id]);
   const [step, setStep] = useState<Step>("corte");
   const [lib, setLib] = useState<MediaAsset[] | null>(null);
   const [libErr, setLibErr] = useState(false);
@@ -154,6 +162,7 @@ export function GuidedEditor({ access, st, onReload }: { access: Access; st: Edi
           <p className="text-sm text-muted-foreground">
             Modo guiado · versão {v.version_no} ({SOURCE_LABEL[v.source]}{v.created_label ? `, ${v.created_label}` : ""}){!isCurrent && " · versão antiga, só leitura"}{dirty && " · alterações por gravar"}
           </p>
+          <div className="mt-2"><VariantTabs access={access} current={st.asset.id} variants={siblings} dirty={dirty} mode="guiado" /></div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <select aria-label="Versão" className="h-9 rounded-md border bg-background px-2 text-sm" value={v.id} onChange={(e) => void onReload(e.target.value)}>

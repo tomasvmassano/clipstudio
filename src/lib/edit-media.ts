@@ -30,8 +30,8 @@ async function rpc<T>(fn: string, args: Record<string, unknown>): Promise<T> {
 export const fetchPreviewSources = (a: Access, asset: string, version?: string | null) =>
   rpc<PreviewSources>("edit_preview_sources", { p_ws: a.ws, p_asset: asset, p_version: version ?? null, p_token: a.token });
 
-export async function proxyUrl(a: Access, versionId: string): Promise<{ url: string; expires_at: string }> {
-  const r = await fetch(`/api/media/versions/${versionId}/proxy?ws=${encodeURIComponent(a.ws)}`, { cache: "no-store" });
+export async function proxyUrl(a: Access, versionId: string, soft = false): Promise<{ url: string; expires_at: string }> {
+  const r = await fetch(`/api/media/versions/${versionId}/proxy?ws=${encodeURIComponent(a.ws)}${soft ? "&soft=1" : ""}`, { cache: "no-store" });
   const b = (await r.json().catch(() => ({}))) as { url?: string; expires_at?: string; error?: string };
   if (!r.ok || !b.url) throw new Error(b.error ?? `Não consegui abrir a versão leve (${r.status}).`);
   return { url: b.url, expires_at: b.expires_at ?? "" };
