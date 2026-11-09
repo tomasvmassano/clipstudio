@@ -20,7 +20,7 @@ import { useSession } from "@/components/session-provider";
 import { LinkForm } from "@/components/editor/script-packages";
 import { useFlags } from "@/lib/flags";
 import { CAMERA_LABEL, getClip, unlinkClip } from "@/lib/package-script";
-import { FORMATS, KIND_LABEL, STATUS_LABEL, VERSION_STATE_LABEL, bytes, kindAccepts, mimeOf, precheck, previewKind, splitTags, type MediaStatus } from "@/lib/media-format";
+import { AI_RIGHTS_TEXT, FORMATS, KIND_LABEL, STATUS_LABEL, VERSION_STATE_LABEL, aiTagsAdded, bytes, kindAccepts, mimeOf, precheck, previewKind, splitTags, type MediaStatus } from "@/lib/media-format";
 
 export function MediaAssetSheet({ access, lib, id, onClose, onChanged, onReplace }: {
   access: Access; lib: MediaLibrary; id: string; onClose: () => void; onChanged: () => void; onReplace: (assetId: string, f: File) => void;
@@ -29,6 +29,8 @@ export function MediaAssetSheet({ access, lib, id, onClose, onChanged, onReplace
   const [n, setN] = useState(0);
   // o link criado só se mostra uma vez: fica aqui para sobreviver ao recarregar da ficha (que desmonta as secções)
   const [createdShare, setCreatedShare] = useState<CreatedShare | null>(null);
+  // a confirmação de "Guardado." fica aqui: o formulário remonta a cada gravação (key = lock_version) e perdia-a
+  const [savedNote, setSavedNote] = useState<string | null>(null);
   const reload = () => { r.reload(); onChanged(); setN((x) => x + 1); };
   const a = r.data;
   return (
@@ -50,7 +52,7 @@ export function MediaAssetSheet({ access, lib, id, onClose, onChanged, onReplace
             <>
               <Preview key={`${a.current?.id}-${n}`} access={access} lib={lib} a={a} />
               <Actions access={access} lib={lib} a={a} onChanged={reload} onReplace={onReplace} onClose={onClose} />
-              {a.lifecycle === "ativo" && <MetaForm key={a.lock_version} access={access} lib={lib} a={a} onSaved={reload} />}
+              {a.lifecycle === "ativo" && <MetaForm key={a.lock_version} access={access} lib={lib} a={a} onSaved={reload} note={savedNote} setNote={setSavedNote} />}
               {a.lifecycle === "ativo" && a.kind === "video" && !a.tags.includes("pacote") && <ClipSection access={access} lib={lib} assetId={a.id} onChanged={reload} />}
               <History access={access} lib={lib} a={a} />
               {a.shares && a.lifecycle === "ativo" && <Shares access={access} lib={lib} a={a} onChanged={reload} created={createdShare} setCreated={setCreatedShare} />}
@@ -191,7 +193,8 @@ function Actions({ access, lib, a, onChanged, onReplace, onClose }: {
   );
 }
 
-function MetaForm({ access, lib, a, onSaved }: { access: Access; lib: MediaLibrary; a: MediaAssetDetail; onSaved: () => void }) {
+function MetaForm({ access, lib, a, onSaved, note, setNote }: { access: Access; lib: MediaLibrary; a: MediaAssetDetail; onSaved: () => void;
+                    note: string | null; setNote: (v: string | null) => void }) {
   const [title, setTitle] = useState(a.title);
   const [tags, setTags] = useState(a.tags.join(" "));
   const [project, setProject] = useState(a.project?.id ?? "");
@@ -203,16 +206,22 @@ function MetaForm({ access, lib, a, onSaved }: { access: Access; lib: MediaLibra
   const [notes, setNotes] = useState(a.notes ?? "");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ text: string; bad: boolean } | null>(null);
+  const [rights, setRights] = useState(false);
   const contentChanged = content !== (a.content?.id ?? "");
   const ro = !lib.can.upload;
+  // etiquetas ia-* novas: é a declaração de direitos para a IA (ADR-0071); o servidor recusa sem a confirmação
+  const aiAdded = aiTagsAdded(a.tags, splitTags(tags));
+  const needRights = aiAdded.length > 0;
   const save = async () => {
-    setBusy(true); setMsg(null);
+    setBusy(true); setMsg(null); setNote(null);
     try {
       await saveAsset(access, a.id, {
         title: title.trim(), tags: splitTags(tags), project_id: project || null, format: format || null, status,
         content_id: content || null, take_id: contentChanged ? null : take || null, publication_id: contentChanged ? null : pub || null, notes: notes.trim() || null,
+        ...(needRights ? { ai_rights_confirmed: rights } : {}),
       }, a.lock_version);
-      setMsg({ text: contentChanged ? "Guardado. Escolhe agora o take e a publicação do guião novo, se quiseres." : "Guardado.", bad: false });
+      setRights(false);
+      setNote(contentChanged ? "Guardado. Escolhe agora o take e a publicação do guião novo, se quiseres." : "Guardado.");
       onSaved();
     } catch (e) {
       setMsg({ text: errCode(e) === "PT409" ? "Alguém mudou este ativo entretanto. Recarreguei: revê e volta a guardar." : (e as Error).message, bad: true });
@@ -257,8 +266,24 @@ function MetaForm({ access, lib, a, onSaved }: { access: Access; lib: MediaLibra
         </label>
         <label className="flex flex-col gap-1 sm:col-span-2">Notas<Textarea value={notes} disabled={ro} onChange={(e) => setNotes(e.target.value)} rows={2} /></label>
       </div>
-      {!ro && <Button className="self-start" size="sm" disabled={busy || !title.trim()} onClick={() => void save()}>{busy && <Loader2Icon className="animate-spin" />} Guardar</Button>}
-      {msg && <p role={msg.bad ? "alert" : "status"} className={msg.bad ? "text-destructive" : ""}>{msg.text}</p>}
+      {!ro && needRights && (
+        <Alert role="status">
+          <AlertDescription className="flex flex-col gap-2">
+            <span>
+              {aiAdded.length === 1 ? "A etiqueta " : "As etiquetas "}<strong>{aiAdded.join(", ")}</strong>{aiAdded.length === 1 ? " deixa" : " deixam"} a IA
+              usar este ficheiro nos pacotes de edição deste cliente. Ao guardar declaras que o cliente tem direitos para isso
+              (imagem, música ou vídeo). Fica registado no histórico com o teu nome, a data e a versão do ficheiro.
+            </span>
+            <label className="flex items-start gap-2 text-sm font-medium text-foreground">
+              <input type="checkbox" className="mt-0.5 size-4 accent-primary" checked={rights} onChange={(e) => setRights(e.target.checked)} />
+              {AI_RIGHTS_TEXT}
+            </label>
+          </AlertDescription>
+        </Alert>
+      )}
+      {!ro && <Button className="self-start" size="sm" disabled={busy || !title.trim() || (needRights && !rights)} onClick={() => void save()}>{busy && <Loader2Icon className="animate-spin" />} Guardar</Button>}
+      {msg ? <p role={msg.bad ? "alert" : "status"} className={msg.bad ? "text-destructive" : ""}>{msg.text}</p>
+           : note && <p role="status">{note}</p>}
     </section>
   );
 }

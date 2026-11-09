@@ -1,4 +1,4 @@
-import { backoff, bytes, kindAccepts, kindForMime, mimeOf, precheck, previewKind, retryable, splitTags } from "../src/lib/media-format.ts";
+import { aiTagsAdded, backoff, bytes, kindAccepts, kindForMime, mimeOf, precheck, previewKind, retryable, splitTags } from "../src/lib/media-format.ts";
 
 let bad = 0; let n = 0;
 const eq = (name: string, got: unknown, exp: unknown) => { n++; if (JSON.stringify(got) !== JSON.stringify(exp)) { bad++; console.log("FAIL", name, JSON.stringify(got), "esperado", JSON.stringify(exp)); } };
@@ -21,6 +21,10 @@ eq("backoff 1,2,3 sem variação", [backoff(1, 0.5), backoff(2, 0.5), backoff(3,
 eq("backoff com variação limitada", backoff(1, 1) <= 1200 && backoff(1, 0) >= 800, true);
 eq("repetir rede/5xx/429, não 4xx", [retryable(0), retryable(503), retryable(429), retryable(400), retryable(403)], [true, true, true, false, false]);
 eq("etiquetas", splitTags("#Dubai, final  dubai"), ["dubai", "final"]);
+eq("ia-* novas pedem declaração", aiTagsAdded(["dubai"], splitTags("dubai #IA-Imagem ia-musica")), ["ia-imagem", "ia-musica"]);
+eq("ia-* que já existia não pede", aiTagsAdded(["ia-imagem"], ["ia-imagem", "final"]), []);
+eq("tirar ia-* não pede", aiTagsAdded(["ia-atencao"], []), []);
+eq("parecida não conta", aiTagsAdded([], ["ia", "ia-imagens", "imagem"]), []);
 eq("pré-visualização", [previewKind("application/pdf"), previewKind("text/vtt"), previewKind("video/quicktime")], ["pdf", null, "video"]);
 console.log(`media-format: ${n - bad}/${n}`);
 if (bad) process.exit(1);

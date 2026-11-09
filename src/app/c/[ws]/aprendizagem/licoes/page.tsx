@@ -142,10 +142,23 @@ function Body({ d, access, busy, act }: { d: LessonsPage; access: Access; busy: 
         </section>
       </WidgetBoundary>
 
-      {d.agency && (
+      {d.agency?.readonly && (
+        <WidgetBoundary label="regras da agência">
+          <section aria-labelledby="lrn-agency-ro" className="flex flex-col gap-3 rounded-lg border border-dashed p-3">
+            <h2 id="lrn-agency-ro" className="text-lg font-semibold">Regras da agência <span className="text-sm font-normal text-muted-foreground">(só leitura)</span></h2>
+            <p className="text-sm text-muted-foreground">
+              Regras gerais que a agência aplica a todos os clientes e que o motor também segue para este cliente. Só a agência as
+              aprova ou muda. Em conflito, prevalece a lição deste cliente.
+            </p>
+            <VersionLessons v={d.agency.active} empty="A agência ainda não tem regras em vigor." />
+          </section>
+        </WidgetBoundary>
+      )}
+
+      {d.agency && !d.agency.readonly && (
         <WidgetBoundary label="lições da agência">
           <section aria-labelledby="lrn-agency" className="flex flex-col gap-3 rounded-lg border border-dashed p-3">
-            <h2 id="lrn-agency" className="text-lg font-semibold">Agência <span className="text-sm font-normal text-muted-foreground">(só a equipa da agência vê esta secção)</span></h2>
+            <h2 id="lrn-agency" className="text-lg font-semibold">Agência <span className="text-sm font-normal text-muted-foreground">(a equipa do cliente vê só as regras em vigor, sem propostas)</span></h2>
             <p className="text-sm text-muted-foreground">Regras gerais herdadas por todos os clientes. Guardam só a regra, nunca guiões ou números de um cliente. Em conflito prevalece a lição do cliente.</p>
             <VersionLessons v={d.agency.active} empty="Sem lições da agência em vigor." />
             {d.agency.proposed.map((l) => <ProposedCard key={l.id} l={l} access={access} canDecide={d.can.agency} busy={busy} act={act} />)}
@@ -180,7 +193,7 @@ const changeLabel = (c: LessonVersion["change"]) =>
   c.action === "approve" ? "lição aprovada" : c.action === "retire" ? "lição retirada" : `volta à v${c.from_version ?? "?"}`;
 
 function VersionLessons({ v, empty, action, extra }: {
-  v: LessonVersion | null; empty: string; action?: (id: string) => ReactNode; extra?: (id: string) => ReactNode;
+  v: Pick<LessonVersion, "lessons"> | null; empty: string; action?: (id: string) => ReactNode; extra?: (id: string) => ReactNode;
 }) {
   if (!v || v.lessons.length === 0) return <p className="text-sm text-muted-foreground">{empty}</p>;
   return (

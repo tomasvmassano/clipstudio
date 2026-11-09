@@ -14,10 +14,13 @@ begin
   insert into auth.users (id, email, email_confirmed_at, aud, role) select x, e, now(), 'authenticated', 'authenticated' from (values
     (u_own,'cu-own@test.invalid'),(u_ag,'cu-ag@test.invalid'),(u_adm,'cu-adm@test.invalid'),(u_v,'cu-v@test.invalid'),
     (u_b,'cu-b@test.invalid'),(u_ag2,'cu-ag2@test.invalid')) v(x, e);
-  insert into agency_memberships (organization_id, user_id, agency_role) values (org, u_own, 'agency_owner'), (org, u_ag, 'agency_member'), (org, u_ag2, 'agency_admin');
+  -- ADR-0071: a equipa do cliente nunca vê custos; u_adm e u_b são staff da agência com papel de admin no cliente
+  -- (a recusa da equipa do cliente está em w10_decisoes_dono.sql)
+  insert into agency_memberships (organization_id, user_id, agency_role) values (org, u_own, 'agency_owner'), (org, u_ag, 'agency_member'), (org, u_ag2, 'agency_admin'),
+    (org, u_adm, 'agency_member'), (org, u_b, 'agency_member');
   insert into workspace_access (workspace_id, user_id, affiliation_type, workspace_role) values
-    ('cu_a', u_ag, 'agency_staff', 'manager'), ('cu_a', u_adm, 'client_staff', 'workspace_admin'), ('cu_a', u_v, 'client_staff', 'viewer'),
-    ('cu_b', u_b, 'client_staff', 'workspace_admin'), ('cu_a', u_ag2, 'agency_staff', 'workspace_admin'), ('cu_b', u_ag2, 'agency_staff', 'manager');
+    ('cu_a', u_ag, 'agency_staff', 'manager'), ('cu_a', u_adm, 'agency_staff', 'workspace_admin'), ('cu_a', u_v, 'client_staff', 'viewer'),
+    ('cu_b', u_b, 'agency_staff', 'workspace_admin'), ('cu_a', u_ag2, 'agency_staff', 'workspace_admin'), ('cu_b', u_ag2, 'agency_staff', 'manager');
   insert into studio_tokens (token, client_id, label) values (tok, 'cu_a', 'Equipa CU');
   insert into feature_flags (key, organization_id, workspace_id, stage) values ('costs.content', org, 'cu_a', 'all'), ('costs.content', org, 'cu_b', 'all');
 
@@ -85,7 +88,7 @@ begin
   begin perform costs_ai_usage('cu_b', 7); st := 'none'; exception when others then st := sqlstate; end;
   insert into t values ('admin A não lê B (troca de id)', true, st = '42501');
   begin perform costs_ai_usage(null, 7); st := 'none'; exception when others then st := sqlstate; end;
-  insert into t values ('equipa do cliente nunca vê a vista da agência', true, st = '42501');
+  insert into t values ('admin de A sem costs.read_agency nunca vê a vista da agência', true, st = '42501');
   j := costs_ai_usage_export('runs', 'cu_a', 7);
   execute 'reset role';
   insert into t values ('exportação auditada com a tabela e o período', true, exists (select 1 from audit_events where action = 'costs.ai_exported' and workspace_id = 'cu_a'

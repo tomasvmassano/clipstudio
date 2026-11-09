@@ -91,7 +91,8 @@ as("clientA")("experiência com amostra insuficiente nunca declara líder", asyn
   expect(errors).toEqual([]);
 });
 
-as("clientA")("custos por guião: página, vídeo indisponível e CSV", async ({ page, errors }) => {
+// ADR-0071 (decisão do dono 2026-11-09): a equipa do cliente nunca vê custos; os custos do cliente leem-se com a agência.
+as("owner")("custos por guião: página, vídeo indisponível e CSV", async ({ page, errors }) => {
   await page.goto(`/c/${WS_A}/custos`);
   await page.getByRole("tab", { name: "Por guião e publicação" }).click();
   await expect(page.getByRole("heading", { name: "Custos por guião e publicação" })).toBeVisible();
@@ -104,7 +105,7 @@ as("clientA")("custos por guião: página, vídeo indisponível e CSV", async ({
 });
 
 // W10-10 (FR-10-01, ADR-0062): consumo de IA por agente, modelo e execução, rotulado como estimado, com CSV auditado.
-as("clientA")("custos de IA do cliente: estimado, tabelas e CSV da tabela visível", async ({ page, errors }) => {
+as("owner")("custos de IA do cliente: estimado, tabelas e CSV da tabela visível", async ({ page, errors }) => {
   test.skip(!costsReady(), SKIP_COSTS);
   await page.goto(`/c/${WS_A}/custos`);
   await expect(page.getByRole("heading", { name: "Consumo de IA" })).toBeVisible();
@@ -116,7 +117,7 @@ as("clientA")("custos de IA do cliente: estimado, tabelas e CSV da tabela visív
   await expect(page.getByText(/\(7 dias, fuso /)).toBeVisible();
   const [dl] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name: "Exportar CSV" }).click()]);
   expect(dl.suggestedFilename()).toMatch(/^custos-ia-numeiro-models-\d{4}-\d{2}-\d{2}-\d{4}-\d{2}-\d{2}\.csv$/);
-  await expect.poll(() => sql(`select count(*) from audit_events where action = 'costs.ai_exported' and workspace_id = '${WS_A}' and actor_user_id = '${uid(users.clientA)}' and after->>'table' = 'models'`)[0]).not.toBe("0");
+  await expect.poll(() => sql(`select count(*) from audit_events where action = 'costs.ai_exported' and workspace_id = '${WS_A}' and actor_user_id = '${uid(users.owner)}' and after->>'table' = 'models'`)[0]).not.toBe("0");
   await page.getByLabel("Período").selectOption("custom");
   await page.getByLabel("De", { exact: true }).fill("2026-10-31");
   await page.getByLabel("Até", { exact: true }).fill("2026-10-01");

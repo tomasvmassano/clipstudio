@@ -81,6 +81,17 @@ export function hex(buf: ArrayBuffer): string {
   return Array.from(new Uint8Array(buf), (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
+/**
+ * Etiquetas que deixam a IA usar o ficheiro (EDL-07). Pô-las é a declaração de que o cliente tem direitos para isso
+ * (decisão do dono 2026-11-09, ADR-0071): a ficha pede confirmação e o servidor recusa sem ela.
+ */
+export const AI_TAGS = ["ia-imagem", "ia-atencao", "ia-musica"] as const;
+export const AI_RIGHTS_TEXT = "Confirmo que o cliente tem direitos para a IA usar este ficheiro.";
+/** Etiquetas ia-* que passam a existir (estão em `after` e não em `before`). */
+export function aiTagsAdded(before: readonly string[], after: readonly string[]): string[] {
+  return after.filter((t) => (AI_TAGS as readonly string[]).includes(t) && !before.includes(t));
+}
+
 export function splitTags(s: string): string[] {
   const out: string[] = [];
   for (const raw of s.split(/[\s,]+/)) {

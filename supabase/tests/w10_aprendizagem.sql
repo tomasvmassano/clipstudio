@@ -184,8 +184,11 @@ begin
   execute 'set local role authenticated';
   perform set_config('request.jwt.claims', json_build_object('sub', u_adm, 'role','authenticated')::text, true);
   j := lrn_lessons_list('lr_a');
-  insert into t values ('lista: 2 propostas, sem versão em vigor, admin pode aprovar, sem secção da agência', true,
-    jsonb_array_length(j->'proposed') = 2 and j->'active' = 'null'::jsonb and (j->'can'->>'approve')::boolean and j->'agency' = 'null'::jsonb);
+  -- ADR-0071: a equipa do cliente vê as regras da agência em vigor, só leitura (aqui ainda não há nenhuma); nunca as propostas
+  insert into t values ('lista: 2 propostas, sem versão em vigor, admin pode aprovar, agência só leitura e vazia', true,
+    jsonb_array_length(j->'proposed') = 2 and j->'active' = 'null'::jsonb and (j->'can'->>'approve')::boolean
+    and (j->'agency'->>'readonly')::boolean and j->'agency'->'active' = 'null'::jsonb and j->'agency'->'proposed' = '[]'::jsonb
+    and not (j->'can'->>'agency')::boolean);
   perform set_config('request.jwt.claims', json_build_object('sub', u_b, 'role','authenticated')::text, true);
   begin perform lrn_lessons_list('lr_a'); st := 'none'; exception when others then st := sqlstate; end;
   insert into t values ('cliente B não lê as lições de A', true, st = '42501');
@@ -238,7 +241,8 @@ begin
   perform set_config('request.jwt.claims', json_build_object('sub', u_b, 'role','authenticated')::text, true);
   begin perform lrn_lesson_decide(la, 'approve'); st := 'none'; exception when others then st := sqlstate; end;
   insert into t values ('admin do cliente B não aprova lição da agência', true, st = '42501');
-  insert into t values ('cliente B não vê a secção da agência', true, lrn_lessons_list('lr_b')->'agency' = 'null'::jsonb);
+  insert into t values ('cliente B: agência só leitura, sem propostas da agência', true,
+    (lrn_lessons_list('lr_b')->'agency'->>'readonly')::boolean and lrn_lessons_list('lr_b')->'agency'->'proposed' = '[]'::jsonb);
   perform set_config('request.jwt.claims', json_build_object('sub', u_ag, 'role','authenticated')::text, true);
   begin perform lrn_lesson_decide(la, 'approve'); st := 'none'; exception when others then st := sqlstate; end;
   insert into t values ('membro da agência sem capacidade não aprova', true, st = '42501');

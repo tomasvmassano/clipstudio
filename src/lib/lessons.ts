@@ -64,7 +64,11 @@ export type LessonsPage = {
   proposed: Lesson[]; decided: Lesson[]; active: LessonVersion | null; versions: LessonVersionRow[];
   signals: { since: string; edits: number; no_reason: number; unedited: number; rejected: number };
   job: LessonJob | null;
-  agency: { active: LessonVersion | null; proposed: Lesson[] } | null;
+  /**
+   * Equipa da agência: regras em vigor e propostas. Equipa do cliente: só as regras em vigor, só leitura, com categoria e
+   * texto (readonly = true; sem change nem created_label; ADR-0071). Código de equipa: null.
+   */
+  agency: { readonly?: boolean; active: (Omit<LessonVersion, "change" | "created_label" | "created_at"> & Partial<Pick<LessonVersion, "change" | "created_label" | "created_at">>) | null; proposed: Lesson[] } | null;
 };
 
 export const fetchLessons = (a: Access) => rpc<LessonsPage>("lrn_lessons_list", { p_ws: a.ws, p_token: a.token });
