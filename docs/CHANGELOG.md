@@ -2,7 +2,7 @@
 
 ## 2026-11-09 (refazer a versão leve)
 
-- **W10-28** Refazer a versão leve de um vídeo já pronto (FR-08-01, EDL-08; ADR-0076). O C7870 de 09/11 ficou pronto mas a versão leve falhou por falta de memória no worker, e o editor abriu os 37 vídeos do pacote sem imagem nem som, sem forma de recuperar. Na Biblioteca, um vídeo com a versão leve falhada mostra "Refazer versão leve" (quem pode carregar ficheiros); o motor (numeiro-engine #30) refá-la sem reler o original para o SHA-256 e grava só os campos da versão leve. Migração `PENDING_w10_refazer_versao_leve.sql` (aditiva: `media_proxy_redo`, `media_worker_proxy_save`; rollback no fim). Testes: `w10_refazer_versao_leve` 19/19, suite SQL 3025/3025, motor `tests/test_proxy_redo.py` 5/5.
+- **W10-28** Refazer a versão leve de um vídeo já pronto (FR-08-01, EDL-08; ADR-0076). O C7870 de 09/11 ficou pronto mas a versão leve falhou por falta de memória no worker, e o editor abriu os 37 vídeos do pacote sem imagem nem som, sem forma de recuperar. Na Biblioteca, um vídeo com a versão leve falhada mostra "Refazer versão leve" (quem pode carregar ficheiros); o motor (numeiro-engine #30) refá-la sem reler o original para o SHA-256 e grava só os campos da versão leve. Migração `20261109194601_w10_refazer_versao_leve.sql` (aditiva: `media_proxy_redo`, `media_worker_proxy_save`; rollback no fim). Testes: `w10_refazer_versao_leve` 19/19, suite SQL 3025/3025, motor `tests/test_proxy_redo.py` 5/5.
 
 ## 2026-11-09 (som da lapela na câmara escolhida)
 
