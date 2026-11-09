@@ -16,7 +16,7 @@ import { MediaAssetSheet } from "@/components/media/media-asset-sheet";
 import { MediaPolicySheet } from "@/components/media/media-policy";
 import type { Access } from "@/lib/access";
 import {
-  abandonUpload, addLink, errCode, fetchLibrary, purge, resumeUpload, uploadFile,
+  abandonUpload, addLink, errCode, fetchLibrary, purge, redoProxy, resumeUpload, uploadFile,
   type MediaAsset, type MediaFilters, type MediaLibrary, type MediaView, type UploadProgress,
 } from "@/lib/media";
 import { FORMATS, KIND_LABEL, STATUS_LABEL, aiTagsAdded, bytes, kindForMime, mimeOf, pctOf, precheck, splitTags, type MediaKind } from "@/lib/media-format";
@@ -251,6 +251,7 @@ function AssetGrid({ d, view, onOpen, onResume, access, onChanged }: {
   const fileRef = useRef<HTMLInputElement>(null);
   const [resumeFor, setResumeFor] = useState<MediaAsset | null>(null);
   const [err, setErr] = useState("");
+  const [redoing, setRedoing] = useState<string | null>(null);
   if (d.assets.length === 0) {
     return (
       <p className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
@@ -288,7 +289,20 @@ function AssetGrid({ d, view, onOpen, onResume, access, onChanged }: {
                 {a.current.checksum_verified ? "SHA-256 conferido no servidor" : "SHA-256 declarado pelo browser (não conferido)"}
                 {a.current.storage === "r2" && a.current.proxy_state === "pronta" ? " · versão leve pronta" : ""}
                 {a.current.storage === "r2" && a.current.proxy_state === "falhou" ? ` · versão leve falhou${a.current.proxy_error ? `: ${a.current.proxy_error}` : ""}` : ""}
+                {a.current.storage === "r2" && a.current.proxy_state === "pendente" ? " · a preparar a versão leve" : ""}
               </span>
+            )}
+            {a.current && a.current.storage === "r2" && a.current.proxy_state === "falhou" && (a.current.mime ?? "").startsWith("video/") && d.can.upload && (
+              <div className="flex flex-wrap items-center gap-2 text-xs">
+                <Button size="xs" variant="outline" disabled={redoing === a.current.id} onClick={async () => {
+                  const vid = a.current!.id;
+                  setRedoing(vid);
+                  try { await redoProxy(access, vid); onChanged(); } catch (e) { setErr((e as Error).message); } finally { setRedoing(null); }
+                }}>
+                  {redoing === a.current.id ? <Loader2Icon className="animate-spin" aria-hidden /> : <RotateCwIcon aria-hidden />} Refazer versão leve
+                </Button>
+                <span className="text-muted-foreground">Sem a versão leve o editor não mostra imagem nem som deste vídeo.</span>
+              </div>
             )}
             {view === "lixo" && <span className="text-xs text-muted-foreground">No lixo desde {fmtDateTime(a.trashed_at, d.timezone)}; recuperável até {fmtDateTime(a.purge_after, d.timezone)}.</span>}
             {!a.current && a.pending && (
