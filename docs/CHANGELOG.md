@@ -2,7 +2,7 @@
 
 ## 2026-11-10 (som contínuo no palco do editor)
 
-- **W10-29** O som do palco do editor deixa de dar solavancos (EDL-08; queixa do Tomás a 10/11; ADR-0077). A causa era o palco corrigir o vídeo contra um relógio próprio: cada reposicionamento parava o vídeo a carregar, o relógio seguia e o vídeo voltava a ser reposicionado, em ciclo. Agora, a tocar, é o som que dá o tempo ao editor; o som vem de dois leitores da câmara do som que se revezam nos cortes (o trecho seguinte já posicionado), e só salta onde o corte o exige (`audioRuns`). A imagem fica sem som e segue o áudio. Vale para o editor e para o modo guiado. Sem migração. Testes: `edit-preview` (trechos e índice).
+- **W10-29** O som do palco do editor deixa de dar solavancos (EDL-08; queixa do Tomás a 10/11; ADR-0077). A causa era o palco corrigir o vídeo contra um relógio próprio: cada reposicionamento parava o vídeo a carregar, o relógio seguia e o vídeo voltava a ser reposicionado, em ciclo. Agora, a tocar, é o som que dá o tempo ao editor; o som vem de dois leitores da câmara do som que se revezam nos cortes (o trecho seguinte já posicionado), e só salta onde o corte o exige (`audioRuns`). A imagem fica sem som e segue o áudio. Vale para o editor e para o modo guiado. Sem migração. Testes: `edit-preview` (trechos e índice). Verificado em produção a 10/11: os leitores revezam-se nos cortes sem paragens a carregar. Nota: o PR #106 foi integrado com o passo do registo a falhar (`docs/status.md` por atualizar); corrigido no PR seguinte.
 
 ## 2026-11-09 (refazer a versão leve)
 
