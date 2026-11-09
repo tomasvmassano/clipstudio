@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { WorkspaceGate } from "@/components/workspace-gate";
+import { CommentsTab } from "@/components/reacts/comments-tab";
 import { WsLink } from "@/components/ws-link";
 import { useFlags } from "@/lib/flags";
 import type { Access } from "@/lib/access";
@@ -29,10 +30,10 @@ export default function ReactsPage() {
   return <WorkspaceGate need="reacts.read">{(access) => <Reacts access={access} />}</WorkspaceGate>;
 }
 
-type View = ReactTab | "fontes";
+type View = ReactTab | "fontes" | "comentarios";
 const TABS: { v: View; label: string }[] = [
   { v: "open", label: "A decidir" }, { v: "saved", label: "Guardados" }, { v: "recorded", label: "Gravados" },
-  { v: "rejected", label: "Rejeitados" }, { v: "expired", label: "Expirados" }, { v: "fontes", label: "Fontes" },
+  { v: "rejected", label: "Rejeitados" }, { v: "expired", label: "Expirados" }, { v: "comentarios", label: "Comentários" }, { v: "fontes", label: "Fontes" },
 ];
 
 function Reacts({ access }: { access: Access }) {
@@ -58,11 +59,11 @@ function Reacts({ access }: { access: Access }) {
       <ToggleGroup value={[view]} onValueChange={(v) => { const x = (v as string[])[0] as View | undefined; if (x) setView(x); }} variant="outline" size="sm" className="flex-wrap">
         {TABS.map((t) => (
           <ToggleGroupItem key={t.v} value={t.v}>
-            {t.label}{t.v !== "fontes" && counts ? <span className="ml-1 tabular-nums text-muted-foreground">{counts[t.v as ReactTab] ?? 0}</span> : null}
+            {t.label}{t.v !== "fontes" && t.v !== "comentarios" && counts ? <span className="ml-1 tabular-nums text-muted-foreground">{counts[t.v as ReactTab] ?? 0}</span> : null}
           </ToggleGroupItem>
         ))}
       </ToggleGroup>
-      {view === "fontes" ? <Sources access={access} /> : <Queue key={view} access={access} tab={view} onCounts={setCounts} />}
+      {view === "fontes" ? <Sources access={access} /> : view === "comentarios" ? <CommentsTab access={access} /> : <Queue key={view} access={access} tab={view} onCounts={setCounts} />}
     </div>
   );
 }
