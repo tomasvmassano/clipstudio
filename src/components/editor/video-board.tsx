@@ -41,9 +41,9 @@ export function VideoBoard({ access }: { access: Access }) {
           <h2 id="vb-title" className="text-lg font-semibold">Vídeos por guião</h2>
           <p className="text-sm text-muted-foreground">Cada guião com os seus hooks. Editar o corpo num hook aplica-o aos outros.</p>
         </div>
-        <label className="relative">
+        <label className="relative w-full sm:w-64">
           <SearchIcon className="pointer-events-none absolute left-2 top-2.5 size-4 text-muted-foreground" aria-hidden />
-          <Input className="w-64 pl-8" placeholder="Procurar guião, tema ou hook" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Procurar vídeos" />
+          <Input className="w-full pl-8" placeholder="Procurar guião, tema ou hook" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Procurar vídeos" />
         </label>
       </div>
       {err && (
@@ -136,7 +136,7 @@ function camUrl(access: Access, asset: string, cam: string): Promise<string | nu
       const s = await fetchPreviewSources(access, asset);
       const c = s.cams[cam];
       if (!c || c.state !== "pronta" || !c.version_id) return null;
-      return (await proxyUrl(access, c.version_id)).url;
+      return (await proxyUrl(access, c.version_id, true)).url;   // soft: sem armazenamento, sem imagem (sem erro)
     })().catch(() => { camUrls.delete(k); return null; }));
   }
   return camUrls.get(k)!;
