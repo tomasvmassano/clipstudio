@@ -4,6 +4,7 @@ import { FlagGate } from "@/components/flag-gate";
 import { WorkspaceGate } from "@/components/workspace-gate";
 import { AutoEditView } from "@/components/editor/auto-edit";
 import { ScriptPackagesSection } from "@/components/editor/script-packages";
+import { VideoBoard } from "@/components/editor/video-board";
 import { useSession } from "@/components/session-provider";
 import type { Access } from "@/lib/access";
 import { useFlags } from "@/lib/flags";
@@ -19,6 +20,7 @@ export default function EdicaoAutomaticaPage() {
       {(access) => (
         <FlagGate flag="edit.studio" ws={access.ws}>
           <div className="flex min-w-0 flex-col gap-6">
+            <VideoBoard access={access} />
             <AutoEditView access={access} />
             <ScriptPackagesIfOn access={access} />
           </div>

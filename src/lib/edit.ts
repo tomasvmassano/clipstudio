@@ -61,3 +61,18 @@ export async function applyAlternative(a: Access, asset: string, base: string, s
 }
 
 export const SOURCE_LABEL: Record<EditVersionMeta["source"], string> = { import: "primeira versão (IA)", ai: "IA", user: "editada", agent: "proposta do agente" };
+
+/* Vídeos por guião e corpo partilhado (EDL-14, EDL-15; CHG-011, ADR-0081). */
+export type BoardVariant = {
+  asset_id: string; title: string; status: string; variant: string; style: string | null; version_id: string; version_no: number;
+  updated_at: string; updated_label: string | null; hook_text: string | null; duration: number; body_sig: string; first_in: number | null;
+  source: { cams: Record<string, string> | null; windows: [number, number][] | null; offsets: Record<string, number> | null; audio: string | null };
+  export: { status: string; finished_at: string | null; edit_version_id: string | null; current: boolean } | null;
+};
+export type BoardGuiao = { content_id: string; guiao: { id: string; n: number; date: string; tema: string | null } | null; variants: BoardVariant[] };
+/** Vídeos com documento de edição agrupados por guião (os mais recentes primeiro); content limita a um guião. */
+export const fetchBoard = (a: Access, content?: string | null, limit = 40) =>
+  rpcD<BoardGuiao[]>("edit_board", { p_ws: a.ws, p_content: content ?? null, p_limit: limit, p_token: a.token });
+
+/** Rótulo curto de uma variante ("hook_2" → "Hook 2"), como variantLabel na revisão. */
+export const variantShort = (v: string) => (v?.startsWith("hook_") ? `Hook ${v.slice(5)}` : "Geral");

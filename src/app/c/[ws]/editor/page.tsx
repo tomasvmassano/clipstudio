@@ -14,7 +14,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { WorkspaceGate } from "@/components/workspace-gate";
 import { FlagGate } from "@/components/flag-gate";
 import type { Access } from "@/lib/access";
-import { SOURCE_LABEL, fetchEdit, saveEdit, type EditState } from "@/lib/edit";
+import { SOURCE_LABEL, fetchBoard, fetchEdit, saveEdit, variantShort, type BoardVariant, type EditState } from "@/lib/edit";
+import { applyBodyToSiblings, bodySummary } from "@/lib/body-share-client";
+import { VariantTabs } from "@/components/edit/variant-tabs";
 import { fetchLibrary, type MediaAsset } from "@/lib/media";
 import { useSession } from "@/components/session-provider";
 import {
@@ -93,6 +95,15 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
   const [newNote, setNewNote] = useState("");
   const noteRef = useRef<HTMLInputElement>(null);
   const dirty = h.past.length > 0;
+  // hooks do mesmo guião (EDL-14/15): separadores e corpo partilhado
+  const [siblings, setSiblings] = useState<BoardVariant[]>([]);
+  const [shareBody, setShareBody] = useState(() => { try { return localStorage.getItem("edit.shareBody") !== "0"; } catch { return true; } });
+  useEffect(() => {
+    if (!st.asset.content_id) return;
+    let live = true;
+    fetchBoard(access, st.asset.content_id, 1).then((g) => { if (live) setSiblings(g[0]?.variants ?? []); }).catch(() => { /* sem separadores: o editor continua */ });
+    return () => { live = false; };
+  }, [access, st.asset.content_id, st.document?.current_version_id]);
   const { segs, duration } = useMemo(() => layout(doc), [doc]);
   const words = useMemo(() => wordsOut(doc), [doc]);
   const [tRaw, setT] = useState(0);
@@ -194,7 +205,16 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
     const why = problem(doc);
     if (why) { setMsg({ kind: "err", text: `Não dá para gravar: ${why}.` }); return; }
     setSaving(true); setMsg(null);
-    try { await saveEdit(access, st.asset.id, st.document?.current_version_id ?? null, doc, note.trim() || undefined); setNote(""); await onReload(); }
+    try {
+      await saveEdit(access, st.asset.id, st.document?.current_version_id ?? null, doc, note.trim() || undefined); setNote("");
+      // corpo partilhado (EDL-14): o mesmo corpo nos outros hooks do guião, cada um com o seu hook
+      const others = siblings.filter((x) => x.asset_id !== st.asset.id);
+      if (shareBody && others.length) {
+        const rs = await applyBodyToSiblings(access, st.asset.id, `${variantShort(st.asset.variant)} v${st.versions.length + 1}`, doc, others);
+        setMsg(bodySummary(rs));
+      }
+      await onReload();
+    }
     catch (e) { setMsg({ kind: "err", text: (e as Error).message }); }
     finally { setSaving(false); }
   };
@@ -224,6 +244,7 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
           <p className="text-sm text-muted-foreground">
             Versão {v.version_no} ({SOURCE_LABEL[v.source]}{v.created_label ? `, ${v.created_label}` : ""}){!isCurrent && " · versão antiga, só leitura"}{dirty && " · alterações por gravar"}
           </p>
+          <div className="mt-2"><VariantTabs access={access} current={st.asset.id} variants={siblings} dirty={dirty} /></div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <select aria-label="Versão" className="h-9 rounded-md border bg-background px-2 text-sm" value={v.id}
@@ -347,6 +368,13 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
                   <Button disabled={!canEdit || !dirty || saving} onClick={() => void save()}>{saving ? <Loader2Icon className="animate-spin" /> : <SaveIcon />} Gravar versão {st.versions.length + 1}</Button>
                   {dirty && <Button variant="ghost" onClick={() => setH(historyOf(v.doc))}>Descartar</Button>}
                 </div>
+                {siblings.length > 1 && (
+                  <label className="flex items-center gap-2 text-xs">
+                    <input type="checkbox" checked={shareBody} disabled={!canEdit}
+                      onChange={(e) => { setShareBody(e.target.checked); try { localStorage.setItem("edit.shareBody", e.target.checked ? "1" : "0"); } catch { /* só neste dispositivo */ } }} />
+                    Aplicar o corpo aos outros hooks ({siblings.filter((x) => x.asset_id !== st.asset.id).map((x) => variantShort(x.variant)).join(", ")})
+                  </label>
+                )}
                 {!canEdit && <span className="text-xs text-muted-foreground">Não tens permissão para editar vídeos neste cliente.</span>}
               </>
             ) : (
