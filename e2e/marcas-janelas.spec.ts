@@ -8,7 +8,7 @@ import { as, expect, expectNoCrash } from "./helpers";
 // (marcas do teleprompter ou só a transcrição, e porquê). Só com a flag edit.package_marks; o cliente B não vê pacotes de A.
 test.describe.configure({ mode: "serial" });
 
-const PENDING = "supabase/migrations/20261106131632_w10_marcas_janelas.sql";
+const PENDING = "supabase/migrations/PENDING_w10_marcas_janelas.sql";   // já aplicada e com versão: o supabase start aplica-a; só um PENDING_ se aplica aqui
 const tag = `e2emj${Date.now() % 1_000_000}`;
 let g1 = "", g2 = "";
 

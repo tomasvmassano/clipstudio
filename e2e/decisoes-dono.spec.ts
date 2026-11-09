@@ -10,7 +10,7 @@ import { flagsOnForA, restoreFlags } from "./flags";
 // agência em vigor, só leitura (LRN-04).
 test.describe.configure({ mode: "serial" });
 
-const PENDING = "supabase/migrations/20261109094711_w10_decisoes_dono.sql";
+const PENDING = "supabase/migrations/PENDING_w10_decisoes_dono.sql";   // já aplicada e com versão: o supabase start aplica-a; só um PENDING_ se aplica aqui
 const tag = `e2edd${Date.now() % 1_000_000}`;
 let asset = "";
 let prevAgency = "";

@@ -2,6 +2,7 @@
 
 ## 2026-11-09 (som da lapela na câmara escolhida)
 
+- Correção de testes: cinco specs E2E voltavam a aplicar migrações já versionadas (o caminho tinha sido renomeado com a versão real) e recriavam a `edit_package_request` antiga ao lado da nova, deixando a chamada ambígua (HTTP 300) só no CI. As specs voltam a aplicar apenas ficheiros `PENDING_`. Produção não foi afetada (uma só função).
 - **W10-27** Câmara com o som da lapela escolhida em cada pacote (EDL-01; pedido do Tomás a 09/11; ADR-0074). Até aqui o pacote assumia sempre a lapela na câmara do lado, uma regra herdada do protótipo que nunca foi confirmada. Em Edição automática → Novo pacote, o campo "Som da lapela" (na câmara da frente ou na do lado) é obrigatório e fica lembrado no dispositivo. `edit_package_request` ganha `p_audio` (por defeito `side`, o comportamento de sempre) e guarda-o em `input.audio`; o motor (numeiro-engine `lapela-camara`) tira daí o som, a transcrição e o tempo do documento, e sincroniza a outra câmara. Migração `20261109171200_w10_som_da_lapela.sql` (drop + create com o parâmetro novo no fim, rollback no fim). Testes: `w10_som_da_lapela`, suite SQL 3006/3006, motor `test_do_package_som_da_lapela_na_frente`. Limite: o pacote por guião ainda usa o lado.
 
 ## 2026-11-09 (teleprompter: só aprovados)

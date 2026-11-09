@@ -10,7 +10,7 @@ import { flagsOnForA, restoreFlags } from "./flags";
 // versão nova. O cliente B não lê nem aprova nada de A; a equipa do cliente não vê a secção da agência.
 test.describe.configure({ mode: "serial" });
 
-const PENDING = "supabase/migrations/20261106132216_w10_aprendizagem.sql";
+const PENDING = "supabase/migrations/PENDING_w10_aprendizagem.sql";   // já aplicada e com versão: o supabase start aplica-a; só um PENDING_ se aplica aqui
 const tag = `e2elrn${Date.now() % 1_000_000}`;
 // guiões do motor num dia longe dos outros testes (a base local é partilhada)
 const DAY = sql(`select to_char((now() at time zone 'Asia/Dubai')::date + 500 + (${Date.now() % 97}), 'YYYY-MM-DD')`)[0];
