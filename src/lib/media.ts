@@ -95,6 +95,11 @@ export const abandonUpload = (a: Access, versionId: string, reason: string) =>
 /** Refazer a versão leve de um vídeo pronto cuja versão leve falhou (W10-28, ADR-0076): o worker refá-la sem reconferir o original. */
 export const redoProxy = (a: Access, versionId: string) =>
   rpc<{ id: string; status: string; repeated: boolean }>("media_proxy_redo", { p_ws: a.ws, p_version: versionId, p_token: a.token });
+/** Som substituto de uma gravação (W10-32, ADR-0080): áudio da Biblioteca com a mesma duração, usado no palco e na exportação. null tira-o. */
+export const replaceAudio = (a: Access, videoVersion: string, audioVersion: string | null) =>
+  rpc<{ version_id: string; audio_version_id: string | null }>("media_audio_replace", { p_ws: a.ws, p_video: videoVersion, p_audio: audioVersion, p_token: a.token });
+/** Gravações com som substituto neste cliente: { versão do vídeo: versão do áudio }. */
+export const fetchAudioLinks = (a: Access) => rpc<Record<string, string>>("media_audio_links", { p_ws: a.ws, p_token: a.token });
 export const savePolicy = (a: Access, fields: Partial<Pick<MediaPolicy, "allowed_mime" | "max_file_bytes" | "quota_bytes" | "trash_days">> | Record<string, null>) =>
   rpc<MediaPolicy>("media_policy_save", { p_ws: a.ws, p_fields: fields, p_token: a.token });
 export const createShare = (a: Access, versionId: string, hours: number, note: string) =>

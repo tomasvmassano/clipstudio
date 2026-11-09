@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-10 (som substituto de uma gravação)
+
+- **W10-32** Som substituto de uma gravação (EDL-08, FR-08-01; pedido do Tomás a 10/11; ADR-0080). Um áudio da Biblioteca com a mesma duração (ex.: a lapela do C7870 tratada fora da app) passa a ser o som da gravação no palco do editor e na exportação, no mesmo tempo, sem mexer no original. "Som desta gravação" no cartão da gravação na Biblioteca; trocar o som e exportar outra vez dá um export novo. Migração `20261109223611_w10_som_substituto.sql` (coluna `audio_version_id`, `media_audio_replace`, `media_audio_links`, `_edit_resolve_cams`, `edit_preview_sources`, `edit_export_request`; rollback no fim). Motor: numeiro-engine #32. Testes: `w10_som_substituto` 19/19, suite SQL 3044/3044, motor `SomSubstitutoTest` (ffmpeg real).
+
 ## 2026-11-10 (S15: barra vermelha contínua)
 
 - **W10-31** A barra vermelha do S15 avança de forma contínua, a meio da palavra, como na referência do estilo (instagram.com/p/DenrdHBRDpo; pedido do Tomás a 10/11; ADR-0079). Na exportação (numeiro-engine `s15-barra-continua`) e no palco do editor (`wipeFrac`). S14 e o destaque próprio do aspeto não mudam. Sem migração. Testes: `caption-plan` 5/5, motor `test_wipe` 4/4.

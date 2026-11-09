@@ -4,7 +4,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { Access } from "@/lib/access";
 import type { EditDoc } from "@/lib/edit-doc";
 import { audioCam, audioRuns, runAt, shotAt, type Run, type Windows } from "@/lib/edit-preview";
-import { fetchPreviewSources, proxyUrl, type PreviewSources } from "@/lib/edit-media";
+import { audioUrl, fetchPreviewSources, proxyUrl, type PreviewSources } from "@/lib/edit-media";
 
 /** Desvio tolerado entre a imagem e o som antes de reposicionar a imagem (s). Só a imagem, sem som, é reposicionada. */
 const VIDEO_DRIFT_S = 0.3;
@@ -25,6 +25,7 @@ export function PreviewVideo({ access, asset, versionId, doc, t, playing, onTime
 }) {
   const [src, setSrc] = useState<PreviewSources | null>(null);
   const [urls, setUrls] = useState<Record<string, string>>({});
+  const [subUrl, setSubUrl] = useState<string | null>(null);   // som substituto da câmara do som (W10-32)
   const [err, setErr] = useState<string | null>(null);
   const [reload, setReload] = useState(0);
   const refs = useRef<Record<string, HTMLVideoElement | null>>({});
@@ -41,7 +42,9 @@ export function PreviewVideo({ access, asset, versionId, doc, t, playing, onTime
         setSrc(s); setErr(null);
         const ready = Object.entries(s.cams).filter(([, c]) => c.state === "pronta" && c.version_id);
         const got = await Promise.all(ready.map(async ([cam, c]) => [cam, (await proxyUrl(access, c.version_id!)).url] as const));
-        if (live) setUrls(Object.fromEntries(got));
+        const sub = s.cams[s.audio ?? ""]?.audio_version_id;
+        const subU = sub ? (await audioUrl(access, sub)).url : null;
+        if (live) { setUrls(Object.fromEntries(got)); setSubUrl(subU); }
       } catch (e) {
         if (live) setErr((e as Error).message);
       }
@@ -57,7 +60,8 @@ export function PreviewVideo({ access, asset, versionId, doc, t, playing, onTime
   const offsets = ((doc as EditDoc & { source?: { offsets?: Record<string, number> } }).source?.offsets) ?? {};
   const offKey = JSON.stringify(offsets);
   const allReady = !!src && Object.keys(src.cams).length > 0 && Object.keys(src.cams).every((k) => urls[k]);
-  const soundUrl = urls[sound] ?? null;
+  // com som substituto, o palco ouve-o (o mesmo tempo da gravação); senão o som da versão leve da câmara
+  const soundUrl = (src?.cams[sound]?.audio_version_id ? subUrl : null) ?? urls[sound] ?? null;
   const engine = !!onTime && allReady && !!soundUrl;
 
   // valores recentes para o ciclo de reprodução, sem o recomeçar a cada fotograma
@@ -173,7 +177,7 @@ export function PreviewVideo({ access, asset, versionId, doc, t, playing, onTime
       {engine && soundUrl && (
         <>
           <audio ref={audA} src={soundUrl} preload="auto" onError={() => setReload((n) => n + 1)} />
-          <audio ref={audB} src={soundUrl} preload="auto" />
+          <audio ref={audB} src={soundUrl} preload="auto" onError={() => setReload((n) => n + 1)} />
         </>
       )}
     </div>
