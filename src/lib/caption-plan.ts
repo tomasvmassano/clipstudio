@@ -82,3 +82,9 @@ export function captionAtState(states: [number, CapState][], t: number): CapStat
   }
   return best >= 0 ? states[best][1] : null;
 }
+
+/** Quanto da palavra já se disse no instante t (0 a 1): a barra vermelha do S15 avança de forma contínua (W10-31, wipe_states do motor). */
+export function wipeFrac(w: CapWord, t: number): number {
+  const dur = Math.max(0.05, w.e - w.s);
+  return Math.max(0, Math.min(1, (t - w.s) / dur));
+}
