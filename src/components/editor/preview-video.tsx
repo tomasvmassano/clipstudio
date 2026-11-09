@@ -63,7 +63,7 @@ export function PreviewVideo({ access, asset, versionId, doc, t, playing }: {
   if (!src) return <StageNote text="A preparar a imagem…" />;
   if (!allReady) {
     const parts = Object.entries(src.cams).map(([cam, c]) => `${cam}: ${c.state === "em_falta" ? `falta carregar ${src.names?.[cam] ?? "a gravação"} na Biblioteca`
-      : c.state === "pendente" ? "a preparar a versão leve" : c.state === "falhou" ? "a versão leve falhou" : c.state === "pronta" ? "a abrir" : "sem versão leve"}`);
+      : c.state === "pendente" ? "a preparar a versão leve" : c.state === "falhou" ? "a versão leve falhou (refaz na Biblioteca)" : c.state === "pronta" ? "a abrir" : "sem versão leve"}`);
     return <StageNote text={`Sem imagem ainda · ${parts.join(" · ") || "o documento não tem câmaras"}`} />;
   }
   return (

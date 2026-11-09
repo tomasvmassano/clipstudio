@@ -92,6 +92,9 @@ export const trashAsset = (a: Access, id: string, reason: string) => rpc<MediaAs
 export const restoreAsset = (a: Access, id: string) => rpc<MediaAsset>("media_restore", { p_ws: a.ws, p_id: id, p_token: a.token });
 export const abandonUpload = (a: Access, versionId: string, reason: string) =>
   rpc<MediaVersion>("media_upload_abandon", { p_ws: a.ws, p_version: versionId, p_reason: reason, p_token: a.token });
+/** Refazer a versão leve de um vídeo pronto cuja versão leve falhou (W10-28, ADR-0076): o worker refá-la sem reconferir o original. */
+export const redoProxy = (a: Access, versionId: string) =>
+  rpc<{ id: string; status: string; repeated: boolean }>("media_proxy_redo", { p_ws: a.ws, p_version: versionId, p_token: a.token });
 export const savePolicy = (a: Access, fields: Partial<Pick<MediaPolicy, "allowed_mime" | "max_file_bytes" | "quota_bytes" | "trash_days">> | Record<string, null>) =>
   rpc<MediaPolicy>("media_policy_save", { p_ws: a.ws, p_fields: fields, p_token: a.token });
 export const createShare = (a: Access, versionId: string, hours: number, note: string) =>
