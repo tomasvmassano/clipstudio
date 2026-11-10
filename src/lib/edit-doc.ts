@@ -126,6 +126,39 @@ export function editWord(doc: EditDoc, id: string, patch: Partial<Pick<Word, "w"
   }).filter((w) => w.w !== "") } };
 }
 
+/**
+ * Legenda nova no cursor (W10-43): o texto é partido em palavras, repartidas pela duração conforme o tamanho de cada uma,
+ * no tempo da fonte do corte onde está o cursor (acaba no fim desse corte, no máximo). Com replace, tira primeiro as palavras
+ * que começam nesse intervalo (para reescrever uma legenda mal transcrita). Devolve o documento e os ids das palavras novas.
+ */
+export function addCaption(doc: EditDoc, text: string, atOut: number, dur: number, idBase: string, replace = false): { doc: EditDoc; ids: string[] } {
+  const at = outToSrc(doc, atOut);
+  const parts = text.replace(/\s+/g, " ").trim().split(" ").filter(Boolean).slice(0, 40).map((w) => w.slice(0, 60));
+  if (!at || !parts.length) return { doc, ids: [] };
+  const s0 = at.src, s1 = Math.min(at.seg.out, s0 + Math.max(0.2, dur));
+  if (s1 - s0 < 0.1) return { doc, ids: [] };
+  const weight = parts.map((w) => Math.max(2, w.length));
+  const total = weight.reduce((a, b) => a + b, 0);
+  let t = s0;
+  const fresh: Word[] = parts.map((w, i) => {
+    const e = i === parts.length - 1 ? s1 : t + ((s1 - s0) * weight[i]) / total;
+    const word = { id: `${idBase}-${i}`, w, s: r3(t), e: r3(e) };
+    t = e;
+    return word;
+  });
+  const kept = replace ? doc.captions.words.filter((w) => !(w.s >= s0 - 1e-6 && w.s < s1)) : doc.captions.words;
+  const words = [...kept, ...fresh].sort((a, b) => a.s - b.s || a.e - b.e);
+  return { doc: { ...doc, captions: { ...doc.captions, words } }, ids: fresh.map((w) => w.id) };
+}
+
+/** Palavras que já começam no intervalo [atOut, atOut + dur) da saída, dentro do corte do cursor (para avisar antes de juntar). */
+export function wordsInRange(doc: EditDoc, atOut: number, dur: number): number {
+  const at = outToSrc(doc, atOut);
+  if (!at) return 0;
+  const s1 = Math.min(at.seg.out, at.src + dur);
+  return doc.captions.words.filter((w) => w.s >= at.src - 1e-6 && w.s < s1).length;
+}
+
 export const setHook = (doc: EditDoc, text: string): EditDoc => ({ ...doc, hook: { text: text.slice(0, 200) } });
 export const setMusicDb = (doc: EditDoc, db: number): EditDoc =>
   ({ ...doc, audio: { ...doc.audio, music: doc.audio.music ? { ...doc.audio.music, db: Math.max(-40, Math.min(6, Math.round(db))) } : null } });

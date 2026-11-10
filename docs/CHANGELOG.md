@@ -4,6 +4,10 @@
 
 - **W10-44** Página "Exportados" no espaço do cliente, a pedido do Tomás (em vez de copiar para a Google Drive): todos os vídeos exportados por dia, com nome legível ("Guião 03 · Hook 1 · S17 · v2"), duração, tamanho, hora e quem exportou; "Descarregar" um a um ou vários selecionados (o ficheiro sai já com esse nome); por defeito só a versão mais recente de cada vídeo; os que estão a exportar aparecem com o progresso e atualizam sozinhos, os que falharam com o motivo e o caminho para o editor. Ver: `media.read` com a biblioteca ligada; descarregar: `media.download` (link de 2 min, auditado). Migração `w10_exportados` (uma função nova, `edit_exports_feed`); w10_exportados 12/12, exports-format 3/3.
 
+## 2026-11-10 (legenda nova no editor)
+
+- **W10-43** Legenda nova no cursor, a pedido do Tomás: na linha do tempo, "Legenda no cursor" abre um campo para o texto e a duração; as palavras entram no cursor, repartidas pela duração conforme o tamanho de cada uma, no corte onde está o cursor (acabam no fim desse corte, no máximo), e passam a ser legendas como as outras (corrigir, mover, tirar). Se já houver palavras nesse intervalo, dá para as substituir (para reescrever uma legenda mal transcrita). Só no editor completo (o modo guiado continua a só corrigir texto). Sem migração; caption-add 4/4.
+
 ## 2026-11-10 (biblioteca de estilos da agência)
 
 - **W10-42** Biblioteca de estilos no espaço da agência (`/estilos`, REF-07) e importar para clientes (REF-08), a pedido do Tomás (ADR-0084). Estilos com versões; "Estilo novo", "Duplicar e ajustar", link do vídeo de origem; por cliente "Importar" ou "Atualizar para vN" (o cliente fica na versão importada até alguém atualizar). Só o dono e os admins da agência; a equipa dos clientes nunca vê a biblioteca, só "Da agência · chave vN" no seu catálogo. Migração `w10_biblioteca_estilos` (aditiva): 2 capacidades, 2 tabelas fechadas à API, origem em `edit_styles`, backfill dos estilos ativos do Numeiro. Testes w10_biblioteca_estilos 29/29.

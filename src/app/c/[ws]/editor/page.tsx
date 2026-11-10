@@ -19,13 +19,14 @@ import { applyBodyToSiblings, bodySummary, flashBody, takeBodyFlash } from "@/li
 import { applyFramingToVideos, framingSummary, videosWithFile } from "@/lib/framing-client";
 import { ImagePicker } from "@/components/edit/image-picker";
 import { SecondsInput } from "@/components/edit/seconds-input";
+import { CaptionAdder } from "@/components/edit/caption-adder";
 import { mediaUrl } from "@/lib/edit-media";
 import { GRAPHIC_BOXES, captionStates } from "@/lib/caption-plan";
 import { VariantTabs } from "@/components/edit/variant-tabs";
 import { fetchLibrary, uploadFile, type MediaAsset } from "@/lib/media";
 import { useSession } from "@/components/session-provider";
 import {
-  addNote, addOverlay, clearGain, deleteSegment, editWord, fmtT, historyOf, layout, moveSegment, notesOut, problem, push, redo,
+  addCaption, addNote, addOverlay, clearGain, deleteSegment, editWord, fmtT, historyOf, layout, moveSegment, notesOut, problem, push, redo,
   removeNote, removeOverlay, resizeOverlay, setGain, setHook, setMusic, setMusicDb, shiftOverlay, shiftWord, spanOut, splitSegment, toggleNote, trimSegment, undo,
   camAt, setCam, splitCamAt, frameAllCam, outToSrc, srcToOut, CAM_ANCHOR, ZOOM_LIMITS,
   moveOverlayOut, scaleBox, clampBox, niceImageTitle, shownLabel,
@@ -669,6 +670,13 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
           </label>
           <span className="text-xs text-muted-foreground">{segs.length} cortes · {words.length} palavras · {doc.overlays.length} visuais · {fmtT(duration)}</span>
           <Button size="sm" variant="outline" disabled={!canEdit || !lib} onClick={() => setPicker({ mode: "add" })}><ImagePlusIcon /> Imagem no cursor</Button>
+          <CaptionAdder doc={doc} t={t} disabled={!canEdit} onAdd={(text, dur, replace) => {
+            const r = addCaption(doc, text, t, dur, nextId("w"), replace);
+            if (!r.ids.length) { setMsg({ kind: "err", text: "Não deu para pôr a legenda aqui: o cursor tem de estar dentro de um corte com pelo menos 0,1 s até ao fim." }); return false; }
+            apply(r.doc); setSel({ kind: "word", id: r.ids[0] });
+            setMsg({ kind: "ok", text: `Legenda com ${r.ids.length} palavra${r.ids.length === 1 ? "" : "s"} posta no cursor. Grava a versão para ficar.` });
+            return true;
+          }} />
           <select aria-label="Juntar visual no cursor" className="h-8 max-w-56 rounded-md border bg-background px-2 text-xs" value="" disabled={!canEdit || !lib}
             onChange={(e) => { const a = visuals.find((x) => x.id === e.target.value); if (a) apply(addOverlay(doc, { id: nextId("o"), kind: a.kind === "video" || a.kind === "link_externo" ? "broll" : "graphic", label: a.title, asset: a.id }, t, 2)); }}>
             <option value="">{lib == null ? "A carregar a biblioteca…" : visuals.length ? "＋ Visual da biblioteca no cursor" : "Sem imagens nem vídeos na biblioteca"}</option>
