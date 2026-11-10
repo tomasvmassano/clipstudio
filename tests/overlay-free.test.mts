@@ -35,3 +35,13 @@ test("rótulos com código mostram-se como Imagem", async () => {
   assert.equal(shownLabel("d3fcce3e5468a815cfcbf2d22f5622d1"), "Imagem");
   assert.equal(shownLabel("Lamborghini"), "Lamborghini");
 });
+
+test("segundos escritos à mão aceitam vírgula e rejeitam vazio (W10-40)", async () => {
+  const { parseSeconds } = await import("../src/lib/edit-doc.ts");
+  assert.equal(parseSeconds("2,5"), 2.5);
+  assert.equal(parseSeconds(" 4 "), 4);
+  assert.equal(parseSeconds("1.25"), 1.25);
+  assert.equal(parseSeconds(""), null);
+  assert.equal(parseSeconds("abc"), null);
+  assert.equal(parseSeconds("2,"), 2);
+});
