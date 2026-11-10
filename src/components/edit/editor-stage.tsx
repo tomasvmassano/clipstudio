@@ -1,13 +1,13 @@
 "use client";
 
-import { useMemo, type ReactNode } from "react";
-import { hookEnd, layout, outToSrc, type EditDoc, type TextLook } from "@/lib/edit-doc";
+import { useMemo, useRef, useState, type ReactNode } from "react";
+import { clampBox, fitBox, hookEnd, layout, outToSrc, shownLabel, type Box, type EditDoc, type TextLook } from "@/lib/edit-doc";
 import { CAP_STYLES, GRAPHIC_BOXES, captionAtState, captionStates, capStyleOf, wipeFrac } from "@/lib/caption-plan";
 
 /** Vermelho do destaque do S15 (RED em render_doc.py). */
 const S15_RED = "#E2002C";
 /** A faixa dos gráficos sem posição própria (GRAPHIC_BOX em render_doc.py) e a caixa do hook (title dos estilos S14/S15/S17). */
-const GRAPHIC_BOX: [number, number, number, number] = [108, 730, 864, 600];
+export const GRAPHIC_BOX: [number, number, number, number] = [108, 730, 864, 600];
 const TITLE_BOX = { x: 150, y: 215, w: 780, size: 76 };
 
 /** Aspeto por omissão (o mesmo que o palco mostrava antes de haver "look" no documento). Em px de 1080×1920. */
@@ -26,11 +26,37 @@ export type StageGuides = { reels?: boolean; grid?: boolean };
 /** O retângulo seguro do QC (EDL-03, engine/qc.py SAFE): o que fica fora pode ser tapado pela interface dos Reels. */
 export const SAFE_RECT = { x0: 60, x1: 960, y0: 210, y1: 1600 };
 
-export function EditorStage({ doc, t, media, className, guides, assetUrls }: {
+export function EditorStage({ doc, t, media, className, guides, assetUrls, selectedOv, onSelectOv, onBoxChange }: {
   doc: EditDoc; t: number; media?: ReactNode; className?: string; guides?: StageGuides;
   /** Links das imagens da Biblioteca (id do ativo → URL): o palco mostra a imagem verdadeira, como o export (W10-37). */
   assetUrls?: Record<string, string>;
+  /** Imagens à mão no palco (W10-39): clicar seleciona; arrastar move; o canto redimensiona com a proporção. Sem isto, só se vê. */
+  selectedOv?: string | null; onSelectOv?: (id: string) => void; onBoxChange?: (id: string, box: Box) => void;
 }) {
+  const rootRef = useRef<HTMLDivElement>(null);
+  const [aspects, setAspects] = useState<Record<string, number>>({});   // proporção de cada imagem carregada (largura/altura)
+  const [drag, setDrag] = useState<{ id: string; box: Box } | null>(null);
+  const beginDrag = (id: string, start: Box, mode: "move" | "resize") => (e: React.PointerEvent) => {
+    if (!onBoxChange) return;
+    e.preventDefault(); e.stopPropagation();
+    onSelectOv?.(id);
+    const w = rootRef.current?.getBoundingClientRect().width || 1;
+    const k = 1080 / w, x0 = e.clientX, y0 = e.clientY, aspect = start[2] / start[3];
+    let cur: Box = start;
+    const move = (ev: PointerEvent) => {
+      const dx = (ev.clientX - x0) * k, dy = (ev.clientY - y0) * k;
+      if (mode === "move") cur = clampBox([start[0] + dx, start[1] + dy, start[2], start[3]]);
+      else { const nw = Math.max(40, start[2] + dx); cur = clampBox([start[0], start[1], nw, nw / aspect]); }
+      setDrag({ id, box: cur });
+    };
+    const up = () => {
+      window.removeEventListener("pointermove", move);
+      setDrag(null);
+      if (cur !== start) onBoxChange(id, cur);
+    };
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up, { once: true });
+  };
   const { segs } = layout(doc);
   const hEnd = hookEnd(doc);
   const at = outToSrc(doc, t);
@@ -52,7 +78,7 @@ export function EditorStage({ doc, t, media, className, guides, assetUrls }: {
   const text = (s: string, up?: boolean) => (up ? s.toLocaleUpperCase("pt-PT") : s);
 
   return (
-    <div className={className ?? "relative mx-auto aspect-[9/16] w-full max-w-[20rem] overflow-hidden rounded-lg border bg-neutral-900"}
+    <div ref={rootRef} className={className ?? "relative mx-auto aspect-[9/16] w-full max-w-[20rem] overflow-hidden rounded-lg border bg-neutral-900"}
       style={{ containerType: "inline-size" }} aria-label="Pré-visualização">
       {media ? <div className="absolute inset-0">{media}</div> : (
         <div className="absolute inset-0 flex items-center justify-center text-xs text-neutral-500">
@@ -61,27 +87,39 @@ export function EditorStage({ doc, t, media, className, guides, assetUrls }: {
       )}
       {/* visuais por baixo de tudo: o render desenha as legendas e o hook por cima */}
       {ovNow.map((o) => {
-        const b = o.box ?? (o.kind === "broll" ? null : styleBox);
+        const region = o.box ?? (o.kind === "broll" ? null : styleBox);
         const url = o.asset ? assetUrls?.[o.asset] : undefined;
-        if (!b) return (
+        if (!region) return (
           <div key={o.id} className="absolute inset-0 flex items-center justify-center bg-black/60 text-center text-[11px] text-white">B-roll: {o.label}</div>
         );
+        // a caixa que a imagem ocupa de facto (inteira dentro da região, como o render); a arrastar, a caixa nova
+        const asp = o.asset ? aspects[o.asset] : undefined;
+        const shown: Box = drag?.id === o.id ? drag.box : asp ? fitBox(asp, region) : region;
+        const sel = selectedOv === o.id;
+        const editable = !!onBoxChange && o.kind === "graphic";
         return (
-          <div key={o.id} className="absolute flex items-center justify-center overflow-hidden"
-            style={{ left: `${(b[0] / 1080) * 100}%`, top: top(b[1]), width: `${(b[2] / 1080) * 100}%`, height: `${(b[3] / 1920) * 100}%` }}>
+          <div key={o.id} className={`absolute flex items-center justify-center ${editable ? "cursor-move touch-none" : ""} ${sel && editable ? "outline outline-2 outline-sky-400" : ""}`}
+            style={{ left: `${(shown[0] / 1080) * 100}%`, top: top(shown[1]), width: `${(shown[2] / 1080) * 100}%`, height: `${(shown[3] / 1920) * 100}%` }}
+            onPointerDown={editable ? beginDrag(o.id, shown, "move") : undefined}
+            title={editable ? "Arrasta para mover; o canto muda o tamanho" : undefined}>
             {o.kind === "graphic" && url ? (
               // eslint-disable-next-line @next/next/no-img-element -- link assinado curto do R2, sem otimização do Next
-              <img src={url} alt={o.label} className="max-h-full max-w-full object-contain" />
+              <img src={url} alt={o.label} draggable={false} className="pointer-events-none h-full w-full object-contain"
+                onLoad={(e) => { const im = e.currentTarget; if (o.asset && im.naturalWidth) setAspects((a) => (a[o.asset!] ? a : { ...a, [o.asset!]: im.naturalWidth / im.naturalHeight })); }} />
             ) : (
               <span className="rounded border border-white/30 bg-black/50 px-2 py-1 text-[11px] text-white">
-                {o.kind === "text" ? o.label : `${o.kind === "broll" ? "B-roll" : "Gráfico"}: ${o.label}`}</span>
+                {o.kind === "text" ? o.label : o.kind === "broll" ? `B-roll: ${o.label}` : `A carregar a imagem… (${shownLabel(o.label)})`}</span>
+            )}
+            {sel && editable && (
+              <span role="presentation" className="absolute -bottom-1.5 -right-1.5 size-3.5 cursor-nwse-resize rounded-sm border border-white bg-sky-500"
+                onPointerDown={beginDrag(o.id, shown, "resize")} />
             )}
           </div>
         );
       })}
       {t < hEnd && doc.hook.text && (
         // o hook como o render (draw_title): caixa branca arredondada, letra serifada preta; o aspeto muda cor, caixa, tamanho e y
-        <div className="absolute flex justify-center"
+        <div className="pointer-events-none absolute flex justify-center"
           style={{ left: `${(TITLE_BOX.x / 1080) * 100}%`, width: `${(TITLE_BOX.w / 1080) * 100}%`,
             ...(hk.y != null ? { top: top(hk.y), transform: "translateY(-50%)" } : { top: top(TITLE_BOX.y) }) }}>
           <span className={hk.background === null ? "text-center font-serif leading-[1.05] [text-shadow:0_2px_4px_#000]" : "rounded-[2cqw] px-[3.1cqw] py-[2cqw] text-center font-serif leading-[1.05] shadow-lg"}
@@ -92,7 +130,7 @@ export function EditorStage({ doc, t, media, className, guides, assetUrls }: {
       )}
       {capNow && capStyle === "S17" && (
         // S17: uma linha numa caixa branca, ao centro; já dito a preto, o que vem a cinzento (draw_box_line)
-        <div className="absolute flex justify-center"
+        <div className="pointer-events-none absolute flex justify-center"
           style={{ left: `${(cs.box[0] / 1080) * 100}%`, width: `${(cs.box[2] / 1080) * 100}%`, top: top(lk.y ?? cs.box[1] + cs.box[3] / 2), transform: "translateY(-50%)" }}>
           <span className="px-[0.28em] py-[0.16em] text-center font-serif leading-[1.12] shadow-md"
             style={{ fontSize: px(lk.size ?? cs.size), background: lk.background === null ? undefined : lk.background ?? "#FFFFFF" }}>
@@ -103,14 +141,14 @@ export function EditorStage({ doc, t, media, className, guides, assetUrls }: {
       )}
       {capNow && capStyle !== "S17" && (capStyle === "S14" ? (
         // S14: a palavra que se ouve, ao centro da caixa; com destaque no aspeto leva essa cor
-        <div className="absolute -translate-y-1/2 text-center font-serif [text-shadow:0_3px_5px_rgba(0,0,0,.8)]"
+        <div className="pointer-events-none absolute -translate-y-1/2 text-center font-serif [text-shadow:0_3px_5px_rgba(0,0,0,.8)]"
           style={{ left: `${(cs.box[0] / 1080) * 100}%`, width: `${(cs.box[2] / 1080) * 100}%`, top: top(lk.y ?? cs.box[1] + cs.size * 0.6),
             fontSize: px(lk.size ?? cs.size), color: lk.highlight || lk.color || "#FFFFFF" }}>
           <span className="box-decoration-clone px-[0.2em]" style={lk.background ? { background: lk.background } : undefined}>{text(capNow.chunk[0].w, lk.upper)}</span>
         </div>
       ) : (
         // S15: o bloco inteiro (até 2 linhas), alinhado à esquerda; o que já se disse em caixa vermelha (ou a palavra dita na cor de destaque)
-        <div className="absolute font-serif leading-[1.12]"
+        <div className="pointer-events-none absolute font-serif leading-[1.12]"
           style={{ left: `${(cs.box[0] / 1080) * 100}%`, width: `${(cs.box[2] / 1080) * 100}%`, fontSize: px(lk.size ?? cs.size), color: lk.color || "#FFFFFF",
             ...(lk.y != null ? { top: top(lk.y), transform: "translateY(-50%)" } : { top: top(cs.box[1]) }) }}>
           {capNow.chunk.map((w, j) => {

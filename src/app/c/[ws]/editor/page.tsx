@@ -19,7 +19,7 @@ import { applyBodyToSiblings, bodySummary, flashBody, takeBodyFlash } from "@/li
 import { applyFramingToVideos, framingSummary, videosWithFile } from "@/lib/framing-client";
 import { ImagePicker } from "@/components/edit/image-picker";
 import { mediaUrl } from "@/lib/edit-media";
-import { captionStates } from "@/lib/caption-plan";
+import { GRAPHIC_BOXES, captionStates } from "@/lib/caption-plan";
 import { VariantTabs } from "@/components/edit/variant-tabs";
 import { fetchLibrary, uploadFile, type MediaAsset } from "@/lib/media";
 import { useSession } from "@/components/session-provider";
@@ -27,6 +27,7 @@ import {
   addNote, addOverlay, clearGain, deleteSegment, editWord, fmtT, historyOf, layout, moveSegment, notesOut, problem, push, redo,
   removeNote, removeOverlay, resizeOverlay, setGain, setHook, setMusic, setMusicDb, shiftOverlay, shiftWord, spanOut, splitSegment, toggleNote, trimSegment, undo,
   camAt, setCam, splitCamAt, frameAllCam, outToSrc, srcToOut, CAM_ANCHOR, ZOOM_LIMITS,
+  moveOverlayOut, scaleBox, clampBox, niceImageTitle, shownLabel,
   wordsOut, BOX_PRESETS, boxPreset, setOverlayBox, type EditDoc, type History,
 } from "@/lib/edit-doc";
 import { useFlags } from "@/lib/flags";
@@ -36,7 +37,7 @@ import { WidgetBoundary } from "@/components/widget-boundary";
 import { variantLabel } from "@/lib/media-review";
 import { clientPath } from "@/lib/ws-path";
 import { cn } from "@/lib/utils";
-import { EditorStage, type StageGuides } from "@/components/edit/editor-stage";
+import { EditorStage, GRAPHIC_BOX, type StageGuides } from "@/components/edit/editor-stage";
 import { ExportPanel } from "@/components/editor/export-panel";
 import { PreviewVideo } from "@/components/editor/preview-video";
 import { GuidedEditor } from "@/components/edit/guided-editor";
@@ -126,17 +127,31 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
   const urlsRef = useRef<Record<string, string>>({});
   const pendingUrls = useRef(new Set<string>());
   useEffect(() => { urlsRef.current = assetUrls; }, [assetUrls]);
+  const libRetry = useRef<ReturnType<typeof setTimeout> | null>(null);
   const ensureUrls = useCallback((ids: string[]) => {
+    let missing = false;
     for (const id of ids) {
       if (urlsRef.current[id] || pendingUrls.current.has(id)) continue;
       const vid = (lib ?? []).find((x) => x.id === id)?.current?.id;
-      if (!vid) continue;
+      if (!vid) { missing = true; continue; }
       pendingUrls.current.add(id);
-      mediaUrl(access, vid).then((r) => setAssetUrls((u) => ({ ...u, [id]: r.url }))).catch(() => { /* sem imagem: fica o nome */ })
+      mediaUrl(access, vid).then((r) => setAssetUrls((u) => ({ ...u, [id]: r.url }))).catch(() => { /* sem imagem: fica o aviso no palco */ })
         .finally(() => pendingUrls.current.delete(id));
     }
+    // imagem acabada de carregar: o servidor ainda a está a verificar e a lista não tem a versão pronta; volta a pedir a lista daqui a 3 s
+    if (missing && !libRetry.current) {
+      libRetry.current = setTimeout(() => {
+        libRetry.current = null;
+        fetchLibrary(access, { view: "ativos", limit: 200 }).then((l) => setLib(l.assets)).catch(() => { /* tenta na próxima */ });
+      }, 3000);
+    }
   }, [access, lib]);
-  useEffect(() => { const id = setInterval(() => setAssetUrls({}), 240_000); return () => clearInterval(id); }, []);
+  useEffect(() => () => { if (libRetry.current) clearTimeout(libRetry.current); }, []);
+  // os links do armazenamento duram 5 min: renovar a cada 4 (os ficheiros locais, blob:, ficam)
+  useEffect(() => {
+    const id = setInterval(() => setAssetUrls((u) => Object.fromEntries(Object.entries(u).filter(([, v]) => v.startsWith("blob:")))), 240_000);
+    return () => clearInterval(id);
+  }, []);
   const [picker, setPicker] = useState<null | { mode: "add" } | { mode: "replace"; id: string }>(null);
   // imagens do computador (W10-38): arrastar para o palco ou para a linha do tempo, ou escolher no seletor. Vão para a Biblioteca
   // (a exportação precisa delas no armazenamento) e entram já no documento; até o servidor as verificar, o palco mostra o ficheiro local.
@@ -170,7 +185,7 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
     try {
       for (const [k, f] of imgs.entries()) {
         setUploading(`A carregar ${f.name} (${k + 1} de ${imgs.length})…`);
-        const title = f.name.replace(/\.[^.]+$/, "").slice(0, 120) || "imagem";
+        const title = niceImageTitle(f.name, images.length + k + 1);
         const r = await uploadFile(access, f, { fields: { title, kind: "imagem" } }, () => { /* o progresso fica na mensagem */ });
         const local = URL.createObjectURL(f);
         urlsRef.current = { ...urlsRef.current, [r.assetId]: local };
@@ -222,7 +237,12 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
         const s = b.segments.find((x) => x.id === drag.id)!;
         d = drag.kind === "seg-in" ? trimSegment(b, s.id, "in", s.in + dx) : trimSegment(b, s.id, "out", s.out + dx);
       } else if (drag.kind === "word") d = shiftWord(b, drag.id, dx);
-      else if (drag.kind === "ov") d = shiftOverlay(b, drag.id, dx);
+      else if (drag.kind === "ov") {
+        // no tempo do vídeo final: atravessar um corte leva a imagem para o trecho seguinte, em vez de a esconder num trecho cortado
+        const o = b.overlays.find((x) => x.id === drag.id)!;
+        const at = srcToOut(b, o.s);
+        d = at == null ? shiftOverlay(b, drag.id, dx) : moveOverlayOut(b, drag.id, at + dx);
+      }
       else {
         const o = b.overlays.find((x) => x.id === drag.id)!;
         d = drag.kind === "ov-s" ? resizeOverlay(b, o.id, "s", o.s + dx) : resizeOverlay(b, o.id, "e", o.e + dx);
@@ -404,7 +424,10 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
           onDragLeave={() => setDragOver(null)}
           onDrop={(e) => { e.preventDefault(); setDragOver(null); void uploadImages(dropFiles(e), t); }}>
           {dragOver === "stage" && <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-black/60 text-sm text-white">Larga para pôr a imagem aqui ({fmtT(t)})</div>}
-          <EditorStage doc={doc} t={t} guides={guides} assetUrls={assetUrls} media={<PreviewVideo access={access} asset={st.asset.id} versionId={v.id} doc={doc} t={t} playing={playing}
+          <EditorStage doc={doc} t={t} guides={guides} assetUrls={assetUrls}
+            selectedOv={sel?.kind === "ov" ? sel.id : null} onSelectOv={(id) => setSel({ kind: "ov", id })}
+            onBoxChange={canEdit ? (id, box) => apply(setOverlayBox(doc, id, clampBox(box))) : undefined}
+            media={<PreviewVideo access={access} asset={st.asset.id} versionId={v.id} doc={doc} t={t} playing={playing}
             onTime={setT} onEnd={() => setPlaying(false)} onDriving={(on) => { soundDriving.current = on; }} />} />
           <div className="flex items-center justify-center gap-2">
             <Button size="sm" variant="outline" onClick={() => setT((x) => Math.max(0, x - 1))} aria-label="Recuar 1 s"><ArrowLeftIcon /></Button>
@@ -494,7 +517,7 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
           )}
           {selOv && (
             <div className="flex flex-col gap-2" aria-label="Visual selecionado">
-              <span className="font-medium">{selOv.kind === "broll" ? "B-roll" : selOv.kind === "graphic" ? "Imagem" : "Texto"} · {selOv.label}</span>
+              <span className="font-medium">{selOv.kind === "broll" ? "B-roll" : selOv.kind === "graphic" ? "Imagem" : "Texto"}{shownLabel(selOv.label) !== "Imagem" ? ` · ${selOv.label}` : ""}</span>
               {selOv.kind === "graphic" && (
                 <div className="flex items-center gap-3">
                   <span className="flex h-20 w-20 items-center justify-center overflow-hidden rounded border bg-muted">
@@ -519,7 +542,19 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
                 {[-0.5, 0.5].map((d) => <Button key={`e${d}`} size="sm" variant="outline" disabled={!canEdit} onClick={() => apply(resizeOverlay(doc, selOv.id, "e", selOv.e + d))}>Duração {d > 0 ? `+${d}` : d} s</Button>)}
                 <Button size="sm" variant="destructive" disabled={!canEdit} onClick={remove}><Trash2Icon /> Tirar visual</Button>
               </div>
-              {(canPlace || selOv.box) && (
+              {selOv.kind === "graphic" && (
+                <div className="flex flex-wrap items-center gap-2" aria-label="Tamanho da imagem">
+                  <span className="text-muted-foreground">Tamanho</span>
+                  {([["−", 0.85], ["+", 1.15]] as const).map(([lb, f]) => (
+                    <Button key={lb} size="sm" variant="outline" disabled={!canEdit} aria-label={f > 1 ? "Aumentar a imagem" : "Diminuir a imagem"}
+                      onClick={() => apply(setOverlayBox(doc, selOv.id, scaleBox(selOv.box ?? (GRAPHIC_BOXES[doc.style] ?? GRAPHIC_BOX), f)))}>{lb}</Button>
+                  ))}
+                  <Button size="sm" variant="outline" disabled={!canEdit} onClick={() => apply(setOverlayBox(doc, selOv.id, [0, 0, 1080, 1920]))}>Ecrã inteiro</Button>
+                  <Button size="sm" variant="ghost" disabled={!canEdit || !selOv.box} onClick={() => apply(setOverlayBox(doc, selOv.id, null))}>Repor</Button>
+                  <span className="w-full text-xs text-muted-foreground">No palco: arrasta a imagem para a mover e o canto azul para mudar o tamanho.</span>
+                </div>
+              )}
+              {(canPlace || selOv.box || selOv.kind === "graphic") && (
                 <label className="flex flex-wrap items-center gap-2">
                   <span className="text-muted-foreground">Posição</span>
                   <select aria-label="Posição do visual" className="h-8 rounded-md border bg-background px-2 text-xs" disabled={!canEdit} value={boxPreset(selOv)}
@@ -666,7 +701,7 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
               <Track>
                 {doc.overlays.length === 0 && <span className="px-2 text-xs text-muted-foreground">Sem visuais nesta versão: junta um da biblioteca no cursor</span>}
                 {doc.overlays.flatMap((o) => spanOut(doc, o.s, o.e).map((p, k) => (
-                  <Block key={`${o.id}-${k}`} left={p.at * pps} w={(p.end - p.at) * pps} label={o.label} selected={sel?.kind === "ov" && sel.id === o.id}
+                  <Block key={`${o.id}-${k}`} left={p.at * pps} w={(p.end - p.at) * pps} label={shownLabel(o.label)} selected={sel?.kind === "ov" && sel.id === o.id}
                     className={o.kind === "broll" ? "bg-orange-500/30" : "bg-fuchsia-500/30"} onClick={() => setSel({ kind: "ov", id: o.id })}
                     onBody={canEdit ? startDrag("ov", o.id) : undefined} onEdge={canEdit ? (edge) => startDrag(edge === "start" ? "ov-s" : "ov-e", o.id) : undefined} />
                 )))}

@@ -19,3 +19,7 @@ Sem migração. As imagens têm de estar na Biblioteca do cliente (kind imagem).
 ## Adenda (W10-38, 2026-11-10)
 
 Imagens do computador: arrastar para o palco ou para a linha do tempo, ou carregar no seletor. Cada ficheiro passa pelo carregamento normal da Biblioteca (SHA-256, R2, verificação pelo worker) e o visual entra logo no documento com o ativo novo; o palco mostra o ficheiro local (object URL) até haver link do armazenamento. Só JPG, PNG, WebP e GIF (a política da Biblioteca).
+
+## Adenda 2 (W10-39, 2026-11-10)
+
+Imagens livres: a caixa (`overlay.box`) passa a ser editada à mão no palco (mover, redimensionar com a proporção da imagem, que é o retângulo que o render desenha com "contain"); o movimento na linha do tempo é no tempo da saída (`moveOverlayOut`), sem mudar o modelo (o visual continua preso ao trecho da gravação, para acompanhar a fala quando os cortes mudam). Limite conhecido: uma imagem acaba no fim do corte onde está; para continuar depois do corte junta-se outra.
