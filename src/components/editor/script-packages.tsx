@@ -1,6 +1,7 @@
 "use client";
 
-import { CAP_STYLES } from "@/lib/caption-plan";
+import { optionText } from "@/lib/style-options";
+import { useStyleOptions } from "@/lib/style-options-client";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { ClapperboardIcon, Link2Icon, Loader2Icon, RotateCwIcon, SparklesIcon } from "lucide-react";
@@ -21,7 +22,6 @@ import {
 } from "@/lib/package-script";
 import type { Guiao } from "@/lib/types";
 
-const STYLES = (["S15", "S14", "S17"] as const).map((id) => ({ id, label: CAP_STYLES[id].label }));   // os estilos que o render desenha
 const code = (e: unknown) => (e as { code?: string } | null)?.code;
 const gLabel = (g: { n: number; date: string; tema: string | null }) => `${g.date.slice(8, 10)}/${g.date.slice(5, 7)} · ${String(g.n).padStart(2, "0")} ${g.tema ?? "sem tema"}`;
 
@@ -79,6 +79,7 @@ function SettingsCard({ access, d, onSaved }: { access: Access; d: ScriptList; o
   const [autoPkg, setAutoPkg] = useState(s.auto_package);
   const [autoExp, setAutoExp] = useState(s.auto_export);
   const [style, setStyle] = useState(s.style);
+  const STYLES = useStyleOptions(access, style).options;   // estilos ativos do catálogo que o motor desenha (W10-41)
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
@@ -104,8 +105,7 @@ function SettingsCard({ access, d, onSaved }: { access: Access; d: ScriptList; o
             <span>Exportar todos os vídeos do guião quando o pacote acaba (entram na revisão em lote){!d.can.export && <span className="block text-xs text-muted-foreground">Precisa da permissão de exportar vídeos.</span>}</span></label>
           <label className="flex max-w-xs flex-col gap-1">Estilo de legendas
             <select className={selectCls} value={style} onChange={(e) => setStyle(e.target.value)}>
-              {!STYLES.some((x) => x.id === style) && <option value={style}>{style}</option>}
-              {STYLES.map((x) => <option key={x.id} value={x.id}>{x.label}</option>)}
+              {STYLES.map((o) => <option key={o.id} value={o.id}>{optionText(o)}</option>)}
             </select>
           </label>
           <div className="flex flex-wrap items-center gap-2">

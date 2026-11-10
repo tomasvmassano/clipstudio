@@ -43,6 +43,7 @@ import { ExportPanel } from "@/components/editor/export-panel";
 import { PreviewVideo } from "@/components/editor/preview-video";
 import { GuidedEditor } from "@/components/edit/guided-editor";
 import { LookPanel, SavedStylesPanel } from "@/components/edit/style-tools";
+import { useStyleOptions } from "@/lib/style-options-client";
 
 type Sel = { kind: "seg" | "word" | "ov" | "note" | "cam"; id: string } | null;
 type DragKind = "seg-in" | "seg-out" | "word" | "ov" | "ov-s" | "ov-e";
@@ -95,6 +96,7 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
   const [h, setH] = useState<History>(() => historyOf(v.doc));
   const [drag, setDrag] = useState<Drag | null>(null);
   const doc = drag?.doc ?? h.present;      // enquanto se arrasta mostra o resultado; ao largar entra no histórico
+  const styleOpts = useStyleOptions(access, doc.style);   // estilos do catálogo do cliente (W10-41)
   const { label: me } = useSession();
   const flags = useFlags(access.ws, access.token);
   const canPlace = !!flags?.has("edit.ai_visuals");   // posição por visual (ADR-0068), atrás da flag
@@ -594,7 +596,7 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
           <details className="border-t pt-3">
             <summary className="cursor-pointer font-medium">Aspeto e estilos guardados</summary>
             <div className="mt-2 flex flex-col gap-3">
-              <LookPanel doc={doc} disabled={!canEdit} onChange={apply} />
+              <LookPanel doc={doc} disabled={!canEdit} onChange={apply} styles={styleOpts.options} stylesError={styleOpts.error} />
               <SavedStylesPanel access={access} st={st} dirty={dirty} canSave={!!st.can.styles} onApplied={() => onReload()} />
             </div>
           </details>
