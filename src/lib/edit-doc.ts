@@ -457,3 +457,9 @@ export function niceImageTitle(fileName: string, n: number): string {
 
 /** Rótulo para mostrar: um código (hash, IMG_1234) aparece como "Imagem"; o resto como está. */
 export const shownLabel = (label: string) => (niceImageTitle(label, 0) === "Imagem 0" ? "Imagem" : label);
+/** Segundos escritos à mão (W10-40): "2,5" ou "2.5" → 2.5; vazio ou inválido → null. */
+export function parseSeconds(s: string): number | null {
+  const t = s.trim().replace(",", ".");
+  const v = Number(t);
+  return t && Number.isFinite(v) ? v : null;
+}

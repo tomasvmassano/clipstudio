@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-10 (testes às imagens no editor: erros pouco amigáveis)
+
+- **W10-40** Testes em produção às imagens do editor (pôr, arrastar no palco, redimensionar, Tamanho, Ecrã inteiro, arrastar na linha do tempo através de um corte, duração), a pedido do Tomás. Três problemas corrigidos: (1) clicar ou arrastar um visual na linha do tempo deixava o cursor onde estava e a imagem desaparecia do palco; agora o cursor vai até ao visual quando é escolhido, movido ou muda de duração. (2) O campo Duração não se deixava apagar (ficava "1" e escrever 4 dava 14) e cada tecla era um passo de anular; agora grava com Enter ou ao sair, aceita "2,5", Esc repõe. (3) As mensagens de carregar imagens e os erros só apareciam no topo da página, escondidos para quem larga imagens na linha do tempo; agora flutuam no fundo do ecrã, com botão de fechar, e as de sucesso saem sozinhas ao fim de 10 s. "Trocar imagem" já abre com a Biblioteca vazia (dá para carregar do computador). Sem migração; testes overlay-free 5/5.
+
 ## 2026-11-10 (imagens livres no palco e na linha do tempo)
 
 - **W10-39** Correções e liberdade nas imagens do editor, a pedido do Tomás (ADR-0083, adenda 2). Erro: uma imagem acabada de carregar ficava como "Gráfico: <código>" porque a lista da Biblioteca ainda não tinha a versão verificada e o editor não voltava a pedir; agora volta a pedir até haver link e não descarta a cópia local. No palco: clicar na imagem seleciona, arrastar move e o canto azul muda o tamanho mantendo a proporção (a exportação desenha na mesma caixa). No painel: tamanho −/+, ecrã inteiro e repor. Na linha do tempo, arrastar uma imagem move-a no tempo do vídeo final (atravessar um corte já não a esconde num trecho cortado). Nomes legíveis ("Imagem 3" em vez do código do ficheiro); "Caixa de sempre" passa a "A do estilo"; as legendas e o hook deixam passar os cliques para a imagem. Sem migração. Testes: `overlay-free` 4/4.

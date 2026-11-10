@@ -4,7 +4,7 @@ import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "rea
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
-  ArrowLeftIcon, ArrowRightIcon, ExternalLinkIcon, ImagePlusIcon, Loader2Icon, PauseIcon, PlayIcon, Redo2Icon, RotateCwIcon, ScissorsIcon, SaveIcon, Trash2Icon, Undo2Icon,
+  ArrowLeftIcon, ArrowRightIcon, ExternalLinkIcon, ImagePlusIcon, Loader2Icon, PauseIcon, PlayIcon, Redo2Icon, RotateCwIcon, ScissorsIcon, SaveIcon, Trash2Icon, Undo2Icon, XIcon,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +18,7 @@ import { SOURCE_LABEL, fetchBoard, fetchEdit, saveEdit, variantShort, type Board
 import { applyBodyToSiblings, bodySummary, flashBody, takeBodyFlash } from "@/lib/body-share-client";
 import { applyFramingToVideos, framingSummary, videosWithFile } from "@/lib/framing-client";
 import { ImagePicker } from "@/components/edit/image-picker";
+import { SecondsInput } from "@/components/edit/seconds-input";
 import { mediaUrl } from "@/lib/edit-media";
 import { GRAPHIC_BOXES, captionStates } from "@/lib/caption-plan";
 import { VariantTabs } from "@/components/edit/variant-tabs";
@@ -119,6 +120,12 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
   const [note, setNote] = useState("");
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(takeBodyFlash);   // o resultado do corpo partilhado, depois de recarregar
+  // as mensagens de sucesso saem sozinhas ao fim de 10 s; os erros ficam até se fecharem
+  useEffect(() => {
+    if (msg?.kind !== "ok") return;
+    const id = setTimeout(() => setMsg((m) => (m === msg ? null : m)), 10000);
+    return () => clearTimeout(id);
+  }, [msg]);
   const idSeq = useRef(0);
   const apply = useCallback((d: EditDoc) => { if (canEdit) setH((x) => push(x, d)); }, [canEdit]);
   const nextId = (p: string) => { idSeq.current += 1; return `${p}${Date.now().toString(36)}${idSeq.current}`; };
@@ -377,6 +384,14 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
   const selSeg = sel?.kind === "seg" ? segs.find((s) => s.id === sel.id) ?? null : null;
   const selWord = sel?.kind === "word" ? doc.captions.words.find((w) => w.id === sel.id) ?? null : null;
   const selOv = sel?.kind === "ov" ? doc.overlays.find((o) => o.id === sel.id) ?? null : null;
+  // ao escolher, arrastar ou mudar a duração de um visual, o cursor vai até ele (W10-40): a imagem fica no palco para a ajustar ali
+  const ovKey = selOv ? `${selOv.id}:${selOv.s}:${selOv.e}` : "";
+  const [seenOvKey, setSeenOvKey] = useState("");
+  if (ovKey !== seenOvKey) {
+    setSeenOvKey(ovKey);
+    const at = selOv && !playing ? srcToOut(doc, selOv.s) : null;
+    if (at != null && selOv && (t < at || t >= at + (selOv.e - selOv.s))) setT(Math.min(duration, at + 0.05));
+  }
   const selCamIdx = sel?.kind === "cam" ? Number(sel.id) : -1;
   const selCam = selCamIdx >= 0 ? doc.cameras[selCamIdx] ?? null : null;
   const notes = notesOut(doc);
@@ -414,8 +429,18 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
         <ExportPanel access={access} ws={access.ws} asset={st.asset.id} versionId={isCurrent ? v.id : null} versionNo={v.version_no} dirty={dirty} canExport={st.can.export} />
         {st.asset.drive_file_id && <a className="inline-flex items-center gap-1 text-sm underline" href={`https://drive.google.com/file/d/${st.asset.drive_file_id}/view`} target="_blank" rel="noreferrer">Vídeo anterior na Drive <ExternalLinkIcon className="size-3" /></a>}
       </div>
-      {uploading && <Alert><AlertDescription className="flex items-center gap-2"><Loader2Icon className="size-4 animate-spin" /> {uploading}</AlertDescription></Alert>}
-      {msg && <Alert variant={msg.kind === "err" ? "destructive" : "default"}><AlertDescription>{msg.text}</AlertDescription></Alert>}
+      {/* mensagens a flutuar no fundo do ecrã (W10-40): quem larga imagens na linha do tempo está lá em baixo e via-as escondidas no topo */}
+      {(uploading || msg) && (
+        <div className="fixed bottom-4 left-1/2 z-50 flex w-[min(36rem,calc(100%-2rem))] -translate-x-1/2 flex-col gap-2" aria-live="polite">
+          {uploading && <Alert className="bg-background shadow-lg"><AlertDescription className="flex items-center gap-2"><Loader2Icon className="size-4 animate-spin" /> {uploading}</AlertDescription></Alert>}
+          {msg && (
+            <Alert variant={msg.kind === "err" ? "destructive" : "default"} className="bg-background pr-10 shadow-lg">
+              <AlertDescription>{msg.text}</AlertDescription>
+              <button type="button" className="absolute right-2 top-2 rounded p-1 text-muted-foreground hover:text-foreground" aria-label="Fechar mensagem" onClick={() => setMsg(null)}><XIcon className="size-4" /></button>
+            </Alert>
+          )}
+        </div>
+      )}
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,20rem)_1fr]">
         {/* palco 9:16; largar imagens aqui põe-nas no cursor */}
@@ -526,14 +551,13 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
                       <img src={assetUrls[selOv.asset]} alt="" className="max-h-full max-w-full object-contain" />
                     ) : <span className="text-[10px] text-muted-foreground">…</span>}
                   </span>
-                  <Button size="sm" variant="outline" disabled={!canEdit || !images.length} onClick={() => setPicker({ mode: "replace", id: selOv.id })}>Trocar imagem</Button>
+                  <Button size="sm" variant="outline" disabled={!canEdit} onClick={() => setPicker({ mode: "replace", id: selOv.id })}>Trocar imagem</Button>
                 </div>
               )}
               <div className="flex flex-wrap items-center gap-2">
                 <label className="flex items-center gap-2"><span className="text-muted-foreground">Duração</span>
-                  <Input type="number" min={0.1} max={30} step={0.1} className="h-8 w-20" disabled={!canEdit} aria-label="Duração do visual em segundos"
-                    value={Math.round((selOv.e - selOv.s) * 10) / 10}
-                    onChange={(e) => { const v = Number(e.target.value); if (Number.isFinite(v) && v >= 0.1) apply(resizeOverlay(doc, selOv.id, "e", selOv.s + v)); }} /> s</label>
+                  <SecondsInput key={selOv.id} value={selOv.e - selOv.s} max={30} disabled={!canEdit} label="Duração do visual em segundos"
+                    onCommit={(v) => apply(resizeOverlay(doc, selOv.id, "e", selOv.s + v))} /> s</label>
                 <Button size="sm" variant="outline" disabled={!canEdit} title="Estica ou encurta até ao fim da frase da legenda"
                   onClick={() => { const o = srcToOut(doc, selOv.s); if (o != null) apply(resizeOverlay(doc, selOv.id, "e", selOv.s + toPhraseEnd(o))); }}>Até ao fim da frase</Button>
               </div>
