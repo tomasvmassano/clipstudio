@@ -11,8 +11,8 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | Estado | Requisitos |
 |---|---|
 | feito | 36 |
-| parcial | 224 |
-| por começar | 53 |
+| parcial | 226 |
+| por começar | 51 |
 | bloqueado | 3 |
 | adiado | 3 |
 | **total** | **319** |
@@ -183,6 +183,8 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | REF-02 | P1 | parcial | deploy do worker (numeiro-engine#19) e APIFY_TOKEN no worker (não verificado); verificação com sessão real (R-15) | Dissecção visível |
 | REF-03 | P1 | parcial | deploy do worker; calibrar limites de semelhança (pressuposto); verificador factual (VAR-04); verificação com sessão real | Adaptação ao cliente: 3 guiões por link (decisão), cada um com 3 hooks |
 | REF-04 | P1 | parcial | topo da fila do teleprompter, modo rápido pelo telemóvel (ING-04), estilo extraído (REF-05); meta de 10 min por medir | Via rápida |
+| REF-07 | P1 | parcial | aplicar a migração w10_biblioteca_estilos (aprovação do Tomás); verificação com sessão real da agência e de um cliente | Biblioteca de estilos da agência |
+| REF-08 | P1 | parcial | aplicar a migração; render por parâmetros para chaves diferentes das do motor (REF-05); verificação com sessão real | Importar para um cliente |
 | REACT-01 | P1 | parcial | agente diário de descoberta a correr e verificado com sessão real; aprendizagem da descoberta com aceitar/rejeitar | Fontes vigiadas e descoberta de contas |
 | REACT-02 | P1 | parcial | recolha diária pelo agente (tarefa agendada) e classificação do tipo de vídeo por frames; verificação com sessão real | Recolha de takes |
 | REACT-03 | P1 | parcial | avaliação feita pelo agente em cada corrida; calibração | Avaliação pela IA |
@@ -735,8 +737,8 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | REF-04 | parcial | topo da fila do teleprompter, modo rápido pelo telemóvel (ING-04), estilo extraído (REF-05); meta de 10 min por medir | guiões origem via_rapida em revisão, badge, reference_script_outputs (W10-04) | — |
 | REF-05 | por começar |  |  | — |
 | REF-06 | por começar |  |  | — |
-| REF-07 | por começar |  |  | — |
-| REF-08 | por começar |  |  | — |
+| REF-07 | parcial | aplicar a migração w10_biblioteca_estilos (aprovação do Tomás); verificação com sessão real da agência e de um cliente | W10-42: agency_styles/agency_style_versions, agency_style_library/save/set_status/history, /estilos (ADR-0084); w10_biblioteca_estilos 29/29 | — |
+| REF-08 | parcial | aplicar a migração; render por parâmetros para chaves diferentes das do motor (REF-05); verificação com sessão real | W10-42: agency_style_import (versão fixa, origem, Atualizar, recusa chave do cliente PT409), origem no catálogo do cliente; w10_biblioteca_estilos 29/29 | — |
 | REF-09 | por começar |  |  | — |
 
 ## 46.1 Olhar na câmara e teleprompter (GAZE)

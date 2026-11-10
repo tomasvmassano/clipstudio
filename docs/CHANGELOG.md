@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-10 (biblioteca de estilos da agência)
+
+- **W10-42** Biblioteca de estilos no espaço da agência (`/estilos`, REF-07) e importar para clientes (REF-08), a pedido do Tomás (ADR-0084). Estilos com versões; "Estilo novo", "Duplicar e ajustar", link do vídeo de origem; por cliente "Importar" ou "Atualizar para vN" (o cliente fica na versão importada até alguém atualizar). Só o dono e os admins da agência; a equipa dos clientes nunca vê a biblioteca, só "Da agência · chave vN" no seu catálogo. Migração `w10_biblioteca_estilos` (aditiva): 2 capacidades, 2 tabelas fechadas à API, origem em `edit_styles`, backfill dos estilos ativos do Numeiro. Testes w10_biblioteca_estilos 29/29.
+
 ## 2026-11-10 (estilos do editor iguais ao catálogo do cliente)
 
 - **W10-41** Os estilos do editor, da Edição automática e do pacote por guião vinham de uma lista escrita no código (S14, S15, S17) e não batiam com a página "Estilos de edição" (catálogo do cliente, VAR-02), a pedido do Tomás. Agora os três leem o catálogo: aparecem os estilos ativos que o motor já desenha, com o nome do catálogo. O estilo atual de um vídeo aparece sempre, marcado com o motivo (não ativo, arquivado, sem render, fora do catálogo), para nunca mudar sozinho. Sem catálogo, mostra os estilos do motor e diz que o catálogo não respondeu. No catálogo, cada estilo ativo diz "No editor" ou "Sem render ainda" (S13, S16). Sem migração; style-options 3/3. A seguir: biblioteca de estilos da agência e importar para cliente (REF-07/08), novo estilo a partir de vídeo (REF-05/06).
