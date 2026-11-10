@@ -30,7 +30,7 @@ export function VideoBoard({ access }: { access: Access }) {
   const shown = useMemo(() => {
     const s = q.trim().toLowerCase();
     if (!data || !s) return data ?? [];
-    return data.filter((g) => [`guião ${g.guiao?.n ?? ""}`, g.guiao?.tema ?? "", ...g.variants.map((v) => v.hook_text ?? "")]
+    return data.filter((g) => [`guião ${g.guiao?.n ?? ""}`, g.guiao?.tema ?? "", ...g.variants.flatMap((v) => [v.hook_text ?? "", v.hook_spoken ?? ""])]
       .some((x) => x.toLowerCase().includes(s)));
   }, [data, q]);
 
@@ -111,7 +111,9 @@ function VariantTile({ access, v, onChanged }: { access: Access; v: BoardVariant
           {v.style && <Badge variant="outline">{v.style}</Badge>}
           <span className="text-xs text-muted-foreground tabular-nums">{fmtDur(v.duration)} · v{v.version_no}</span>
         </div>
-        <p className="line-clamp-3 text-sm">{v.hook_text || <span className="text-muted-foreground">sem texto de hook</span>}</p>
+        {v.hook_spoken ? <p className="line-clamp-3 text-sm" title="O que se diz no hook">“{v.hook_spoken}”</p> : null}
+        <p className={v.hook_spoken ? "line-clamp-1 text-xs text-muted-foreground" : "line-clamp-3 text-sm"} title="Texto no ecrã">
+          {v.hook_text || <span className="text-muted-foreground">sem texto de hook</span>}</p>
         <span className={b.tone === "ok" ? "text-xs text-emerald-600 dark:text-emerald-400" : b.tone === "warn" ? "text-xs text-amber-600 dark:text-amber-400"
           : b.tone === "err" ? "text-xs text-destructive" : "text-xs text-muted-foreground"}>{b.text}</span>
         <div className="mt-auto flex flex-wrap gap-2 pt-1">
@@ -168,7 +170,8 @@ function Thumb({ access, v }: { access: Access; v: BoardVariant }) {
   return (
     <div ref={ref} className="relative h-36 w-20 overflow-hidden rounded bg-neutral-900">
       {src && !failed ? (
-        <video src={src} muted playsInline preload="metadata" className="h-full w-full object-cover" onError={() => setFailed(true)} aria-hidden />
+        <video src={src} muted playsInline preload="metadata" className="h-full w-full object-cover" onError={() => setFailed(true)} aria-hidden
+          onLoadedMetadata={(e) => { const t = Number(src.split("#t=")[1]); if (Number.isFinite(t)) e.currentTarget.currentTime = t; }} />
       ) : (
         <span className="absolute inset-0 flex items-center justify-center p-1 text-center text-[10px] text-neutral-400">{failed ? "sem imagem" : "…"}</span>
       )}

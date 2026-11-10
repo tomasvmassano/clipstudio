@@ -16,6 +16,7 @@ import { FlagGate } from "@/components/flag-gate";
 import type { Access } from "@/lib/access";
 import { SOURCE_LABEL, fetchBoard, fetchEdit, saveEdit, variantShort, type BoardVariant, type EditState } from "@/lib/edit";
 import { applyBodyToSiblings, bodySummary, flashBody, takeBodyFlash } from "@/lib/body-share-client";
+import { applyFramingToVideos, framingSummary, videosWithFile } from "@/lib/framing-client";
 import { VariantTabs } from "@/components/edit/variant-tabs";
 import { fetchLibrary, type MediaAsset } from "@/lib/media";
 import { useSession } from "@/components/session-provider";
@@ -241,6 +242,24 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
     catch (e) { setMsg({ kind: "err", text: (e as Error).message }); }
     finally { setSaving(false); }
   };
+  const [framing, setFraming] = useState(false);
+  const camFile = (cam: string) => (doc as EditDoc & { source?: { cams?: Record<string, string> } }).source?.cams?.[cam] ?? null;
+  // enquadramento da gravação inteira (W10-36): este vídeo fica com o enquadramento já (por gravar) e os outros com a mesma
+  // gravação recebem uma versão nova
+  const frameEverywhere = async (cam: string, f: { zoom: number; x?: number; y?: number }) => {
+    const file = camFile(cam);
+    if (!file) return;
+    setFraming(true); setMsg(null);
+    try {
+      const vids = await videosWithFile(access, cam, file, st.asset.id);
+      if (vids.length && !window.confirm(`Pôr este zoom e posição da câmara ${camLabel(cam).toLowerCase()} em mais ${vids.length} vídeo${vids.length === 1 ? "" : "s"} com ${file}? Cada um fica com uma versão nova.`)) return;
+      apply(frameAllCam(doc, cam, f));
+      const rs = vids.length ? await applyFramingToVideos(access, cam, f, vids, `enquadramento de ${file} igual ao de ${variantShort(st.asset.variant)}`) : [];
+      const sm = rs.length ? framingSummary(rs) : null;
+      setMsg({ kind: sm?.kind ?? "ok", text: `${sm ? sm.text + " " : ""}Grava este vídeo para ficar também com este enquadramento.` });
+    } catch (e) { setMsg({ kind: "err", text: (e as Error).message }); }
+    finally { setFraming(false); }
+  };
   const [syncing, setSyncing] = useState(false);
   // Igualar corpos (EDL-14): o corpo da versão gravada deste hook vai para os outros
   const syncBodies = async () => {
@@ -372,6 +391,9 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
                 <Button size="sm" variant="outline" disabled={!canEdit}
                   onClick={() => apply(frameAllCam(doc, selCam.cam, { zoom: selCam.zoom, x: selCam.x, y: selCam.y }))}>
                   Aplicar a toda a câmara {camLabel(selCam.cam).toLowerCase()}</Button>
+                <Button size="sm" variant="outline" disabled={!canEdit || framing || !camFile(selCam.cam)} title="O mesmo zoom e posição em todos os vídeos que usam esta gravação"
+                  onClick={() => void frameEverywhere(selCam.cam, { zoom: selCam.zoom, x: selCam.x, y: selCam.y })}>
+                  {framing ? <Loader2Icon className="animate-spin" /> : null} Aplicar a todos os vídeos com {camFile(selCam.cam) ?? "esta gravação"}</Button>
                 <Button size="sm" variant="ghost" disabled={!canEdit}
                   onClick={() => apply(setCam(doc, selCamIdx, { zoom: 1, x: CAM_ANCHOR.x, y: CAM_ANCHOR.y }))}>Repor</Button>
               </div>

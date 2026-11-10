@@ -65,7 +65,7 @@ export const SOURCE_LABEL: Record<EditVersionMeta["source"], string> = { import:
 /* Vídeos por guião e corpo partilhado (EDL-14, EDL-15; CHG-011, ADR-0081). */
 export type BoardVariant = {
   asset_id: string; title: string; status: string; variant: string; style: string | null; version_id: string; version_no: number;
-  updated_at: string; updated_label: string | null; hook_text: string | null; duration: number; body_sig: string; first_in: number | null;
+  updated_at: string; updated_label: string | null; hook_text: string | null; /** As primeiras palavras ditas nos cortes de hook (W10-34). */ hook_spoken?: string | null; duration: number; body_sig: string; first_in: number | null;
   source: { cams: Record<string, string> | null; windows: [number, number][] | null; offsets: Record<string, number> | null; audio: string | null };
   export: { status: string; finished_at: string | null; edit_version_id: string | null; current: boolean } | null;
 };
