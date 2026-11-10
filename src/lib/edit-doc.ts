@@ -7,7 +7,8 @@
 export type Section = "hook" | "body";
 export type Seg = { id: string; in: number; out: number; section: Section };
 export type Word = { id: string; w: string; s: number; e: number };
-export type Cam = { s: number; e: number; cam: string; zoom: number; intro?: boolean };
+/** x/y (W10-35): enquadramento com zoom, de 0 a 1 = de onde se corta (0 esquerda/cima, 1 direita/baixo); sem eles CAM_ANCHOR. */
+export type Cam = { s: number; e: number; cam: string; zoom: number; intro?: boolean; x?: number; y?: number };
 /** box (ADR-0068): posição própria em px de 1080×1920 [x, y, largura, altura]; sem box = a caixa de sempre (B-roll em ecrã inteiro). */
 export type Box = [number, number, number, number];
 export type Overlay = { id: string; kind: "broll" | "graphic" | "text"; label: string; asset?: string | null; s: number; e: number; box?: Box | null };
@@ -372,4 +373,43 @@ export function setOverlayBox(doc: EditDoc, id: string, box: Box | null): EditDo
     void _old;
     return box ? { ...rest, box: [...box] as Box } : rest;
   }) };
+}
+
+
+/* Câmaras à mão (W10-35): trocar o ângulo, zoom e posição por trecho, dividir no cursor, enquadrar a câmara inteira. */
+export const CAM_ANCHOR = { x: 0.5, y: 0.38 };   // o mesmo que ANCHOR em engine/render_doc.py
+export const ZOOM_LIMITS: [number, number] = [1, 3];
+const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
+
+/** Índice do trecho de câmara que contém o instante t da fonte (-1 se nenhum). */
+export function camAt(doc: EditDoc, t: number): number {
+  return doc.cameras.findIndex((c) => t >= c.s - 1e-6 && t < c.e - 1e-6);
+}
+
+/** Muda um trecho de câmara: ângulo, zoom (1 a 3) e posição (0 a 1). */
+export function setCam(doc: EditDoc, i: number, patch: Partial<Pick<Cam, "cam" | "zoom" | "x" | "y">>): EditDoc {
+  if (i < 0 || i >= doc.cameras.length) return doc;
+  const c = { ...doc.cameras[i] };
+  if (patch.cam) c.cam = patch.cam;
+  if (patch.zoom != null) c.zoom = r3(clamp(patch.zoom, ...ZOOM_LIMITS));
+  if (patch.x != null) c.x = r3(clamp(patch.x, 0, 1));
+  if (patch.y != null) c.y = r3(clamp(patch.y, 0, 1));
+  return { ...doc, cameras: doc.cameras.map((k, j) => (j === i ? c : k)) };
+}
+
+/** Parte o trecho de câmara no instante t da fonte (os dois lados com pelo menos MIN_SEG). Fora de um trecho, nada muda. */
+export function splitCamAt(doc: EditDoc, t: number): EditDoc {
+  const i = camAt(doc, t);
+  if (i < 0) return doc;
+  const c = doc.cameras[i];
+  if (t - c.s < MIN_SEG || c.e - t < MIN_SEG) return doc;
+  const a = { ...c, e: r3(t) }, b = { ...c, s: r3(t), intro: false };
+  return { ...doc, cameras: [...doc.cameras.slice(0, i), a, b, ...doc.cameras.slice(i + 1)] };
+}
+
+/** O mesmo zoom e posição em todos os trechos de uma câmara (ex.: puxar a câmara da frente para cima no vídeo inteiro). */
+export function frameAllCam(doc: EditDoc, cam: string, f: { zoom: number; x?: number; y?: number }): EditDoc {
+  return { ...doc, cameras: doc.cameras.map((c) => (c.cam !== cam ? c : {
+    ...c, zoom: r3(clamp(f.zoom, ...ZOOM_LIMITS)), x: r3(clamp(f.x ?? CAM_ANCHOR.x, 0, 1)), y: r3(clamp(f.y ?? CAM_ANCHOR.y, 0, 1)),
+  })) };
 }

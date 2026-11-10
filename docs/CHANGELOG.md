@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-10 (câmaras à mão, guias e corpo sempre igual)
+
+- **W10-35** Controlo manual no editor, a pedido do Tomás (ADR-0082). Câmaras: clicar num trecho da faixa das câmaras para trocar o ângulo (frente/lado), zoom (1 a 3×), posição vertical e horizontal, dividir no cursor, aplicar a toda a câmara e repor; tecla C troca a câmara no cursor. O render usa a mesma posição (numeiro-engine `enquadramento-por-trecho`), por isso o palco é igual ao export. Guias do palco: "Zona segura Reels" e "Hook · olhos · legendas", só no editor. Corpo sempre igual nos hooks (EDL-14): sem caixa para desligar, também no modo guiado, e "Igualar corpos a este" no aviso. Sem migração. Testes: `cam-edit` 3/3, motor `EnquadramentoTest` e `EnquadramentoRenderTest` (ffmpeg real).
+
 ## 2026-11-10 (corpo partilhado e vídeos por guião)
 
 - **W10-33** Corpo partilhado entre hooks (EDL-14) e vídeos por guião (EDL-15), a pedido do Tomás (CHG-011, ADR-0081). Ao gravar no editor, o corpo (cortes que não são hook e as legendas, câmaras, visuais e volumes desses trechos) é aplicado aos outros hooks do guião, cada um com o seu hook, como versão nova; quem gravou entretanto fica de fora com aviso. Separadores Hook 1/2/3 no editor e no modo guiado, com "corpo igual" ou "diferente em". Na Edição automática, "Vídeos por guião": imagem do início, texto do hook, duração, versão e exportação, com Abrir e Exportar. Migração `20261109230237_w10_videos_por_guiao.sql` (`edit_board`, só leitura). Testes: `w10_videos_por_guiao` 12/12, `body-share` 5/5.

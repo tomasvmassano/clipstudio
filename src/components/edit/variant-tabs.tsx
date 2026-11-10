@@ -10,8 +10,10 @@ import { variantShort, type BoardVariant } from "@/lib/edit";
  * Separadores dos hooks do mesmo guião no editor (EDL-15) e o estado do corpo partilhado (EDL-14): igual em todos ou diferente
  * em quais (pelos cortes do corpo da versão gravada). Mudar de separador com alterações por gravar pede confirmação.
  */
-export function VariantTabs({ access, current, variants, dirty, mode }: {
+export function VariantTabs({ access, current, variants, dirty, mode, onSync, syncing }: {
   access: Access; current: string; variants: BoardVariant[]; dirty: boolean; mode?: string | null;
+  /** Igualar corpos: copia o corpo gravado deste hook para os outros (sem alterações por gravar). */
+  onSync?: () => void; syncing?: boolean;
 }) {
   if (variants.length < 2) return null;
   const me = variants.find((v) => v.asset_id === current);
@@ -34,8 +36,14 @@ export function VariantTabs({ access, current, variants, dirty, mode }: {
       {me && (diff.length === 0 ? (
         <span className="inline-flex items-center gap-1 text-xs text-muted-foreground"><CheckIcon className="size-3" aria-hidden /> Corpo igual nos {variants.length} hooks</span>
       ) : (
-        <span className="inline-flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400"><TriangleAlertIcon className="size-3" aria-hidden />
-          Corpo diferente em {diff.map((v) => variantShort(v.variant)).join(", ")}</span>
+        <span className="inline-flex flex-wrap items-center gap-2 text-xs text-amber-600 dark:text-amber-400"><TriangleAlertIcon className="size-3" aria-hidden />
+          Corpo diferente em {diff.map((v) => variantShort(v.variant)).join(", ")}
+          {onSync && (
+            <button type="button" disabled={dirty || syncing} onClick={onSync}
+              title={dirty ? "Grava ou descarta as alterações primeiro" : `Copia o corpo deste hook para ${diff.map((v) => variantShort(v.variant)).join(", ")}`}
+              className="rounded border border-current px-2 py-0.5 font-medium hover:bg-amber-500/10 disabled:opacity-50">
+              {syncing ? "A igualar…" : "Igualar corpos a este"}</button>
+          )}</span>
       ))}
     </div>
   );
