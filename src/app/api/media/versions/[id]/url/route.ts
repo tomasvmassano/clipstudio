@@ -11,6 +11,8 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
   const { id } = await ctx.params;
   const ws = req.nextUrl.searchParams.get("ws") ?? "";
   const purpose = req.nextUrl.searchParams.get("purpose") === "download" ? "download" : "preview";
+  // nome do ficheiro ao descarregar (W10-44): só letras, números, espaços e - _ . · ( ); a extensão vem sempre do servidor
+  const asName = (req.nextUrl.searchParams.get("name") ?? "").normalize("NFC").replace(/[^\p{L}\p{N} ._()·-]/gu, "").replace(/\s+/g, " ").trim().slice(0, 120);
   if (!UUID.test(id) || !WS.test(ws)) return fail({ code: "22023", message: "pedido_invalido", details: "Pedido inválido." });
   const sb = await serverSupabase();
   const r = await rpc<{ bucket: string; path: string; filename: string; mime: string; ttl_seconds: number }>(
@@ -18,9 +20,16 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
   if (r.error) return fail(r.error);
   try {
     const url = await mediaStorage(sb, r.data.bucket).createSignedUrl(r.data.bucket, r.data.path,
-      { expiresIn: r.data.ttl_seconds, downloadName: purpose === "download" ? r.data.filename : undefined });
+      { expiresIn: r.data.ttl_seconds, downloadName: purpose === "download" ? withExt(asName, r.data.filename) : undefined });
     return ok({ url, mime: r.data.mime, filename: r.data.filename, expires_at: new Date(Date.now() + r.data.ttl_seconds * 1000).toISOString() });
   } catch (e) {
     return fail(e as Error);
   }
+}
+
+/** Nome pedido + a extensão do ficheiro guardado; sem nome pedido, o nome guardado. */
+function withExt(name: string, stored: string): string {
+  if (!name) return stored;
+  const ext = /\.[A-Za-z0-9]{1,5}$/.exec(stored)?.[0] ?? "";
+  return name.replace(/\.[A-Za-z0-9]{1,5}$/, "") + ext;
 }
