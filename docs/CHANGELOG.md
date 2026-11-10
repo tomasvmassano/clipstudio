@@ -3,6 +3,9 @@
 ## 2026-11-10 (legenda nova no editor)
 
 - **W10-43** Legenda nova no cursor, a pedido do Tomás: na linha do tempo, "Legenda no cursor" abre um campo para o texto e a duração; as palavras entram no cursor, repartidas pela duração conforme o tamanho de cada uma, no corte onde está o cursor (acabam no fim desse corte, no máximo), e passam a ser legendas como as outras (corrigir, mover, tirar). Se já houver palavras nesse intervalo, dá para as substituir (para reescrever uma legenda mal transcrita). Só no editor completo (o modo guiado continua a só corrigir texto). Sem migração; caption-add 4/4.
+## 2026-11-10 (biblioteca de estilos da agência)
+
+- **W10-42** Biblioteca de estilos no espaço da agência (`/estilos`, REF-07) e importar para clientes (REF-08), a pedido do Tomás (ADR-0084). Estilos com versões; "Estilo novo", "Duplicar e ajustar", link do vídeo de origem; por cliente "Importar" ou "Atualizar para vN" (o cliente fica na versão importada até alguém atualizar). Só o dono e os admins da agência; a equipa dos clientes nunca vê a biblioteca, só "Da agência · chave vN" no seu catálogo. Migração `w10_biblioteca_estilos` (aditiva): 2 capacidades, 2 tabelas fechadas à API, origem em `edit_styles`, backfill dos estilos ativos do Numeiro. Testes w10_biblioteca_estilos 29/29.
 
 ## 2026-11-10 (estilos do editor iguais ao catálogo do cliente)
 
