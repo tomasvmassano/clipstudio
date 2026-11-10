@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-10 (imagens do computador no editor)
+
+- **W10-38** Imagens do computador no editor, a pedido do Tomás (ADR-0083): arrastar uma ou várias imagens para o palco (entram no cursor) ou para a linha do tempo (entram onde se largam, uma a seguir à outra, cada uma até ao fim da frase), ou "Carregar do computador" / arrastar no seletor de imagens. Vão para a Biblioteca (a exportação precisa delas no armazenamento) e entram já no vídeo; enquanto o servidor as verifica, o palco mostra o ficheiro local. Tipos aceites: JPG, PNG, WebP e GIF (aviso claro para os outros, como HEIC). Sem migração.
+
 ## 2026-11-10 (estilo S17 e imagens no editor)
 
 - **W10-37** Estilo S17 "caixa branca com imagens" (referência instagram.com/reel/DeiO5-mNeVh; pedido do Tomás; ADR-0083): legenda numa linha em caixa branca, o que já se disse a preto e o que vem a cinzento; imagens inteiras num cartão na metade de baixo, sempre por baixo das letras. Exportação (numeiro-engine `estilo-s17`) e palco iguais. Editor: "Imagem no cursor" com grelha de miniaturas e procura, a imagem entra até ao fim da frase; painel com miniatura, trocar imagem, duração em segundos e "até ao fim da frase". O palco passa a mostrar a imagem verdadeira e o hook como no export, com os visuais por baixo. S17 nos estilos do pacote e do editor. Sem migração. Testes: `caption-plan` (igual ao motor em 200 documentos), motor `test_s17` 5/5.

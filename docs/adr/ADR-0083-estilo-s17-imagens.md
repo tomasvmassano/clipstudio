@@ -15,3 +15,7 @@ O Tomás pediu o estilo da referência instagram.com/reel/DeiO5-mNeVh, com uma f
 ## Consequências
 
 Sem migração. As imagens têm de estar na Biblioteca do cliente (kind imagem). Os links das imagens no editor são curtos e renovam-se sozinhos. O hook do palco muda de aspeto em todos os estilos para ficar igual ao export.
+
+## Adenda (W10-38, 2026-11-10)
+
+Imagens do computador: arrastar para o palco ou para a linha do tempo, ou carregar no seletor. Cada ficheiro passa pelo carregamento normal da Biblioteca (SHA-256, R2, verificação pelo worker) e o visual entra logo no documento com o ativo novo; o palco mostra o ficheiro local (object URL) até haver link do armazenamento. Só JPG, PNG, WebP e GIF (a política da Biblioteca).

@@ -21,7 +21,7 @@ import { ImagePicker } from "@/components/edit/image-picker";
 import { mediaUrl } from "@/lib/edit-media";
 import { captionStates } from "@/lib/caption-plan";
 import { VariantTabs } from "@/components/edit/variant-tabs";
-import { fetchLibrary, type MediaAsset } from "@/lib/media";
+import { fetchLibrary, uploadFile, type MediaAsset } from "@/lib/media";
 import { useSession } from "@/components/session-provider";
 import {
   addNote, addOverlay, clearGain, deleteSegment, editWord, fmtT, historyOf, layout, moveSegment, notesOut, problem, push, redo,
@@ -138,6 +138,14 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
   }, [access, lib]);
   useEffect(() => { const id = setInterval(() => setAssetUrls({}), 240_000); return () => clearInterval(id); }, []);
   const [picker, setPicker] = useState<null | { mode: "add" } | { mode: "replace"; id: string }>(null);
+  // imagens do computador (W10-38): arrastar para o palco ou para a linha do tempo, ou escolher no seletor. Vão para a Biblioteca
+  // (a exportação precisa delas no armazenamento) e entram já no documento; até o servidor as verificar, o palco mostra o ficheiro local.
+  const [uploading, setUploading] = useState<string | null>(null);
+  const reloadLib = useCallback(() => {
+    fetchLibrary(access, { view: "ativos", limit: 200 }).then((l) => setLib(l.assets)).catch(() => { /* fica a lista que havia */ });
+  }, [access]);
+  const dropFiles = (e: React.DragEvent) => Array.from(e.dataTransfer?.files ?? []);
+  const [dragOver, setDragOver] = useState<"stage" | "timeline" | null>(null);
   const graphicIds = useMemo(() => Array.from(new Set(doc.overlays.filter((o) => o.kind === "graphic" && o.asset).map((o) => o.asset!))), [doc.overlays]);
   useEffect(() => { ensureUrls(graphicIds); }, [graphicIds, ensureUrls, assetUrls]);
   const images = useMemo(() => (lib ?? []).filter((a) => a.kind === "imagem" || a.kind === "thumbnail"), [lib]);
@@ -151,6 +159,43 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
     const nxt = capStates.slice(i + 1).find((st) => st[1]?.chunk !== cur.chunk);
     return Math.min(8, Math.max(0.5, (nxt ? nxt[0] : duration) - x));
   }, [capStates, duration]);
+  const uploadImages = async (files: File[], atOut: number, replaceId?: string) => {
+    const OK = ["image/png", "image/jpeg", "image/webp", "image/gif"];   // os tipos de imagem que a Biblioteca aceita (media policy)
+    const imgs = files.filter((f) => OK.includes(f.type));
+    const other = files.filter((f) => !OK.includes(f.type)).map((f) => f.name);
+    if (!imgs.length) { setMsg({ kind: "err", text: `Só dá para largar imagens JPG, PNG, WebP ou GIF${other.length ? ` (${other.join(", ")} não é)` : ""}. Fotos HEIC do iPhone: exporta-as como JPG.` }); return; }
+    if (!canEdit) return;
+    let d = doc, at = atOut, lastId: string | null = null;
+    const done: string[] = [];
+    try {
+      for (const [k, f] of imgs.entries()) {
+        setUploading(`A carregar ${f.name} (${k + 1} de ${imgs.length})…`);
+        const title = f.name.replace(/\.[^.]+$/, "").slice(0, 120) || "imagem";
+        const r = await uploadFile(access, f, { fields: { title, kind: "imagem" } }, () => { /* o progresso fica na mensagem */ });
+        const local = URL.createObjectURL(f);
+        urlsRef.current = { ...urlsRef.current, [r.assetId]: local };
+        setAssetUrls((u) => ({ ...u, [r.assetId]: local }));
+        if (replaceId && k === 0) {
+          d = { ...d, overlays: d.overlays.map((o) => (o.id === replaceId ? { ...o, asset: r.assetId, label: title } : o)) };
+          lastId = replaceId;
+        } else {
+          const oid = nextId("o"), dur = toPhraseEnd(at);
+          const n = addOverlay(d, { id: oid, kind: "graphic", label: title, asset: r.assetId }, at, dur);
+          if (n !== d) { d = n; lastId = oid; at = Math.min(duration - 0.1, at + dur); }
+        }
+        done.push(f.name);
+      }
+      apply(d);
+      if (lastId) setSel({ kind: "ov", id: lastId });
+      setMsg({ kind: "ok", text: `${done.length === 1 ? "Imagem carregada" : `${done.length} imagens carregadas`} para a Biblioteca e postas no vídeo. Grava a versão para ficarem.${other.length ? ` Ficaram de fora (não são JPG, PNG, WebP ou GIF): ${other.join(", ")}.` : ""}` });
+    } catch (e) {
+      if (done.length) apply(d);
+      setMsg({ kind: "err", text: `Não consegui carregar ${imgs[done.length]?.name ?? "a imagem"}: ${(e as Error).message}` });
+    } finally {
+      setUploading(null);
+      reloadLib();
+    }
+  };
 
   // ficheiros da biblioteca do cliente para visuais e música (só os que dão para usar)
   useEffect(() => {
@@ -349,11 +394,16 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
         <ExportPanel access={access} ws={access.ws} asset={st.asset.id} versionId={isCurrent ? v.id : null} versionNo={v.version_no} dirty={dirty} canExport={st.can.export} />
         {st.asset.drive_file_id && <a className="inline-flex items-center gap-1 text-sm underline" href={`https://drive.google.com/file/d/${st.asset.drive_file_id}/view`} target="_blank" rel="noreferrer">Vídeo anterior na Drive <ExternalLinkIcon className="size-3" /></a>}
       </div>
+      {uploading && <Alert><AlertDescription className="flex items-center gap-2"><Loader2Icon className="size-4 animate-spin" /> {uploading}</AlertDescription></Alert>}
       {msg && <Alert variant={msg.kind === "err" ? "destructive" : "default"}><AlertDescription>{msg.text}</AlertDescription></Alert>}
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,20rem)_1fr]">
-        {/* palco 9:16 */}
-        <div className="flex flex-col gap-2">
+        {/* palco 9:16; largar imagens aqui põe-nas no cursor */}
+        <div className={cn("relative flex flex-col gap-2 rounded-lg", dragOver === "stage" && "ring-2 ring-primary")}
+          onDragOver={(e) => { if (canEdit && e.dataTransfer?.types.includes("Files")) { e.preventDefault(); setDragOver("stage"); } }}
+          onDragLeave={() => setDragOver(null)}
+          onDrop={(e) => { e.preventDefault(); setDragOver(null); void uploadImages(dropFiles(e), t); }}>
+          {dragOver === "stage" && <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-black/60 text-sm text-white">Larga para pôr a imagem aqui ({fmtT(t)})</div>}
           <EditorStage doc={doc} t={t} guides={guides} assetUrls={assetUrls} media={<PreviewVideo access={access} asset={st.asset.id} versionId={v.id} doc={doc} t={t} playing={playing}
             onTime={setT} onEnd={() => setPlaying(false)} onDriving={(on) => { soundDriving.current = on; }} />} />
           <div className="flex items-center justify-center gap-2">
@@ -481,7 +531,7 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
               )}
             </div>
           )}
-          {!sel && <p className="text-muted-foreground">Clica num corte ou numa palavra na linha do tempo para a ajustar. Arrasta as pontas de um corte ou de um visual para aparar e uma palavra ou um visual para o mover. Clica na faixa das câmaras para trocar o ângulo, o zoom e a posição. Atalhos: Espaço tocar, ←/→ 0,1 s (Shift 1 s), S dividir, C trocar a câmara no cursor, N nota, Delete tirar, Cmd+Z desfazer.</p>}
+          {!sel && <p className="text-muted-foreground">Clica num corte ou numa palavra na linha do tempo para a ajustar. Arrasta as pontas de um corte ou de um visual para aparar e uma palavra ou um visual para o mover. Clica na faixa das câmaras para trocar o ângulo, o zoom e a posição. Arrasta imagens do computador para o palco ou para a linha do tempo. Atalhos: Espaço tocar, ←/→ 0,1 s (Shift 1 s), S dividir, C trocar a câmara no cursor, N nota, Delete tirar, Cmd+Z desfazer.</p>}
           <details className="border-t pt-3">
             <summary className="cursor-pointer font-medium">Aspeto e estilos guardados</summary>
             <div className="mt-2 flex flex-col gap-3">
@@ -533,6 +583,7 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
 
       {/* original vs. cortado (CLIP-06): só com doc.ai.clip */}
       <ImagePicker open={!!picker} onOpenChange={(o) => { if (!o) setPicker(null); }} images={images} urls={assetUrls} ensure={ensureUrls}
+        onFiles={(fs) => { const p = picker; setPicker(null); void uploadImages(fs, t, p?.mode === "replace" ? p.id : undefined); }}
         title={picker?.mode === "replace" ? "Trocar imagem" : "Imagem no cursor"}
         onPick={(a) => {
           if (!picker) return;
@@ -581,7 +632,15 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
             {["", "Secções", "Cortes", "Câmara", "Legendas", "Visuais", "Som", "Notas"].map((l, i) => <div key={i} style={{ height: i === 0 ? 20 : TRACK_H }} className="flex items-center">{l}</div>)}
           </div>
           <div className="min-w-0 flex-1 overflow-x-auto">
-            <div className="relative select-none" style={{ width }}>
+            <div className={cn("relative select-none", dragOver === "timeline" && "bg-primary/10 ring-2 ring-primary")} style={{ width }}
+              onDragOver={(e) => { if (canEdit && e.dataTransfer?.types.includes("Files")) { e.preventDefault(); setDragOver("timeline"); } }}
+              onDragLeave={() => setDragOver(null)}
+              onDrop={(e) => {
+                e.preventDefault(); setDragOver(null);
+                const r = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+                const at = Math.min(duration - 0.1, Math.max(0, (e.clientX - r.left) / pps));
+                setT(at); void uploadImages(dropFiles(e), at);
+              }}>
               {/* régua */}
               <div className="relative h-5 cursor-pointer border-b" onClick={(e) => { const r = (e.currentTarget as HTMLDivElement).getBoundingClientRect(); setT(Math.min(duration, Math.max(0, (e.clientX - r.left) / pps))); }}>
                 {Array.from({ length: Math.floor(duration) + 1 }, (_, s) => s).filter((s) => s % (pps < 30 ? 10 : pps < 80 ? 5 : 1) === 0).map((s) => (
