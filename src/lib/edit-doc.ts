@@ -355,7 +355,7 @@ export function replaceOverlays(doc: EditDoc, ids: string[], next: { asset?: str
 
 /** Posições prontas para um visual (px de 1080×1920); "Caixa de sempre" tira a posição própria. O texto fica no retângulo seguro. */
 export const BOX_PRESETS: { key: string; label: string; box: Box | null }[] = [
-  { key: "default", label: "Caixa de sempre", box: null },
+  { key: "default", label: "A do estilo", box: null },
   { key: "title", label: "Faixa do título", box: [120, 230, 840, 220] },
   { key: "middle", label: "Ao meio", box: [108, 500, 864, 560] },
   { key: "top", label: "Metade de cima", box: [0, 0, 1080, 960] },
@@ -413,3 +413,47 @@ export function frameAllCam(doc: EditDoc, cam: string, f: { zoom: number; x?: nu
     ...c, zoom: r3(clamp(f.zoom, ...ZOOM_LIMITS)), x: r3(clamp(f.x ?? CAM_ANCHOR.x, 0, 1)), y: r3(clamp(f.y ?? CAM_ANCHOR.y, 0, 1)),
   })) };
 }
+
+/* Imagens livres (W10-39): mover no tempo do vídeo final, caixa à vontade no palco (arrastar e redimensionar com a proporção). */
+
+/** Move um visual para começar no instante `startOut` da saída, com a mesma duração (até ao fim desse corte). Atravessar um corte
+ *  já não o leva para um trecho cortado (shiftOverlay mexe no tempo da fonte). */
+export function moveOverlayOut(doc: EditDoc, id: string, startOut: number): EditDoc {
+  const o = doc.overlays.find((x) => x.id === id);
+  const p = outToSrc(doc, Math.max(0, startOut));
+  if (!o || !p) return doc;
+  const s = p.src, e = Math.min(p.seg.out, s + (o.e - o.s));
+  if (e - s < MIN_SEG) return doc;
+  return { ...doc, overlays: doc.overlays.map((x) => (x.id === id ? { ...x, s: r3(s), e: r3(e) } : x)) };
+}
+
+/** A caixa que uma imagem de proporção `aspect` (largura/altura) ocupa dentro de `region`, inteira e ao centro (como o render). */
+export function fitBox(aspect: number, region: Box): Box {
+  const [x, y, w, h] = region;
+  if (!(aspect > 0)) return region;
+  const bw = Math.min(w, h * aspect), bh = bw / aspect;
+  return [Math.round(x + (w - bw) / 2), Math.round(y + (h - bh) / 2), Math.round(bw), Math.round(bh)];
+}
+
+/** Caixa dentro do ecrã (1080×1920), com pelo menos 40 px de lado. */
+export function clampBox(b: Box): Box {
+  const w = Math.round(Math.min(1080 * 2, Math.max(40, b[2]))), h = Math.round(Math.min(1920 * 2, Math.max(40, b[3])));
+  const x = Math.round(Math.min(1080 - 20, Math.max(20 - w, b[0]))), y = Math.round(Math.min(1920 - 20, Math.max(20 - h, b[1])));
+  return [x, y, w, h];
+}
+
+/** Aumenta ou diminui a caixa à volta do centro (f = 1 fica igual). */
+export function scaleBox(b: Box, f: number): Box {
+  const cx = b[0] + b[2] / 2, cy = b[1] + b[3] / 2, w = b[2] * f, h = b[3] * f;
+  return clampBox([cx - w / 2, cy - h / 2, w, h]);
+}
+
+/** Nome legível para uma imagem carregada: o nome do ficheiro, a não ser que seja um código (hash, IMG_1234, número). */
+export function niceImageTitle(fileName: string, n: number): string {
+  const base = fileName.replace(/\.[^.]+$/, "").trim();
+  if (!base || /^[0-9a-f]{12,}$/i.test(base) || /^(img|dsc|pxl|image|screenshot)[-_ ]?\d+/i.test(base) || /^\d+$/.test(base)) return `Imagem ${n}`;
+  return base.slice(0, 120);
+}
+
+/** Rótulo para mostrar: um código (hash, IMG_1234) aparece como "Imagem"; o resto como está. */
+export const shownLabel = (label: string) => (niceImageTitle(label, 0) === "Imagem 0" ? "Imagem" : label);

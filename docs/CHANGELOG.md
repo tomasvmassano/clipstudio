@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-10 (imagens livres no palco e na linha do tempo)
+
+- **W10-39** Correções e liberdade nas imagens do editor, a pedido do Tomás (ADR-0083, adenda 2). Erro: uma imagem acabada de carregar ficava como "Gráfico: <código>" porque a lista da Biblioteca ainda não tinha a versão verificada e o editor não voltava a pedir; agora volta a pedir até haver link e não descarta a cópia local. No palco: clicar na imagem seleciona, arrastar move e o canto azul muda o tamanho mantendo a proporção (a exportação desenha na mesma caixa). No painel: tamanho −/+, ecrã inteiro e repor. Na linha do tempo, arrastar uma imagem move-a no tempo do vídeo final (atravessar um corte já não a esconde num trecho cortado). Nomes legíveis ("Imagem 3" em vez do código do ficheiro); "Caixa de sempre" passa a "A do estilo"; as legendas e o hook deixam passar os cliques para a imagem. Sem migração. Testes: `overlay-free` 4/4.
+
 ## 2026-11-10 (imagens do computador no editor)
 
 - **W10-38** Imagens do computador no editor, a pedido do Tomás (ADR-0083): arrastar uma ou várias imagens para o palco (entram no cursor) ou para a linha do tempo (entram onde se largam, uma a seguir à outra, cada uma até ao fim da frase), ou "Carregar do computador" / arrastar no seletor de imagens. Vão para a Biblioteca (a exportação precisa delas no armazenamento) e entram já no vídeo; enquanto o servidor as verifica, o palco mostra o ficheiro local. Tipos aceites: JPG, PNG, WebP e GIF (aviso claro para os outros, como HEIC). Sem migração.

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import type { MediaAsset } from "@/lib/media";
+import { shownLabel } from "@/lib/edit-doc";
 
 /**
  * Escolher uma imagem da Biblioteca pela miniatura (W10-37): grelha com procura; ao abrir pede os links das imagens (ensure) e
@@ -63,7 +64,7 @@ export function ImagePicker({ open, onOpenChange, images, urls, ensure, onPick, 
                       <img src={urls[a.id]} alt="" className="max-h-full max-w-full object-contain" loading="lazy" />
                     ) : <span className="text-[10px] text-muted-foreground">…</span>}
                   </span>
-                  <span className="truncate text-xs">{a.title}</span>
+                  <span className="truncate text-xs">{shownLabel(a.title)}</span>
                 </button>
               </li>
             ))}
