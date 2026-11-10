@@ -19,6 +19,8 @@ import { WidgetBoundary } from "@/components/widget-boundary";
 import type { Access } from "@/lib/access";
 import { EditRpcError, SOURCE_LABEL, applyAlternative, fetchBoard, saveEdit, type BoardVariant, type EditState } from "@/lib/edit";
 import { VariantTabs } from "@/components/edit/variant-tabs";
+import { applyBodyToSiblings, bodySummary, flashBody, takeBodyFlash } from "@/lib/body-share-client";
+import { variantShort } from "@/lib/edit";
 import {
   addNote, altSections, deleteSegment, editWord, fmtT, guidedProblem, historyOf, hookTexts, layout, notesOut, optionInDoc, problem, push, redo, restorable,
   restoreSegment, setHook, setMusic, toggleNote, undo, wordsBySegment, type AltSection, type EditDoc, type History,
@@ -66,7 +68,7 @@ export function GuidedEditor({ access, st, onReload }: { access: Access; st: Edi
   const [newNote, setNewNote] = useState("");
   const [vnote, setVnote] = useState("");
   const [saving, setSaving] = useState(false);
-  const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
+  const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(takeBodyFlash);   // o resultado do corpo partilhado, depois de recarregar
   const [alt, setAlt] = useState<{ busy: string | null; err: { text: string; conflict: boolean; retry: { section: AltSection; id: string } } | null }>({ busy: null, err: null });
   const idSeq = useRef(0);
   const { segs, duration } = useMemo(() => layout(doc), [doc]);
@@ -115,7 +117,13 @@ export function GuidedEditor({ access, st, onReload }: { access: Access; st: Edi
     const why = problem(doc) ?? guidedWhy;
     if (why) { setMsg({ kind: "err", text: `Não dá para gravar: ${why}.` }); return; }
     setSaving(true); setMsg(null);
-    try { await saveEdit(access, st.asset.id, st.document?.current_version_id ?? null, doc, vnote.trim() || undefined); setVnote(""); await onReload(); }
+    try {
+      await saveEdit(access, st.asset.id, st.document?.current_version_id ?? null, doc, vnote.trim() || undefined); setVnote("");
+      // corpo partilhado (EDL-14): o mesmo corpo nos outros hooks; o servidor aplica as regras do modo guiado a cada um
+      const others = siblings.filter((x) => x.asset_id !== st.asset.id);
+      if (others.length) flashBody(bodySummary(await applyBodyToSiblings(access, st.asset.id, `${variantShort(st.asset.variant)} v${st.versions.length + 1}`, doc, others)));
+      await onReload();
+    }
     catch (e) { setMsg({ kind: "err", text: (e as Error).message }); setSaving(false); }
   };
   // alternativa da IA: versão nova feita no servidor a partir da versão gravada (as alterações por gravar perder-se-iam)

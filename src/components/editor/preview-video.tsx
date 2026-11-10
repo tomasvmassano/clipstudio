@@ -172,7 +172,9 @@ export function PreviewVideo({ access, asset, versionId, doc, t, playing, onTime
         <video key={cam} ref={(el) => { refs.current[cam] = el; }} src={url} playsInline preload="auto" muted={engine || cam !== sound}
           onError={() => setReload((n) => n + 1)}
           className="absolute inset-0 h-full w-full object-cover transition-none"
-          style={{ opacity: shot?.cam === cam ? 1 : 0, transform: `scale(${shot?.cam === cam ? shot.zoom : 1})` }} />
+          // zoom à volta do ponto de enquadramento: o render corta (iw - W)·x, que é escalar com transform-origin em x (e y)
+          style={{ opacity: shot?.cam === cam ? 1 : 0, transform: `scale(${shot?.cam === cam ? shot.zoom : 1})`,
+            transformOrigin: shot?.cam === cam ? `${shot.x * 100}% ${shot.y * 100}%` : "50% 38%" }} />
       ))}
       {engine && soundUrl && (
         <>

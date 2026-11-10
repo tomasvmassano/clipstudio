@@ -30,7 +30,8 @@ export function virtualToSession(windows: Windows | null | undefined, v: number)
   return last;
 }
 
-export type Shot = { cam: string; zoom: number; session: number; src: number; segEndOut: number };
+/** x/y: enquadramento com zoom (0 a 1, CAM_ANCHOR por omissão), o mesmo que o anchor do render. */
+export type Shot = { cam: string; zoom: number; x: number; y: number; session: number; src: number; segEndOut: number };
 
 /** O que se vê no instante t de saída: câmara, zoom, tempo na gravação; null fora do vídeo. */
 export function shotAt(doc: EditDoc, t: number): Shot | null {
@@ -38,7 +39,7 @@ export function shotAt(doc: EditDoc, t: number): Shot | null {
   if (!p) return null;
   const c = doc.cameras.find((k) => p.src >= k.s && p.src < k.e) ?? doc.cameras.find((k) => Math.abs(p.src - k.e) < 1e-3);
   const windows = (doc as EditDoc & { source?: { windows?: Windows } }).source?.windows;
-  return { cam: c?.cam ?? "front", zoom: c?.zoom ?? 1, src: p.src, session: virtualToSession(windows, p.src), segEndOut: p.seg.at + p.seg.dur };
+  return { cam: c?.cam ?? "front", zoom: c?.zoom ?? 1, x: c?.x ?? 0.5, y: c?.y ?? 0.38, src: p.src, session: virtualToSession(windows, p.src), segEndOut: p.seg.at + p.seg.dur };
 }
 
 /** Câmara de onde vem o som (por defeito a primeira). */
