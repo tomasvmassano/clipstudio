@@ -16,6 +16,8 @@ export type Transformation = "baixa" | "media" | "alta";
 export type EditStyle = {
   key: string; status: StyleStatus; version: number; name: string; spec: StyleSpec; transformation: Transformation | null;
   platforms: Platform[]; notes: string | null; updated_at: string; updated_label: string | null; problems: string[];
+  /** De onde veio (W10-42): chave e versão do estilo da agência; null = criado neste cliente. */
+  origin?: { key: string; version: number } | null;
 };
 export type OutputKind = "master" | "split_image_persona" | "split_attention" | "style";
 export type PresetOutput = { kind: OutputKind; captions: "burned" | "none"; per_hook?: boolean; style?: string; style_version?: number };
@@ -81,4 +83,23 @@ export function specProblems(spec: unknown, requireLayers: boolean): string[] {
     if (l.max_words !== undefined && (typeof l.max_words !== "number" || l.max_words < 1 || l.max_words > 30)) p.push(`Camada ${i}: máximo de palavras entre 1 e 30.`);
   });
   return p;
+}
+
+/* Biblioteca de estilos da agência (REF-07) e importar para um cliente (REF-08). W10-42, ADR-0084. Só staff da agência. */
+export type StyleImport = { ws: string; name: string; key: string; version: number; status: StyleStatus };
+export type AgencyStyle = Omit<EditStyle, "origin"> & { look: unknown; source_url: string | null; imports: StyleImport[] };
+export type AgencyLibrary = { can_import: boolean; styles: AgencyStyle[]; clients: { ws: string; name: string }[] };
+export type AgencyStyleInput = Partial<Pick<AgencyStyle, "name" | "spec" | "transformation" | "platforms" | "notes" | "source_url">>;
+export const fetchAgencyLibrary = () => rpc<AgencyLibrary>("agency_style_library", {});
+export const saveAgencyStyle = (key: string, style: AgencyStyleInput, expected: number) =>
+  rpc<AgencyLibrary>("agency_style_save", { p_key: key, p_style: style, p_expected: expected });
+export const setAgencyStyleStatus = (key: string, status: StyleStatus) => rpc<AgencyLibrary>("agency_style_set_status", { p_key: key, p_status: status });
+export const agencyStyleHistory = (key: string) => rpc<(StyleVersion & { source_url: string | null })[]>("agency_style_history", { p_key: key });
+export const importAgencyStyle = (key: string, ws: string, as?: string) =>
+  rpc<AgencyLibrary>("agency_style_import", { p_key: key, p_ws: ws, p_as: as ?? null });
+
+/** Próxima chave livre na biblioteca (S18, S19…) para um estilo novo. */
+export function nextStyleKey(keys: string[]): string {
+  const n = keys.map((k) => /^S(\d+)$/.exec(k)?.[1]).filter(Boolean).map(Number);
+  return `S${String((n.length ? Math.max(...n) : 0) + 1).padStart(2, "0")}`;
 }
