@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-11-10 (vídeos por guião afinados e enquadramento da gravação inteira)
+
+- **W10-34** Vídeos por guião: cada hook mostra o que se diz no início (as primeiras palavras dos cortes de hook) com o texto no ecrã por baixo, porque o pacote põe o mesmo texto nos três; as imagens posicionam o vídeo no instante ao carregar (deixam de ficar pretas). Migração `20261110002931_w10_quadro_hook_dito.sql` (`edit_board` com `hook_spoken`, só leitura).
+- **W10-36** Enquadramento da gravação inteira, a pedido do Tomás: no painel da câmara, "Aplicar a todos os vídeos com C7870" põe o mesmo zoom e posição dessa câmara em todos os vídeos que usam o mesmo ficheiro (confirmação com o número de vídeos; versão nova em cada um; quem gravou entretanto fica de fora com aviso). Sem migração.
+
 ## 2026-11-10 (câmaras à mão, guias e corpo sempre igual)
 
 - **W10-35** Controlo manual no editor, a pedido do Tomás (ADR-0082). Câmaras: clicar num trecho da faixa das câmaras para trocar o ângulo (frente/lado), zoom (1 a 3×), posição vertical e horizontal, dividir no cursor, aplicar a toda a câmara e repor; tecla C troca a câmara no cursor. O render usa a mesma posição (numeiro-engine `enquadramento-por-trecho`), por isso o palco é igual ao export. Guias do palco: "Zona segura Reels" e "Hook · olhos · legendas", só no editor. Corpo sempre igual nos hooks (EDL-14): sem caixa para desligar, também no modo guiado, e "Igualar corpos a este" no aviso. Sem migração. Testes: `cam-edit` 3/3, motor `EnquadramentoTest` e `EnquadramentoRenderTest` (ffmpeg real).
