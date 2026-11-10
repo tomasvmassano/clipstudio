@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-10 (página Exportados)
+
+- **W10-44** Página "Exportados" no espaço do cliente, a pedido do Tomás (em vez de copiar para a Google Drive): todos os vídeos exportados por dia, com nome legível ("Guião 03 · Hook 1 · S17 · v2"), duração, tamanho, hora e quem exportou; "Descarregar" um a um ou vários selecionados (o ficheiro sai já com esse nome); por defeito só a versão mais recente de cada vídeo; os que estão a exportar aparecem com o progresso e atualizam sozinhos, os que falharam com o motivo e o caminho para o editor. Ver: `media.read` com a biblioteca ligada; descarregar: `media.download` (link de 2 min, auditado). Migração `w10_exportados` (uma função nova, `edit_exports_feed`); w10_exportados 12/12, exports-format 3/3.
+
 ## 2026-11-10 (estilos do editor iguais ao catálogo do cliente)
 
 - **W10-41** Os estilos do editor, da Edição automática e do pacote por guião vinham de uma lista escrita no código (S14, S15, S17) e não batiam com a página "Estilos de edição" (catálogo do cliente, VAR-02), a pedido do Tomás. Agora os três leem o catálogo: aparecem os estilos ativos que o motor já desenha, com o nome do catálogo. O estilo atual de um vídeo aparece sempre, marcado com o motivo (não ativo, arquivado, sem render, fora do catálogo), para nunca mudar sozinho. Sem catálogo, mostra os estilos do motor e diz que o catálogo não respondeu. No catálogo, cada estilo ativo diz "No editor" ou "Sem render ainda" (S13, S16). Sem migração; style-options 3/3. A seguir: biblioteca de estilos da agência e importar para cliente (REF-07/08), novo estilo a partir de vídeo (REF-05/06).
