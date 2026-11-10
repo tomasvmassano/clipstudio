@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-10 (estilo S17 e imagens no editor)
+
+- **W10-37** Estilo S17 "caixa branca com imagens" (referência instagram.com/reel/DeiO5-mNeVh; pedido do Tomás; ADR-0083): legenda numa linha em caixa branca, o que já se disse a preto e o que vem a cinzento; imagens inteiras num cartão na metade de baixo, sempre por baixo das letras. Exportação (numeiro-engine `estilo-s17`) e palco iguais. Editor: "Imagem no cursor" com grelha de miniaturas e procura, a imagem entra até ao fim da frase; painel com miniatura, trocar imagem, duração em segundos e "até ao fim da frase". O palco passa a mostrar a imagem verdadeira e o hook como no export, com os visuais por baixo. S17 nos estilos do pacote e do editor. Sem migração. Testes: `caption-plan` (igual ao motor em 200 documentos), motor `test_s17` 5/5.
+
 ## 2026-11-10 (vídeos por guião afinados e enquadramento da gravação inteira)
 
 - **W10-34** Vídeos por guião: cada hook mostra o que se diz no início (as primeiras palavras dos cortes de hook) com o texto no ecrã por baixo, porque o pacote põe o mesmo texto nos três; as imagens posicionam o vídeo no instante ao carregar (deixam de ficar pretas). Migração `20261110002931_w10_quadro_hook_dito.sql` (`edit_board` com `hook_spoken`, só leitura).

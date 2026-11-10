@@ -4,7 +4,7 @@ import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "rea
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
-  ArrowLeftIcon, ArrowRightIcon, ExternalLinkIcon, Loader2Icon, PauseIcon, PlayIcon, Redo2Icon, RotateCwIcon, ScissorsIcon, SaveIcon, Trash2Icon, Undo2Icon,
+  ArrowLeftIcon, ArrowRightIcon, ExternalLinkIcon, ImagePlusIcon, Loader2Icon, PauseIcon, PlayIcon, Redo2Icon, RotateCwIcon, ScissorsIcon, SaveIcon, Trash2Icon, Undo2Icon,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -17,13 +17,16 @@ import type { Access } from "@/lib/access";
 import { SOURCE_LABEL, fetchBoard, fetchEdit, saveEdit, variantShort, type BoardVariant, type EditState } from "@/lib/edit";
 import { applyBodyToSiblings, bodySummary, flashBody, takeBodyFlash } from "@/lib/body-share-client";
 import { applyFramingToVideos, framingSummary, videosWithFile } from "@/lib/framing-client";
+import { ImagePicker } from "@/components/edit/image-picker";
+import { mediaUrl } from "@/lib/edit-media";
+import { captionStates } from "@/lib/caption-plan";
 import { VariantTabs } from "@/components/edit/variant-tabs";
 import { fetchLibrary, type MediaAsset } from "@/lib/media";
 import { useSession } from "@/components/session-provider";
 import {
   addNote, addOverlay, clearGain, deleteSegment, editWord, fmtT, historyOf, layout, moveSegment, notesOut, problem, push, redo,
   removeNote, removeOverlay, resizeOverlay, setGain, setHook, setMusic, setMusicDb, shiftOverlay, shiftWord, spanOut, splitSegment, toggleNote, trimSegment, undo,
-  camAt, setCam, splitCamAt, frameAllCam, outToSrc, CAM_ANCHOR, ZOOM_LIMITS,
+  camAt, setCam, splitCamAt, frameAllCam, outToSrc, srcToOut, CAM_ANCHOR, ZOOM_LIMITS,
   wordsOut, BOX_PRESETS, boxPreset, setOverlayBox, type EditDoc, type History,
 } from "@/lib/edit-doc";
 import { useFlags } from "@/lib/flags";
@@ -118,6 +121,36 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
   const idSeq = useRef(0);
   const apply = useCallback((d: EditDoc) => { if (canEdit) setH((x) => push(x, d)); }, [canEdit]);
   const nextId = (p: string) => { idSeq.current += 1; return `${p}${Date.now().toString(36)}${idSeq.current}`; };
+  // imagens da Biblioteca no palco e no seletor (W10-37): links curtos, pedidos quando fazem falta e renovados a cada 4 min
+  const [assetUrls, setAssetUrls] = useState<Record<string, string>>({});
+  const urlsRef = useRef<Record<string, string>>({});
+  const pendingUrls = useRef(new Set<string>());
+  useEffect(() => { urlsRef.current = assetUrls; }, [assetUrls]);
+  const ensureUrls = useCallback((ids: string[]) => {
+    for (const id of ids) {
+      if (urlsRef.current[id] || pendingUrls.current.has(id)) continue;
+      const vid = (lib ?? []).find((x) => x.id === id)?.current?.id;
+      if (!vid) continue;
+      pendingUrls.current.add(id);
+      mediaUrl(access, vid).then((r) => setAssetUrls((u) => ({ ...u, [id]: r.url }))).catch(() => { /* sem imagem: fica o nome */ })
+        .finally(() => pendingUrls.current.delete(id));
+    }
+  }, [access, lib]);
+  useEffect(() => { const id = setInterval(() => setAssetUrls({}), 240_000); return () => clearInterval(id); }, []);
+  const [picker, setPicker] = useState<null | { mode: "add" } | { mode: "replace"; id: string }>(null);
+  const graphicIds = useMemo(() => Array.from(new Set(doc.overlays.filter((o) => o.kind === "graphic" && o.asset).map((o) => o.asset!))), [doc.overlays]);
+  useEffect(() => { ensureUrls(graphicIds); }, [graphicIds, ensureUrls, assetUrls]);
+  const images = useMemo(() => (lib ?? []).filter((a) => a.kind === "imagem" || a.kind === "thumbnail"), [lib]);
+  const capStates = useMemo(() => captionStates(doc, duration), [doc, duration]);
+  /** Segundos do instante x da saída até ao fim da frase da legenda (entre 0,5 e 8 s; fora de uma frase, 2,5 s). */
+  const toPhraseEnd = useCallback((x: number) => {
+    let i = -1;
+    for (let k = 0; k < capStates.length; k++) if (capStates[k][0] <= x + 1e-6) i = k;
+    const cur = i >= 0 ? capStates[i][1] : null;
+    if (!cur) return 2.5;
+    const nxt = capStates.slice(i + 1).find((st) => st[1]?.chunk !== cur.chunk);
+    return Math.min(8, Math.max(0.5, (nxt ? nxt[0] : duration) - x));
+  }, [capStates, duration]);
 
   // ficheiros da biblioteca do cliente para visuais e música (só os que dão para usar)
   useEffect(() => {
@@ -321,7 +354,7 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
       <div className="grid gap-4 lg:grid-cols-[minmax(0,20rem)_1fr]">
         {/* palco 9:16 */}
         <div className="flex flex-col gap-2">
-          <EditorStage doc={doc} t={t} guides={guides} media={<PreviewVideo access={access} asset={st.asset.id} versionId={v.id} doc={doc} t={t} playing={playing}
+          <EditorStage doc={doc} t={t} guides={guides} assetUrls={assetUrls} media={<PreviewVideo access={access} asset={st.asset.id} versionId={v.id} doc={doc} t={t} playing={playing}
             onTime={setT} onEnd={() => setPlaying(false)} onDriving={(on) => { soundDriving.current = on; }} />} />
           <div className="flex items-center justify-center gap-2">
             <Button size="sm" variant="outline" onClick={() => setT((x) => Math.max(0, x - 1))} aria-label="Recuar 1 s"><ArrowLeftIcon /></Button>
@@ -411,7 +444,26 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
           )}
           {selOv && (
             <div className="flex flex-col gap-2" aria-label="Visual selecionado">
-              <span className="font-medium">{selOv.kind === "broll" ? "B-roll" : selOv.kind === "graphic" ? "Gráfico" : "Texto"} · {selOv.label}</span>
+              <span className="font-medium">{selOv.kind === "broll" ? "B-roll" : selOv.kind === "graphic" ? "Imagem" : "Texto"} · {selOv.label}</span>
+              {selOv.kind === "graphic" && (
+                <div className="flex items-center gap-3">
+                  <span className="flex h-20 w-20 items-center justify-center overflow-hidden rounded border bg-muted">
+                    {selOv.asset && assetUrls[selOv.asset] ? (
+                      // eslint-disable-next-line @next/next/no-img-element -- link assinado curto do R2
+                      <img src={assetUrls[selOv.asset]} alt="" className="max-h-full max-w-full object-contain" />
+                    ) : <span className="text-[10px] text-muted-foreground">…</span>}
+                  </span>
+                  <Button size="sm" variant="outline" disabled={!canEdit || !images.length} onClick={() => setPicker({ mode: "replace", id: selOv.id })}>Trocar imagem</Button>
+                </div>
+              )}
+              <div className="flex flex-wrap items-center gap-2">
+                <label className="flex items-center gap-2"><span className="text-muted-foreground">Duração</span>
+                  <Input type="number" min={0.1} max={30} step={0.1} className="h-8 w-20" disabled={!canEdit} aria-label="Duração do visual em segundos"
+                    value={Math.round((selOv.e - selOv.s) * 10) / 10}
+                    onChange={(e) => { const v = Number(e.target.value); if (Number.isFinite(v) && v >= 0.1) apply(resizeOverlay(doc, selOv.id, "e", selOv.s + v)); }} /> s</label>
+                <Button size="sm" variant="outline" disabled={!canEdit} title="Estica ou encurta até ao fim da frase da legenda"
+                  onClick={() => { const o = srcToOut(doc, selOv.s); if (o != null) apply(resizeOverlay(doc, selOv.id, "e", selOv.s + toPhraseEnd(o))); }}>Até ao fim da frase</Button>
+              </div>
               <div className="flex flex-wrap items-center gap-2">
                 {[-0.5, 0.5].map((d) => <Button key={d} size="sm" variant="outline" disabled={!canEdit} onClick={() => apply(shiftOverlay(doc, selOv.id, d))}>Mover {d > 0 ? `+${d}` : d} s</Button>)}
                 {[-0.5, 0.5].map((d) => <Button key={`e${d}`} size="sm" variant="outline" disabled={!canEdit} onClick={() => apply(resizeOverlay(doc, selOv.id, "e", selOv.e + d))}>Duração {d > 0 ? `+${d}` : d} s</Button>)}
@@ -480,6 +532,20 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
       </div>
 
       {/* original vs. cortado (CLIP-06): só com doc.ai.clip */}
+      <ImagePicker open={!!picker} onOpenChange={(o) => { if (!o) setPicker(null); }} images={images} urls={assetUrls} ensure={ensureUrls}
+        title={picker?.mode === "replace" ? "Trocar imagem" : "Imagem no cursor"}
+        onPick={(a) => {
+          if (!picker) return;
+          if (picker.mode === "replace") {
+            const id = picker.id;
+            apply({ ...doc, overlays: doc.overlays.map((o) => (o.id === id ? { ...o, asset: a.id, label: a.title } : o)) });
+          } else {
+            const oid = nextId("o");
+            const next = addOverlay(doc, { id: oid, kind: "graphic", label: a.title, asset: a.id }, t, toPhraseEnd(t));
+            apply(next);
+            if (next !== doc) setSel({ kind: "ov", id: oid });
+          }
+        }} />
       <WidgetBoundary label="Original vs. cortado"><ClipOrderView doc={doc} t={t} onSeek={(x) => { setPlaying(false); setT(x); }} /></WidgetBoundary>
 
       {/* linha do tempo (min-w-0: a faixa larga rola dentro, sem alargar a página) */}
@@ -490,6 +556,7 @@ function Editor({ access, st, onReload }: { access: Access; st: EditState; onRel
             <input type="range" min={15} max={200} value={pps} onChange={(e) => setPps(Number(e.target.value))} aria-label="Zoom da linha do tempo" />
           </label>
           <span className="text-xs text-muted-foreground">{segs.length} cortes · {words.length} palavras · {doc.overlays.length} visuais · {fmtT(duration)}</span>
+          <Button size="sm" variant="outline" disabled={!canEdit || !lib} onClick={() => setPicker({ mode: "add" })}><ImagePlusIcon /> Imagem no cursor</Button>
           <select aria-label="Juntar visual no cursor" className="h-8 max-w-56 rounded-md border bg-background px-2 text-xs" value="" disabled={!canEdit || !lib}
             onChange={(e) => { const a = visuals.find((x) => x.id === e.target.value); if (a) apply(addOverlay(doc, { id: nextId("o"), kind: a.kind === "video" || a.kind === "link_externo" ? "broll" : "graphic", label: a.title, asset: a.id }, t, 2)); }}>
             <option value="">{lib == null ? "A carregar a biblioteca…" : visuals.length ? "＋ Visual da biblioteca no cursor" : "Sem imagens nem vídeos na biblioteca"}</option>

@@ -15,9 +15,12 @@ export type CapWord = { w: string; s: number; e: number };
 export const CAP_STYLES = {
   S14: { box: [140, 1090, 800, 140] as const, size: 84, maxWords: 1, label: "S14 · uma palavra de cada vez" },
   S15: { box: [150, 1250, 780, 220] as const, size: 72, maxWords: 6, label: "S15 · frases com destaque" },
+  S17: { box: [90, 1225, 900, 90] as const, size: 60, maxWords: 4, label: "S17 · caixa branca com imagens" },
 } as const;
+/** Onde vão as imagens sem posição própria, por estilo (graphic_box em render_doc.py); sem estilo próprio, a faixa de sempre. */
+export const GRAPHIC_BOXES: Partial<Record<string, [number, number, number, number]>> = { S17: [90, 1120, 900, 760] };
 export type CapStyle = keyof typeof CAP_STYLES;
-export const capStyleOf = (doc: EditDoc): CapStyle => (doc.style === "S14" || doc.style === "S15" ? doc.style : "S15");
+export const capStyleOf = (doc: EditDoc): CapStyle => (doc.style in CAP_STYLES ? (doc.style as CapStyle) : "S15");
 
 /** Palavras no tempo da saída: cada palavra entra uma vez, no segmento onde começa (como words_out do motor). */
 export function capWordsOut(doc: EditDoc): CapWord[] {
@@ -63,7 +66,7 @@ export function captionStates(doc: EditDoc, duration: number): [number, CapState
       t = Math.min(nxt, w.e + 0.35);
     });
   } else {
-    for (const c of chunksOf(words, CAP_STYLES.S15.maxWords)) {
+    for (const c of chunksOf(words, CAP_STYLES[style].maxWords)) {
       if (c[0].s > t + 0.02) states.push([t, null]);
       c.forEach((w, j) => states.push([w.s, { chunk: c, active: j }]));
       t = c[c.length - 1].e + 0.25;
