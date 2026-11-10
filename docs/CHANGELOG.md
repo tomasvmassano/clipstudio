@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-10 (legenda nova no editor)
+
+- **W10-43** Legenda nova no cursor, a pedido do Tomás: na linha do tempo, "Legenda no cursor" abre um campo para o texto e a duração; as palavras entram no cursor, repartidas pela duração conforme o tamanho de cada uma, no corte onde está o cursor (acabam no fim desse corte, no máximo), e passam a ser legendas como as outras (corrigir, mover, tirar). Se já houver palavras nesse intervalo, dá para as substituir (para reescrever uma legenda mal transcrita). Só no editor completo (o modo guiado continua a só corrigir texto). Sem migração; caption-add 4/4.
+
 ## 2026-11-10 (estilos do editor iguais ao catálogo do cliente)
 
 - **W10-41** Os estilos do editor, da Edição automática e do pacote por guião vinham de uma lista escrita no código (S14, S15, S17) e não batiam com a página "Estilos de edição" (catálogo do cliente, VAR-02), a pedido do Tomás. Agora os três leem o catálogo: aparecem os estilos ativos que o motor já desenha, com o nome do catálogo. O estilo atual de um vídeo aparece sempre, marcado com o motivo (não ativo, arquivado, sem render, fora do catálogo), para nunca mudar sozinho. Sem catálogo, mostra os estilos do motor e diz que o catálogo não respondeu. No catálogo, cada estilo ativo diz "No editor" ou "Sem render ainda" (S13, S16). Sem migração; style-options 3/3. A seguir: biblioteca de estilos da agência e importar para cliente (REF-07/08), novo estilo a partir de vídeo (REF-05/06).
