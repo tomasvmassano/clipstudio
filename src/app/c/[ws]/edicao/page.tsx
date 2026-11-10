@@ -318,6 +318,7 @@ function EdicaoInner({ access }: { access: Access }) {
                         <Badge variant={statusVariant(s.status)}>{STATUS_LABEL[s.status]}</Badge>
                         <span className="text-xs text-muted-foreground">v{s.version}{s.transformation ? ` · transf. ${TRANSFORMATION_LABEL[s.transformation].toLowerCase()}` : ""}</span>
                       </span>
+                      {s.origin && <span className="text-xs text-muted-foreground">Da agência · {s.origin.key} v{s.origin.version}</span>}
                       {s.status === "ativo" && (isRenderable(s.key)
                         ? <span className="text-xs text-emerald-500">No editor</span>
                         : <span className="text-xs text-amber-500" title="O motor ainda não desenha este estilo: não aparece no editor nem na edição automática">Sem render ainda</span>)}

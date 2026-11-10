@@ -4,6 +4,10 @@
 
 - **W10-44** Página "Exportados" no espaço do cliente, a pedido do Tomás (em vez de copiar para a Google Drive): todos os vídeos exportados por dia, com nome legível ("Guião 03 · Hook 1 · S17 · v2"), duração, tamanho, hora e quem exportou; "Descarregar" um a um ou vários selecionados (o ficheiro sai já com esse nome); por defeito só a versão mais recente de cada vídeo; os que estão a exportar aparecem com o progresso e atualizam sozinhos, os que falharam com o motivo e o caminho para o editor. Ver: `media.read` com a biblioteca ligada; descarregar: `media.download` (link de 2 min, auditado). Migração `w10_exportados` (uma função nova, `edit_exports_feed`); w10_exportados 12/12, exports-format 3/3.
 
+## 2026-11-10 (biblioteca de estilos da agência)
+
+- **W10-42** Biblioteca de estilos no espaço da agência (`/estilos`, REF-07) e importar para clientes (REF-08), a pedido do Tomás (ADR-0084). Estilos com versões; "Estilo novo", "Duplicar e ajustar", link do vídeo de origem; por cliente "Importar" ou "Atualizar para vN" (o cliente fica na versão importada até alguém atualizar). Só o dono e os admins da agência; a equipa dos clientes nunca vê a biblioteca, só "Da agência · chave vN" no seu catálogo. Migração `w10_biblioteca_estilos` (aditiva): 2 capacidades, 2 tabelas fechadas à API, origem em `edit_styles`, backfill dos estilos ativos do Numeiro. Testes w10_biblioteca_estilos 29/29.
+
 ## 2026-11-10 (estilos do editor iguais ao catálogo do cliente)
 
 - **W10-41** Os estilos do editor, da Edição automática e do pacote por guião vinham de uma lista escrita no código (S14, S15, S17) e não batiam com a página "Estilos de edição" (catálogo do cliente, VAR-02), a pedido do Tomás. Agora os três leem o catálogo: aparecem os estilos ativos que o motor já desenha, com o nome do catálogo. O estilo atual de um vídeo aparece sempre, marcado com o motivo (não ativo, arquivado, sem render, fora do catálogo), para nunca mudar sozinho. Sem catálogo, mostra os estilos do motor e diz que o catálogo não respondeu. No catálogo, cada estilo ativo diz "No editor" ou "Sem render ainda" (S13, S16). Sem migração; style-options 3/3. A seguir: biblioteca de estilos da agência e importar para cliente (REF-07/08), novo estilo a partir de vídeo (REF-05/06).
@@ -218,6 +222,7 @@
 ## 2026-11-05 (vídeo no R2, imagem no editor, exportar)
 
 - **W5-07** vídeo no Cloudflare R2 por cliente (flag `media.r2`; ING-01, FR-08-01, EDL-08, EDL-11; ADR-0047): envio direto do browser com URLs pré-assinados, por partes acima de 256 MiB (até 50 GiB), SHA-256 incremental no browser; o worker confere tamanho e SHA-256, gera a versão leve (540 px) e só então a versão fica pronta. Fila `media_jobs` com lease, cancelamento e repetição. Editor: imagem no palco a partir das versões leves das gravações (uma por câmara, no tempo da sessão) e exportar a versão gravada para uma versão nova do vídeo na revisão. Worker: `engine/media_worker.py` e `engine/render_doc.py` (numeiro-engine). Testes `w5_media_r2` 39/39, suite SQL 1803, `sigv4` (exemplo oficial AWS), `sha256-incremental`, `edit-preview`, render local do guião 3.
+
 ## 2026-11-05 (editor de vídeo, estilos guardados)
 
 - **W5-11** estilos guardados no editor (EDL-13 parcial; ADR-0050): aspeto das legendas e do hook no modo completo ("Aspeto e estilos guardados"); "Guardar como estilo" grava aspeto, música e volume e layout da versão gravada como estilo do cliente no catálogo do VAR-02 (E01..E99, versionado, coluna `look`); aplicar um estilo a outro vídeo cria versão nova, também no passo Estilo do modo guiado. Testes `w5_edit_saved_styles` 24/24, `edit-doc` 63/63.

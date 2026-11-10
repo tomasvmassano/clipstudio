@@ -11,6 +11,8 @@ Fonte: PRD v2.1 §3 (papéis), §5A (TEAM-01…16), CAP-03/05/08. **PROPOSTA de 
 | `workspaces.read` (lista `/clientes`) | todos, incluindo arquivados | só os atribuídos | — (troca pelos atribuídos no seletor) | — (idem) |
 | `workspaces.create` / `archive` | ✓ | — (delegar exige grants de âmbito org, por fazer) | — | — |
 | `learn.lessons.agency`: lições gerais da agência (W10-19, ADR-0069) | ✓ | ✓ | — | — |
+| `styles.library.manage`: biblioteca de estilos da agência `/estilos` (W10-42, ADR-0084) | ✓ | ✓ | — | — |
+| `styles.import`: importar/atualizar um estilo num cliente (precisa também de ver o cliente e de `styles.manage` nele) | ✓ | ✓ | — | — |
 | `team.invite` (staff interno) | ✓ | se delegado | — | — |
 | `team.manage` (atribuir staff a clientes, `agency_staff_assign`) | ✓ | — (idem) | — | — |
 | `permissions.manage` (org) | ✓ | limitado | — | — |
