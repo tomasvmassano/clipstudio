@@ -39,6 +39,7 @@ export const agencyNavGroups: SidebarNavGroup[] = [
 			{ title: "Custos", path: "/custos", icon: <WalletIcon />, orgCap: "costs.read_agency", flag: "costs.agency" },
 			{ title: "Caixa de entrada", path: "/caixa", icon: <InboxIcon />, orgCap: "dashboard.agency" },
 			{ title: "Equipa da agência", path: "/equipa-agencia", icon: <UsersRoundIcon />, orgCap: "team.read" },
+			{ title: "Estilos de edição", path: "/estilos", icon: <FilmIcon />, orgCap: "styles.library.manage" },
 			{ title: "Integrações", path: "/integracoes", icon: <PlugIcon />, orgCap: "integrations.agency.read" },
 			{ title: "Saúde do sistema", path: "/saude", icon: <ActivityIcon />, orgCap: "ops.health" },
 			{ title: "Funcionalidades em teste", path: "/funcionalidades", icon: <FlaskConicalIcon />, orgCap: "flags.manage" },

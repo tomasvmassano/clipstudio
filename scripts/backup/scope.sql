@@ -19,7 +19,7 @@ declare
                            'dashboard_widgets','feature_flag_defs','integration_types','notification_channel_defs',
                            'notification_event_defs','ops_health_runs','role_capabilities'];
   -- dados da agência (organização), não de outro cliente
-  org_t text[] := array['agency_memberships','fx_rates','pub_platform_limits'];
+  org_t text[] := array['agency_memberships','agency_styles','agency_style_versions','fx_rates','pub_platform_limits'];
   -- dados por pessoa: só as pessoas ligadas ao cliente
   user_t text[] := array['profiles','member_availability','teleprompter_prefs','privacy_requests'];
 begin
