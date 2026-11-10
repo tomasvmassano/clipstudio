@@ -1,5 +1,6 @@
 "use client";
 
+import { CAP_STYLES } from "@/lib/caption-plan";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ClapperboardIcon, Loader2Icon, RotateCwIcon, SparklesIcon } from "lucide-react";
@@ -19,7 +20,7 @@ import { fetchLibrary } from "@/lib/media";
 import { packageErrorText } from "@/lib/package-errors";
 import { clockText, packageWindows, windowRows } from "@/lib/package-windows";
 
-const STYLES = [{ id: "S15", label: "S15 · frases com destaque" }, { id: "S14", label: "S14 · uma palavra de cada vez" }];
+const STYLES = (["S15", "S14", "S17"] as const).map((id) => ({ id, label: CAP_STYLES[id].label }));   // os estilos que o render desenha
 const pct = (x: number | null | undefined) => (x == null ? "?" : `${Math.round(x * 100)}%`);
 
 const FAILED = new Set(["failed", "dead", "cancelled"]);

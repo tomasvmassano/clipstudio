@@ -1,5 +1,6 @@
 "use client";
 
+import { CAP_STYLES } from "@/lib/caption-plan";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { ClapperboardIcon, Link2Icon, Loader2Icon, RotateCwIcon, SparklesIcon } from "lucide-react";
@@ -20,7 +21,7 @@ import {
 } from "@/lib/package-script";
 import type { Guiao } from "@/lib/types";
 
-const STYLES = [{ id: "S15", label: "S15 · frases com destaque" }, { id: "S14", label: "S14 · uma palavra de cada vez" }];
+const STYLES = (["S15", "S14", "S17"] as const).map((id) => ({ id, label: CAP_STYLES[id].label }));   // os estilos que o render desenha
 const code = (e: unknown) => (e as { code?: string } | null)?.code;
 const gLabel = (g: { n: number; date: string; tema: string | null }) => `${g.date.slice(8, 10)}/${g.date.slice(5, 7)} · ${String(g.n).padStart(2, "0")} ${g.tema ?? "sem tema"}`;
 

@@ -2,10 +2,13 @@
 
 import { useMemo, type ReactNode } from "react";
 import { hookEnd, layout, outToSrc, type EditDoc, type TextLook } from "@/lib/edit-doc";
-import { CAP_STYLES, captionAtState, captionStates, capStyleOf, wipeFrac } from "@/lib/caption-plan";
+import { CAP_STYLES, GRAPHIC_BOXES, captionAtState, captionStates, capStyleOf, wipeFrac } from "@/lib/caption-plan";
 
 /** Vermelho do destaque do S15 (RED em render_doc.py). */
 const S15_RED = "#E2002C";
+/** A faixa dos gráficos sem posição própria (GRAPHIC_BOX em render_doc.py) e a caixa do hook (title dos estilos S14/S15/S17). */
+const GRAPHIC_BOX: [number, number, number, number] = [108, 730, 864, 600];
+const TITLE_BOX = { x: 150, y: 215, w: 780, size: 76 };
 
 /** Aspeto por omissão (o mesmo que o palco mostrava antes de haver "look" no documento). Em px de 1080×1920. */
 export const DEFAULT_LOOK: { captions: Required<Pick<TextLook, "color" | "size" | "y">>; hook: Required<Pick<TextLook, "color" | "size" | "y">> } = {
@@ -23,7 +26,11 @@ export type StageGuides = { reels?: boolean; grid?: boolean };
 /** O retângulo seguro do QC (EDL-03, engine/qc.py SAFE): o que fica fora pode ser tapado pela interface dos Reels. */
 export const SAFE_RECT = { x0: 60, x1: 960, y0: 210, y1: 1600 };
 
-export function EditorStage({ doc, t, media, className, guides }: { doc: EditDoc; t: number; media?: ReactNode; className?: string; guides?: StageGuides }) {
+export function EditorStage({ doc, t, media, className, guides, assetUrls }: {
+  doc: EditDoc; t: number; media?: ReactNode; className?: string; guides?: StageGuides;
+  /** Links das imagens da Biblioteca (id do ativo → URL): o palco mostra a imagem verdadeira, como o export (W10-37). */
+  assetUrls?: Record<string, string>;
+}) {
   const { segs } = layout(doc);
   const hEnd = hookEnd(doc);
   const at = outToSrc(doc, t);
@@ -37,7 +44,8 @@ export function EditorStage({ doc, t, media, className, guides }: { doc: EditDoc
   const capStyle = capStyleOf(doc);
   const cs = CAP_STYLES[capStyle];
   const lk: TextLook = doc.look?.captions ?? {};
-  const hl = { ...DEFAULT_LOOK.hook, ...(doc.look?.hook ?? {}) };
+  const hk: TextLook = doc.look?.hook ?? {};
+  const styleBox = GRAPHIC_BOXES[capStyle] ?? GRAPHIC_BOX;
   const segNo = at ? segs.findIndex((s) => s.id === at.seg.id) + 1 : segs.length;
   const px = (v: number) => `${(v / 1080) * 100}cqw`;   // px de 1080 → largura do palco
   const top = (y: number) => `${(y / 1920) * 100}%`;
@@ -51,24 +59,49 @@ export function EditorStage({ doc, t, media, className, guides }: { doc: EditDoc
           {`${cam ? (cam.cam === "front" ? "Câmara frente" : "Câmara lado") : "Câmara"}${cam && cam.zoom !== 1 ? ` · zoom ${cam.zoom}` : ""} · corte ${segNo}`}
         </div>
       )}
+      {/* visuais por baixo de tudo: o render desenha as legendas e o hook por cima */}
+      {ovNow.map((o) => {
+        const b = o.box ?? (o.kind === "broll" ? null : styleBox);
+        const url = o.asset ? assetUrls?.[o.asset] : undefined;
+        if (!b) return (
+          <div key={o.id} className="absolute inset-0 flex items-center justify-center bg-black/60 text-center text-[11px] text-white">B-roll: {o.label}</div>
+        );
+        return (
+          <div key={o.id} className="absolute flex items-center justify-center overflow-hidden"
+            style={{ left: `${(b[0] / 1080) * 100}%`, top: top(b[1]), width: `${(b[2] / 1080) * 100}%`, height: `${(b[3] / 1920) * 100}%` }}>
+            {o.kind === "graphic" && url ? (
+              // eslint-disable-next-line @next/next/no-img-element -- link assinado curto do R2, sem otimização do Next
+              <img src={url} alt={o.label} className="max-h-full max-w-full object-contain" />
+            ) : (
+              <span className="rounded border border-white/30 bg-black/50 px-2 py-1 text-[11px] text-white">
+                {o.kind === "text" ? o.label : `${o.kind === "broll" ? "B-roll" : "Gráfico"}: ${o.label}`}</span>
+            )}
+          </div>
+        );
+      })}
       {t < hEnd && doc.hook.text && (
-        <div className="absolute inset-x-[8%] -translate-y-1/2 text-center font-extrabold leading-tight [text-shadow:0_1px_3px_#000,0_0_2px_#000]"
-          style={{ top: top(hl.y), fontSize: px(hl.size), color: hl.color }}>
-          <span className="box-decoration-clone px-[0.2em]" style={hl.background ? { background: hl.background } : undefined}>{text(doc.hook.text, hl.upper)}</span>
+        // o hook como o render (draw_title): caixa branca arredondada, letra serifada preta; o aspeto muda cor, caixa, tamanho e y
+        <div className="absolute flex justify-center"
+          style={{ left: `${(TITLE_BOX.x / 1080) * 100}%`, width: `${(TITLE_BOX.w / 1080) * 100}%`,
+            ...(hk.y != null ? { top: top(hk.y), transform: "translateY(-50%)" } : { top: top(TITLE_BOX.y) }) }}>
+          <span className={hk.background === null ? "text-center font-serif leading-[1.05] [text-shadow:0_2px_4px_#000]" : "rounded-[2cqw] px-[3.1cqw] py-[2cqw] text-center font-serif leading-[1.05] shadow-lg"}
+            style={{ fontSize: px(hk.size ?? TITLE_BOX.size), color: hk.color ?? "#000000",
+              background: hk.background === null ? undefined : hk.background ?? "#FFFFFF" }}>
+            {text(doc.hook.text, hk.upper)}</span>
         </div>
       )}
-      {ovNow.map((o) => o.box ? (
-        // posição própria (ADR-0068): a caixa onde o render desenha o visual, à escala do palco
-        <div key={o.id} className="absolute flex items-center justify-center overflow-hidden rounded border border-white/30 bg-black/50 px-2 py-1 text-center text-[11px] text-white"
-          style={{ left: `${(o.box[0] / 1080) * 100}%`, top: top(o.box[1]), width: `${(o.box[2] / 1080) * 100}%`, height: `${(o.box[3] / 1920) * 100}%` }}>
-          {o.kind === "text" ? o.label : `${o.kind === "broll" ? "B-roll" : "Gráfico"}: ${o.label}`}
+      {capNow && capStyle === "S17" && (
+        // S17: uma linha numa caixa branca, ao centro; já dito a preto, o que vem a cinzento (draw_box_line)
+        <div className="absolute flex justify-center"
+          style={{ left: `${(cs.box[0] / 1080) * 100}%`, width: `${(cs.box[2] / 1080) * 100}%`, top: top(lk.y ?? cs.box[1] + cs.box[3] / 2), transform: "translateY(-50%)" }}>
+          <span className="px-[0.28em] py-[0.16em] text-center font-serif leading-[1.12] shadow-md"
+            style={{ fontSize: px(lk.size ?? cs.size), background: lk.background === null ? undefined : lk.background ?? "#FFFFFF" }}>
+            {capNow.chunk.map((w, j) => (
+              <span key={j} style={{ color: j <= capNow.active ? lk.color ?? "#111111" : lk.highlight ?? "#A6A6A6" }}>{j ? " " : ""}{text(w.w, lk.upper)}</span>
+            ))}</span>
         </div>
-      ) : (
-        <div key={o.id} className="absolute inset-x-[10%] top-[38%] rounded border border-white/30 bg-black/50 px-2 py-1 text-center text-[11px] text-white">
-          {o.kind === "broll" ? "B-roll" : o.kind === "graphic" ? "Gráfico" : "Texto"}: {o.label}
-        </div>
-      ))}
-      {capNow && (capStyle === "S14" ? (
+      )}
+      {capNow && capStyle !== "S17" && (capStyle === "S14" ? (
         // S14: a palavra que se ouve, ao centro da caixa; com destaque no aspeto leva essa cor
         <div className="absolute -translate-y-1/2 text-center font-serif [text-shadow:0_3px_5px_rgba(0,0,0,.8)]"
           style={{ left: `${(cs.box[0] / 1080) * 100}%`, width: `${(cs.box[2] / 1080) * 100}%`, top: top(lk.y ?? cs.box[1] + cs.size * 0.6),

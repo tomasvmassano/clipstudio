@@ -45,6 +45,9 @@ export async function audioUrl(a: Access, versionId: string): Promise<{ url: str
   return { url: b.url, expires_at: b.expires_at ?? "" };
 }
 
+/** Link assinado curto (5 min) para ver um ficheiro da Biblioteca no editor (imagens no palco e no seletor, W10-37). */
+export const mediaUrl = (a: Access, versionId: string) => audioUrl(a, versionId);
+
 export const requestExport = (a: Access, asset: string, version?: string | null) =>
   rpc<ExportJob>("edit_export_request", { p_ws: a.ws, p_asset: asset, p_version: version ?? null, p_token: a.token });
 export const listExports = (a: Access, asset: string) => rpc<ExportJob[]>("edit_export_list", { p_ws: a.ws, p_asset: asset, p_token: a.token });
