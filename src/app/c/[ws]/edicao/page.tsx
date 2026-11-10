@@ -17,6 +17,7 @@ import {
   type EditCatalog, type EditStyle, type Platform, type PresetOutput, type StyleSpec, type StyleVersion, type Transformation,
 } from "@/lib/edit-styles";
 import { cn } from "@/lib/utils";
+import { isRenderable } from "@/lib/style-options-client";
 import { StylePreview } from "@/components/edit/style-preview";
 
 /*
@@ -269,7 +270,7 @@ function EdicaoInner({ access }: { access: Access }) {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Estilos de edição</h1>
-          <p className="text-sm text-muted-foreground">O catálogo de estilos deste cliente e o que a edição automática gera por guião. A edição corre quando houver gravações ligadas ao motor.</p>
+          <p className="text-sm text-muted-foreground">O catálogo de estilos deste cliente e o que a edição automática gera por guião. No editor e na edição automática aparecem os estilos ativos marcados &quot;No editor&quot;.</p>
         </div>
         <Button variant="outline" size="sm" onClick={() => void reload()}><RotateCwIcon />Atualizar</Button>
       </div>
@@ -317,6 +318,9 @@ function EdicaoInner({ access }: { access: Access }) {
                         <Badge variant={statusVariant(s.status)}>{STATUS_LABEL[s.status]}</Badge>
                         <span className="text-xs text-muted-foreground">v{s.version}{s.transformation ? ` · transf. ${TRANSFORMATION_LABEL[s.transformation].toLowerCase()}` : ""}</span>
                       </span>
+                      {s.status === "ativo" && (isRenderable(s.key)
+                        ? <span className="text-xs text-emerald-500">No editor</span>
+                        : <span className="text-xs text-amber-500" title="O motor ainda não desenha este estilo: não aparece no editor nem na edição automática">Sem render ainda</span>)}
                     </button>
                   </li>
                 ))}

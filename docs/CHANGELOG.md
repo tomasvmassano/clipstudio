@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-10 (estilos do editor iguais ao catálogo do cliente)
+
+- **W10-41** Os estilos do editor, da Edição automática e do pacote por guião vinham de uma lista escrita no código (S14, S15, S17) e não batiam com a página "Estilos de edição" (catálogo do cliente, VAR-02), a pedido do Tomás. Agora os três leem o catálogo: aparecem os estilos ativos que o motor já desenha, com o nome do catálogo. O estilo atual de um vídeo aparece sempre, marcado com o motivo (não ativo, arquivado, sem render, fora do catálogo), para nunca mudar sozinho. Sem catálogo, mostra os estilos do motor e diz que o catálogo não respondeu. No catálogo, cada estilo ativo diz "No editor" ou "Sem render ainda" (S13, S16). Sem migração; style-options 3/3. A seguir: biblioteca de estilos da agência e importar para cliente (REF-07/08), novo estilo a partir de vídeo (REF-05/06).
+
 ## 2026-11-10 (testes às imagens no editor: erros pouco amigáveis)
 
 - **W10-40** Testes em produção às imagens do editor (pôr, arrastar no palco, redimensionar, Tamanho, Ecrã inteiro, arrastar na linha do tempo através de um corte, duração), a pedido do Tomás. Três problemas corrigidos: (1) clicar ou arrastar um visual na linha do tempo deixava o cursor onde estava e a imagem desaparecia do palco; agora o cursor vai até ao visual quando é escolhido, movido ou muda de duração. (2) O campo Duração não se deixava apagar (ficava "1" e escrever 4 dava 14) e cada tecla era um passo de anular; agora grava com Enter ou ao sair, aceita "2,5", Esc repõe. (3) As mensagens de carregar imagens e os erros só apareciam no topo da página, escondidos para quem larga imagens na linha do tempo; agora flutuam no fundo do ecrã, com botão de fechar, e as de sucesso saem sozinhas ao fim de 10 s. "Trocar imagem" já abre com a Biblioteca vazia (dá para carregar do computador). Sem migração; testes overlay-free 5/5.

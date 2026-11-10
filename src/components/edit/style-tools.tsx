@@ -8,12 +8,17 @@ import { DEFAULT_LOOK } from "@/components/edit/editor-stage";
 import type { Access } from "@/lib/access";
 import { applyStyle, fetchSavedStyles, saveStyleFromDoc, type EditState, type SavedStyles } from "@/lib/edit";
 import { LOOK_LIMITS, setLook, type EditDoc, type TextLook } from "@/lib/edit-doc";
-import { CAP_STYLES, capStyleOf, type CapStyle } from "@/lib/caption-plan";
+import { capStyleOf } from "@/lib/caption-plan";
+import { optionText, type StyleOption } from "@/lib/style-options";
 
 /* Aspeto e estilos guardados no editor (EDL-13, ADR-0050). O servidor lê a versão gravada e valida tudo. */
 
 /** Aspeto das legendas e do hook (modo completo). Cada mudança entra no histórico do editor. */
-export function LookPanel({ doc, disabled, onChange }: { doc: EditDoc; disabled: boolean; onChange: (d: EditDoc) => void }) {
+export function LookPanel({ doc, disabled, onChange, styles, stylesError }: {
+  doc: EditDoc; disabled: boolean; onChange: (d: EditDoc) => void;
+  /** Estilos ativos do catálogo do cliente que o motor desenha (W10-41). */
+  styles: StyleOption[]; stylesError?: string;
+}) {
   const part = (key: "captions" | "hook", label: string) => {
     const l: TextLook = { ...DEFAULT_LOOK[key], ...(doc.look?.[key] ?? {}) };
     const set = (p: Partial<TextLook>) => onChange(setLook(doc, key, p));
@@ -43,9 +48,10 @@ export function LookPanel({ doc, disabled, onChange }: { doc: EditDoc; disabled:
       <label className="flex flex-col gap-1">
         <span className="font-medium">Estilo das legendas</span>
         <select aria-label="Estilo das legendas" className="h-9 max-w-64 rounded-md border bg-background px-2" disabled={disabled}
-          value={capStyleOf(doc)} onChange={(e) => onChange({ ...doc, style: e.target.value as CapStyle })}>
-          {(Object.keys(CAP_STYLES) as CapStyle[]).map((k) => <option key={k} value={k}>{CAP_STYLES[k].label}</option>)}
+          value={doc.style || capStyleOf(doc)} onChange={(e) => onChange({ ...doc, style: e.target.value })}>
+          {styles.map((o) => <option key={o.id} value={o.id}>{optionText(o)}</option>)}
         </select>
+        <span className="text-xs text-muted-foreground">Os estilos ativos de &quot;Estilos de edição&quot; que o motor já desenha.{stylesError ? ` Não deu para ler o catálogo (${stylesError}).` : ""}</span>
       </label>
       {part("captions", "Legendas")}{part("hook", "Hook")}
     </div>
