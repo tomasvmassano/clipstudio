@@ -79,3 +79,21 @@ export const listEditDocs = (a: Access) => rpc<EditDocRow[]>("edit_doc_list", { 
 export type PackageExportResult = { queued: number; jobs: { asset_id: string; job_id: string; status: ExportJob["status"] }[];
   failed: { asset_id: string; title: string; error: string }[] };
 export const exportPackage = (a: Access, job: string) => rpc<PackageExportResult>("edit_package_export", { p_ws: a.ws, p_job: job, p_token: a.token });
+
+/* Exportados (W10-44, EDL-11): os vídeos exportados do cliente para a equipa descarregar e publicar. */
+export type ExportItem = {
+  job_id: string; status: ExportJob["status"]; progress: { pct?: number; step?: string } | null; last_error: string | null;
+  asset_id: string; title: string; tags: string[]; content: { id: string; n: number; date: string; tema: string | null } | null;
+  style: string | null; edit_version_no: number | null; version_id: string | null; version_no: number | null;
+  size_bytes: number | null; duration: number | null; created_label: string | null; created_at: string; finished_at: string | null; latest: boolean;
+};
+export type ExportsFeed = { can_download: boolean; timezone: string | null; days: number; items: ExportItem[] };
+export const fetchExportsFeed = (a: Access, days = 14) => rpc<ExportsFeed>("edit_exports_feed", { p_ws: a.ws, p_days: days, p_token: a.token });
+
+/** Link curto para descarregar com um nome que se percebe ("Guião 03 · Hook 1 · S17 · v2"). */
+export async function downloadUrl(a: Access, versionId: string, name: string): Promise<string> {
+  const r = await fetch(`/api/media/versions/${versionId}/url?ws=${encodeURIComponent(a.ws)}&purpose=download&name=${encodeURIComponent(name)}`, { cache: "no-store" });
+  const b = (await r.json().catch(() => ({}))) as { url?: string; error?: string };
+  if (!r.ok || !b.url) throw new Error(b.error ?? `Não consegui preparar o download (${r.status}).`);
+  return b.url;
+}
