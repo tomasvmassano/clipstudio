@@ -1,6 +1,7 @@
 "use client";
 
-import { CAP_STYLES } from "@/lib/caption-plan";
+import { optionText } from "@/lib/style-options";
+import { useStyleOptions } from "@/lib/style-options-client";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ClapperboardIcon, Loader2Icon, RotateCwIcon, SparklesIcon } from "lucide-react";
@@ -20,7 +21,6 @@ import { fetchLibrary } from "@/lib/media";
 import { packageErrorText } from "@/lib/package-errors";
 import { clockText, packageWindows, windowRows } from "@/lib/package-windows";
 
-const STYLES = (["S15", "S14", "S17"] as const).map((id) => ({ id, label: CAP_STYLES[id].label }));   // os estilos que o render desenha
 const pct = (x: number | null | undefined) => (x == null ? "?" : `${Math.round(x * 100)}%`);
 
 const FAILED = new Set(["failed", "dead", "cancelled"]);
@@ -51,6 +51,7 @@ export function AutoEditView({ access }: { access: Access }) {
   const [side, setSide] = useState("");
   const [picked, setPicked] = useState<Set<string> | null>(null);
   const [style, setStyle] = useState("S15");
+  const STYLES = useStyleOptions(access, style).options;   // estilos ativos do catálogo que o motor desenha (W10-41)
   // câmara com o som da lapela: escolhida em cada pacote (pode mudar de sessão para sessão); lembra a última neste dispositivo
   const audioKey = `pkg.audio.${access.ws}`;
   const [audio, setAudioState] = useState<"" | "front" | "side">(() => {
@@ -130,7 +131,7 @@ export function AutoEditView({ access }: { access: Access }) {
               </label>
               <label className="flex flex-col gap-1 text-sm">Estilo de legendas
                 <select className={selectCls} value={style} onChange={(e) => setStyle(e.target.value)}>
-                  {STYLES.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
+                  {STYLES.map((o) => <option key={o.id} value={o.id}>{optionText(o)}</option>)}
                 </select>
               </label>
             </div>
