@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-13 (cortes a partir do link do YouTube)
+
+- **W10-45** Cortes de vídeos longos a partir do link do YouTube (CHG-012, ADR-0085), a pedido do Tomás. Na página Cortes: colar o link do vídeo acabado (título e canal pelo oEmbed público, nada se descarrega), a app encontra o ficheiro na Biblioteca pelo título ou carrega-se ali mesmo (arrastar ou "Carregar ficheiro"; o pedido começa sozinho quando o ficheiro fica pronto); número de cortes automático pela duração (~1 por 4 min, 5 a 20) ou escolhido (3 a 20); modo leve por defeito (como foi dito, só legendas) e "Edição completa" como opção. Cada corte mostra o tipo de momento (conversa, reflexão, opinião sobre um facto, história, momento engraçado, conselho, resposta, confissão, frase citável, revelação). Motor: numeiro-engine #20 (Clip Miner, prompt clip-miner-2, idioma detetado). Migração `w10_cortes_youtube` (aditiva: `clips_request2`, `_youtube_id`, `clips_list` com modo e link); w10_cortes_youtube 19/19, w10_clip_miner 38/38, clips-youtube 3/3.
+
 ## 2026-11-10 (página Exportados)
 
 - **W10-44** Página "Exportados" no espaço do cliente, a pedido do Tomás (em vez de copiar para a Google Drive): todos os vídeos exportados por dia, com nome legível ("Guião 03 · Hook 1 · S17 · v2"), duração, tamanho, hora e quem exportou; "Descarregar" um a um ou vários selecionados (o ficheiro sai já com esse nome); por defeito só a versão mais recente de cada vídeo; os que estão a exportar aparecem com o progresso e atualizam sozinhos, os que falharam com o motivo e o caminho para o editor. Ver: `media.read` com a biblioteca ligada; descarregar: `media.download` (link de 2 min, auditado). Migração `w10_exportados` (uma função nova, `edit_exports_feed`); w10_exportados 12/12, exports-format 3/3.
