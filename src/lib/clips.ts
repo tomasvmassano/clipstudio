@@ -13,6 +13,7 @@ export type ClipRow = {
 };
 export type ClipJob = Omit<ExportJob, "kind" | "result"> & {
   kind: "clips"; version_id: string | null; master_name: string | null; master_title: string | null; master_active: boolean; count: number; clips: ClipRow[];
+  mode?: "leve" | "completo"; youtube?: { url: string; id: string } | null;
   result: { clips?: unknown[]; flags?: string[]; blocked?: { start: string; end: string; reason: string }[]; rejected?: string[];
             sentences?: number; candidates?: number; model?: string; prompt_version?: string } | null;
 };
@@ -27,7 +28,8 @@ async function rpc<T>(fn: string, args: Record<string, unknown>): Promise<T> {
   return data as T;
 }
 
-export const requestClips = (a: Access, version: string, count: number) =>
-  rpc<ClipJob>("clips_request", { p_ws: a.ws, p_version: version, p_count: count, p_token: a.token });
+/** Pedir cortes (W10-45, CHG-012): count null = automático pela duração; modo leve (só legendas) por defeito; link do YouTube opcional. */
+export const requestClips = (a: Access, version: string, count: number | null, mode: "leve" | "completo" = "leve", youtube: string | null = null) =>
+  rpc<ClipJob>("clips_request2", { p_ws: a.ws, p_version: version, p_count: count, p_mode: mode, p_youtube: youtube, p_token: a.token });
 export const listClips = (a: Access) => rpc<ClipJob[]>("clips_list", { p_ws: a.ws, p_token: a.token });
 export const exportClips = (a: Access, job: string) => rpc<PackageExportResult>("clips_export", { p_ws: a.ws, p_job: job, p_token: a.token });

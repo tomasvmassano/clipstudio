@@ -5,7 +5,49 @@ export type ClipMeta = {
   polemic?: string[]; enemy?: { kind: string; target: string } | null; identity_trigger?: string | null; risks?: string[]; persons?: string[];
   context?: string | null; justification?: string; reordered?: boolean; times?: { in: number; out: number; duration: number };
   model?: string; prompt_version?: string; speakers?: string;
+  /** CHG-012: tipo de momento, modo (leve = só legendas) e idioma detetado. */
+  moment?: string; mode?: "leve" | "completo"; language?: string | null;
 };
+
+/* CHG-012 (W10-45): tipos de momento, link do YouTube e ligação ao ficheiro. */
+export const MOMENT_LABEL: Record<string, string> = {
+  conversa: "Conversa", reflexao: "Reflexão", opiniao: "Opinião sobre um facto", historia: "História", humor: "Momento engraçado",
+  conselho: "Conselho prático", resposta: "Resposta a uma pergunta", confissao: "Confissão", frase: "Frase citável", revelacao: "Revelação",
+  outro: "Outro",
+};
+export const momentText = (m: string | null | undefined) => (m ? MOMENT_LABEL[m] ?? m : "—");
+
+/** Id do vídeo (11 caracteres) de um link do YouTube, ou null. Igual a _youtube_id no servidor. */
+export function youtubeId(url: string): string | null {
+  const m = /^(?:https?:\/\/)?(?:www\.|m\.|music\.)?(?:youtube\.com\/(?:watch\?(?:[^#]*&)?v=|shorts\/|live\/|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})(?:[?&#/].*)?$/.exec(url.trim());
+  return m ? m[1] : null;
+}
+
+const norm = (t: string) => t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\.[a-z0-9]{2,4}$/, "").replace(/[^a-z0-9]+/g, " ").trim();
+const STOP = new Set(["the", "a", "o", "os", "as", "de", "do", "da", "e", "and", "of", "to", "in", "em", "um", "uma", "com", "with", "ep", "episode", "episodio", "final", "mp4", "mov", "v1", "v2"]);
+const tokens = (t: string) => new Set(norm(t).split(" ").filter((w) => w.length > 1 && !STOP.has(w)));
+
+/** Quanto um nome de ficheiro/título se parece com o título do vídeo do YouTube (0 a 1, Jaccard das palavras). */
+export function titleSimilarity(a: string, b: string): number {
+  const x = tokens(a), y = tokens(b);
+  if (!x.size || !y.size) return 0;
+  let inter = 0;
+  for (const w of x) if (y.has(w)) inter += 1;
+  return inter / (x.size + y.size - inter);
+}
+
+/** O ficheiro mais parecido com o título do YouTube, se for parecido o bastante (≥ 0,34); senão null. */
+export function bestMasterMatch<T extends { title: string; current: { original_name: string | null } | null }>(ytTitle: string, masters: T[]): T | null {
+  let best: T | null = null, score = 0;
+  for (const m of masters) {
+    const s = Math.max(titleSimilarity(ytTitle, m.title), titleSimilarity(ytTitle, m.current?.original_name ?? ""));
+    if (s > score) { score = s; best = m; }
+  }
+  return score >= 0.34 ? best : null;
+}
+
+/** Cortes automáticos pela duração: ~1 por 4 min, entre 5 e 20 (igual ao servidor e ao motor). */
+export const autoClipCount = (sec: number | null | undefined) => (!sec ? 8 : Math.max(5, Math.min(20, Math.round(sec / 240))));
 
 export const POLEMIC_LABEL: Record<string, string> = {
   inimigo: "inimigo", gatilho_identidade: "gatilho de identidade", tensao: "tensão", afirmacao_forte: "afirmação forte",
