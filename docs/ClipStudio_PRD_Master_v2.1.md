@@ -1249,6 +1249,7 @@ Referências externas consultadas em 2026-10-28: ClickUp (custom roles, workload
 
 ## 36. Registo de alterações
 
+- **CHG-012 — 2026-11-13:** cortes de vídeos longos (§46.3): colar o link do YouTube e ligar ao ficheiro (CLIP-01), tipos de momento e idioma (CLIP-03), número pela duração até 20 (CLIP-05), modo leve só com legendas por defeito (CLIP-06). Pedido do Tomás.
 - **CHG-011 — 2026-11-10:** corpo partilhado entre hooks (EDL-14) e vista dos vídeos por guião (EDL-15), §39.1. Pedido do Tomás depois de editar o primeiro pacote real.
 - **CHG-008 — 2026-11-06:** §46: olhar na câmara e teleprompter (GAZE-01..06), aprendizagem contínua com edições e rejeições em dois níveis, agência e cliente (LRN-01..07), cortes de vídeos longos com o agente Clip Miner, com prioridade (CLIP-01..11), estúdio ligado à app com captura direta e pacote por guião (STU-01..05); sequência revista em §46.5. Origem: IDEA-010 a IDEA-013.
 - **CHG-006 — 2026-11-03:** revisão de vídeo por link da Google Drive enquanto não há object storage (FR-05-03, ING-01): player da Drive embutido, comentários com o momento escrito por quem comenta, aprovar ou pedir alterações com motivo. Decisão do Tomás para rever os 69 vídeos do Numeiro.
@@ -1486,17 +1487,17 @@ Assenta em FR-17-10 (motivos de retrabalho), FR-06-04 (versões da configuraçã
 
 Concretiza SCALE-03 (clip factory) e VAR-06 para vídeos longos dos clientes (YouTube, podcasts, vlogs). **Prioridade (decisão do Tomás, 05/11):** é das funcionalidades com mais prioridade; ver §46.5.
 
-**CLIP-01 [P0] Fonte = ficheiro master original.** Upload ou Drive do cliente, em 4K quando houver. A YouTube Data API não descarrega vídeos e os termos do YouTube proíbem descarregar; o link do YouTube serve para metadados, capítulos e métricas.
+**CLIP-01 [P0] Fonte = ficheiro master original.** Upload ou Drive do cliente, em 4K quando houver. A YouTube Data API não descarrega vídeos e os termos do YouTube proíbem descarregar; o link do YouTube serve para metadados, capítulos e métricas. *CHG-012:* o pedido começa por colar o link do YouTube do vídeo acabado; a app liga-o ao ficheiro: o master que já está na Biblioteca ou um arrastado ali mesmo (sem master, o ficheiro que o próprio cliente descarrega no YouTube Studio). A app nunca descarrega do YouTube.
 
 **CLIP-02 [P0] Transcrição com oradores.** Tempos por palavra e separação de oradores, em PT-PT; fornecedor escolhido depois de um teste com episódios reais do cliente.
 
-**CLIP-03 [P0] Agente "Clip Miner": candidatos e ranking.** Segmentação; proposta de candidatos; crítica e ranking com a rubrica e as máquinas da bíblia de estilo do cliente; resultado por candidato: início/fim em IDs de frase (nunca tempos inventados), tese, máquina viral, etiquetas de polémica, gatilho de identidade, riscos, pontuação e justificação. O LLM ordena; não se apresenta a pontuação como previsão de viral.
+**CLIP-03 [P0] Agente "Clip Miner": candidatos e ranking.** Segmentação; proposta de candidatos; crítica e ranking com a rubrica e as máquinas da bíblia de estilo do cliente; resultado por candidato: início/fim em IDs de frase (nunca tempos inventados), tese, máquina viral, etiquetas de polémica, gatilho de identidade, riscos, pontuação e justificação. O LLM ordena; não se apresenta a pontuação como previsão de viral. *CHG-012:* cada candidato tem também um tipo de momento: conversa, reflexão, opinião sobre um facto, história, humor, conselho, resposta a uma pergunta, confissão, frase citável, revelação. Um corte não precisa de ser polémico; o idioma (PT/EN) é detetado e títulos e hooks saem no idioma do vídeo.
 
 **CLIP-04 [P0] Etiquetas de polémica e portão da dignidade.** Taxonomia alinhada com a bíblia de estilo: inimigo (comportamento, crença, ego), gatilho de identidade, tensão, afirmação forte, número, confissão. Ataque à dignidade de um grupo essencializado bloqueado sempre; pessoa identificada assinalada (regra final para afirmações sobre terceiros pendente, ver §46.5).
 
-**CLIP-05 [P0] Diversidade e cortes limpos.** 5-10 cortes por vídeo; diversificação com limites por máquina e por tema, pelo menos um corte não polémico; pontos de corte ajustados em código a fins de frase e silêncios; duração alvo 25-60 s para opinião [pressuposto].
+**CLIP-05 [P0] Diversidade e cortes limpos.** 5-10 cortes por vídeo (*CHG-012:* por defeito ~1 por cada 4 min de vídeo, entre 5 e 20 [pressuposto], para não deixar oportunidades por aproveitar; os limites por máquina e tema relaxam até ao número pedido); diversificação com limites por máquina e por tema, pelo menos um corte não polémico; pontos de corte ajustados em código a fins de frase e silêncios; duração alvo 25-60 s para opinião [pressuposto].
 
-**CLIP-06 [P0] Preparação do corte.** Gancho no 0:00; reordenação só com frases inteiras, no máximo 3 trechos e sem mudar a tese (o revisor vê original e reordenado lado a lado); título por cima com ≤ 8 palavras; 3 hooks; cartão de contexto quando preciso; CTA de 1-2 s para o vídeo completo.
+**CLIP-06 [P0] Preparação do corte.** *CHG-012, modo leve por defeito:* o corte sai tal como foi dito (trecho contínuo, sem reordenar), só com legendas e vertical, duração de 20 a 90 s; o modo completo abaixo fica como opção por pedido. Gancho no 0:00; reordenação só com frases inteiras, no máximo 3 trechos e sem mudar a tese (o revisor vê original e reordenado lado a lado); título por cima com ≤ 8 palavras; 3 hooks; cartão de contexto quando preciso; CTA de 1-2 s para o vídeo completo.
 
 **CLIP-07 [P0] Vertical, legendas, estilo e revisão.** Reframe 9:16 com deteção do orador ativo (dois oradores: alternância ou split, com tempo mínimo por plano e suavização); legendas e estilos do catálogo (VAR-02) e preset do cliente (EDL-01); QC (EDL-03); fila de revisão em lote (EDL-02). Fontes multi-câmara usam os planos individuais diretamente.
 
