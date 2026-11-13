@@ -9,7 +9,7 @@ export const SOURCE_LABEL: Record<HealthSource, string> = { agent: "Agentes", me
 
 export const KIND_LABEL: Record<string, string> = {
   daily_pipeline: "Corrida diária", scouts: "Batedores", analysis: "Análise",
-  ingest: "Verificar envio", export: "Exportar vídeo", package: "Pacote de edição",
+  ingest: "Verificar envio", export: "Exportar vídeo", package: "Pacote de edição", clips: "Cortes de vídeos longos",
 };
 export const kindLabel = (k: string) => KIND_LABEL[k] ?? k;
 
