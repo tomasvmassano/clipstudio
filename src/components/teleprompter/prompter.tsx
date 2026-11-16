@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { blockLabel, blocksOf, isRecorded, type BlockKey, type MarkKind, type SessionItem, type TakeRow, type TpAction, type TpPrefs } from "@/lib/recording";
+import { blockLabel, blocksOf, isCtaBlock, isRecorded, type BlockKey, type MarkKind, type SessionItem, type TakeRow, type TpAction, type TpPrefs } from "@/lib/recording";
 import { keyMap } from "@/components/teleprompter/use-prefs";
 import { useScreenInfo } from "@/components/teleprompter/use-screen";
 import { fmtDeg, gazeColumn, gazeLevel, halfAngleDeg, phraseParagraphs } from "@/lib/gaze";
@@ -363,18 +363,18 @@ export function Prompter(p: Props) {
                 <div className={cn("mb-[.8em] text-[.45em] font-normal", labelColor)}>{cur.content.n}{cur.content.tema ? ` · ${cur.content.tema}` : ""}</div>
                 {blocks.map((b) => (
                   <section key={b.key} data-block={b.key} ref={(n) => { if (n) blockRefs.current.set(b.key, n); else blockRefs.current.delete(b.key); }}
-                    className={cn("mb-[1.2em]", (b.key === "body" || b.key.startsWith("x_")) && "border-t-[3px] border-neutral-700 pt-[.6em]")}>
+                    className={cn("mb-[1.2em]", (b.key === "body" || (b.key.startsWith("x_") && !isCtaBlock(b))) && "border-t-[3px] border-neutral-700 pt-[.6em]")}>
                     <div className={cn("mb-[.3em] text-[.3em] font-semibold uppercase tracking-widest", labelColor)}>
                       {b.label}
                       {takeCount(b.key) > 0 && <span className="ml-3 normal-case tracking-normal">· {takeCount(b.key)} take{takeCount(b.key) > 1 ? "s" : ""}{chosen(b.key) ? ` · escolhido #${chosen(b.key)!.take_number}` : ""}</span>}
                     </div>
                     {prefs.phrase_mode
                       ? phraseParagraphs(b.text).map((lines, i) => (
-                        <div key={i} className={cn("mb-[.6em]", b.key === "cta" && prefs.contrast !== "ambar" && "text-amber-300")}>
+                        <div key={i} className={cn("mb-[.6em]", isCtaBlock(b) && prefs.contrast !== "ambar" && "text-amber-300")}>
                           {lines.map((l, k) => <p key={k} data-phrase-line><span className="inline-block">{l}</span></p>)}
                         </div>
                       ))
-                      : b.text.split("\n").filter(Boolean).map((l, i) => <p key={i} className={cn("mb-[.6em]", b.key === "cta" && prefs.contrast !== "ambar" && "text-amber-300")}>{l}</p>)}
+                      : b.text.split("\n").filter(Boolean).map((l, i) => <p key={i} className={cn("mb-[.6em]", isCtaBlock(b) && prefs.contrast !== "ambar" && "text-amber-300")}>{l}</p>)}
                   </section>
                 ))}
               </>

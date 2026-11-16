@@ -1,5 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import { friendlyError, type Access } from "@/lib/access";
+import { MARKER } from "./blocks";
+export { MARKER, corpoParts, isCtaBlock } from "./blocks";
 
 /* Teleprompter: sessões de gravação, fila, takes e preferências (PRD M03, ADR-0006). */
 
@@ -39,8 +41,6 @@ export function blockSlug(label: string): string {
   return slug || "bloco";
 }
 
-/** Uma linha "## Nome" no corpo começa um bloco personalizado (FR-03-02). */
-export const MARKER = /^\s*##\s*(\S.*)$/;
 const customLabels = new Map<string, string>();
 
 /**
