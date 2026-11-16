@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-17 (blocos CTA e corpo por blocos no guião)
+
+- **W10-46** Guiões com vários corpos e CTAs (plano de 90 dias do EVOLVE), a pedido do Tomás: no cartão do guião o corpo mostra-se por blocos (C1, depois cada "## Nome" com o rótulo no estilo dos hooks, sem linhas vazias a mais) e os blocos com nome "CTA…" (CTA 1, CTA 2, CTA 3) aparecem como o CTA; no teleprompter esses blocos ficam em âmbar como o CTA e sem a linha de separação dos corpos. Sem migração; blocks 2/2.
+
 ## 2026-11-13 (cortes a partir do link do YouTube)
 
 - **W10-45** Cortes de vídeos longos a partir do link do YouTube (CHG-012, ADR-0085), a pedido do Tomás. Na página Cortes: colar o link do vídeo acabado (título e canal pelo oEmbed público, nada se descarrega), a app encontra o ficheiro na Biblioteca pelo título ou carrega-se ali mesmo (arrastar ou "Carregar ficheiro"; o pedido começa sozinho quando o ficheiro fica pronto); número de cortes automático pela duração (~1 por 4 min, 5 a 20) ou escolhido (3 a 20); modo leve por defeito (como foi dito, só legendas) e "Edição completa" como opção. Cada corte mostra o tipo de momento (conversa, reflexão, opinião sobre um facto, história, momento engraçado, conselho, resposta, confissão, frase citável, revelação). Motor: numeiro-engine #20 (Clip Miner, prompt clip-miner-2, idioma detetado). Migração `20261113153853_w10_cortes_youtube` (aditiva: `clips_request2`, `_youtube_id`, `clips_list` com modo e link); w10_cortes_youtube 19/19, w10_clip_miner 38/38, clips-youtube 3/3.

@@ -23,7 +23,7 @@ import { CommentsSheet } from "@/components/guiao-comments";
 import { BriefSheet } from "@/components/guiao-brief";
 import { DetailsSheet, metaNames, useMetaLists } from "@/components/guiao-details";
 import { KIND_LABEL, PLATFORMS } from "@/lib/projects";
-import { MARKER } from "@/lib/recording";
+import { MARKER, corpoParts } from "@/lib/recording";
 import { ReasonForm } from "@/components/guiao-reason-form";
 import { DeleteScriptDialog } from "@/components/guiao-delete";
 import { HookChecks, VerifierSummary, useVerification } from "@/components/guiao-verifier";
@@ -177,12 +177,27 @@ export function GuiaoCard({ g, carried, caps, actions, onError, startInEdit, ope
                 ))}
               </ol>
               <VerifierSummary g={g} state={verif} />
-              <div className={cn("whitespace-pre-line border-l-2 pl-3 text-sm leading-relaxed", !open && "line-clamp-3")}>
-                {g.corpo.split("\n").map((l, i) => {
-                  const m = l.match(MARKER);
-                  return m ? <span key={i} className="mt-1 block font-mono text-[11px] uppercase text-primary">{m[1]}</span> : <span key={i}>{l}{"\n"}</span>;
-                })}
-              </div>
+              {/* corpo por blocos (W10-46): o texto antes da 1.ª marca e cada "## Nome"; blocos "CTA…" mostram-se como o CTA */}
+              {(() => {
+                const parts = corpoParts(g.corpo);
+                const body = parts.filter((p) => !/^cta\b/i.test(p.label ?? ""));
+                const ctas = parts.filter((p) => /^cta\b/i.test(p.label ?? ""));
+                return (
+                  <>
+                    <div className={cn("flex flex-col gap-2 border-l-2 pl-3 text-sm leading-relaxed", !open && "line-clamp-3")}>
+                      {body.map((p, i) => (
+                        <div key={i}>
+                          {p.label && <span className="block font-mono text-[11px] uppercase text-primary">{p.label}</span>}
+                          {p.lines.map((l, k) => <p key={k}>{l}</p>)}
+                        </div>
+                      ))}
+                    </div>
+                    {ctas.map((p, i) => (
+                      <p key={i} className="border-l-2 border-primary/60 pl-3 text-sm font-medium">{p.label}: {p.lines.join(" ")}</p>
+                    ))}
+                  </>
+                );
+              })()}
               {g.cta && <p className="border-l-2 border-primary/60 pl-3 text-sm font-medium">CTA: {g.cta}</p>}
               {open && g.notas && <p className="rounded-md bg-muted/50 px-3 py-2 text-xs text-muted-foreground">Notas: {g.notas}</p>}
               {(st === "rejected" || st === "changes_requested") && g.motivo_rejeicao && (
