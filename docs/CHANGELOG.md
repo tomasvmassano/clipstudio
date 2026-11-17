@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-17 (pacote com uma câmara só)
+
+- **W10-47** Pacote de edição com uma câmara só (EDL-01, ADR-0086), a pedido do Tomás: a EVOLVE gravou os kits K1 a K8 com uma câmara (C8128). Em Edição automática → Novo pacote, "Gravei com uma câmara só" (ligado sozinho quando só há uma gravação pronta) esconde a câmara do lado e o som da lapela; a gravação dá o som, a imagem e o tempo, e no corpo o vídeo alterna plano normal e aproximado (zoom 1,2), que se muda por trecho no editor. Migração aditiva `w10_pacote_uma_camara` (`edit_package_request` aceita `p_side` vazio; `input.single`; duas câmaras ficam iguais). Motor numeiro-engine #35 (sem sincronização, `source.cams = {front}`). Testes: `w10_pacote_uma_camara` 11/11, `w10_som_da_lapela` 13/13, `w5_edit_package` 19/19, motor `test_do_package_uma_camara`.
+
 ## 2026-11-17 (blocos CTA e corpo por blocos no guião)
 
 - **W10-46** Guiões com vários corpos e CTAs (plano de 90 dias do EVOLVE), a pedido do Tomás: no cartão do guião o corpo mostra-se por blocos (C1, depois cada "## Nome" com o rótulo no estilo dos hooks, sem linhas vazias a mais) e os blocos com nome "CTA…" (CTA 1, CTA 2, CTA 3) aparecem como o CTA; no teleprompter esses blocos ficam em âmbar como o CTA e sem a linha de separação dos corpos. Sem migração; blocks 2/2.
