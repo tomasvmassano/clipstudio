@@ -58,6 +58,11 @@ export function AutoEditView({ access }: { access: Access }) {
     try { const v = localStorage.getItem(audioKey); return v === "front" || v === "side" ? v : ""; } catch { return ""; }
   });
   const setAudio = (v: "" | "front" | "side") => { setAudioState(v); try { if (v) localStorage.setItem(audioKey, v); } catch {} };
+  // uma câmara só (W10-47): a mesma gravação dá o som e a imagem; lembra a escolha neste dispositivo
+  const oneKey = `pkg.onecam.${access.ws}`;
+  const [oneCam, setOneCamState] = useState(() => { try { return localStorage.getItem(oneKey) === "1"; } catch { return false; } });
+  const setOneCam = (v: boolean) => { setOneCamState(v); try { localStorage.setItem(oneKey, v ? "1" : "0"); } catch {} };
+  const single = oneCam || recordings.length === 1;
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -71,15 +76,17 @@ export function AutoEditView({ access }: { access: Access }) {
     setBusy(true); setErr(null);
     try {
       const ordered = guioes.filter((g) => sel.has(g.id)).sort((a, b) => (a.date === b.date ? a.n - b.n : a.date < b.date ? -1 : 1)).map((g) => g.id);
-      await requestPackage(access, front, side, ordered, style, audio || "side");
+      await requestPackage(access, front, single ? null : side, ordered, style, single ? "front" : audio || "side");
       setTick((n) => n + 1);
     } catch (e) { setErr((e as Error).message); } finally { setBusy(false); }
   };
   // "Tentar de novo" num pacote que falhou: volta a preencher o formulário com as mesmas câmaras e guiões; a pessoa confirma.
   const retryFrom = (j: PackageJob) => {
     const sideRec = recordings.find((a) => a.current!.id === j.version_id) ?? recordings.find((a) => (a.current!.original_name ?? a.title) === j.side_name);
-    const frontRec = recordings.find((a) => (a.current!.original_name ?? a.title) === j.front_name && a.current!.id !== sideRec?.current!.id);
-    setSide(sideRec?.current!.id ?? ""); setFront(frontRec?.current!.id ?? "");
+    const was1 = !!j.result?.single || j.front_name === j.side_name;
+    const frontRec = was1 ? sideRec : recordings.find((a) => (a.current!.original_name ?? a.title) === j.front_name && a.current!.id !== sideRec?.current!.id);
+    setOneCam(was1);
+    setSide(was1 ? "" : sideRec?.current!.id ?? ""); setFront(frontRec?.current!.id ?? "");
     const ids = (j.guioes ?? []).filter((g) => !g.deleted).map((g) => g.id);
     const shown = new Set(guioes.map((g) => g.id));
     setPicked(new Set(ids.filter((id) => shown.has(id))));
@@ -88,10 +95,11 @@ export function AutoEditView({ access }: { access: Access }) {
     setNotice(`Preenchi o pacote com as mesmas câmaras e guiões${missing.length ? `, mas ${missing.join(" e ")}` : ""}. Revê e carrega em Criar pacote.`);
     formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
-  const reason = !mayRequest ? "Sem permissão para pedir pacotes (precisa de editar na linha do tempo)."
+  const camReason = single ? (!front ? "Escolhe a gravação da sessão." : null)
     : !front || !side ? "Escolhe as duas gravações." : front === side ? "As duas câmaras têm de ser gravações diferentes."
-    : !audio ? "Escolhe em que câmara está o som da lapela."
-    : sel.size === 0 ? "Escolhe os guiões gravados nesta sessão." : null;
+    : !audio ? "Escolhe em que câmara está o som da lapela." : null;
+  const reason = !mayRequest ? "Sem permissão para pedir pacotes (precisa de editar na linha do tempo)."
+    : camReason ?? (sel.size === 0 ? "Escolhe os guiões gravados nesta sessão." : null);
 
   return (
     <div className="flex min-w-0 flex-col gap-6">
@@ -106,16 +114,24 @@ export function AutoEditView({ access }: { access: Access }) {
       {mayRequest && (
         <section ref={formRef} className="rounded-xl border p-4" aria-labelledby="novo-pacote">
           <h2 id="novo-pacote" className="mb-3 font-medium">Novo pacote</h2>
-          {lib.error ? <LoadState loading={false} error={lib.error} reload={lib.reload} label="as gravações">{null}</LoadState> : !lib.last ? <Skeleton className="h-24" /> : recordings.length < 2 ? (
-            <Alert><AlertDescription>Carrega primeiro na <Link className="underline" href={`/c/${access.ws}/biblioteca`}>Biblioteca</Link> as duas gravações da sessão (câmara da frente e câmara do lado; uma delas com o som da lapela). Precisam de estar prontas (verificadas no servidor).</AlertDescription></Alert>
+          {lib.error ? <LoadState loading={false} error={lib.error} reload={lib.reload} label="as gravações">{null}</LoadState> : !lib.last ? <Skeleton className="h-24" /> : recordings.length === 0 ? (
+            <Alert><AlertDescription>Carrega primeiro na <Link className="underline" href={`/c/${access.ws}/biblioteca`}>Biblioteca</Link> a gravação da sessão (ou as duas, se gravaste com câmara da frente e câmara do lado). Precisa de estar pronta (verificada no servidor).</AlertDescription></Alert>
           ) : (
+            <div className="flex flex-col gap-3">
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" className="size-4" checked={single} disabled={recordings.length === 1}
+                onChange={(e) => setOneCam(e.target.checked)} />
+              Gravei com uma câmara só
+              {recordings.length === 1 && <span className="text-xs text-muted-foreground">(só há uma gravação pronta na Biblioteca)</span>}
+            </label>
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-              <label className="flex flex-col gap-1 text-sm">Câmara da frente
+              <label className="flex flex-col gap-1 text-sm">{single ? "Gravação" : "Câmara da frente"}
                 <select className={selectCls} value={front} onChange={(e) => setFront(e.target.value)}>
                   <option value="">Escolher…</option>
                   {recordings.map((a) => <option key={a.id} value={a.current!.id}>{a.current!.original_name ?? a.title}</option>)}
                 </select>
               </label>
+              {!single && <>
               <label className="flex flex-col gap-1 text-sm">Câmara do lado
                 <select className={selectCls} value={side} onChange={(e) => setSide(e.target.value)}>
                   <option value="">Escolher…</option>
@@ -129,11 +145,14 @@ export function AutoEditView({ access }: { access: Access }) {
                   <option value="side">Na câmara do lado</option>
                 </select>
               </label>
+              </>}
               <label className="flex flex-col gap-1 text-sm">Estilo de legendas
                 <select className={selectCls} value={style} onChange={(e) => setStyle(e.target.value)}>
                   {STYLES.map((o) => <option key={o.id} value={o.id}>{optionText(o)}</option>)}
                 </select>
               </label>
+            </div>
+            {single && <p className="text-xs text-muted-foreground">O som, a imagem e o tempo vêm desta gravação. No corpo o vídeo alterna entre o plano normal e um plano aproximado; podes mudar cada trecho no editor.</p>}
             </div>
           )}
           <fieldset className="mt-4">
@@ -210,7 +229,7 @@ function PackageRow({ j, access, mayExport, showWindows, onRetry, onDone }: { j:
   return (
     <div className="rounded-md border p-3 text-sm" aria-live="polite">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <span><strong>{EXPORT_STATUS[j.status] === "a exportar" ? "a preparar" : EXPORT_STATUS[j.status]}</strong> · {j.front_name} + {j.side_name} · {j.guioes?.length ?? 0} guiões · {j.created_label}</span>
+        <span><strong>{EXPORT_STATUS[j.status] === "a exportar" ? "a preparar" : EXPORT_STATUS[j.status]}</strong> · {j.result?.single || j.front_name === j.side_name ? `${j.front_name} (uma câmara)` : `${j.front_name} + ${j.side_name}`} · {j.guioes?.length ?? 0} guiões · {j.created_label}</span>
         <span className="text-xs text-muted-foreground">{new Date(j.created_at).toLocaleString("pt-PT", { timeZone: "Asia/Dubai" })}</span>
       </div>
       {running && <div className="mt-2 flex items-center gap-2"><Progress value={j.progress?.pct ?? 0} className="h-2 flex-1" /><span className="text-xs tabular-nums">{Math.round(j.progress?.pct ?? 0)}% · {j.progress?.step ?? ""}</span></div>}
@@ -247,7 +266,7 @@ function PackageRow({ j, access, mayExport, showWindows, onRetry, onDone }: { j:
       )}
       {err && <p className="mt-1 text-xs text-destructive" role="alert">{err} <button type="button" className="underline" onClick={exportAll}>Tentar de novo</button></p>}
       {j.status === "done" && (j.result?.missing?.length ?? 0) > 0 && <p className="mt-1 text-xs text-amber-500">Não encontrei na gravação: {j.result!.missing!.join(", ")}.</p>}
-      {j.status === "done" && j.result?.offset && <p className="mt-1 text-xs text-muted-foreground">Câmaras sincronizadas pelo som (desvio {(j.result.offset.front || j.result.offset.side || 0).toFixed(2)} s, confiança {j.result.offset.confidence}).</p>}
+      {j.status === "done" && j.result?.offset && !j.result.single && <p className="mt-1 text-xs text-muted-foreground">Câmaras sincronizadas pelo som (desvio {(j.result.offset.front || j.result.offset.side || 0).toFixed(2)} s, confiança {j.result.offset.confidence}).</p>}
       {showWindows && j.status === "done" && <WindowsDetail j={j} />}
     </div>
   );
