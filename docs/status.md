@@ -11,8 +11,8 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | Estado | Requisitos |
 |---|---|
 | feito | 36 |
-| parcial | 226 |
-| por começar | 65 |
+| parcial | 233 |
+| por começar | 58 |
 | bloqueado | 3 |
 | adiado | 3 |
 | **total** | **333** |
@@ -102,6 +102,13 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | CLIP-06 | P0 | parcial | verificação com sessão real com um master real (vista Original vs. cortado no editor) | Preparação do corte |
 | CLIP-07 | P0 | parcial | reframe 9:16 com orador ativo (hoje corte ao centro), fontes multi-câmara, verificação com sessão real | Vertical, legendas, estilo e revisão |
 | STU-03 | P0 | parcial | verificar com sessão real (cortes curtos por guião → pacote em minutos → notificação agrupada → exportar → rever); disparo pelo agente de estúdio (STU-02) | Pacote de edição por guião |
+| STY-02 | P0 | parcial | job na app (hoje run.py style-extract no motor); legendas por visão só com chave; aprovação em STY-03 | Job `style_extract` (concretiza REF-05) |
+| POD-01 | P0 | parcial | abrir o documento do episódio no editor (o editor é vertical; ADR-0087); verificação com um episódio real | Pedido |
+| POD-02 | P0 | parcial | verificação com um episódio real (cortes aceites sem mudança, zero cortes a meio de palavra) | Limpeza pela transcrição |
+| POD-03 | P0 | parcial | verificação com um episódio multi-câmara real; separação de oradores (CLIP-02) por escolher | Câmara por orador |
+| POD-04 | P0 | parcial | redução de ruído opcional e música de entrada/saída do perfil; verificação com episódio real | Som |
+| POD-05 | P0 | parcial | enviar o master ao Clip Miner sozinho; verificação com episódio real | Entregáveis |
+| POD-06 | P0 | parcial | verificação com episódio real | Proteções |
 | FR-01-04 | P1 | parcial | sem calendário compacto no Início | Calendário editorial compacto e atividade recente com ator e timestamp. |
 | FR-02-03 | P1 | parcial | título próprio (usa o tema); verificação com conta real (R-15) | Campos: título, cliente/workspace, campanha, tema, formato, plataforma, responsá |
 | FR-02-05 | P1 | parcial | verificação com sessão real (R-15) da equipa Numeiro | Enviar para revisão, aprovar/rejeitar/pedir alterações com comentário obrigatóri |
@@ -808,7 +815,7 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
 | STY-01 | por começar |  |  | — |
-| STY-02 | por começar |  |  | — |
+| STY-02 | parcial | job na app (hoje run.py style-extract no motor); legendas por visão só com chave; aprovação em STY-03 | numeiro-engine engine/style_extract.py; test_style_extract 4/4; campos com evidência e confiança, abaixo de 0,5 por definir | — |
 | STY-03 | por começar |  |  | — |
 | STY-04 | por começar |  |  | — |
 
@@ -816,12 +823,12 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 
 | ID | Estado | O que falta | Evidência | Verificado |
 |---|---|---|---|---|
-| POD-01 | por começar |  |  | — |
-| POD-02 | por começar |  |  | — |
-| POD-03 | por começar |  |  | — |
-| POD-04 | por começar |  |  | — |
-| POD-05 | por começar |  |  | — |
-| POD-06 | por começar |  |  | — |
+| POD-01 | parcial | abrir o documento do episódio no editor (o editor é vertical; ADR-0087); verificação com um episódio real | W11-01: episode_request/episode_list, job episode (numeiro-engine #37), master na Biblioteca; w11_episodio 36/36 | — |
+| POD-02 | parcial | verificação com um episódio real (cortes aceites sem mudança, zero cortes a meio de palavra) | engine/episode.py mark_words, keep_segments, sentence_cuts (só IDs de frase); test_episode 18/18; corrida real 128 s | — |
+| POD-03 | parcial | verificação com um episódio multi-câmara real; separação de oradores (CLIP-02) por escolher | speaker_cams pela energia do som de cada câmara, camera_track (plano mínimo, largo nas ambíguas, zoom alternado com uma câmara) | — |
+| POD-04 | parcial | redução de ruído opcional e música de entrada/saída do perfil; verificação com episódio real | render_doc target_lufs (doc.audio.lufs, defeito -16 no podcast); corrida real -16,6 LUFS | — |
+| POD-05 | parcial | enviar o master ao Clip Miner sozinho; verificação com episódio real | master.mp4, audio.mp3, legendas.srt, capitulos.txt, notas.md, cortes.json no R2; episode_file_access e /api/episodes/:id/files/:name | — |
+| POD-06 | parcial | verificação com episódio real | resumo por motivo e aviso acima de 25%; job durável e cancelável; versões episode-1/episode-rules-1 no documento | — |
 | POD-07 | por começar |  |  | — |
 
 ## 48.3 Aprender com as alterações às edições (ELRN)

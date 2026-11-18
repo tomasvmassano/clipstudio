@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-18 (edição do episódio completo)
+
+- **W11-01** Edição do episódio completo de podcasts e vídeos longos (CHG-013, POD-01..06, ADR-0087), a pedido do Tomás. Página "Edição de episódios" (`/c/[ws]/episodios`): escolher 1 a 4 câmaras da Biblioteca, a câmara do som, o plano largo, o idioma e, opcionalmente, o perfil do estilo (JSON do `style-extract`); o worker devolve o master limpo (entra na Biblioteca), áudio MP3, legendas .srt, capítulos, notas com 3 títulos e a lista de cortes com o motivo de cada um, a descarregar por link curto. Capacidade `edit.episode` (dono, admin, gestor) e `edit.style_learn`/`edit.style_approve` registadas como planeadas; flag `edit.episode`. Migração aditiva `20261118090000_w11_episodio.sql` (kind `episode`, 3 RPCs, `media_worker_finish` com o ramo novo). Motor numeiro-engine #37 (job `episode`, `style_extract`, tela e loudness por documento no render). Testes: `w11_episodio` 36/36, suite SQL 3163/3163, episodes-format 20/20, motor 241 OK.
+
 ## 2026-11-18 (ensinar o estilo e editar com ele)
 
 - **CHG-013** PRD §48 (pedido do Tomás): perfil de edição por cliente e formato e job `style_extract` (STY-01..04; REF-05/06 passam a P0), edição do episódio completo de podcasts e vídeos longos (POD-01..07), aprendizagem com as alterações às edições (ELRN-01..03). Só documentação; IDs novos como por começar.
