@@ -12,10 +12,10 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 |---|---|
 | feito | 36 |
 | parcial | 226 |
-| por começar | 51 |
+| por começar | 65 |
 | bloqueado | 3 |
 | adiado | 3 |
-| **total** | **319** |
+| **total** | **333** |
 
 ## Pendentes abertos (bloqueados primeiro, depois por prioridade)
 
@@ -802,3 +802,32 @@ O resumo e os pendentes abertos são gerados: `python3 scripts/status/check.py -
 | REACT-06 | parcial | lições LRN a partir das decisões e relatório de calibração | W10-25 (ADR-0074): react_sources/react_candidates fechadas à API, RPCs com ws_can + flag reacts.radar, worker_react_* só engine_worker; tab /c/[ws]/reacts e rota /api/reacts/:id/video; w10_reacts 33/33, reacts-format 26/26; migração 20261109095944_w10_reacts aplicada em produção a 2026-11-09 (worker_react_context devolve as decisões ao agente) | — |
 | REACT-07 | parcial | agente diário a renovar links | W10-25 (ADR-0074): react_sources/react_candidates fechadas à API, RPCs com ws_can + flag reacts.radar, worker_react_* só engine_worker; tab /c/[ws]/reacts e rota /api/reacts/:id/video; w10_reacts 33/33, reacts-format 26/26; migração 20261109095944_w10_reacts aplicada em produção a 2026-11-09 (worker_react_context lista links a renovar) | — |
 | REACT-08 | parcial | verificação em sessão real de cliente (flag reacts.radar só equipa da agência); recolha pela API oficial quando houver OAuth (R-19) | W10-26 (ADR-0075): comment_ideas fechada à API, comments_list/comment_decide/comment_record com reacts.read/reacts.decide + flag reacts.radar, worker_comment_* só engine_worker com a config ativa do cliente; separador Comentários em /c/[ws]/reacts; w10_comentarios 26/26, comments-format 5/5; migração 20261109132856_w10_comentarios aplicada em produção; 1.ª análise 2026-11-09: 624 comentários de 15 reels, 22 ideias; tarefa agendada de 3 em 3 dias; verificado em produção com sessão da agência a 2026-11-09: separador abre com 22 ideias, filtro por tipo funciona, 0 erros na consola; data do comentário escondida quando não existe | 2026-11-09 |
+
+## 48.1 Perfil de edição (STY)
+
+| ID | Estado | O que falta | Evidência | Verificado |
+|---|---|---|---|---|
+| STY-01 | por começar |  |  | — |
+| STY-02 | por começar |  |  | — |
+| STY-03 | por começar |  |  | — |
+| STY-04 | por começar |  |  | — |
+
+## 48.2 Edição do episódio completo (POD)
+
+| ID | Estado | O que falta | Evidência | Verificado |
+|---|---|---|---|---|
+| POD-01 | por começar |  |  | — |
+| POD-02 | por começar |  |  | — |
+| POD-03 | por começar |  |  | — |
+| POD-04 | por começar |  |  | — |
+| POD-05 | por começar |  |  | — |
+| POD-06 | por começar |  |  | — |
+| POD-07 | por começar |  |  | — |
+
+## 48.3 Aprender com as alterações às edições (ELRN)
+
+| ID | Estado | O que falta | Evidência | Verificado |
+|---|---|---|---|---|
+| ELRN-01 | por começar |  |  | — |
+| ELRN-02 | por começar |  |  | — |
+| ELRN-03 | por começar |  |  | — |
