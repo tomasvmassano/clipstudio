@@ -73,6 +73,7 @@ Um `agency_member` sem atribuição a um workspace **não vê nada** desse works
 | `edit.export` | ✓ | ✓ | ✓ | — | — | — |
 | `persona.manage` (frases-persona, R-17) | ✓ | ✓ | — | — | — | — |
 | `clips.mine` (Clip Miner, W10-12) | ✓ | ✓ | ✓ | — | — | — |
+| `edit.episode` (edição de episódios, W11-01) | ✓ | ✓ | ✓ | — | — | — |
 | `reacts.read` (radar de reacts, W10-25) | ✓ | ✓ | ✓ | ✓ | — | — |
 | `reacts.decide` (gravar, guardar, rejeitar, nota) | ✓ | ✓ | ✓ | ✓ | — | — |
 | `reacts.sources.manage` (contas vigiadas e propostas) | ✓ | ✓ | ✓ | — | — | — |
@@ -173,3 +174,5 @@ Portal do cliente (W8, ADR-0041): entrar com `scripts.read` (staff da agência s
 **W10-26 (ADR-0075):** separador Comentários com as mesmas regras do radar: flag `reacts.radar` (desligada: 55000), ver exige `reacts.read`, decidir exige `reacts.decide`, gravar exige também `scripts.create`. Tabela `comment_ideas` fechada à API; `worker_comment_*` só `engine_worker`/`service_role` (browser 42501). Outro cliente: 42501 em ler, decidir e gravar; a fila de B não mostra nada de A. Revisor e negação explícita não veem. O guião criado não leva o nome de quem comentou. Teste `supabase/tests/w10_comentarios.sql`.
 
 **W10-44:** página Exportados (`edit_exports_feed`): ver com `media.read` e a flag `media.library` (todos os papéis do cliente), sessão individual (código de equipa recusado, 28000); descarregar pelo link assinado com `media.download` (o leitor vê mas não descarrega). Outro cliente 42501; biblioteca desligada 55000. Só ativos não apagados; jobs cancelados não aparecem. Teste `supabase/tests/w10_exportados.sql`.
+
+**W11-01 (CHG-013, ADR-0087):** pedir a edição de um episódio exige `edit.episode` (dono, admin, gestor; outros por grant individual; negação explícita prevalece), flags `edit.episode` e `edit.studio` e R2; ver pedidos exige acesso ao editor; descarregar ficheiros exige `media.download` e só serve os caminhos que o worker gravou no destino do pedido. Outro cliente: 42501; job de outro cliente pelo próprio espaço: P0002; flag desligada: 55000 mesmo com a capacidade. `media_jobs` continua fechada a `authenticated`. Teste `supabase/tests/w11_episodio.sql` (36 casos).
