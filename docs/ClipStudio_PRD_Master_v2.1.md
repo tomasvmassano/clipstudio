@@ -1249,6 +1249,7 @@ Referências externas consultadas em 2026-10-28: ClickUp (custom roles, workload
 
 ## 36. Registo de alterações
 
+- **CHG-013 — 2026-11-18:** §48 ensinar o estilo e editar com ele: perfil de edição por cliente e formato e job `style_extract` (STY-01..04, REF-05/06 passam a P0), edição do episódio completo de podcasts e vídeos longos (POD-01..07), aprendizagem com as alterações às edições (ELRN-01..03). Pedido do Tomás: um podcast editado no próprio dia.
 - **CHG-012 — 2026-11-13:** cortes de vídeos longos (§46.3): colar o link do YouTube e ligar ao ficheiro (CLIP-01), tipos de momento e idioma (CLIP-03), número pela duração até 20 (CLIP-05), modo leve só com legendas por defeito (CLIP-06). Pedido do Tomás.
 - **CHG-011 — 2026-11-10:** corpo partilhado entre hooks (EDL-14) e vista dos vídeos por guião (EDL-15), §39.1. Pedido do Tomás depois de editar o primeiro pacote real.
 - **CHG-008 — 2026-11-06:** §46: olhar na câmara e teleprompter (GAZE-01..06), aprendizagem contínua com edições e rejeições em dois níveis, agência e cliente (LRN-01..07), cortes de vídeos longos com o agente Clip Miner, com prioridade (CLIP-01..11), estúdio ligado à app com captura direta e pacote por guião (STU-01..05); sequência revista em §46.5. Origem: IDEA-010 a IDEA-013.
@@ -1317,7 +1318,7 @@ Complementa §8, M05, M08, SCALE-02, SCALE-03 e decide o ponto em aberto de §14
 
 **EDL-04 [P1] Vídeos de atenção.** Biblioteca própria ou licenciada de loops (filmados pela agência ou stock licenciado); não usar gameplay de terceiros (risco de direitos). Estilo testável no piloto contra os outros.
 
-**EDL-05 [P1] Pós-produção multi-agente v2 (IDEA-002).** Ondas em paralelo (ingest em código; corte, cor, criativo, revisão do texto; produtor; design, som, packaging; QC; painel de personas e compliance). Acrescenta: notas do painel guardadas por vídeo e calibradas contra resultados reais a 24 h/72 h/7 d (personas que não preveem são revistas ou removidas); máximo 2 reruns, orçamento por vídeo, idempotência e dead-letter; custo por agente e por vídeo; memória de revisões do cliente (cada revisão vira regra que o produtor lê); routing de modelos por tarefa. O "All pass" passa a "pronto para revisão humana", nunca entrega direta.
+**EDL-05 [P1] Pós-produção multi-agente v2 (IDEA-002).** Ondas em paralelo (ingest em código; corte, cor, criativo, revisão do texto; produtor; design, som, packaging; QC; painel de personas e compliance). Acrescenta: notas do painel guardadas por vídeo e calibradas contra resultados reais a 24 h/72 h/7 d (personas que não preveem são revistas ou removidas); máximo 2 reruns, orçamento por vídeo, idempotência e dead-letter; custo por agente e por vídeo; memória de revisões do cliente (cada revisão vira regra que o produtor lê); routing de modelos por tarefa. O "All pass" passa a "pronto para revisão humana", nunca entrega direta. *CHG-013:* a memória de revisões do cliente começa já por ELRN-01..03 (§48), sem esperar pelas ondas multi-agente.
 
 **EDL-06 [P1] Piloto.** ~100 renders, 4 estilos, ~40 publicados em 3-4 semanas. Avança se [pressuposto]: custo de render ≤ 0,05 USD/variante; QC à primeira ≥ 90%; ≥ 50% aprovadas sem edição; ≤ 30 s de revisão por variante; mediana das publicadas ≥ 0,5× a mediana da conta; zero alertas de saúde da conta.
 
@@ -1431,9 +1432,9 @@ R-20 (CHG-005, decisão de produto). **Recolha de vídeos de referência de terc
 
 **REF-04 [P1] Via rápida.** Os guiões entram em revisão marcados "via rápida"; aprovados, vão para o topo da fila do teleprompter da próxima sessão ou para o modo rápido pelo telemóvel (ING-04); o pacote de edição pode usar o estilo extraído (REF-05). Meta [pressuposto]: guiões prontos para revisão menos de 10 minutos depois de colar o link.
 
-**REF-05 [P1] Extração do estilo de edição para uma ficha de parâmetros.** Legendas (posição, tamanho, cor, contorno, sombra, palavras por linha, destaque, animação, maiúsculas, emojis); ritmo de cortes; zooms e punch-ins (frequência, intensidade, palavras); transições; sobreposições e cartões de imagem; layout; look de cor aproximado; música e efeitos sonoros (presença e ritmo). Letra: a mais próxima disponível com licença. Não se copiam música, logótipos, marcas d'água, imagens nem vídeo do autor original; copia-se o estilo, aplicado ao nosso conteúdo (VAR-01). Resultado: parâmetros muito próximos e ajustáveis, não uma cópia pixel a pixel.
+**REF-05 [P0] Extração do estilo de edição para uma ficha de parâmetros.** Legendas (posição, tamanho, cor, contorno, sombra, palavras por linha, destaque, animação, maiúsculas, emojis); ritmo de cortes; zooms e punch-ins (frequência, intensidade, palavras); transições; sobreposições e cartões de imagem; layout; look de cor aproximado; música e efeitos sonoros (presença e ritmo). Letra: a mais próxima disponível com licença. Não se copiam música, logótipos, marcas d'água, imagens nem vídeo do autor original; copia-se o estilo, aplicado ao nosso conteúdo (VAR-01). Resultado: parâmetros muito próximos e ajustáveis, não uma cópia pixel a pixel. *CHG-013:* passa a P0 e é concretizado pelo job `style_extract` (STY-02, §48).
 
-**REF-06 [P1] Pré-visualizar e afinar antes de gravar.** A ficha é aplicada a um clip do cliente; ajusta-se com controlos simples (tamanho da legenda, frequência de zoom, posição) e grava-se como versão.
+**REF-06 [P0] Pré-visualizar e afinar antes de gravar.** A ficha é aplicada a um clip do cliente; ajusta-se com controlos simples (tamanho da legenda, frequência de zoom, posição) e grava-se como versão. *CHG-013:* passa a P0; concretizado por STY-03 (§48).
 
 **REF-07 [P1] Biblioteca de estilos da agência.** Os estilos extraídos pertencem à agência (espaço da agência, R-13), versionados. A equipa de um cliente nunca vê a biblioteca da agência.
 
@@ -1499,7 +1500,7 @@ Concretiza SCALE-03 (clip factory) e VAR-06 para vídeos longos dos clientes (Yo
 
 **CLIP-06 [P0] Preparação do corte.** *CHG-012, modo leve por defeito:* o corte sai tal como foi dito (trecho contínuo, sem reordenar), só com legendas e vertical, duração de 20 a 90 s; o modo completo abaixo fica como opção por pedido. Gancho no 0:00; reordenação só com frases inteiras, no máximo 3 trechos e sem mudar a tese (o revisor vê original e reordenado lado a lado); título por cima com ≤ 8 palavras; 3 hooks; cartão de contexto quando preciso; CTA de 1-2 s para o vídeo completo.
 
-**CLIP-07 [P0] Vertical, legendas, estilo e revisão.** Reframe 9:16 com deteção do orador ativo (dois oradores: alternância ou split, com tempo mínimo por plano e suavização); legendas e estilos do catálogo (VAR-02) e preset do cliente (EDL-01); QC (EDL-03); fila de revisão em lote (EDL-02). Fontes multi-câmara usam os planos individuais diretamente.
+**CLIP-07 [P0] Vertical, legendas, estilo e revisão.** Reframe 9:16 com deteção do orador ativo (dois oradores: alternância ou split, com tempo mínimo por plano e suavização); legendas e estilos do catálogo (VAR-02) e preset do cliente (EDL-01); QC (EDL-03); fila de revisão em lote (EDL-02). Fontes multi-câmara usam os planos individuais diretamente. *CHG-013:* a deteção do orador ativo é a mesma de POD-03 (§48).
 
 **CLIP-08 [P1] Promover o vídeo completo.** Link na descrição; tarefa manual por Short para definir o "vídeo relacionado" no YouTube Studio (a API não o permite); comentário fixado à mão; medir tráfego dos cortes para o vídeo longo.
 
@@ -1521,7 +1522,7 @@ Concretiza ING-02 e ING-03 para gravação ao vivo e edição guião a guião.
 
 **STU-04 [P1] Validação do equipamento.** Ensaio de 20-60 min antes de comprar o resto: frames perdidos por atraso de codificação, cada placa na sua porta, disco externo rápido, upload real. MacBook Pro M4 base com 16 GB: deve aguentar 2 câmaras 4K (a confirmar); 3 câmaras é o ponto de risco (alternativas: câmara do plano largo mais leve ou só no cartão, ou um Mac com chip Pro/Max).
 
-**STU-05 [P1] Variante podcast.** 2 pessoas, 3 câmaras (plano largo + dois individuais em cruzado), 2 microfones para uma interface de áudio ou para a câmara principal, gravação contínua sem teleprompter; o episódio entra direto no Clip Miner (§46.3) e os planos individuais dão os cortes verticais.
+**STU-05 [P1] Variante podcast.** 2 pessoas, 3 câmaras (plano largo + dois individuais em cruzado), 2 microfones para uma interface de áudio ou para a câmara principal, gravação contínua sem teleprompter; o episódio entra direto no Clip Miner (§46.3) e os planos individuais dão os cortes verticais. *CHG-013:* o episódio passa primeiro pela edição do episódio completo (POD, §48) e o master limpo segue para o Clip Miner.
 
 ### 46.5 Sequência e decisões em aberto
 
@@ -1550,3 +1551,51 @@ Origem: IDEA-017 da inbox de ideias do Tomás (09/11/2026). Os reacts a takes po
 **REACT-08 [P1] Comentários como fonte de ideias (CHG-010).** Separador Comentários na tab Reacts. De 3 em 3 dias [pressuposto] o agente lê os comentários publicados desde a corrida anterior nos Reels do próprio cliente (contas ligadas pela API oficial quando houver OAuth, R-19; antes disso pelo mecanismo de recolha de R-20) e escolhe os que dão vídeos novos, em quatro tipos: discorda (vídeo a responder), concorda e acrescenta (aprofundar o argumento), outro ponto de vista (argumentar mais) e pergunta (vídeo de resposta). A avaliação usa a configuração ativa do cliente (voz, formatos, guardrails, temas) e a lista de frases-persona (R-17): nota de 0 a 100 com parcelas, tipo, ideia, ângulo, 3 ganchos e rascunho da resposta, e o comentário com o Reel de origem e as métricas do comentário (gostos, respostas). Decisões iguais às dos reacts (gravar, guardar, rejeitar com motivo, nota); Gravar cria um guião em rascunho (formato resposta a comentário) ligado ao Reel e ao comentário. Quem comenta é uma pessoa privada: o vídeo responde à ideia, nunca goza com a pessoa, e o nome de utilizador só aparece com autorização ou desfocado. Usa as capacidades `reacts.read` e `reacts.decide` e a flag `reacts.radar`.
 
 **Regras:** opinião forte sim; acusações de crimes ou factos falsos sobre a pessoa a quem se reage, não (R-17, AGENTS §7). Isolamento por cliente (R-13): fontes, candidatos e decisões de um cliente nunca aparecem noutro.
+
+## 48. Ensinar o estilo e editar com ele (STY, POD, ELRN, CHG-013)
+
+Origem: pedido do Tomás (18/11/2026): o fluxo completo é ter um vídeo ou uma referência, ensinar ao sistema a linguagem de edição, receber a gravação e editar com tudo o que o sistema aprendeu; prioridade imediata: podcasts e curtos, com um podcast editado no próprio dia. Hoje a aprendizagem (LRN) só cobre guiões e a extração de estilo (REF-05/06) não começou; a edição do episódio completo de um podcast não estava no PRD (STU-05 e CLIP só tratam cortes). Espaço: cliente (perfis importados da agência por REF-07/08). Números marcados [pressuposto] são pontos de partida a calibrar.
+
+**Fluxo:** referência (vídeo editado do próprio cliente ou link REF-01) → STY-02 mede e propõe o perfil → STY-03 rever, afinar e aprovar → gravação (ING, STU, CLIP-01) → os jobs editam com o perfil (STY-04: pacote, cortes, episódio) → revisão no editor → ELRN aprende com o que a pessoa mudou → nova versão do perfil (com aprovação).
+
+### 48.1 Perfil de edição (STY)
+
+**STY-01 [P0] Perfil por cliente e por formato.** Formatos: curto, podcast, longo, anúncio. O perfil é uma versão do estilo do catálogo (VAR-02, EDL-13) com, além do aspeto que o render já desenha (legendas, hook, cor, música, layout): ritmo (pausa máxima mantida, cortar hesitações sim/não, cortar falsos arranques e repetições, frequência de punch-in), som (LUFS alvo, música de fundo e nível, entrada e saída), câmaras (plano mínimo, troca por orador, frequência do plano largo), estrutura (abertura, fecho, CTA) e as listas "sempre" e "nunca". Versionado e imutável como os outros estilos; cada documento de edição guarda a versão do perfil usada.
+
+**STY-02 [P0] Job `style_extract` (concretiza REF-05).** Entrada: 1 a 5 vídeos editados (upload, Biblioteca ou link REF-01, R-20), mesmo formato. Mede em código: cortes de cena (duração média, mediana, p10/p90, ritmo do gancho), silêncios que o editor deixou (pausa máxima mantida), hesitações na transcrição do vídeo editado (política de hesitações), loudness integrada e música de fundo, punch-ins; lê frames amostrados com um modelo de visão para as legendas (posição, caixa, palavras por linha, cores, destaque, contorno, emojis), cartões e sobreposições; cor por descrição. Resultado: proposta de versão do perfil em que cada campo traz o valor medido, a evidência (vídeo e momentos) e a confiança; o que não se consegue medir fica "por definir", nunca inventado. Só copia o estilo (REF-05: nada de música, logótipos ou imagens do autor).
+
+**STY-03 [P0] Rever, afinar e aprovar (concretiza REF-06).** Resumo em linguagem simples (5 a 8 linhas) e a ficha campo a campo; aplicar a um vídeo do cliente na pré-visualização (EDL-08); afinar com controlos simples; gravar como versão. Nada se aplica sem aprovação de quem tiver a capacidade (AGENTS §7).
+
+**STY-04 [P0] Os jobs editam com o perfil.** O pacote (EDL-01), os cortes (CLIP-06/07) e o episódio (POD) leem o perfil do formato do cliente: ritmo para os cortes, som para a mistura, legendas e aspeto para o render. Sem perfil aprovado usam o defeito do formato e dizem-no na revisão.
+
+### 48.2 Edição do episódio completo (POD)
+
+**POD-01 [P0] Pedido.** Um episódio de podcast ou vídeo longo: um ficheiro, ou várias câmaras (largo + individuais, STU-05) sincronizadas pelo som como no pacote (EDL-01). Resultado: um documento de edição 16:9 (ou o formato da fonte) que abre no editor (EDL-07..09) e se exporta pelo job normal (EDL-11), com QC (EDL-03) e revisão (EDL-02). O original nunca é alterado.
+
+**POD-02 [P0] Limpeza pela transcrição.** Transcrição com tempos por palavra (CLIP-02); cada trecho classificado: manter, pausa acima do máximo do perfil, falso arranque, repetição, gaguez, hesitação (só se o perfil cortar), ar morto, conversa antes ou depois do episódio. Cortes só em fronteiras de palavra ou silêncio, com cruzamento de som de 40-80 ms; pausas antes de uma piada ou revelação mantêm-se. Cada corte guarda o motivo, visível no editor, e pode ser reposto.
+
+**POD-03 [P0] Câmara por orador.** Com várias câmaras: plano do orador ativo (energia por microfone ou câmara, separação de oradores quando existir, CLIP-02), plano mínimo de 2,5 s [pressuposto], plano largo nas sobreposições e risos e com a frequência do perfil. Com um ficheiro só: alterna plano normal e aproximado como W10-47.
+
+**POD-04 [P0] Som.** Loudness ao alvo do perfil (defeito -16 LUFS para podcast, -14 para redes [pressuposto]) em duas passagens, pico -1,5 dBTP; redução de ruído opcional; música de entrada e saída do perfil.
+
+**POD-05 [P0] Entregáveis.** Master de vídeo, áudio MP3, legendas .srt, capítulos com tempos, notas do episódio e 3 títulos no idioma do episódio. O master limpo pode seguir sozinho para o Clip Miner (CLIP-03), se o cliente o tiver ligado.
+
+**POD-06 [P0] Proteções.** Resumo dos cortes (minutos removidos por motivo, antes e depois); acima de 25% removido [pressuposto] a revisão mostra aviso; o job é durável, idempotente e cancelável (AGENTS §2.8); custo e versões do motor registados (AGENTS §7).
+
+**POD-07 [P1] Piloto.** 3 episódios reais. Avança se [pressuposto]: ≥ 80% dos cortes aceites sem mudança, zero cortes a meio de palavra, documento pronto em ≤ 0,5× a duração do episódio, revisão ≤ 20 min por hora de episódio.
+
+### 48.3 Aprender com as alterações às edições (ELRN)
+
+**ELRN-01 [P0] Diferenças de edição.** Ao exportar, compara a versão 1 da IA com a versão exportada: cortes repostos ou acrescentados, pausas, legendas, zooms, música, câmaras. Guarda os sinais por campo do perfil (complementa LRN-01, que trata guiões; começa a memória de revisões de EDL-05).
+
+**ELRN-02 [P0] Lições de edição.** O "Editor de lições" (LRN-02) propõe lições ligadas a campos do perfil, com evidência (ex.: "pausa máxima 0,6 → 0,35 s, em 9 de 11 vídeos"); aprovar cria nova versão do perfil (fluxo de LRN-03, com voltar atrás). Nada muda sozinho.
+
+**ELRN-03 [P1] Medir.** Por versão do perfil: % de versões 1 exportadas sem mudança, distância de edição por campo, tempo de revisão; alerta e voltar atrás quando uma versão piora (como LRN-06).
+
+### 48.4 Capacidades, sequência e decisões
+
+**Capacidades novas:** `edit.style_learn` (correr `style_extract` e propor perfis: dono, admin, gestor; atribuível), `edit.style_approve` (aprovar versão do perfil: dono, admin, gestor), `edit.episode` (pedir a edição de um episódio: dono, admin, gestor; atribuível). Flags: `edit.episode`, `edit.style_learn`, `learn.edit_lessons`.
+
+**Sequência (altera §44 e §46.5 na ordem, não no âmbito):** já, POD-01..06 e STY-01/02 no motor (primeiro corrido pela equipa sobre ficheiros reais, depois como job na app); a seguir STY-03/04 e a deteção do orador ativo partilhada com CLIP-07; depois ELRN-01..02, POD-07 e ELRN-03.
+
+**Decisões do Tomás (18/11):** o estilo aprende-se dos vídeos já editados do próprio cliente ou de referências; competências de agentes (skills de ffmpeg, transcrição e edição de podcast) servem de guia na construção do motor e a lógica vive nos jobs do worker; não se usa um segundo motor de render (Remotion), porque a pré-visualização tem de ser igual ao export (EDL-08).
